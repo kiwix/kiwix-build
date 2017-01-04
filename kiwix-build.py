@@ -7,63 +7,15 @@ import tarfile
 import subprocess
 import hashlib
 import shutil
-from collections import defaultdict
+import tempfile
+from collections import defaultdict, namedtuple
 
 pj = os.path.join
 
 REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 
-SOURCE_DIR = pj(os.getcwd(), "SOURCE")
-ARCHIVE_DIR = pj(os.getcwd(), "ARCHIVE")
-
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-################################################################################
-##### UTILS
-################################################################################
-
-# Some utils taken from meson
-def is_debianlike():
-    return os.path.isfile('/etc/debian_version')
-
-
-def default_libdir():
-    if is_debianlike():
-        try:
-            pc = subprocess.Popen(['dpkg-architecture', '-qDEB_HOST_MULTIARCH'],
-                                  stdout=subprocess.PIPE,
-                                  stderr=subprocess.DEVNULL)
-            (stdo, _) = pc.communicate()
-            if pc.returncode == 0:
-                archpath = stdo.decode().strip()
-                return 'lib/' + archpath
-        except Exception:
-            pass
-    if os.path.isdir('/usr/lib64') and not os.path.islink('/usr/lib64'):
-        return 'lib64'
-    return 'lib'
-
-def detect_ninja():
-    for n in ['ninja', 'ninja-build']:
-        try:
-            retcode = subprocess.check_call([n, '--version'],
-                                            stdout=subprocess.DEVNULL)
-        except (FileNotFoundError, PermissionError):
-            # Doesn't exist in PATH or isn't executable
-            continue
-        if retcode == 0:
-            return n
-
-def detect_meson():
-    for n in ['meson.py', 'meson']:
-        try:
-            retcode = subprocess.check_call([n, '--version'],
-                                            stdout=subprocess.DEVNULL)
-        except (FileNotFoundError, PermissionError):
-            # Doesn't exist in PATH or isn't executable
-            continue
-        if retcode == 0:
-            return n
 
 class Defaultdict(defaultdict):
     def __getattr__(self, name):
@@ -81,20 +33,34 @@ class SkipCommand(Exception):
 class StopBuild(Exception):
     pass
 
-def command(name, withlog='source_path', autoskip=False):
+Remotefile = namedtuple('Remotefile', ('name', 'sha256'))
+
+class Context:
+    def __init__(self, command_name, log_file):
+        self.command_name = command_name
+        self.log_file = log_file
+        self.autoskip_file = None
+
+    def try_skip(self, path):
+        self.autoskip_file = pj(path, ".{}_ok".format(self.command_name))
+        if os.path.exists(self.autoskip_file):
+            raise SkipCommand()
+
+    def _finalise(self):
+        if self.autoskip_file is not None:
+            with open(self.autoskip_file, 'w') as f: pass
+
+
+def command(name):
     def decorator(function):
         def wrapper(self, *args):
             print("  {} {} : ".format(name, self.name), end="", flush=True)
-            if autoskip and os.path.exists(pj(self.source_path, ".{}_ok".format(name))):
-                print("SKIP")
-                return
-            log = pj(getattr(self, withlog), 'cmd_{}_{}.log'.format(name, self.name))
+            log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
+            context = Context(name, log)
             try:
-                with open(log, 'w') as _log:
-                    ret = function(self, *args, log=_log)
+                ret = function(self, *args, context=context)
+                context._finalise()
                 print("OK")
-                if autoskip:
-                    with open(pj(self.source_path, ".{}_ok".format(name)), 'w') as f: pass
                 return ret
             except SkipCommand:
                 print("SKIP")
@@ -109,103 +75,206 @@ def command(name, withlog='source_path', autoskip=False):
         return wrapper
     return decorator
 
-def run_command(command, cwd, log, env=None, input=None):
-    log.write("run command '{}'\n".format(command))
-    if env:
-        log.write("env is :\n")
-        for k, v in env.items():
-            log.write("  {} : {!r}\n".format(k, v))
-    log.flush()
 
-    kwargs = dict()
-    if env:
-        kwargs['env'] = env
-    if input:
-        kwargs['stdin'] = input
-    return subprocess.check_call(command, shell=True, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, **kwargs)
+def extract_archive(archive_path, dest_dir, topdir=None, name=None):
+    with tarfile.open(archive_path) as archive:
+        members = archive.getmembers()
+        if not topdir:
+            for d in (m for m in members if m.isdir()):
+                if not os.path.dirname(d.name):
+                    if topdir:
+                        # There is already a top dir.
+                        # Two topdirs in the same archive.
+                        # Extract all
+                        topdir = None
+                        break
+                    topdir = d
+        else:
+            topdir = archive.getmember(topdir)
+        if topdir:
+            members_to_extract = [m for m in members if m.name.startswith(topdir.name+'/')]
+            os.makedirs(dest_dir, exist_ok=True)
+            with tempfile.TemporaryDirectory(prefix=os.path.basename(archive_path), dir=dest_dir) as tmpdir:
+                archive.extractall(path=tmpdir, members=members_to_extract)
+                name = name or topdir.name
+                os.rename(pj(tmpdir, topdir.name), pj(dest_dir, name))
+        else:
+            if name:
+                dest_dir = pj(dest_dir, name)
+                os.makedirs(dest_dir)
+            archive.extractall(path=dest_dir)
 
+
+class BuildEnv:
+    def __init__(self, options):
+        self.SOURCE_DIR = pj(os.getcwd(), "SOURCE")
+        self.ARCHIVE_DIR = pj(os.getcwd(), "ARCHIVE")
+        self.log_dir = pj(os.getcwd(), 'LOGS')
+        os.makedirs(self.SOURCE_DIR, exist_ok=True)
+        os.makedirs(self.ARCHIVE_DIR, exist_ok=True)
+        os.makedirs(self.log_dir, exist_ok=True)
+        self.ninja_command = self._detect_ninja()
+        self.meson_command = self._detect_meson()
+        self.options = options
+        self.libprefix = options.libprefix or self._detect_libdir()
+
+    def __getattr__(self, name):
+        return getattr(self.options, name)
+
+    def _is_debianlike(self):
+        return os.path.isfile('/etc/debian_version')
+
+    def _detect_libdir(self):
+        if self._is_debianlike():
+            try:
+                pc = subprocess.Popen(['dpkg-architecture', '-qDEB_HOST_MULTIARCH'],
+                                      stdout=subprocess.PIPE,
+                                      stderr=subprocess.DEVNULL)
+                (stdo, _) = pc.communicate()
+                if pc.returncode == 0:
+                    archpath = stdo.decode().strip()
+                    return 'lib/' + archpath
+            except Exception:
+                pass
+        if os.path.isdir('/usr/lib64') and not os.path.islink('/usr/lib64'):
+            return 'lib64'
+        return 'lib'
+
+    def _detect_ninja(self):
+        for n in ['ninja', 'ninja-build']:
+            try:
+                retcode = subprocess.check_call([n, '--version'],
+                                                stdout=subprocess.DEVNULL)
+            except (FileNotFoundError, PermissionError):
+                # Doesn't exist in PATH or isn't executable
+                continue
+            if retcode == 0:
+                return n
+
+    def _detect_meson(self):
+        for n in ['meson.py', 'meson']:
+            try:
+                retcode = subprocess.check_call([n, '--version'],
+                                                stdout=subprocess.DEVNULL)
+            except (FileNotFoundError, PermissionError):
+                # Doesn't exist in PATH or isn't executable
+                continue
+            if retcode == 0:
+                return n
+
+    def run_command(self, command, cwd, context, env=None, input=None):
+        with open(context.log_file, 'w') as log:
+            log.write("run command '{}'\n".format(command))
+            if env:
+                log.write("env is :\n")
+                for k, v in env.items():
+                    log.write("  {} : {!r}\n".format(k, v))
+            log.flush()
+
+            kwargs = dict()
+            if env:
+                kwargs['env'] = env
+            if input:
+                kwargs['stdin'] = input
+            return subprocess.check_call(command, shell=True, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, **kwargs)
+
+    def download(self, what, where=None):
+        where = where or self.ARCHIVE_DIR
+        file_path = pj(where, what.name)
+        file_url = REMOTE_PREFIX + what.name
+        if os.path.exists(file_path):
+            if what.sha256 == get_sha256(file_path):
+                raise SkipCommand()
+            os.remove(file_path)
+        urllib.request.urlretrieve(file_url, file_path)
+        if what.sha256 != get_sha256(file_path):
+            os.remove(file_path)
+            raise StopBuild()
 
 
 ################################################################################
 ##### PROJECT
 ################################################################################
-
-
 class Dependency:
+    subsource_dir = None
+    def __init__(self, buildEnv):
+        self.buildEnv = buildEnv
+
     @property
     def source_path(self):
-        return pj(SOURCE_DIR, self.source_dir)
+        if self.subsource_dir:
+            return pj(self.buildEnv.SOURCE_DIR, self.source_dir, self.subsource_dir)
+        return pj(self.buildEnv.SOURCE_DIR, self.source_dir)
+
+    @property
+    def _log_dir(self):
+        return self.buildEnv.log_dir
 
 
 class ReleaseDownloadMixin:
-    _log_download = ARCHIVE_DIR
-    _log_source = SOURCE_DIR
-
-    archive_top_dir = ""
-
-    @property
-    def archive_path(self):
-        return pj(ARCHIVE_DIR, self.archive_name)
-
+    archive_top_dir = None
     @property
     def extract_path(self):
-        return SOURCE_DIR
+        return pj(self.buildEnv.SOURCE_DIR, self.extract_dir)
 
     @property
-    def archive_top_path(self):
-        return pj(SOURCE_DIR, self.archive_top_dir or self.source_dir)
+    def source_dir(self):
+        return "{}-{}".format(self.name, self.version)
 
-    @command("download", withlog='_log_download')
-    def _download(self, log):
-        if os.path.exists(self.archive_path):
-            sha256 = get_sha256(self.archive_path)
-            if sha256 == self.archive_sha256:
-                raise SkipCommand()
-            os.remove(self.archive_path)
-        remote = REMOTE_PREFIX + self.archive_name
-        urllib.request.urlretrieve(remote, self.archive_path)
+    @property
+    def extract_dir(self):
+        return "{}-{}".format(self.name, self.version)
 
-    @command("extract", withlog='_log_source', autoskip=True)
-    def _extract(self, log):
-        if os.path.exists(self.source_path):
-            shutil.rmtree(self.source_path)
-        with tarfile.open(self.archive_path) as archive:
-            archive.extractall(self.extract_path)
+    @command("download")
+    def _download(self, context):
+        self.buildEnv.download(self.archive)
 
-    @command("patch", autoskip=True)
-    def _patch(self, log):
-        if not hasattr(self, 'patch'):
-            raise SkipCommand()
+    @command("extract")
+    def _extract(self, context):
+        context.try_skip(self.extract_path)
+        if os.path.exists(self.extract_path):
+            shutil.rmtree(self.extract_path)
+        extract_archive(pj(self.buildEnv.ARCHIVE_DIR, self.archive.name),
+                           self.buildEnv.SOURCE_DIR,
+                           topdir=self.archive_top_dir,
+                           name=self.extract_dir)
+
+    @command("patch")
+    def _patch(self, context):
+        context.try_skip(self.extract_path)
         with open(pj(SCRIPT_DIR, 'patches', self.patch), 'r') as patch_input:
-            run_command("patch -p1", self.source_path, log, input=patch_input)
+            self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input)
 
-    def prepare(self, options):
+    def prepare(self):
         self._download()
         self._extract()
-        self._patch()
+        if hasattr(self, 'patch'):
+            self._patch()
 
 
 class GitCloneMixin:
-    _log_clone = SOURCE_DIR
     git_ref = "master"
+    @property
+    def source_dir(self):
+        return self.git_dir
 
     @property
     def git_path(self):
-        return pj(SOURCE_DIR, self.git_dir)
+        return pj(self.buildEnv.SOURCE_DIR, self.git_dir)
 
-    @command("gitclone", withlog='_log_clone')
-    def _git_clone(self, log):
+    @command("gitclone")
+    def _git_clone(self, context):
         if os.path.exists(self.git_path):
             raise SkipCommand()
         command = "git clone " + self.git_remote
-        run_command(command, SOURCE_DIR, log)
+        self.buildEnv.run_command(command, self.buildEnv.SOURCE_DIR, context)
 
     @command("gitupdate")
-    def _git_update(self, log):
-        run_command("git pull", self.git_path, log)
-        run_command("git checkout "+self.git_ref, self.git_path, log)
+    def _git_update(self, context):
+        self.buildEnv.run_command("git pull", self.git_path, context)
+        self.buildEnv.run_command("git checkout "+self.git_ref, self.git_path, context)
 
-    def prepare(self, options):
+    def prepare(self):
         self._git_clone()
         self._git_update()
 
@@ -217,116 +286,119 @@ class MakeMixin:
     configure_script = "./configure"
     configure_env = None
 
-    @command("configure", autoskip=True)
-    def _configure(self, options, log):
+    @command("configure")
+    def _configure(self, context):
+        context.try_skip(self.source_path)
         command = "{configure_script} {configure_option} --prefix {install_dir} --libdir {libdir}"
         command = command.format(
             configure_script = self.configure_script,
             configure_option = self.configure_option,
-            install_dir = options.install_dir,
-            libdir = pj(options.install_dir, options.libprefix)
+            install_dir = self.buildEnv.install_dir,
+            libdir = pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
         )
         env = Defaultdict(str, os.environ)
-        if options.build_static:
+        if self.buildEnv.build_static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
         if self.configure_env:
            for k in self.configure_env:
                if k.startswith('_format_'):
                    v = self.configure_env.pop(k)
-                   v = v.format(options=options, env=env)
+                   v = v.format(buildEnv=self.buildEnv, env=env)
                    self.configure_env[k[8:]] = v
            env.update(self.configure_env)
-        run_command(command, self.source_path, log, env=env)
+        self.buildEnv.run_command(command, self.source_path, context, env=env)
 
-    @command("compile", autoskip=True)
-    def _compile(self, log):
+    @command("compile")
+    def _compile(self, context):
+        context.try_skip(self.source_path)
         command = "make -j4 " + self.make_option
-        run_command(command, self.source_path, log)
+        self.buildEnv.run_command(command, self.source_path, context)
 
-    @command("install", autoskip=True)
-    def  _install(self, log):
+    @command("install")
+    def  _install(self, context):
+        context.try_skip(self.source_path)
         command = "make install " + self.make_option
-        run_command(command, self.source_path, log)
+        self.buildEnv.run_command(command, self.source_path, context)
 
-    def build(self, options):
-        self._configure(options)
+    def build(self):
+        self._configure()
         self._compile()
         self._install()
 
 
 class CMakeMixin(MakeMixin):
-    @command("configure", autoskip=True)
-    def _configure(self, options, log):
+    @command("configure")
+    def _configure(self, context):
+        context.try_skip(self.source_path)
         command = "cmake {configure_option} -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir}"
         command = command.format(
             configure_option = self.configure_option,
-            install_dir = options.install_dir,
-            libdir = options.libprefix
+            install_dir = self.buildEnv.install_dir,
+            libdir = self.buildEnv.libprefix
         )
         env = Defaultdict(str, os.environ)
-        if options.build_static:
+        if self.buildEnv.build_static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
         if self.configure_env:
            for k in self.configure_env:
                if k.startswith('_format_'):
                    v = self.configure_env.pop(k)
-                   v = v.format(options=options, env=env)
+                   v = v.format(buildEnv=self.buildEnv, env=env)
                    self.configure_env[k[8:]] = v
            env.update(self.configure_env)
-        run_command(command, self.source_path, log, env=env)
+        self.buildEnv.run_command(command, self.source_path, context, env=env)
 
 class MesonMixin(MakeMixin):
-    meson_command = detect_meson()
-    ninja_command = detect_ninja()
     @property
     def build_path(self):
         return pj(self.source_path, 'build')
 
-    def _gen_env(self, options):
+    def _gen_env(self):
         env = Defaultdict(str, os.environ)
-        env['PKG_CONFIG_PATH'] = (env['PKG_CONFIG_PATH'] + ':' + pj(options.install_dir, options.libprefix, 'pkgconfig')
+        env['PKG_CONFIG_PATH'] = (env['PKG_CONFIG_PATH'] + ':' + pj(self.buildEnv.install_dir, self.buildEnv.libprefix, 'pkgconfig')
                                   if env['PKG_CONFIG_PATH']
-                                  else pj(options.install_dir, options.libprefix, 'pkgconfig')
+                                  else pj(self.buildEnv.install_dir, self.buildEnv.libprefix, 'pkgconfig')
                                  )
-        env['PATH'] = ':'.join([pj(options.install_dir, 'bin'), env['PATH']])
-        if options.build_static:
+        env['PATH'] = ':'.join([pj(self.buildEnv.install_dir, 'bin'), env['PATH']])
+        if self.buildEnv.build_static:
             env['LDFLAGS'] = env['LDFLAGS'] + " -static-libstdc++ --static"
         return env
 
-    @command("configure", autoskip=True)
-    def _configure(self, options, log):
+    @command("configure")
+    def _configure(self, context):
+        context.try_skip(self.source_path)
         if os.path.exists(self.build_path):
             shutil.rmtree(self.build_path)
         os.makedirs(self.build_path)
-        env = self._gen_env(options)
-        if options.build_static:
+        env = self._gen_env()
+        if self.buildEnv.build_static:
             library_type = 'static'
         else:
             library_type = 'shared'
-        configure_option = self.configure_option.format(options=options)
-        command = "{command} --default-library={library_type} {configure_option} . build --prefix={options.install_dir} --libdir={options.libprefix}".format(
-            command = self.meson_command,
+        configure_option = self.configure_option.format(buildEnv=self.buildEnv)
+        command = "{command} --default-library={library_type} {configure_option} . build --prefix={buildEnv.install_dir} --libdir={buildEnv.libprefix}".format(
+            command = self.buildEnv.meson_command,
             library_type=library_type,
             configure_option=configure_option,
-            options=options)
-        run_command(command, self.source_path, log, env=env)
+            buildEnv=self.buildEnv)
+        self.buildEnv.run_command(command, self.source_path, context, env=env)
 
     @command("compile")
-    def _compile(self, options, log):
-        env = self._gen_env(options)
-        command = "{} -v".format(self.ninja_command)
-        run_command(command, self.build_path, log, env=env)
+    def _compile(self, context):
+        env = self._gen_env()
+        command = "{} -v".format(self.buildEnv.ninja_command)
+        self.buildEnv.run_command(command, self.build_path, context, env=env)
 
     @command("install")
-    def _install(self, options, log):
-        env = self._gen_env(options)
-        command = "{} -v install".format(self.ninja_command)
-        run_command(command, self.build_path, log)
+    def _install(self, context):
+        env = self._gen_env()
+        command = "{} -v install".format(self.buildEnv.ninja_command)
+        self.buildEnv.run_command(command, self.build_path, context)
 
-    def build(self, options):
-        self._configure(options)
-        self._compile(options)
-        self._install(options)
+    def build(self):
+        self._configure()
+        self._compile()
+        self._install()
 
 
 # *************************************
@@ -347,91 +419,85 @@ class MesonMixin(MakeMixin):
 
 class UUID(Dependency, ReleaseDownloadMixin, MakeMixin):
     name = 'uuid'
-    archive_name = 'e2fsprogs-1.42.tar.gz'
-    archive_sha256 = '55b46db0cec3e2eb0e5de14494a88b01ff6c0500edf8ca8927cad6da7b5e4a46'
-    source_dir = 'e2fsprogs-1.42'
+    version = "1.42"
+    archive = Remotefile('e2fsprogs-1.42.tar.gz',
+                         '55b46db0cec3e2eb0e5de14494a88b01ff6c0500edf8ca8927cad6da7b5e4a46')
+    source_dir = extract_dir = 'e2fsprogs-1.42'
     configure_option = "--enable-libuuid"
     configure_env = {'_format_CFLAGS' : "{env.CFLAGS} -fPIC"}
 
-    @command("compile", autoskip=True)
-    def _compile(self, log):
+    @command("compile")
+    def _compile(self, context):
+        context.try_skip(self.source_path)
         command = "make -j4 libs " + self.make_option
-        run_command(command, self.source_path, log)
+        self.buildEnv.run_command(command, self.source_path, context)
 
-    @command("install", autoskip=True)
-    def  _install(self, log):
+    @command("install")
+    def  _install(self, context):
+        context.try_skip(self.source_path)
         command = "make install-libs " + self.make_option
-        run_command(command, self.source_path, log)
+        self.buildEnv.run_command(command, self.source_path, context)
 
 
 class Xapian(Dependency, ReleaseDownloadMixin, MakeMixin):
-    name = "xapian"
-    archive_name = 'xapian-core-1.4.0.tar.xz'
-    source_dir = 'xapian-core-1.4.0'
-    archive_sha256 = '10584f57112aa5e9c0e8a89e251aecbf7c582097638bfee79c1fe39a8b6a6477'
+    name = "xapian-core"
+    version = "1.4.0"
+    archive = Remotefile('xapian-core-1.4.0.tar.xz',
+                         '10584f57112aa5e9c0e8a89e251aecbf7c582097638bfee79c1fe39a8b6a6477')
     configure_option = "--enable-shared --enable-static --disable-sse --disable-backend-inmemory"
     patch = "xapian_pkgconfig.patch"
-    configure_env = {'_format_LDFLAGS' : "-L{options.install_dir}/{options.libprefix}",
-                     '_format_CXXFLAGS' : "-I{options.install_dir}/include"}
+    configure_env = {'_format_LDFLAGS' : "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
+                     '_format_CXXFLAGS' : "-I{buildEnv.install_dir}/include"}
 
 
 class CTPP2(Dependency, ReleaseDownloadMixin, CMakeMixin):
     name = "ctpp2"
-    archive_name = 'ctpp2-2.8.3.tar.gz'
-    source_dir = 'ctpp2-2.8.3'
-    archive_sha256 = 'a83ffd07817adb575295ef40fbf759892512e5a63059c520f9062d9ab8fb42fc'
+    version = "2.8.3"
+    archive = Remotefile('ctpp2-2.8.3.tar.gz',
+                         'a83ffd07817adb575295ef40fbf759892512e5a63059c520f9062d9ab8fb42fc')
     configure_option = "-DMD5_SUPPORT=OFF"
     patch = "ctpp2_include.patch"
 
 
 class Pugixml(Dependency, ReleaseDownloadMixin, MesonMixin):
     name = "pugixml"
-    archive_name = 'pugixml-1.2.tar.gz'
-    extract_path = pj(SOURCE_DIR, 'pugixml-1.2')
-    source_dir = 'pugixml-1.2'
-    archive_sha256 = '0f422dad86da0a2e56a37fb2a88376aae6e931f22cc8b956978460c9db06136b'
+    version = "1.2"
+    archive = Remotefile('pugixml-1.2.tar.gz',
+                         '0f422dad86da0a2e56a37fb2a88376aae6e931f22cc8b956978460c9db06136b')
     patch = "pugixml_meson.patch"
 
 
 class MicroHttpd(Dependency, ReleaseDownloadMixin, MakeMixin):
-    name = "microhttpd"
-    archive_name = 'libmicrohttpd-0.9.19.tar.gz'
-    source_dir = 'libmicrohttpd-0.9.19'
-    archive_sha256 = 'dc418c7a595196f09d2f573212a0d794404fa4ac5311fc9588c1e7ad7a90fae6'
+    name = "libmicrohttpd"
+    version = "0.9.19"
+    archive = Remotefile('libmicrohttpd-0.9.19.tar.gz',
+                         'dc418c7a595196f09d2f573212a0d794404fa4ac5311fc9588c1e7ad7a90fae6')
     configure_option = "--enable-shared --enable-static --disable-https --without-libgcrypt --without-libcurl"
 
 
 class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
-    name = "icu"
-    archive_name = 'icu4c-56_1-src.tgz'
-    archive_sha256 = '3a64e9105c734dcf631c0b3ed60404531bce6c0f5a64bfe1a6402a4cc2314816'
-    archive_top_dir = 'icu'
-    data_name = 'icudt56l.dat'
-    data_sha256 = 'e23d85eee008f335fc49e8ef37b1bc2b222db105476111e3d16f0007d371cbca'
-    source_dir = 'icu/source'
+    name = "icu4c"
+    version = "56_1"
+    archive = Remotefile('icu4c-56_1-src.tgz',
+                         '3a64e9105c734dcf631c0b3ed60404531bce6c0f5a64bfe1a6402a4cc2314816'
+                        )
+    data = Remotefile('icudt56l.dat',
+                      'e23d85eee008f335fc49e8ef37b1bc2b222db105476111e3d16f0007d371cbca')
     configure_option = "Linux --disable-samples --disable-tests --disable-extras --enable-static --disable-dyload"
     configure_script = "./runConfigureICU"
+    subsource_dir = "source"
 
-    @property
-    def data_path(self):
-        return pj(ARCHIVE_DIR, self.data_name)
+    @command("download_data")
+    def _download_data(self, context):
+        self.buildEnv.download(self.data)
 
-    @command("download_data", autoskip=True)
-    def _download_data(self, log):
-        if os.path.exists(self.data_path):
-            sha256 = get_sha256(self.data_path)
-            if sha256 == self.data_sha256:
-                raise SkipCommand()
-            os.remove(self.data_path)
-        remote = REMOTE_PREFIX + self.data_name
-        urllib.request.urlretrieve(remote, self.data_path)
+    @command("copy_data")
+    def _copy_data(self, context):
+        context.try_skip(self.source_path)
+        shutil.copyfile(pj(self.buildEnv.ARCHIVE_DIR, self.data.name), pj(self.source_path, 'data', 'in', self.data.name))
 
-    @command("copy_data", autoskip=True)
-    def _copy_data(self, log):
-        shutil.copyfile(self.data_path, pj(self.source_path, 'data', 'in', self.data_name))
-
-    def prepare(self, options):
-        super().prepare(options)
+    def prepare(self):
+        super().prepare()
         self._download_data()
         self._copy_data()
 
@@ -442,46 +508,51 @@ class Zimlib(Dependency, GitCloneMixin, MesonMixin):
     git_remote = "https://github.com/mgautierfr/openzim"
     git_dir = "openzim"
     git_ref = "meson"
-    source_dir = "openzim/zimlib"
+    subsource_dir = "zimlib"
 
 
 class Kiwixlib(Dependency, GitCloneMixin, MesonMixin):
     name = "kiwix-lib"
     git_remote = "https://github.com/kiwix/kiwix-lib.git"
     git_dir = "kiwix-lib"
-    source_dir = "kiwix-lib"
-    configure_option = "-Dctpp2-install-prefix={options.install_dir}"
+    configure_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
 
 
 class KiwixTools(Dependency, GitCloneMixin, MesonMixin):
     name = "kiwix-tools"
     git_remote = "https://github.com/kiwix/kiwix-tools.git"
     git_dir = "kiwix-tools"
-    source_dir = "kiwix-tools"
-    configure_option = "-Dctpp2-install-prefix={options.install_dir}"
+    configure_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
 
 
-class Project:
-    def __init__(self, options):
-        self.options = options
-        self.dependencies = [UUID(), Xapian(), CTPP2(), Pugixml(), Zimlib(), MicroHttpd(), Icu(), Kiwixlib(), KiwixTools()]
-        os.makedirs(SOURCE_DIR, exist_ok=True)
-        os.makedirs(ARCHIVE_DIR, exist_ok=True)
+class Builder:
+    def __init__(self, buildEnv):
+        self.buildEnv = buildEnv
+        self.dependencies = [UUID(buildEnv),
+                             Xapian(buildEnv),
+                             CTPP2(buildEnv),
+                             Pugixml(buildEnv),
+                             Zimlib(buildEnv),
+                             MicroHttpd(buildEnv),
+                             Icu(buildEnv),
+                             Kiwixlib(buildEnv),
+                             KiwixTools(buildEnv)
+                            ]
 
     def prepare(self):
         for dependency in self.dependencies:
             print("prepare {} :".format(dependency.name))
-            dependency.prepare(self.options)
+            dependency.prepare()
 
     def build(self):
         for dependency in self.dependencies:
             print("build {} :".format(dependency.name))
-            dependency.build(self.options)
+            dependency.build()
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('install_dir')
-    parser.add_argument('--libprefix', default=default_libdir())
+    parser.add_argument('--libprefix', default=None)
     parser.add_argument('--target_arch', default="x86_64")
     parser.add_argument('--build_static', action="store_true")
     return parser.parse_args()
@@ -489,11 +560,12 @@ def parse_args():
 if __name__ == "__main__":
     options = parse_args()
     options.install_dir = os.path.abspath(options.install_dir)
-    project = Project(options)
+    buildEnv = BuildEnv(options)
+    builder = Builder(buildEnv)
     try:
         print("[PREPARE]")
-        project.prepare()
+        builder.prepare()
         print("[BUILD]")
-        project.build()
+        builder.build()
     except StopBuild:
         print("Stopping build due to errors")
