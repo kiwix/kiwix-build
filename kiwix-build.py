@@ -243,13 +243,14 @@ class ReleaseDownloadMixin:
     @command("patch")
     def _patch(self, context):
         context.try_skip(self.extract_path)
-        with open(pj(SCRIPT_DIR, 'patches', self.patch), 'r') as patch_input:
-            self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input)
+        for p in self.patches:
+            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
+                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input)
 
     def prepare(self):
         self._download()
         self._extract()
-        if hasattr(self, 'patch'):
+        if hasattr(self, 'patches'):
             self._patch()
 
 
@@ -444,7 +445,7 @@ class Xapian(Dependency, ReleaseDownloadMixin, MakeMixin):
     archive = Remotefile('xapian-core-1.4.0.tar.xz',
                          '10584f57112aa5e9c0e8a89e251aecbf7c582097638bfee79c1fe39a8b6a6477')
     configure_option = "--enable-shared --enable-static --disable-sse --disable-backend-inmemory"
-    patch = "xapian_pkgconfig.patch"
+    patches = ["xapian_pkgconfig.patch"]
     configure_env = {'_format_LDFLAGS' : "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
                      '_format_CXXFLAGS' : "-I{buildEnv.install_dir}/include"}
 
@@ -455,7 +456,7 @@ class CTPP2(Dependency, ReleaseDownloadMixin, CMakeMixin):
     archive = Remotefile('ctpp2-2.8.3.tar.gz',
                          'a83ffd07817adb575295ef40fbf759892512e5a63059c520f9062d9ab8fb42fc')
     configure_option = "-DMD5_SUPPORT=OFF"
-    patch = "ctpp2_include.patch"
+    patches = ["ctpp2_include.patch"]
 
 
 class Pugixml(Dependency, ReleaseDownloadMixin, MesonMixin):
@@ -463,7 +464,7 @@ class Pugixml(Dependency, ReleaseDownloadMixin, MesonMixin):
     version = "1.2"
     archive = Remotefile('pugixml-1.2.tar.gz',
                          '0f422dad86da0a2e56a37fb2a88376aae6e931f22cc8b956978460c9db06136b')
-    patch = "pugixml_meson.patch"
+    patches = ["pugixml_meson.patch"]
 
 
 class MicroHttpd(Dependency, ReleaseDownloadMixin, MakeMixin):
