@@ -107,11 +107,11 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
 
 class BuildEnv:
     def __init__(self, options):
-        self.SOURCE_DIR = pj(os.getcwd(), "SOURCE")
-        self.ARCHIVE_DIR = pj(os.getcwd(), "ARCHIVE")
+        self.source_dir = pj(os.getcwd(), "SOURCE")
+        self.archive_dir = pj(os.getcwd(), "ARCHIVE")
         self.log_dir = pj(os.getcwd(), 'LOGS')
-        os.makedirs(self.SOURCE_DIR, exist_ok=True)
-        os.makedirs(self.ARCHIVE_DIR, exist_ok=True)
+        os.makedirs(self.source_dir, exist_ok=True)
+        os.makedirs(self.archive_dir, exist_ok=True)
         os.makedirs(self.log_dir, exist_ok=True)
         self.ninja_command = self._detect_ninja()
         self.meson_command = self._detect_meson()
@@ -179,7 +179,7 @@ class BuildEnv:
             return subprocess.check_call(command, shell=True, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, **kwargs)
 
     def download(self, what, where=None):
-        where = where or self.ARCHIVE_DIR
+        where = where or self.archive_dir
         file_path = pj(where, what.name)
         file_url = REMOTE_PREFIX + what.name
         if os.path.exists(file_path):
@@ -203,8 +203,8 @@ class Dependency:
     @property
     def source_path(self):
         if self.subsource_dir:
-            return pj(self.buildEnv.SOURCE_DIR, self.source_dir, self.subsource_dir)
-        return pj(self.buildEnv.SOURCE_DIR, self.source_dir)
+            return pj(self.buildEnv.source_dir, self.source_dir, self.subsource_dir)
+        return pj(self.buildEnv.source_dir, self.source_dir)
 
     @property
     def _log_dir(self):
@@ -215,7 +215,7 @@ class ReleaseDownloadMixin:
     archive_top_dir = None
     @property
     def extract_path(self):
-        return pj(self.buildEnv.SOURCE_DIR, self.extract_dir)
+        return pj(self.buildEnv.source_dir, self.extract_dir)
 
     @property
     def source_dir(self):
@@ -234,8 +234,8 @@ class ReleaseDownloadMixin:
         context.try_skip(self.extract_path)
         if os.path.exists(self.extract_path):
             shutil.rmtree(self.extract_path)
-        extract_archive(pj(self.buildEnv.ARCHIVE_DIR, self.archive.name),
-                           self.buildEnv.SOURCE_DIR,
+        extract_archive(pj(self.buildEnv.archive_dir, self.archive.name),
+                           self.buildEnv.source_dir,
                            topdir=self.archive_top_dir,
                            name=self.extract_dir)
 
@@ -260,14 +260,14 @@ class GitCloneMixin:
 
     @property
     def git_path(self):
-        return pj(self.buildEnv.SOURCE_DIR, self.git_dir)
+        return pj(self.buildEnv.source_dir, self.git_dir)
 
     @command("gitclone")
     def _git_clone(self, context):
         if os.path.exists(self.git_path):
             raise SkipCommand()
         command = "git clone " + self.git_remote
-        self.buildEnv.run_command(command, self.buildEnv.SOURCE_DIR, context)
+        self.buildEnv.run_command(command, self.buildEnv.source_dir, context)
 
     @command("gitupdate")
     def _git_update(self, context):
@@ -494,7 +494,7 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
     @command("copy_data")
     def _copy_data(self, context):
         context.try_skip(self.source_path)
-        shutil.copyfile(pj(self.buildEnv.ARCHIVE_DIR, self.data.name), pj(self.source_path, 'data', 'in', self.data.name))
+        shutil.copyfile(pj(self.buildEnv.archive_dir, self.data.name), pj(self.source_path, 'data', 'in', self.data.name))
 
     def prepare(self):
         super().prepare()
