@@ -163,6 +163,7 @@ class BuildEnv:
                 return n
 
     def run_command(self, command, cwd, context, env=None, input=None):
+        os.makedirs(cwd, exist_ok=True)
         with open(context.log_file, 'w') as log:
             log.write("run command '{}'\n".format(command))
             if env:
