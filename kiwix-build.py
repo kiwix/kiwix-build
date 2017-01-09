@@ -108,10 +108,12 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
 class BuildEnv:
     def __init__(self, options):
         self.source_dir = pj(os.getcwd(), "SOURCE")
+        self.build_dir = pj(os.getcwd(), "BUILD_{mode}".format(mode='native'))
         self.archive_dir = pj(os.getcwd(), "ARCHIVE")
         self.log_dir = pj(os.getcwd(), 'LOGS')
         os.makedirs(self.source_dir, exist_ok=True)
         os.makedirs(self.archive_dir, exist_ok=True)
+        os.makedirs(self.build_dir, exist_ok=True)
         os.makedirs(self.log_dir, exist_ok=True)
         self.ninja_command = self._detect_ninja()
         self.meson_command = self._detect_meson()
@@ -208,6 +210,10 @@ class Dependency:
         return pj(self.buildEnv.source_dir, self.source_dir)
 
     @property
+    def build_path(self):
+        return pj(self.buildEnv.build_dir, self.source_dir)
+
+    @property
     def _log_dir(self):
         return self.buildEnv.log_dir
 
@@ -285,17 +291,17 @@ class MakeMixin:
     configure_option = ""
     make_option = ""
     install_option = ""
-    configure_script = "./configure"
+    configure_script = "configure"
     configure_env = None
     make_target = ""
     make_install_target = "install"
 
     @command("configure")
     def _configure(self, context):
-        context.try_skip(self.source_path)
+        context.try_skip(self.build_path)
         command = "{configure_script} {configure_option} --prefix {install_dir} --libdir {libdir}"
         command = command.format(
-            configure_script = self.configure_script,
+            configure_script = pj(self.source_path, self.configure_script),
             configure_option = self.configure_option,
             install_dir = self.buildEnv.install_dir,
             libdir = pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
@@ -310,25 +316,25 @@ class MakeMixin:
                    v = v.format(buildEnv=self.buildEnv, env=env)
                    self.configure_env[k[8:]] = v
            env.update(self.configure_env)
-        self.buildEnv.run_command(command, self.source_path, context, env=env)
+        self.buildEnv.run_command(command, self.build_path, context, env=env)
 
     @command("compile")
     def _compile(self, context):
-        context.try_skip(self.source_path)
+        context.try_skip(self.build_path)
         command = "make -j4 {make_target} {make_option}".format(
             make_target = self.make_target,
             make_option = self.make_option
         )
-        self.buildEnv.run_command(command, self.source_path, context)
+        self.buildEnv.run_command(command, self.build_path, context)
 
     @command("install")
     def  _install(self, context):
-        context.try_skip(self.source_path)
+        context.try_skip(self.build_path)
         command = "make {make_install_target} {make_option}".format(
             make_install_target = self.make_install_target,
             make_option = self.make_option
         )
-        self.buildEnv.run_command(command, self.source_path, context)
+        self.buildEnv.run_command(command, self.build_path, context)
 
     def build(self):
         self._configure()
@@ -339,12 +345,13 @@ class MakeMixin:
 class CMakeMixin(MakeMixin):
     @command("configure")
     def _configure(self, context):
-        context.try_skip(self.source_path)
-        command = "cmake {configure_option} -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir}"
+        context.try_skip(self.build_path)
+        command = "cmake {configure_option} -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
         command = command.format(
             configure_option = self.configure_option,
             install_dir = self.buildEnv.install_dir,
-            libdir = self.buildEnv.libprefix
+            libdir = self.buildEnv.libprefix,
+            source_path = self.source_path
         )
         env = Defaultdict(str, os.environ)
         if self.buildEnv.build_static:
@@ -356,13 +363,9 @@ class CMakeMixin(MakeMixin):
                    v = v.format(buildEnv=self.buildEnv, env=env)
                    self.configure_env[k[8:]] = v
            env.update(self.configure_env)
-        self.buildEnv.run_command(command, self.source_path, context, env=env)
+        self.buildEnv.run_command(command, self.build_path, context, env=env)
 
 class MesonMixin(MakeMixin):
-    @property
-    def build_path(self):
-        return pj(self.source_path, 'build')
-
     def _gen_env(self):
         env = Defaultdict(str, os.environ)
         env['PKG_CONFIG_PATH'] = (env['PKG_CONFIG_PATH'] + ':' + pj(self.buildEnv.install_dir, self.buildEnv.libprefix, 'pkgconfig')
@@ -376,7 +379,7 @@ class MesonMixin(MakeMixin):
 
     @command("configure")
     def _configure(self, context):
-        context.try_skip(self.source_path)
+        context.try_skip(self.build_path)
         if os.path.exists(self.build_path):
             shutil.rmtree(self.build_path)
         os.makedirs(self.build_path)
@@ -386,10 +389,11 @@ class MesonMixin(MakeMixin):
         else:
             library_type = 'shared'
         configure_option = self.configure_option.format(buildEnv=self.buildEnv)
-        command = "{command} --default-library={library_type} {configure_option} . build --prefix={buildEnv.install_dir} --libdir={buildEnv.libprefix}".format(
+        command = "{command} --default-library={library_type} {configure_option} . {build_path} --prefix={buildEnv.install_dir} --libdir={buildEnv.libprefix}".format(
             command = self.buildEnv.meson_command,
             library_type=library_type,
             configure_option=configure_option,
+            build_path = self.build_path,
             buildEnv=self.buildEnv)
         self.buildEnv.run_command(command, self.source_path, context, env=env)
 
@@ -484,7 +488,7 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
     data = Remotefile('icudt56l.dat',
                       'e23d85eee008f335fc49e8ef37b1bc2b222db105476111e3d16f0007d371cbca')
     configure_option = "Linux --disable-samples --disable-tests --disable-extras --enable-static --disable-dyload"
-    configure_script = "./runConfigureICU"
+    configure_script = "runConfigureICU"
     subsource_dir = "source"
 
     @command("download_data")
