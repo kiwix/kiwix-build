@@ -285,6 +285,8 @@ class MakeMixin:
     install_option = ""
     configure_script = "./configure"
     configure_env = None
+    make_target = ""
+    make_install_target = "install"
 
     @command("configure")
     def _configure(self, context):
@@ -311,13 +313,19 @@ class MakeMixin:
     @command("compile")
     def _compile(self, context):
         context.try_skip(self.source_path)
-        command = "make -j4 " + self.make_option
+        command = "make -j4 {make_target} {make_option}".format(
+            make_target = self.make_target,
+            make_option = self.make_option
+        )
         self.buildEnv.run_command(command, self.source_path, context)
 
     @command("install")
     def  _install(self, context):
         context.try_skip(self.source_path)
-        command = "make install " + self.make_option
+        command = "make {make_install_target} {make_option}".format(
+            make_install_target = self.make_install_target,
+            make_option = self.make_option
+        )
         self.buildEnv.run_command(command, self.source_path, context)
 
     def build(self):
@@ -425,18 +433,8 @@ class UUID(Dependency, ReleaseDownloadMixin, MakeMixin):
     source_dir = extract_dir = 'e2fsprogs-1.42'
     configure_option = "--enable-libuuid"
     configure_env = {'_format_CFLAGS' : "{env.CFLAGS} -fPIC"}
-
-    @command("compile")
-    def _compile(self, context):
-        context.try_skip(self.source_path)
-        command = "make -j4 libs " + self.make_option
-        self.buildEnv.run_command(command, self.source_path, context)
-
-    @command("install")
-    def  _install(self, context):
-        context.try_skip(self.source_path)
-        command = "make install-libs " + self.make_option
-        self.buildEnv.run_command(command, self.source_path, context)
+    make_target = 'libs'
+    make_install_target = 'install-libs'
 
 
 class Xapian(Dependency, ReleaseDownloadMixin, MakeMixin):
