@@ -33,7 +33,9 @@ class SkipCommand(Exception):
 class StopBuild(Exception):
     pass
 
-Remotefile = namedtuple('Remotefile', ('name', 'sha256'))
+class Remotefile(namedtuple('Remotefile', ('name', 'sha256', 'url'))):
+    def __new__(cls, name, sha256, url=None):
+        return super().__new__(cls, name, sha256, url)
 
 class Context:
     def __init__(self, command_name, log_file):
@@ -184,7 +186,7 @@ class BuildEnv:
     def download(self, what, where=None):
         where = where or self.archive_dir
         file_path = pj(where, what.name)
-        file_url = REMOTE_PREFIX + what.name
+        file_url = what.url or (REMOTE_PREFIX + what.name)
         if os.path.exists(file_path):
             if what.sha256 == get_sha256(file_path):
                 raise SkipCommand()
