@@ -192,7 +192,9 @@ class BuildEnv:
                 raise SkipCommand()
             os.remove(file_path)
         urllib.request.urlretrieve(file_url, file_path)
-        if what.sha256 != get_sha256(file_path):
+        if not what.sha256:
+            print('Sha256 for {} not set, do no verify download'.format(what.name))
+        elif what.sha256 != get_sha256(file_path):
             os.remove(file_path)
             raise StopBuild()
 
