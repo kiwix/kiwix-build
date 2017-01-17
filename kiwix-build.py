@@ -425,7 +425,7 @@ class CMakeMixin(MakeMixin):
     @command("configure")
     def _configure(self, context):
         context.try_skip(self.build_path)
-        command = "cmake {configure_option} -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
+        command = "cmake {configure_option} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
         command = command.format(
             configure_option = "{} {}".format(self.buildEnv.cmake_option, self.configure_option),
             install_dir = self.buildEnv.install_dir,
