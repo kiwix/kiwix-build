@@ -109,14 +109,16 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
 
 class BuildEnv:
     def __init__(self, options):
-        self.source_dir = pj(os.getcwd(), "SOURCE")
-        self.build_dir = pj(os.getcwd(), "BUILD_{mode}".format(mode='native'))
-        self.archive_dir = pj(os.getcwd(), "ARCHIVE")
-        self.log_dir = pj(os.getcwd(), 'LOGS')
+        self.source_dir = pj(options.working_dir, "SOURCE")
+        self.build_dir = pj(options.working_dir, "BUILD")
+        self.archive_dir = pj(options.working_dir, "ARCHIVE")
+        self.log_dir = pj(options.working_dir, 'LOGS')
+        self.install_dir = pj(self.build_dir, "INSTALL")
         os.makedirs(self.source_dir, exist_ok=True)
         os.makedirs(self.archive_dir, exist_ok=True)
         os.makedirs(self.build_dir, exist_ok=True)
         os.makedirs(self.log_dir, exist_ok=True)
+        os.makedirs(self.install_dir, exist_ok=True)
         self.ninja_command = self._detect_ninja()
         self.meson_command = self._detect_meson()
         self.options = options
@@ -559,7 +561,7 @@ class Builder:
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('install_dir')
+    parser.add_argument('working_dir', default=".", nargs='?')
     parser.add_argument('--libprefix', default=None)
     parser.add_argument('--target_arch', default="x86_64")
     parser.add_argument('--build_static', action="store_true")
@@ -567,7 +569,7 @@ def parse_args():
 
 if __name__ == "__main__":
     options = parse_args()
-    options.install_dir = os.path.abspath(options.install_dir)
+    options.working_dir = os.path.abspath(options.working_dir)
     buildEnv = BuildEnv(options)
     builder = Builder(buildEnv)
     try:
