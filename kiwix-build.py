@@ -678,7 +678,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('working_dir', default=".", nargs='?')
     parser.add_argument('--libprefix', default=None)
-    parser.add_argument('--build_static', action="store_true")
+    parser.add_argument('--build-static', action="store_true")
     parser.add_argument('--build-target', default="native", choices=BuildEnv.build_targets)
     parser.add_argument('--verbose', '-v', action="store_true",
                         help=("Print all logs on stdout instead of in specific"
