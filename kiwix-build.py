@@ -533,7 +533,8 @@ class Xapian(Dependency, ReleaseDownloadMixin, MakeMixin):
     version = "1.4.0"
     archive = Remotefile('xapian-core-1.4.0.tar.xz',
                          '10584f57112aa5e9c0e8a89e251aecbf7c582097638bfee79c1fe39a8b6a6477')
-    configure_option = "--enable-shared --enable-static --disable-sse --disable-backend-inmemory"
+    configure_option = ("--enable-shared --enable-static --disable-sse "
+                        "--disable-backend-inmemory --disable-documentation")
     patches = ["xapian_pkgconfig.patch"]
     configure_env = {'_format_LDFLAGS' : "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
                      '_format_CXXFLAGS' : "-I{buildEnv.install_dir}/include"}
