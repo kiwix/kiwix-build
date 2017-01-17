@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys
+import os, sys, stat
 import argparse
 import urllib.request
 import tarfile
@@ -8,7 +8,9 @@ import subprocess
 import hashlib
 import shutil
 import tempfile
+import configparser
 from collections import defaultdict, namedtuple
+
 
 pj = os.path.join
 
@@ -108,10 +110,11 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
 
 
 class BuildEnv:
-    build_targets = ['native']
+    build_targets = ['native', 'win32']
 
     _targets_env = {
-        'native' : {}
+        'native' : {},
+        'win32'  : {'wrapper': 'mingw32-env'}
     }
 
     def __init__(self, options):
@@ -141,6 +144,52 @@ class BuildEnv:
         self.configure_option = ""
         self.cmake_option = ""
         self.meson_crossfile = None
+
+    def _get_rpm_mingw32(self, value):
+        command = "rpm --eval %{{mingw32_{}}}".format(value)
+        output = subprocess.check_output(command, shell=True)
+        return output[:-1].decode()
+
+    def _gen_meson_crossfile(self):
+        self.meson_crossfile = pj(self.build_dir, 'cross_file.txt')
+        config = configparser.ConfigParser()
+        config['binaries'] = {
+            'c' : repr(self._get_rpm_mingw32('cc')),
+            'cpp' : repr(self._get_rpm_mingw32('cxx')),
+            'ar' : repr(self._get_rpm_mingw32('ar')),
+            'strip' : repr(self._get_rpm_mingw32('strip')),
+            'pkgconfig' : repr(self._get_rpm_mingw32('pkg_config')),
+            'exe_wrapper' : repr('wine') # A command used to run generated executables.
+        }
+        config['properties'] = {
+            'c_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4'],
+            'cpp_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4']
+        }
+        config['host_machine'] = {
+            'system' : repr('windows'),
+            'cpu_family' : repr('x86'),
+            'cpu' : repr('i586'),
+            'endian' : repr('little')
+        }
+        with open(self.meson_crossfile, 'w') as configfile:
+            config.write(configfile)
+
+    def setup_win32(self):
+        command = "rpm --eval %{mingw32_env}"
+        self.wrapper = pj(self.build_dir, 'mingw32-wrapper.sh')
+        with open(self.wrapper, 'w') as output:
+            output.write("#!/usr/bin/sh\n\n")
+            output.flush()
+            output.write(self._get_rpm_mingw32('env'))
+            output.write('\n\nexec "$@"\n')
+            output.flush()
+        current_permissions = stat.S_IMODE(os.lstat(self.wrapper).st_mode)
+        os.chmod(self.wrapper, current_permissions | stat.S_IXUSR)
+        self.configure_option = "--host=i686-w64-mingw32"
+        self.cmake_option = "-DCMAKE_SYSTEM_NAME=Windows"
+
+        self._gen_meson_crossfile()
+
     def __getattr__(self, name):
         return getattr(self.options, name)
 
