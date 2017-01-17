@@ -76,6 +76,7 @@ def command(name):
             except:
                 print("ERROR")
                 raise
+        wrapper._wrapped = function
         return wrapper
     return decorator
 
@@ -567,9 +568,26 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
                         )
     data = Remotefile('icudt56l.dat',
                       'e23d85eee008f335fc49e8ef37b1bc2b222db105476111e3d16f0007d371cbca')
-    configure_option = "Linux --disable-samples --disable-tests --disable-extras --enable-static --disable-dyload"
-    configure_script = "runConfigureICU"
+    configure_option = "--disable-samples --disable-tests --disable-extras --enable-static --disable-dyload"
     subsource_dir = "source"
+
+    def __init__(self, buildEnv, cross_compile_process=False, cross_build=None):
+        Dependency.__init__(self, buildEnv)
+        self.cross_compile_process = cross_compile_process
+        self.cross_build = cross_build
+
+    @property
+    def build_path(self):
+        if self.cross_compile_process and not self.cross_build:
+            return pj(self.buildEnv.build_dir, self.source_dir+"_native")
+        return pj(self.buildEnv.build_dir, self.source_dir)
+
+    @property
+    def configure_option(self):
+        default_configure_option = "--disable-samples --disable-tests --disable-extras --enable-static --disable-dyload"
+        if self.cross_build:
+            return default_configure_option + " --with-cross-build=" + self.cross_build.build_path
+        return default_configure_option
 
     @command("download_data")
     def _download_data(self, context):
@@ -579,6 +597,12 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
     def _copy_data(self, context):
         context.try_skip(self.source_path)
         shutil.copyfile(pj(self.buildEnv.archive_dir, self.data.name), pj(self.source_path, 'data', 'in', self.data.name))
+
+    @command("install")
+    def _install(self, context):
+        if self.cross_compile_process and not self.cross_build:
+            raise SkipCommand()
+        return super()._install._wrapped(self, context)
 
     def prepare(self):
         super().prepare()
@@ -613,13 +637,17 @@ class Builder:
     def __init__(self, buildEnv):
         self.buildEnv = buildEnv
         if buildEnv.build_target != 'native':
+            subBuildEnv = BuildEnv(buildEnv.options)
+            subBuildEnv.setup_build_target('native')
+            nativeICU = Icu(subBuildEnv, True)
             self.dependencies = [
                              Xapian(buildEnv),
                              CTPP2(buildEnv),
                              Pugixml(buildEnv),
                              Zimlib(buildEnv),
                              MicroHttpd(buildEnv),
-                             Icu(buildENv),
+                             nativeICU,
+                             Icu(buildEnv, True, nativeICU),
                              Kiwixlib(buildEnv),
                              KiwixTools(buildEnv)
                             ]
