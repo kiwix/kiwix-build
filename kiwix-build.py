@@ -574,6 +574,7 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
                         )
     data = Remotefile('icudt56l.dat',
                       'e23d85eee008f335fc49e8ef37b1bc2b222db105476111e3d16f0007d371cbca')
+    patches = ["icu4c_fix_static_lib_name_mingw.patch"]
     configure_option = "--disable-samples --disable-tests --disable-extras --enable-static --disable-dyload"
     subsource_dir = "source"
 
