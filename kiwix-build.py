@@ -170,20 +170,19 @@ class BuildEnv:
 
     def run_command(self, command, cwd, context, env=None, input=None):
         os.makedirs(cwd, exist_ok=True)
+        if env is None:
+            env = dict(os.environ)
         with open(context.log_file, 'w') as log:
             log.write("run command '{}'\n".format(command))
-            if env:
-                log.write("env is :\n")
-                for k, v in env.items():
-                    log.write("  {} : {!r}\n".format(k, v))
+            log.write("env is :\n")
+            for k, v in env.items():
+                log.write("  {} : {!r}\n".format(k, v))
             log.flush()
 
             kwargs = dict()
-            if env:
-                kwargs['env'] = env
             if input:
                 kwargs['stdin'] = input
-            return subprocess.check_call(command, shell=True, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, **kwargs)
+            return subprocess.check_call(command, shell=True, cwd=cwd, env=env, stdout=log, stderr=subprocess.STDOUT, **kwargs)
 
     def download(self, what, where=None):
         where = where or self.archive_dir
