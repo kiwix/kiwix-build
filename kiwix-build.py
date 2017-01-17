@@ -120,7 +120,11 @@ class BuildEnv:
 
     def __init__(self, options):
         self.source_dir = pj(options.working_dir, "SOURCE")
-        self.build_dir = pj(options.working_dir, "BUILD_{target}".format(target=options.build_target))
+        build_dir = "BUILD_{target}_{libmod}".format(
+            target=options.build_target,
+            libmod='static' if options.build_static else 'dyn'
+        )
+        self.build_dir = pj(options.working_dir, build_dir)
         self.archive_dir = pj(options.working_dir, "ARCHIVE")
         self.log_dir = pj(options.working_dir, 'LOGS')
         self.install_dir = pj(self.build_dir, "INSTALL")
