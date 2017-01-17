@@ -579,7 +579,6 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
     data = Remotefile('icudt56l.dat',
                       'e23d85eee008f335fc49e8ef37b1bc2b222db105476111e3d16f0007d371cbca')
     patches = ["icu4c_fix_static_lib_name_mingw.patch"]
-    configure_option = "--disable-samples --disable-tests --disable-extras --enable-static --disable-dyload"
     subsource_dir = "source"
 
     def __init__(self, buildEnv, cross_compile_process=False, cross_build=None):
@@ -595,7 +594,11 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
 
     @property
     def configure_option(self):
-        default_configure_option = "--disable-samples --disable-tests --disable-extras --enable-static --disable-dyload"
+        default_configure_option = "--disable-samples --disable-tests --disable-extras --disable-dyload"
+        if self.buildEnv.build_static:
+            default_configure_option += " --enable-static --disable-shared"
+        else:
+            default_configure_option += " --enable-shared --enable-shared"
         if self.cross_build:
             return default_configure_option + " --with-cross-build=" + self.cross_build.build_path
         return default_configure_option
