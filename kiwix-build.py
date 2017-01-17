@@ -554,10 +554,11 @@ class Pugixml(Dependency, ReleaseDownloadMixin, MesonMixin):
 
 class MicroHttpd(Dependency, ReleaseDownloadMixin, MakeMixin):
     name = "libmicrohttpd"
-    version = "0.9.19"
-    archive = Remotefile('libmicrohttpd-0.9.19.tar.gz',
-                         'dc418c7a595196f09d2f573212a0d794404fa4ac5311fc9588c1e7ad7a90fae6')
     configure_option = "--enable-shared --enable-static --disable-https --without-libgcrypt --without-libcurl"
+    version = "0.9.46"
+    archive = Remotefile('libmicrohttpd-0.9.46.tar.gz',
+                         '06dbd2654f390fa1e8196fe063fc1449a6c2ed65a38199a49bf29ad8a93b8979',
+                         'http://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.46.tar.gz')
 
 
 class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
