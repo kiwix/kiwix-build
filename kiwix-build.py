@@ -108,9 +108,15 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
 
 
 class BuildEnv:
+    build_targets = ['native']
+
+    _targets_env = {
+        'native' : {}
+    }
+
     def __init__(self, options):
         self.source_dir = pj(options.working_dir, "SOURCE")
-        self.build_dir = pj(options.working_dir, "BUILD")
+        self.build_dir = pj(options.working_dir, "BUILD_{target}".format(target=options.build_target))
         self.archive_dir = pj(options.working_dir, "ARCHIVE")
         self.log_dir = pj(options.working_dir, 'LOGS')
         self.install_dir = pj(self.build_dir, "INSTALL")
@@ -119,11 +125,22 @@ class BuildEnv:
         os.makedirs(self.build_dir, exist_ok=True)
         os.makedirs(self.log_dir, exist_ok=True)
         os.makedirs(self.install_dir, exist_ok=True)
+        self.setup_build_target(options.build_target)
         self.ninja_command = self._detect_ninja()
         self.meson_command = self._detect_meson()
         self.options = options
         self.libprefix = options.libprefix or self._detect_libdir()
 
+    def setup_build_target(self, build_target):
+        self.build_target = build_target
+        self.target_env = self._targets_env[self.build_target]
+        getattr(self, 'setup_{}'.format(self.build_target))()
+
+    def setup_native(self):
+        self.wrapper = None
+        self.configure_option = ""
+        self.cmake_option = ""
+        self.meson_crossfile = None
     def __getattr__(self, name):
         return getattr(self.options, name)
 
@@ -312,7 +329,7 @@ class MakeMixin:
         command = "{configure_script} {configure_option} --prefix {install_dir} --libdir {libdir}"
         command = command.format(
             configure_script = pj(self.source_path, self.configure_script),
-            configure_option = self.configure_option,
+            configure_option = "{} {}".format(self.configure_option, self.buildEnv.configure_option),
             install_dir = self.buildEnv.install_dir,
             libdir = pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
         )
@@ -358,7 +375,7 @@ class CMakeMixin(MakeMixin):
         context.try_skip(self.build_path)
         command = "cmake {configure_option} -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
         command = command.format(
-            configure_option = self.configure_option,
+            configure_option = "{} {}".format(self.buildEnv.cmake_option, self.configure_option),
             install_dir = self.buildEnv.install_dir,
             libdir = self.buildEnv.libprefix,
             source_path = self.source_path
@@ -399,12 +416,14 @@ class MesonMixin(MakeMixin):
         else:
             library_type = 'shared'
         configure_option = self.configure_option.format(buildEnv=self.buildEnv)
-        command = "{command} --default-library={library_type} {configure_option} . {build_path} --prefix={buildEnv.install_dir} --libdir={buildEnv.libprefix}".format(
+        command = "{command} --default-library={library_type} {configure_option} . {build_path} --prefix={buildEnv.install_dir} --libdir={buildEnv.libprefix} {cross_option}".format(
             command = self.buildEnv.meson_command,
             library_type=library_type,
             configure_option=configure_option,
             build_path = self.build_path,
-            buildEnv=self.buildEnv)
+            buildEnv=self.buildEnv,
+            cross_option = "--cross-file {}".format(self.buildEnv.meson_crossfile) if self.buildEnv.meson_crossfile else ""
+        )
         self.buildEnv.run_command(command, self.source_path, context, env=env)
 
     @command("compile")
@@ -567,8 +586,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('working_dir', default=".", nargs='?')
     parser.add_argument('--libprefix', default=None)
-    parser.add_argument('--target_arch', default="x86_64")
     parser.add_argument('--build_static', action="store_true")
+    parser.add_argument('--build-target', default="native", choices=BuildEnv.build_targets)
     parser.add_argument('--verbose', '-v', action="store_true",
                         help=("Print all logs on stdout instead of in specific"
                               " log files per commands"))
