@@ -612,7 +612,19 @@ class KiwixTools(Dependency, GitCloneMixin, MesonMixin):
 class Builder:
     def __init__(self, buildEnv):
         self.buildEnv = buildEnv
-        self.dependencies = [UUID(buildEnv),
+        if buildEnv.build_target != 'native':
+            self.dependencies = [
+                             Xapian(buildEnv),
+                             CTPP2(buildEnv),
+                             Pugixml(buildEnv),
+                             Zimlib(buildEnv),
+                             MicroHttpd(buildEnv),
+                             Icu(buildENv),
+                             Kiwixlib(buildEnv),
+                             KiwixTools(buildEnv)
+                            ]
+        else:
+            self.dependencies = [UUID(buildEnv),
                              Xapian(buildEnv),
                              CTPP2(buildEnv),
                              Pugixml(buildEnv),
