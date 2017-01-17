@@ -185,8 +185,10 @@ class BuildEnv:
             if retcode == 0:
                 return n
 
-    def run_command(self, command, cwd, context, env=None, input=None):
+    def run_command(self, command, cwd, context, env=None, input=None, allow_wrapper=True):
         os.makedirs(cwd, exist_ok=True)
+        if allow_wrapper and self.wrapper:
+            command = "{} {}".format(self.wrapper, command)
         if env is None:
             env = dict(os.environ)
         log = None
@@ -278,7 +280,7 @@ class ReleaseDownloadMixin:
         context.try_skip(self.extract_path)
         for p in self.patches:
             with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input)
+                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input, allow_wrapper=False)
 
     def prepare(self):
         self._download()
@@ -424,19 +426,19 @@ class MesonMixin(MakeMixin):
             buildEnv=self.buildEnv,
             cross_option = "--cross-file {}".format(self.buildEnv.meson_crossfile) if self.buildEnv.meson_crossfile else ""
         )
-        self.buildEnv.run_command(command, self.source_path, context, env=env)
+        self.buildEnv.run_command(command, self.source_path, context, env=env, allow_wrapper=False)
 
     @command("compile")
     def _compile(self, context):
         env = self._gen_env()
         command = "{} -v".format(self.buildEnv.ninja_command)
-        self.buildEnv.run_command(command, self.build_path, context, env=env)
+        self.buildEnv.run_command(command, self.build_path, context, env=env, allow_wrapper=False)
 
     @command("install")
     def _install(self, context):
         env = self._gen_env()
         command = "{} -v install".format(self.buildEnv.ninja_command)
-        self.buildEnv.run_command(command, self.build_path, context)
+        self.buildEnv.run_command(command, self.build_path, context, allow_wrapper=False)
 
     def build(self):
         self._configure()
