@@ -172,17 +172,22 @@ class BuildEnv:
         os.makedirs(cwd, exist_ok=True)
         if env is None:
             env = dict(os.environ)
-        with open(context.log_file, 'w') as log:
-            log.write("run command '{}'\n".format(command))
-            log.write("env is :\n")
+        log = None
+        try:
+            if not self.options.verbose:
+                log = open(context.log_file, 'w')
+            print("run command '{}'".format(command), file=log)
+            print("env is :",file=log)
             for k, v in env.items():
-                log.write("  {} : {!r}\n".format(k, v))
-            log.flush()
+                print("  {} : {!r}".format(k, v), file=log)
 
             kwargs = dict()
             if input:
                 kwargs['stdin'] = input
-            return subprocess.check_call(command, shell=True, cwd=cwd, env=env, stdout=log, stderr=subprocess.STDOUT, **kwargs)
+            return subprocess.check_call(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+        finally:
+            if log:
+                log.close()
 
     def download(self, what, where=None):
         where = where or self.archive_dir
@@ -564,6 +569,9 @@ def parse_args():
     parser.add_argument('--libprefix', default=None)
     parser.add_argument('--target_arch', default="x86_64")
     parser.add_argument('--build_static', action="store_true")
+    parser.add_argument('--verbose', '-v', action="store_true",
+                        help=("Print all logs on stdout instead of in specific"
+                              " log files per commands"))
     return parser.parse_args()
 
 if __name__ == "__main__":
