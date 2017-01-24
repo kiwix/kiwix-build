@@ -1,0 +1,29 @@
+Description: Fix the name of static library
+ Upstream named the static library in unusual way this patch names the
+ static library in simpler way which suits Debian infrastructure.
+Author: Vasudev Kamath <kamathvasudev@gmail.com>
+Forwarded: no
+Last-Update: 2012-12-19
+
+--- a/ctpp2.spec
++++ b/ctpp2.spec
+@@ -60,7 +60,7 @@
+ %files devel
+ %defattr(-,root,root,-)
+ %{_includedir}/ctpp2
+-%{_libdir}/libctpp2-st.a
++%{_libdir}/libctpp2.a
+ 
+ %changelog
+ * Sat Nov 10 2012 Alexander Pankov <pianist@usrsrc.ru> - 2.8.3-0
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -426,7 +426,7 @@
+ # Lib binary
+ #
+ ADD_LIBRARY(ctpp2-static STATIC ${LIBSRCS})
+-SET_TARGET_PROPERTIES(ctpp2-static PROPERTIES OUTPUT_NAME ctpp2-st)
++SET_TARGET_PROPERTIES(ctpp2-static PROPERTIES OUTPUT_NAME ctpp2)
+ SET_TARGET_PROPERTIES(ctpp2-static PROPERTIES LINKER_LANGUAGE CXX)
+ 
+ ADD_LIBRARY(ctpp2 SHARED ${LIBSRCS})

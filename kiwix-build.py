@@ -464,7 +464,7 @@ class CTPP2(Dependency, ReleaseDownloadMixin, CMakeMixin):
     archive = Remotefile('ctpp2-2.8.3.tar.gz',
                          'a83ffd07817adb575295ef40fbf759892512e5a63059c520f9062d9ab8fb42fc')
     configure_option = "-DMD5_SUPPORT=OFF"
-    patches = ["ctpp2_include.patch", "ctpp2_no_src_modification.patch"]
+    patches = ["ctpp2_include.patch", "ctpp2_no_src_modification.patch", "ctpp2_fix-static-libname.patch"]
 
 
 class Pugixml(Dependency, ReleaseDownloadMixin, MesonMixin):
