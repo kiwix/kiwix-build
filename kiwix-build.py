@@ -120,6 +120,7 @@ class BuildEnv:
 
     def setup_native(self):
         self.wrapper = None
+        self.cmake_command = "cmake"
         self.configure_option = ""
         self.cmake_option = ""
         self.meson_crossfile = None
@@ -165,7 +166,8 @@ class BuildEnv:
         current_permissions = stat.S_IMODE(os.lstat(self.wrapper).st_mode)
         os.chmod(self.wrapper, current_permissions | stat.S_IXUSR)
         self.configure_option = "--host=i686-w64-mingw32"
-        self.cmake_option = "-DCMAKE_SYSTEM_NAME=Windows"
+        self.cmake_command = "mingw32-cmake"
+        self.cmake_option = ""
 
         self._gen_meson_crossfile()
 
@@ -416,8 +418,9 @@ class MakeMixin:
 class CMakeMixin(MakeMixin):
     def _configure(self, context):
         context.try_skip(self.build_path)
-        command = "cmake {configure_option} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
+        command = "{command} {configure_option} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
         command = command.format(
+            command = self.buildEnv.cmake_command,
             configure_option = "{} {}".format(self.buildEnv.cmake_option, self.configure_option),
             install_dir = self.buildEnv.install_dir,
             libdir = self.buildEnv.libprefix,
@@ -433,7 +436,7 @@ class CMakeMixin(MakeMixin):
                    v = v.format(buildEnv=self.buildEnv, env=env)
                    self.configure_env[k[8:]] = v
            env.update(self.configure_env)
-        self.buildEnv.run_command(command, self.build_path, context, env=env)
+        self.buildEnv.run_command(command, self.build_path, context, env=env, allow_wrapper=False)
 
 class MesonMixin(MakeMixin):
     def _gen_env(self):
