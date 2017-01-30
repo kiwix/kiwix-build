@@ -9,7 +9,7 @@ import hashlib
 import shutil
 import tempfile
 import configparser
-from collections import defaultdict, namedtuple
+from collections import defaultdict, namedtuple, OrderedDict
 
 
 pj = os.path.join
@@ -22,6 +22,14 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 class Defaultdict(defaultdict):
     def __getattr__(self, name):
         return self[name]
+
+def remove_duplicates(iterable):
+    seen = set()
+    for elem in iterable:
+        if elem in seen:
+            continue
+        seen.add(elem)
+        yield elem
 
 def get_sha256(path):
     sha256 = hashlib.sha256()
@@ -92,7 +100,7 @@ class BuildEnv:
         'win32'  : {'wrapper': 'mingw32-env'}
     }
 
-    def __init__(self, options):
+    def __init__(self, options, targetsDict):
         self.source_dir = pj(options.working_dir, "SOURCE")
         build_dir = "BUILD_{target}_{libmod}".format(
             target=options.build_target,
@@ -112,6 +120,7 @@ class BuildEnv:
         self.meson_command = self._detect_meson()
         self.options = options
         self.libprefix = options.libprefix or self._detect_libdir()
+        self.targetsDict = targetsDict
 
     def setup_build_target(self, build_target):
         self.build_target = build_target
@@ -257,7 +266,17 @@ class BuildEnv:
 ################################################################################
 ##### PROJECT
 ################################################################################
-class Dependency:
+class _MetaDependency(type):
+    def __new__(cls, name, bases, dct):
+        _class = type.__new__(cls, name, bases, dct)
+        if name != 'Dependency':
+            Dependency.all_deps[name] = _class
+        return _class
+
+
+class Dependency(metaclass=_MetaDependency):
+    all_deps = {}
+    dependencies = []
     force_native_build = False
     version = None
     def __init__(self, buildEnv):
@@ -571,6 +590,12 @@ class Xapian(Dependency):
         configure_env = {'_format_LDFLAGS' : "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
                          '_format_CXXFLAGS' : "-I{buildEnv.install_dir}/include"}
 
+    @property
+    def dependencies(self):
+        if self.buildEnv.build_target == 'win32':
+            return []
+        return ['UUID']
+
 
 class CTPP2(Dependency):
     name = "ctpp2"
@@ -689,6 +714,11 @@ class Zimlib(Dependency):
 
 class Kiwixlib(Dependency):
     name = "kiwix-lib"
+    @property
+    def dependencies(self):
+        if self.buildEnv.build_target == 'win32':
+            return ["Xapian", "CTPP2", "Pugixml", "Icu_cross_compile", "Zimlib"]
+        return ["Xapian", "CTPP2", "Pugixml", "Icu", "Zimlib"]
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-lib.git"
@@ -700,6 +730,7 @@ class Kiwixlib(Dependency):
 
 class KiwixTools(Dependency):
     name = "kiwix-tools"
+    dependencies = ["Kiwixlib", "MicroHttpd"]
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-tools.git"
@@ -710,44 +741,52 @@ class KiwixTools(Dependency):
 
 
 class Builder:
-    def __init__(self, buildEnv):
-        self.buildEnv = buildEnv
+    def __init__(self, options, targetDef='KiwixTools'):
+        self.targets = OrderedDict()
+        self.buildEnv = buildEnv = BuildEnv(options, self.targets)
         if buildEnv.build_target != 'native':
-            subBuildEnv = BuildEnv(buildEnv.options)
-            subBuildEnv.setup_build_target('native')
-            nativeICU = Icu_native(subBuildEnv)
-            self.dependencies = [
-                             Xapian(buildEnv),
-                             CTPP2(buildEnv),
-                             Pugixml(buildEnv),
-                             Zimlib(buildEnv),
-                             MicroHttpd(buildEnv),
-                             nativeICU,
-                             Icu_cross_compile(buildEnv, True, nativeICU),
-                             Kiwixlib(buildEnv),
-                             KiwixTools(buildEnv)
-                            ]
+            self.nativeBuildEnv = BuildEnv(options, self.targets)
+            self.nativeBuildEnv.setup_build_target('native')
         else:
-            self.dependencies = [UUID(buildEnv),
-                             Xapian(buildEnv),
-                             CTPP2(buildEnv),
-                             Pugixml(buildEnv),
-                             Zimlib(buildEnv),
-                             MicroHttpd(buildEnv),
-                             Icu(buildEnv),
-                             Kiwixlib(buildEnv),
-                             KiwixTools(buildEnv)
-                            ]
+            self.nativeBuildEnv = buildEnv
+
+        _targets = {}
+        self.add_targets(targetDef, _targets)
+
+        dependencies_order = list(remove_duplicates(self.order_dependencies(_targets, targetDef)))
+        dependencies_order.append(targetDef)
+
+        for dep in dependencies_order:
+             self.targets[dep] = _targets[dep]
+
+        self.sources = remove_duplicates(dep.source for dep in self.targets.values())
+        self.builders = (dep.builder for dep in self.targets.values())
+
+    def add_targets(self, targetName, targets):
+        if targetName in targets:
+            return
+        targetClass = Dependency.all_deps[targetName]
+        if targetClass.force_native_build:
+            target = targetClass(self.nativeBuildEnv)
+        else:
+            target = targetClass(self.buildEnv)
+        targets[targetName] = target
+        for dep in target.dependencies:
+            self.add_targets(dep, targets)
+
+    def order_dependencies(self, _targets, targetName):
+        target = _targets[targetName]
+        for depName in target.dependencies:
+            yield from self.order_dependencies(_targets, depName)
+        yield targetName
 
     def prepare(self):
-        for dependency in self.dependencies:
-            source = dependency.source
-            print("prepare {} :".format(source.name))
+        for source in self.sources:
+            print("prepare sources {} :".format(source.name))
             source.prepare()
 
     def build(self):
-        for dependency in self.dependencies:
-            builder = dependency.builder
+        for builder in self.builders:
             print("build {} :".format(builder.name))
             builder.build()
 
@@ -765,8 +804,7 @@ def parse_args():
 if __name__ == "__main__":
     options = parse_args()
     options.working_dir = os.path.abspath(options.working_dir)
-    buildEnv = BuildEnv(options)
-    builder = Builder(buildEnv)
+    builder = Builder(options)
     try:
         print("[PREPARE]")
         builder.prepare()
