@@ -55,32 +55,6 @@ class Context:
             with open(self.autoskip_file, 'w') as f: pass
 
 
-def command(name):
-    def decorator(function):
-        def wrapper(self, *args):
-            print("  {} {} : ".format(name, self.name), end="", flush=True)
-            log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
-            context = Context(name, log)
-            try:
-                ret = function(self, *args, context=context)
-                context._finalise()
-                print("OK")
-                return ret
-            except SkipCommand:
-                print("SKIP")
-            except subprocess.CalledProcessError:
-                print("ERROR")
-                with open(log, 'r') as f:
-                    print(f.read())
-                raise StopBuild()
-            except:
-                print("ERROR")
-                raise
-        wrapper._wrapped = function
-        return wrapper
-    return decorator
-
-
 def extract_archive(archive_path, dest_dir, topdir=None, name=None):
     with tarfile.open(archive_path) as archive:
         members = archive.getmembers()
@@ -300,6 +274,28 @@ class Dependency:
     def _log_dir(self):
         return self.buildEnv.log_dir
 
+    def command(self, name, function, *args):
+        print("  {} {} : ".format(name, self.name), end="", flush=True)
+        log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
+        context = Context(name, log)
+        try:
+            ret = function(*args, context=context)
+            context._finalise()
+            print("OK")
+            return ret
+        except SkipCommand:
+            print("SKIP")
+        except subprocess.CalledProcessError:
+            print("ERROR")
+            try:
+                with open(log, 'r') as f:
+                    print(f.read())
+            except:
+                pass
+            raise StopBuild()
+        except:
+            print("ERROR")
+            raise
 
 class ReleaseDownloadMixin:
     archive_top_dir = None
@@ -315,11 +311,9 @@ class ReleaseDownloadMixin:
     def extract_dir(self):
         return "{}-{}".format(self.name, self.version)
 
-    @command("download")
     def _download(self, context):
         self.buildEnv.download(self.archive)
 
-    @command("extract")
     def _extract(self, context):
         context.try_skip(self.extract_path)
         if os.path.exists(self.extract_path):
@@ -329,7 +323,6 @@ class ReleaseDownloadMixin:
                            topdir=self.archive_top_dir,
                            name=self.extract_dir)
 
-    @command("patch")
     def _patch(self, context):
         context.try_skip(self.extract_path)
         for p in self.patches:
@@ -337,10 +330,10 @@ class ReleaseDownloadMixin:
                 self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input, allow_wrapper=False)
 
     def prepare(self):
-        self._download()
-        self._extract()
+        self.command('download', self._download)
+        self.command('extract', self._extract)
         if hasattr(self, 'patches'):
-            self._patch()
+            self.command('patch', self._patch)
 
 
 class GitCloneMixin:
@@ -353,21 +346,19 @@ class GitCloneMixin:
     def git_path(self):
         return pj(self.buildEnv.source_dir, self.git_dir)
 
-    @command("gitclone")
     def _git_clone(self, context):
         if os.path.exists(self.git_path):
             raise SkipCommand()
         command = "git clone " + self.git_remote
         self.buildEnv.run_command(command, self.buildEnv.source_dir, context)
 
-    @command("gitupdate")
     def _git_update(self, context):
         self.buildEnv.run_command("git pull", self.git_path, context)
         self.buildEnv.run_command("git checkout "+self.git_ref, self.git_path, context)
 
     def prepare(self):
-        self._git_clone()
-        self._git_update()
+        self.command('gitclone', self._git_clone)
+        self.command('gitupdate', self._git_update)
 
 
 class MakeMixin:
@@ -379,7 +370,6 @@ class MakeMixin:
     make_target = ""
     make_install_target = "install"
 
-    @command("configure")
     def _configure(self, context):
         context.try_skip(self.build_path)
         command = "{configure_script} {configure_option} --prefix {install_dir} --libdir {libdir}"
@@ -401,7 +391,6 @@ class MakeMixin:
            env.update(self.configure_env)
         self.buildEnv.run_command(command, self.build_path, context, env=env)
 
-    @command("compile")
     def _compile(self, context):
         context.try_skip(self.build_path)
         command = "make -j4 {make_target} {make_option}".format(
@@ -410,7 +399,6 @@ class MakeMixin:
         )
         self.buildEnv.run_command(command, self.build_path, context)
 
-    @command("install")
     def  _install(self, context):
         context.try_skip(self.build_path)
         command = "make {make_install_target} {make_option}".format(
@@ -420,13 +408,12 @@ class MakeMixin:
         self.buildEnv.run_command(command, self.build_path, context)
 
     def build(self):
-        self._configure()
-        self._compile()
-        self._install()
+        self.command('configure', self._configure)
+        self.command('compile', self._compile)
+        self.command('install', self._install)
 
 
 class CMakeMixin(MakeMixin):
-    @command("configure")
     def _configure(self, context):
         context.try_skip(self.build_path)
         command = "cmake {configure_option} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
@@ -460,7 +447,6 @@ class MesonMixin(MakeMixin):
             env['LDFLAGS'] = env['LDFLAGS'] + " -static-libstdc++ --static"
         return env
 
-    @command("configure")
     def _configure(self, context):
         context.try_skip(self.build_path)
         if os.path.exists(self.build_path):
@@ -482,22 +468,15 @@ class MesonMixin(MakeMixin):
         )
         self.buildEnv.run_command(command, self.source_path, context, env=env, allow_wrapper=False)
 
-    @command("compile")
     def _compile(self, context):
         env = self._gen_env()
         command = "{} -v".format(self.buildEnv.ninja_command)
         self.buildEnv.run_command(command, self.build_path, context, env=env, allow_wrapper=False)
 
-    @command("install")
     def _install(self, context):
         env = self._gen_env()
         command = "{} -v install".format(self.buildEnv.ninja_command)
         self.buildEnv.run_command(command, self.build_path, context, allow_wrapper=False)
-
-    def build(self):
-        self._configure()
-        self._compile()
-        self._install()
 
 
 # *************************************
@@ -604,25 +583,22 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
             return default_configure_option + " --with-cross-build=" + self.cross_build.build_path
         return default_configure_option
 
-    @command("download_data")
     def _download_data(self, context):
         self.buildEnv.download(self.data)
 
-    @command("copy_data")
     def _copy_data(self, context):
         context.try_skip(self.source_path)
         shutil.copyfile(pj(self.buildEnv.archive_dir, self.data.name), pj(self.source_path, 'data', 'in', self.data.name))
 
-    @command("install")
     def _install(self, context):
         if self.cross_compile_process and not self.cross_build:
             raise SkipCommand()
-        return super()._install._wrapped(self, context)
+        return super()._install.(context)
 
     def prepare(self):
         super().prepare()
-        self._download_data()
-        self._copy_data()
+        self.command('download_data', self._download_data)
+        self.command('copy_data', self._copy_data)
 
 
 class Zimlib(Dependency, GitCloneMixin, MesonMixin):
