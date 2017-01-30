@@ -258,19 +258,22 @@ class BuildEnv:
 ##### PROJECT
 ################################################################################
 class Dependency:
-    subsource_dir = None
+    force_native_build = False
+    version = None
     def __init__(self, buildEnv):
         self.buildEnv = buildEnv
+        self.source = self.Source(self)
+        self.builder = self.Builder(self)
+
+    @property
+    def full_name(self):
+        if self.version:
+            return "{}-{}".format(self.name, self.version)
+        return self.name
 
     @property
     def source_path(self):
-        if self.subsource_dir:
-            return pj(self.buildEnv.source_dir, self.source_dir, self.subsource_dir)
-        return pj(self.buildEnv.source_dir, self.source_dir)
-
-    @property
-    def build_path(self):
-        return pj(self.buildEnv.build_dir, self.source_dir)
+        return pj(self.buildEnv.source_dir, self.source.source_dir)
 
     @property
     def _log_dir(self):
@@ -299,19 +302,32 @@ class Dependency:
             print("ERROR")
             raise
 
-class ReleaseDownloadMixin:
-    archive_top_dir = None
+
+class Source:
+    """Base Class to the real preparator
+       A source preparator must install source in the self.source_dir attribute
+       inside the buildEnv.source_dir."""
+    def __init__(self, target):
+        self.target = target
+        self.buildEnv = target.buildEnv
+
     @property
-    def extract_path(self):
-        return pj(self.buildEnv.source_dir, self.extract_dir)
+    def name(self):
+        return self.target.name
 
     @property
     def source_dir(self):
-        return "{}-{}".format(self.name, self.version)
+        return self.target.full_name
 
+    def command(self, *args, **kwargs):
+        return self.target.command(*args, **kwargs)
+
+
+class ReleaseDownload(Source):
+    archive_top_dir = None
     @property
-    def extract_dir(self):
-        return "{}-{}".format(self.name, self.version)
+    def extract_path(self):
+        return pj(self.buildEnv.source_dir, self.source_dir)
 
     def _download(self, context):
         self.buildEnv.download(self.archive)
@@ -323,7 +339,7 @@ class ReleaseDownloadMixin:
         extract_archive(pj(self.buildEnv.archive_dir, self.archive.name),
                            self.buildEnv.source_dir,
                            topdir=self.archive_top_dir,
-                           name=self.extract_dir)
+                           name=self.source_dir)
 
     def _patch(self, context):
         context.try_skip(self.extract_path)
@@ -338,7 +354,7 @@ class ReleaseDownloadMixin:
             self.command('patch', self._patch)
 
 
-class GitCloneMixin:
+class GitClone(Source):
     git_ref = "master"
     @property
     def source_dir(self):
@@ -363,7 +379,37 @@ class GitCloneMixin:
         self.command('gitupdate', self._git_update)
 
 
-class MakeMixin:
+class Builder:
+    subsource_dir = None
+    def __init__(self, target):
+        self.target = target
+        self.buildEnv = target.buildEnv
+
+    @property
+    def name(self):
+        return self.target.name
+
+    @property
+    def source_path(self):
+        base_source_path = self.target.source_path
+        if self.subsource_dir:
+            return pj(base_source_path, self.subsource_dir)
+        return base_source_path
+
+    @property
+    def build_path(self):
+        return pj(self.buildEnv.build_dir, self.target.full_name)
+
+    def command(self, *args, **kwargs):
+        return self.target.command(*args, **kwargs)
+
+    def build(self):
+        self.command('configure', self._configure)
+        self.command('compile', self._compile)
+        self.command('install', self._install)
+
+
+class MakeBuilder(Builder):
     configure_option = ""
     make_option = ""
     install_option = ""
@@ -409,13 +455,8 @@ class MakeMixin:
         )
         self.buildEnv.run_command(command, self.build_path, context)
 
-    def build(self):
-        self.command('configure', self._configure)
-        self.command('compile', self._compile)
-        self.command('install', self._install)
 
-
-class CMakeMixin(MakeMixin):
+class CMakeBuilder(MakeBuilder):
     def _configure(self, context):
         context.try_skip(self.build_path)
         command = "{command} {configure_option} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
@@ -438,7 +479,8 @@ class CMakeMixin(MakeMixin):
            env.update(self.configure_env)
         self.buildEnv.run_command(command, self.build_path, context, env=env, allow_wrapper=False)
 
-class MesonMixin(MakeMixin):
+class MesonBuilder(Builder):
+    configure_option = ""
     def _gen_env(self):
         env = Defaultdict(str, os.environ)
         env['PKG_CONFIG_PATH'] = (env['PKG_CONFIG_PATH'] + ':' + pj(self.buildEnv.install_dir, self.buildEnv.libprefix, 'pkgconfig')
@@ -498,133 +540,163 @@ class MesonMixin(MakeMixin):
 # gettext
 # *************************************
 
-class UUID(Dependency, ReleaseDownloadMixin, MakeMixin):
+class UUID(Dependency):
     name = 'uuid'
     version = "1.42"
-    archive = Remotefile('e2fsprogs-1.42.tar.gz',
-                         '55b46db0cec3e2eb0e5de14494a88b01ff6c0500edf8ca8927cad6da7b5e4a46')
-    source_dir = extract_dir = 'e2fsprogs-1.42'
-    configure_option = "--enable-libuuid"
-    configure_env = {'_format_CFLAGS' : "{env.CFLAGS} -fPIC"}
-    make_target = 'libs'
-    make_install_target = 'install-libs'
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('e2fsprogs-1.42.tar.gz',
+                             '55b46db0cec3e2eb0e5de14494a88b01ff6c0500edf8ca8927cad6da7b5e4a46')
+        extract_dir = 'e2fsprogs-1.42'
+
+    class Builder(MakeBuilder):
+        configure_option = "--enable-libuuid"
+        configure_env = {'_format_CFLAGS' : "{env.CFLAGS} -fPIC"}
+        make_target = 'libs'
+        make_install_target = 'install-libs'
 
 
-class Xapian(Dependency, ReleaseDownloadMixin, MakeMixin):
+class Xapian(Dependency):
     name = "xapian-core"
     version = "1.4.0"
-    archive = Remotefile('xapian-core-1.4.0.tar.xz',
-                         '10584f57112aa5e9c0e8a89e251aecbf7c582097638bfee79c1fe39a8b6a6477')
-    configure_option = ("--enable-shared --enable-static --disable-sse "
-                        "--disable-backend-inmemory --disable-documentation")
-    patches = ["xapian_pkgconfig.patch"]
-    configure_env = {'_format_LDFLAGS' : "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
-                     '_format_CXXFLAGS' : "-I{buildEnv.install_dir}/include"}
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('xapian-core-1.4.0.tar.xz',
+                             '10584f57112aa5e9c0e8a89e251aecbf7c582097638bfee79c1fe39a8b6a6477')
+        patches = ["xapian_pkgconfig.patch"]
+
+    class Builder(MakeBuilder):
+        configure_option = ("--enable-shared --enable-static --disable-sse "
+                            "--disable-backend-inmemory --disable-documentation")
+        configure_env = {'_format_LDFLAGS' : "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
+                         '_format_CXXFLAGS' : "-I{buildEnv.install_dir}/include"}
 
 
-class CTPP2(Dependency, ReleaseDownloadMixin, CMakeMixin):
+class CTPP2(Dependency):
     name = "ctpp2"
     version = "2.8.3"
-    archive = Remotefile('ctpp2-2.8.3.tar.gz',
-                         'a83ffd07817adb575295ef40fbf759892512e5a63059c520f9062d9ab8fb42fc')
-    configure_option = "-DMD5_SUPPORT=OFF"
-    patches = ["ctpp2_include.patch",
+
+    class Source(ReleaseDownload):
+         archive = Remotefile('ctpp2-2.8.3.tar.gz',
+                              'a83ffd07817adb575295ef40fbf759892512e5a63059c520f9062d9ab8fb42fc')
+         patches = ["ctpp2_include.patch",
                "ctpp2_no_src_modification.patch",
                "ctpp2_fix-static-libname.patch",
                "ctpp2_mingw32.patch",
                "ctpp2_dll_export_VMExecutable.patch",
                "ctpp2_win_install_lib_in_lib_dir.patch"]
 
+    class Builder(CMakeBuilder):
+        configure_option = "-DMD5_SUPPORT=OFF"
 
-class Pugixml(Dependency, ReleaseDownloadMixin, MesonMixin):
+
+class Pugixml(Dependency):
     name = "pugixml"
     version = "1.2"
-    archive = Remotefile('pugixml-1.2.tar.gz',
-                         '0f422dad86da0a2e56a37fb2a88376aae6e931f22cc8b956978460c9db06136b')
-    patches = ["pugixml_meson.patch"]
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('pugixml-1.2.tar.gz',
+                             '0f422dad86da0a2e56a37fb2a88376aae6e931f22cc8b956978460c9db06136b')
+        patches = ["pugixml_meson.patch"]
+
+    Builder = MesonBuilder
 
 
-class MicroHttpd(Dependency, ReleaseDownloadMixin, MakeMixin):
+class MicroHttpd(Dependency):
     name = "libmicrohttpd"
-    configure_option = "--enable-shared --enable-static --disable-https --without-libgcrypt --without-libcurl"
     version = "0.9.46"
-    archive = Remotefile('libmicrohttpd-0.9.46.tar.gz',
-                         '06dbd2654f390fa1e8196fe063fc1449a6c2ed65a38199a49bf29ad8a93b8979',
-                         'http://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.46.tar.gz')
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('libmicrohttpd-0.9.46.tar.gz',
+                             '06dbd2654f390fa1e8196fe063fc1449a6c2ed65a38199a49bf29ad8a93b8979',
+                             'http://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.46.tar.gz')
+
+    class Builder(MakeBuilder):
+        configure_option = "--enable-shared --enable-static --disable-https --without-libgcrypt --without-libcurl"
 
 
-class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
+class Icu(Dependency):
     name = "icu4c"
     version = "56_1"
-    archive = Remotefile('icu4c-56_1-src.tgz',
-                         '3a64e9105c734dcf631c0b3ed60404531bce6c0f5a64bfe1a6402a4cc2314816'
-                        )
-    data = Remotefile('icudt56l.dat',
-                      'e23d85eee008f335fc49e8ef37b1bc2b222db105476111e3d16f0007d371cbca')
-    patches = ["icu4c_fix_static_lib_name_mingw.patch"]
-    subsource_dir = "source"
 
     def __init__(self, buildEnv, cross_compile_process=False, cross_build=None):
         Dependency.__init__(self, buildEnv)
-        self.cross_compile_process = cross_compile_process
-        self.cross_build = cross_build
+        self.builder.cross_compile_process = cross_compile_process
+        self.builder.cross_build = cross_build
 
-    @property
-    def build_path(self):
-        if self.cross_compile_process and not self.cross_build:
-            return pj(self.buildEnv.build_dir, self.source_dir+"_native")
-        return pj(self.buildEnv.build_dir, self.source_dir)
+    class Source(ReleaseDownload):
+        archive = Remotefile('icu4c-56_1-src.tgz',
+                             '3a64e9105c734dcf631c0b3ed60404531bce6c0f5a64bfe1a6402a4cc2314816'
+                            )
+        patches = ["icu4c_fix_static_lib_name_mingw.patch"]
+        data = Remotefile('icudt56l.dat',
+                          'e23d85eee008f335fc49e8ef37b1bc2b222db105476111e3d16f0007d371cbca')
 
-    @property
-    def configure_option(self):
-        default_configure_option = "--disable-samples --disable-tests --disable-extras --disable-dyload"
-        if self.buildEnv.build_static:
-            default_configure_option += " --enable-static --disable-shared"
-        else:
-            default_configure_option += " --enable-shared --enable-shared"
-        if self.cross_build:
-            return default_configure_option + " --with-cross-build=" + self.cross_build.build_path
-        return default_configure_option
+        def _download_data(self, context):
+            self.buildEnv.download(self.data)
 
-    def _download_data(self, context):
-        self.buildEnv.download(self.data)
+        def _copy_data(self, context):
+            context.try_skip(self.extract_path)
+            shutil.copyfile(pj(self.buildEnv.archive_dir, self.data.name), pj(self.extract_path, 'source', 'data', 'in', self.data.name))
 
-    def _copy_data(self, context):
-        context.try_skip(self.source_path)
-        shutil.copyfile(pj(self.buildEnv.archive_dir, self.data.name), pj(self.source_path, 'data', 'in', self.data.name))
+        def prepare(self):
+            super().prepare()
+            self.command("download_data", self._download_data)
+            self.command("copy_data", self._copy_data)
 
-    def _install(self, context):
-        if self.cross_compile_process and not self.cross_build:
-            raise SkipCommand()
-        return super()._install.(context)
+    class Builder(MakeBuilder):
+        subsource_dir = "source"
 
-    def prepare(self):
-        super().prepare()
-        self.command('download_data', self._download_data)
-        self.command('copy_data', self._copy_data)
+        @property
+        def configure_option(self):
+            default_configure_option = "--disable-samples --disable-tests --disable-extras --disable-dyload"
+            if self.buildEnv.build_static:
+                default_configure_option += " --enable-static --disable-shared"
+            else:
+                default_configure_option += " --enable-shared --enable-shared"
+            if self.cross_build:
+                return default_configure_option + " --with-cross-build=" + self.cross_build.build_path
+            return default_configure_option
+
+        def _install(self, context):
+            if self.target.cross_compile_process and not self.target.cross_build:
+                raise SkipCommand()
+            return super()._install.(context)
 
 
-class Zimlib(Dependency, GitCloneMixin, MesonMixin):
+class Zimlib(Dependency):
     name = "zimlib"
-    #git_remote = "https://gerrit.wikimedia.org/r/p/openzim.git"
-    git_remote = "https://github.com/mgautierfr/openzim"
-    git_dir = "openzim"
-    git_ref = "meson"
-    subsource_dir = "zimlib"
+
+    class Source(GitClone):
+        #git_remote = "https://gerrit.wikimedia.org/r/p/openzim.git"
+        git_remote = "https://github.com/mgautierfr/openzim"
+        git_dir = "openzim"
+        git_ref = "meson"
+
+    class Builder(MesonBuilder):
+        subsource_dir = "zimlib"
 
 
-class Kiwixlib(Dependency, GitCloneMixin, MesonMixin):
+class Kiwixlib(Dependency):
     name = "kiwix-lib"
-    git_remote = "https://github.com/kiwix/kiwix-lib.git"
-    git_dir = "kiwix-lib"
-    configure_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
+
+    class Source(GitClone):
+        git_remote = "https://github.com/kiwix/kiwix-lib.git"
+        git_dir = "kiwix-lib"
+
+    class Builder(MesonBuilder):
+        configure_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
 
 
-class KiwixTools(Dependency, GitCloneMixin, MesonMixin):
+class KiwixTools(Dependency):
     name = "kiwix-tools"
-    git_remote = "https://github.com/kiwix/kiwix-tools.git"
-    git_dir = "kiwix-tools"
-    configure_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
+
+    class Source(GitClone):
+        git_remote = "https://github.com/kiwix/kiwix-tools.git"
+        git_dir = "kiwix-tools"
+
+    class Builder(MesonBuilder):
+        configure_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
 
 
 class Builder:
@@ -659,13 +731,15 @@ class Builder:
 
     def prepare(self):
         for dependency in self.dependencies:
-            print("prepare {} :".format(dependency.name))
-            dependency.prepare()
+            source = dependency.source
+            print("prepare {} :".format(source.name))
+            source.prepare()
 
     def build(self):
         for dependency in self.dependencies:
-            print("build {} :".format(dependency.name))
-            dependency.build()
+            builder = dependency.builder
+            print("build {} :".format(builder.name))
+            builder.build()
 
 def parse_args():
     parser = argparse.ArgumentParser()
