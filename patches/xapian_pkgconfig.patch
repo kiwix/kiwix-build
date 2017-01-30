@@ -1,10 +1,93 @@
-diff -ru xapian-core-1.4.0/pkgconfig/xapian-core.pc.in xapian-core-1.4.0_patched/pkgconfig/xapian-core.pc.in
---- xapian-core-1.4.0/pkgconfig/xapian-core.pc.in	2016-06-25 17:36:49.000000000 +0200
-+++ xapian-core-1.4.0_patched/pkgconfig/xapian-core.pc.in	2016-12-19 20:45:25.716329832 +0100
-@@ -11,4 +11,5 @@
+diff -ur xapian-core-1.4.0/configure.ac xapian-core-1.4.0.patched/configure.ac
+--- xapian-core-1.4.0/configure.ac	2016-06-25 17:36:49.000000000 +0200
++++ xapian-core-1.4.0.patched/configure.ac	2017-01-17 14:33:42.268536542 +0100
+@@ -393,6 +393,7 @@
+ esac
+ 
+ dnl We use timer_create() if available to implement a search time limit.
++use_rt_lib=0
+ SAVE_LIBS=$LIBS
+ AC_SEARCH_LIBS([timer_create], [rt],
+ 	       [
+@@ -403,12 +404,14 @@
+ #endif]])],
+ 	[AC_MSG_RESULT([yes])
+ 	XAPIAN_LIBS="$LIBS $XAPIAN_LIBS"
+-	AC_DEFINE([HAVE_TIMER_CREATE], [1], [Define to 1 if you have the 'timer_create' function.])]
++	AC_DEFINE([HAVE_TIMER_CREATE], [1], [Define to 1 if you have the 'timer_create' function.])
++        use_rt_lib=1]
+ 	,
+ 	[AC_MSG_RESULT([no])
+     ])
+ ])
+ LIBS=$SAVE_LIBS
++AM_CONDITIONAL([USE_RT_LIB], [test "$use_win32_uuid_api" = 1])
+ 
+ dnl Used by tests/soaktest/soaktest.cc
+ AC_CHECK_FUNCS([srandom random])
+diff -ur xapian-core-1.4.0/configure xapian-core-1.4.0.patched/configure
+--- xapian-core-1.4.0/configure	2016-06-25 17:39:25.000000000 +0200
++++ xapian-core-1.4.0.patched/configure	2017-01-17 15:43:07.929290801 +0100
+@@ -671,6 +671,8 @@
+ DOCUMENTATION_RULES_FALSE
+ DOCUMENTATION_RULES_TRUE
+ PERL
++USE_RT_LIB_FALSE
++USE_RT_LIB_TRUE
+ ldflags
+ XAPIAN_LIBS
+ XAPIAN_LDFLAGS
+@@ -18247,6 +18249,7 @@
+     ;;
+ esac
+ 
++use_rt_lib=0
+ SAVE_LIBS=$LIBS
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing timer_create" >&5
+ $as_echo_n "checking for library containing timer_create... " >&6; }
+@@ -18324,6 +18327,7 @@
+ 
+ $as_echo "#define HAVE_TIMER_CREATE 1" >>confdefs.h
+ 
++        use_rt_lib=1
+ 
+ else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+@@ -18335,6 +18339,14 @@
+ fi
+ 
+ LIBS=$SAVE_LIBS
++ if test "$use_rt_lib" = 1; then
++  USE_RT_LIB_TRUE=
++  USE_RT_LIB_FALSE='#'
++else
++  USE_RT_LIB_TRUE='#'
++  USE_RT_LIB_FALSE=
++fi
++
+ 
+ for ac_func in srandom random
+ do :
+@@ -20854,6 +20866,10 @@
+ Usually this means the macro was only invoked conditionally." "$LINENO" 5
+ fi
+ 
++if test -z "${USE_RT_LIB_TRUE}" && test -z "${USE_RT_LIB_FALSE}"; then
++  as_fn_error $? "conditional \"USE_RT_LIB\" was never defined.
++Usually this means the macro was only invoked conditionally." "$LINENO" 5
++fi
+ if test -z "${DOCUMENTATION_RULES_TRUE}" && test -z "${DOCUMENTATION_RULES_FALSE}"; then
+   as_fn_error $? "conditional \"DOCUMENTATION_RULES\" was never defined.
+ Usually this means the macro was only invoked conditionally." "$LINENO" 5
+diff -ur xapian-core-1.4.0/pkgconfig/xapian-core.pc.in xapian-core-1.4.0.patched/pkgconfig/xapian-core.pc.in
+--- xapian-core-1.4.0/pkgconfig/xapian-core.pc.in	2017-01-17 15:22:40.184786108 +0100
++++ xapian-core-1.4.0.patched/pkgconfig/xapian-core.pc.in	2017-01-17 14:34:17.692972977 +0100
+@@ -11,4 +11,6 @@
  URL: https://xapian.org/
  Version: @VERSION@
  Cflags: -I${includedir} @abi_affecting_cxxflags@
 -Libs: @ldflags@ -L${libdir} -lxapian@LIBRARY_VERSION_SUFFIX@
-+Libs: @ldflags@ -L${libdir} -lxapian@LIBRARY_VERSION_SUFFIX@ -lrt
-+Requires: uuid
++@USE_RT_LIB_TRUE@Libs: @ldflags@ -L${libdir} -lxapian@LIBRARY_VERSION_SUFFIX@ -lrt
++@USE_RT_LIB_FALSE@Libs: @ldflags@ -L${libdir} -lxapian@LIBRARY_VERSION_SUFFIX@
++@USE_WIN32_UUID_API_FALSE@Requires: uuid
+

@@ -1,0 +1,85 @@
+diff -ur ctpp2-2.8.3/include/CTPP2SourceLoader.hpp ctpp2-2.8.3.patched/include/CTPP2SourceLoader.hpp
+--- ctpp2-2.8.3/include/CTPP2SourceLoader.hpp	2017-01-09 17:00:57.542353340 +0100
++++ ctpp2-2.8.3.patched/include/CTPP2SourceLoader.hpp	2017-01-09 16:54:04.467316656 +0100
+@@ -33,7 +33,7 @@
+ #define _CTPP2_SOURCE_LOADER_HPP__ 1
+ 
+ #ifdef _WIN32
+-#include <Windows.h>
++#include <windows.h>
+ #else
+  #include <unistd.h>
+ #endif
+diff -ur ctpp2-2.8.3/src/CTPP2DTOA.cpp ctpp2-2.8.3.patched/src/CTPP2DTOA.cpp
+--- ctpp2-2.8.3/src/CTPP2DTOA.cpp	2012-11-11 00:50:01.000000000 +0100
++++ ctpp2-2.8.3.patched/src/CTPP2DTOA.cpp	2017-01-09 16:53:13.184181977 +0100
+@@ -158,8 +158,8 @@
+ #include <stdio.h>
+ #include <errno.h>
+ 
+-#ifdef _MSC_VER
+-    #include <WinSock2.h>
++#if defined(_MSC_VER) || defined(__MINGW32__)
++    #include <winsock2.h>
+     #ifndef BIG_ENDIAN
+         #define BIG_ENDIAN BIGENDIAN
+     #endif
+diff -ur ctpp2-2.8.3/src/CTPP2StringIconvOutputCollector.cpp ctpp2-2.8.3.patched/src/CTPP2StringIconvOutputCollector.cpp
+--- ctpp2-2.8.3/src/CTPP2StringIconvOutputCollector.cpp	2012-08-02 09:22:44.000000000 +0200
++++ ctpp2-2.8.3.patched/src/CTPP2StringIconvOutputCollector.cpp	2017-01-09 16:56:11.162179732 +0100
+@@ -85,7 +85,7 @@
+ 	size_t iDstLength     = CTPP_ESCAPE_BUFFER_LEN;
+ 
+ 	char         aDstData[CTPP_ESCAPE_BUFFER_LEN];
+-#if defined(linux) || defined(__APPLE__)
++#if defined(linux) || defined(__APPLE__) || defined(__MINGW32__)
+ 	char       * aSrcData = (char *)vData;
+ #else
+ 	const char * aSrcData = (const char *)vData;
+diff -ur ctpp2-2.8.3/src/functions/FnHostname.cpp ctpp2-2.8.3.patched/src/functions/FnHostname.cpp
+--- ctpp2-2.8.3/src/functions/FnHostname.cpp	2012-11-10 21:40:36.000000000 +0100
++++ ctpp2-2.8.3.patched/src/functions/FnHostname.cpp	2017-01-09 16:58:53.987435623 +0100
+@@ -34,8 +34,8 @@
+ #include "CTPP2Logger.hpp"
+ #include "FnHostname.hpp"
+ 
+-#ifdef _MSC_VER
+-#include <Winsock2.h>
++#if defined(_MSC_VER) || defined(__MINGW32__)
++#include <winsock2.h>
+ #else
+ #include <unistd.h>
+ #endif
+diff -ur ctpp2-2.8.3/src/functions/FnIconv.cpp ctpp2-2.8.3.patched/src/functions/FnIconv.cpp
+--- ctpp2-2.8.3/src/functions/FnIconv.cpp	2012-08-02 09:22:44.000000000 +0200
++++ ctpp2-2.8.3.patched/src/functions/FnIconv.cpp	2017-01-09 16:58:28.948857601 +0100
+@@ -173,7 +173,7 @@
+ 	size_t iDstLength     = CTPP_ESCAPE_BUFFER_LEN;
+ 
+ 	char         aDstData[CTPP_ESCAPE_BUFFER_LEN];
+-#if defined(linux) || defined(__APPLE__)
++#if defined(linux) || defined(__APPLE__) ||  defined(__MINGW32__)
+ 	char       * aSrcData = (char *)sWhat.data();
+ #else
+ 	const char * aSrcData = (const char *)sWhat.data();
+diff -ur ctpp2-2.8.3/src/functions/FnRandom.cpp ctpp2-2.8.3.patched/src/functions/FnRandom.cpp
+--- ctpp2-2.8.3/src/functions/FnRandom.cpp	2012-11-10 21:36:30.000000000 +0100
++++ ctpp2-2.8.3.patched/src/functions/FnRandom.cpp	2017-01-09 16:59:59.879325141 +0100
+@@ -37,7 +37,7 @@
+ #include <stdlib.h>
+ #include <time.h>
+ 
+-#ifdef _MSC_VER
++#if defined(_MSC_VER) ||  defined(__MINGW32__)
+ 	#define random()        rand()
+ 	#define INT_64(x)       (INT_64)(x)
+ 	#define srandomdev()    srand( (unsigned)time(NULL) );
+@@ -51,7 +51,7 @@
+ //
+ FnRandom::FnRandom()
+ {
+-#if defined(__FreeBSD__) || defined(_MSC_VER)
++#if defined(__FreeBSD__) || defined(_MSC_VER) ||  defined(__MINGW32__)
+ 	srandomdev();
+ #else
+ 	srandom(time(NULL));

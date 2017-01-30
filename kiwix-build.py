@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys
+import os, sys, stat
 import argparse
 import urllib.request
 import tarfile
@@ -8,7 +8,9 @@ import subprocess
 import hashlib
 import shutil
 import tempfile
+import configparser
 from collections import defaultdict, namedtuple
+
 
 pj = os.path.join
 
@@ -74,6 +76,7 @@ def command(name):
             except:
                 print("ERROR")
                 raise
+        wrapper._wrapped = function
         return wrapper
     return decorator
 
@@ -108,9 +111,20 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
 
 
 class BuildEnv:
+    build_targets = ['native', 'win32']
+
+    _targets_env = {
+        'native' : {},
+        'win32'  : {'wrapper': 'mingw32-env'}
+    }
+
     def __init__(self, options):
         self.source_dir = pj(options.working_dir, "SOURCE")
-        self.build_dir = pj(options.working_dir, "BUILD")
+        build_dir = "BUILD_{target}_{libmod}".format(
+            target=options.build_target,
+            libmod='static' if options.build_static else 'dyn'
+        )
+        self.build_dir = pj(options.working_dir, build_dir)
         self.archive_dir = pj(options.working_dir, "ARCHIVE")
         self.log_dir = pj(options.working_dir, 'LOGS')
         self.install_dir = pj(self.build_dir, "INSTALL")
@@ -119,10 +133,67 @@ class BuildEnv:
         os.makedirs(self.build_dir, exist_ok=True)
         os.makedirs(self.log_dir, exist_ok=True)
         os.makedirs(self.install_dir, exist_ok=True)
+        self.setup_build_target(options.build_target)
         self.ninja_command = self._detect_ninja()
         self.meson_command = self._detect_meson()
         self.options = options
         self.libprefix = options.libprefix or self._detect_libdir()
+
+    def setup_build_target(self, build_target):
+        self.build_target = build_target
+        self.target_env = self._targets_env[self.build_target]
+        getattr(self, 'setup_{}'.format(self.build_target))()
+
+    def setup_native(self):
+        self.wrapper = None
+        self.configure_option = ""
+        self.cmake_option = ""
+        self.meson_crossfile = None
+
+    def _get_rpm_mingw32(self, value):
+        command = "rpm --eval %{{mingw32_{}}}".format(value)
+        output = subprocess.check_output(command, shell=True)
+        return output[:-1].decode()
+
+    def _gen_meson_crossfile(self):
+        self.meson_crossfile = pj(self.build_dir, 'cross_file.txt')
+        config = configparser.ConfigParser()
+        config['binaries'] = {
+            'c' : repr(self._get_rpm_mingw32('cc')),
+            'cpp' : repr(self._get_rpm_mingw32('cxx')),
+            'ar' : repr(self._get_rpm_mingw32('ar')),
+            'strip' : repr(self._get_rpm_mingw32('strip')),
+            'pkgconfig' : repr(self._get_rpm_mingw32('pkg_config')),
+            'exe_wrapper' : repr('wine') # A command used to run generated executables.
+        }
+        config['properties'] = {
+            'c_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4'],
+            'cpp_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4']
+        }
+        config['host_machine'] = {
+            'system' : repr('windows'),
+            'cpu_family' : repr('x86'),
+            'cpu' : repr('i586'),
+            'endian' : repr('little')
+        }
+        with open(self.meson_crossfile, 'w') as configfile:
+            config.write(configfile)
+
+    def setup_win32(self):
+        command = "rpm --eval %{mingw32_env}"
+        self.wrapper = pj(self.build_dir, 'mingw32-wrapper.sh')
+        with open(self.wrapper, 'w') as output:
+            output.write("#!/usr/bin/sh\n\n")
+            output.flush()
+            output.write(self._get_rpm_mingw32('env'))
+            output.write('\n\nexec "$@"\n')
+            output.flush()
+        current_permissions = stat.S_IMODE(os.lstat(self.wrapper).st_mode)
+        os.chmod(self.wrapper, current_permissions | stat.S_IXUSR)
+        self.configure_option = "--host=i686-w64-mingw32"
+        self.cmake_option = "-DCMAKE_SYSTEM_NAME=Windows"
+
+        self._gen_meson_crossfile()
 
     def __getattr__(self, name):
         return getattr(self.options, name)
@@ -168,8 +239,10 @@ class BuildEnv:
             if retcode == 0:
                 return n
 
-    def run_command(self, command, cwd, context, env=None, input=None):
+    def run_command(self, command, cwd, context, env=None, input=None, allow_wrapper=True):
         os.makedirs(cwd, exist_ok=True)
+        if allow_wrapper and self.wrapper:
+            command = "{} {}".format(self.wrapper, command)
         if env is None:
             env = dict(os.environ)
         log = None
@@ -261,7 +334,7 @@ class ReleaseDownloadMixin:
         context.try_skip(self.extract_path)
         for p in self.patches:
             with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input)
+                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input, allow_wrapper=False)
 
     def prepare(self):
         self._download()
@@ -312,7 +385,7 @@ class MakeMixin:
         command = "{configure_script} {configure_option} --prefix {install_dir} --libdir {libdir}"
         command = command.format(
             configure_script = pj(self.source_path, self.configure_script),
-            configure_option = self.configure_option,
+            configure_option = "{} {}".format(self.configure_option, self.buildEnv.configure_option),
             install_dir = self.buildEnv.install_dir,
             libdir = pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
         )
@@ -356,9 +429,9 @@ class CMakeMixin(MakeMixin):
     @command("configure")
     def _configure(self, context):
         context.try_skip(self.build_path)
-        command = "cmake {configure_option} -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
+        command = "cmake {configure_option} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
         command = command.format(
-            configure_option = self.configure_option,
+            configure_option = "{} {}".format(self.buildEnv.cmake_option, self.configure_option),
             install_dir = self.buildEnv.install_dir,
             libdir = self.buildEnv.libprefix,
             source_path = self.source_path
@@ -399,25 +472,27 @@ class MesonMixin(MakeMixin):
         else:
             library_type = 'shared'
         configure_option = self.configure_option.format(buildEnv=self.buildEnv)
-        command = "{command} --default-library={library_type} {configure_option} . {build_path} --prefix={buildEnv.install_dir} --libdir={buildEnv.libprefix}".format(
+        command = "{command} --default-library={library_type} {configure_option} . {build_path} --prefix={buildEnv.install_dir} --libdir={buildEnv.libprefix} {cross_option}".format(
             command = self.buildEnv.meson_command,
             library_type=library_type,
             configure_option=configure_option,
             build_path = self.build_path,
-            buildEnv=self.buildEnv)
-        self.buildEnv.run_command(command, self.source_path, context, env=env)
+            buildEnv=self.buildEnv,
+            cross_option = "--cross-file {}".format(self.buildEnv.meson_crossfile) if self.buildEnv.meson_crossfile else ""
+        )
+        self.buildEnv.run_command(command, self.source_path, context, env=env, allow_wrapper=False)
 
     @command("compile")
     def _compile(self, context):
         env = self._gen_env()
         command = "{} -v".format(self.buildEnv.ninja_command)
-        self.buildEnv.run_command(command, self.build_path, context, env=env)
+        self.buildEnv.run_command(command, self.build_path, context, env=env, allow_wrapper=False)
 
     @command("install")
     def _install(self, context):
         env = self._gen_env()
         command = "{} -v install".format(self.buildEnv.ninja_command)
-        self.buildEnv.run_command(command, self.build_path, context)
+        self.buildEnv.run_command(command, self.build_path, context, allow_wrapper=False)
 
     def build(self):
         self._configure()
@@ -458,7 +533,8 @@ class Xapian(Dependency, ReleaseDownloadMixin, MakeMixin):
     version = "1.4.0"
     archive = Remotefile('xapian-core-1.4.0.tar.xz',
                          '10584f57112aa5e9c0e8a89e251aecbf7c582097638bfee79c1fe39a8b6a6477')
-    configure_option = "--enable-shared --enable-static --disable-sse --disable-backend-inmemory"
+    configure_option = ("--enable-shared --enable-static --disable-sse "
+                        "--disable-backend-inmemory --disable-documentation")
     patches = ["xapian_pkgconfig.patch"]
     configure_env = {'_format_LDFLAGS' : "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
                      '_format_CXXFLAGS' : "-I{buildEnv.install_dir}/include"}
@@ -470,7 +546,12 @@ class CTPP2(Dependency, ReleaseDownloadMixin, CMakeMixin):
     archive = Remotefile('ctpp2-2.8.3.tar.gz',
                          'a83ffd07817adb575295ef40fbf759892512e5a63059c520f9062d9ab8fb42fc')
     configure_option = "-DMD5_SUPPORT=OFF"
-    patches = ["ctpp2_include.patch", "ctpp2_no_src_modification.patch", "ctpp2_fix-static-libname.patch"]
+    patches = ["ctpp2_include.patch",
+               "ctpp2_no_src_modification.patch",
+               "ctpp2_fix-static-libname.patch",
+               "ctpp2_mingw32.patch",
+               "ctpp2_dll_export_VMExecutable.patch",
+               "ctpp2_win_install_lib_in_lib_dir.patch"]
 
 
 class Pugixml(Dependency, ReleaseDownloadMixin, MesonMixin):
@@ -483,10 +564,11 @@ class Pugixml(Dependency, ReleaseDownloadMixin, MesonMixin):
 
 class MicroHttpd(Dependency, ReleaseDownloadMixin, MakeMixin):
     name = "libmicrohttpd"
-    version = "0.9.19"
-    archive = Remotefile('libmicrohttpd-0.9.19.tar.gz',
-                         'dc418c7a595196f09d2f573212a0d794404fa4ac5311fc9588c1e7ad7a90fae6')
     configure_option = "--enable-shared --enable-static --disable-https --without-libgcrypt --without-libcurl"
+    version = "0.9.46"
+    archive = Remotefile('libmicrohttpd-0.9.46.tar.gz',
+                         '06dbd2654f390fa1e8196fe063fc1449a6c2ed65a38199a49bf29ad8a93b8979',
+                         'http://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.46.tar.gz')
 
 
 class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
@@ -497,9 +579,30 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
                         )
     data = Remotefile('icudt56l.dat',
                       'e23d85eee008f335fc49e8ef37b1bc2b222db105476111e3d16f0007d371cbca')
-    configure_option = "Linux --disable-samples --disable-tests --disable-extras --enable-static --disable-dyload"
-    configure_script = "runConfigureICU"
+    patches = ["icu4c_fix_static_lib_name_mingw.patch"]
     subsource_dir = "source"
+
+    def __init__(self, buildEnv, cross_compile_process=False, cross_build=None):
+        Dependency.__init__(self, buildEnv)
+        self.cross_compile_process = cross_compile_process
+        self.cross_build = cross_build
+
+    @property
+    def build_path(self):
+        if self.cross_compile_process and not self.cross_build:
+            return pj(self.buildEnv.build_dir, self.source_dir+"_native")
+        return pj(self.buildEnv.build_dir, self.source_dir)
+
+    @property
+    def configure_option(self):
+        default_configure_option = "--disable-samples --disable-tests --disable-extras --disable-dyload"
+        if self.buildEnv.build_static:
+            default_configure_option += " --enable-static --disable-shared"
+        else:
+            default_configure_option += " --enable-shared --enable-shared"
+        if self.cross_build:
+            return default_configure_option + " --with-cross-build=" + self.cross_build.build_path
+        return default_configure_option
 
     @command("download_data")
     def _download_data(self, context):
@@ -509,6 +612,12 @@ class Icu(Dependency, ReleaseDownloadMixin, MakeMixin):
     def _copy_data(self, context):
         context.try_skip(self.source_path)
         shutil.copyfile(pj(self.buildEnv.archive_dir, self.data.name), pj(self.source_path, 'data', 'in', self.data.name))
+
+    @command("install")
+    def _install(self, context):
+        if self.cross_compile_process and not self.cross_build:
+            raise SkipCommand()
+        return super()._install._wrapped(self, context)
 
     def prepare(self):
         super().prepare()
@@ -542,7 +651,23 @@ class KiwixTools(Dependency, GitCloneMixin, MesonMixin):
 class Builder:
     def __init__(self, buildEnv):
         self.buildEnv = buildEnv
-        self.dependencies = [UUID(buildEnv),
+        if buildEnv.build_target != 'native':
+            subBuildEnv = BuildEnv(buildEnv.options)
+            subBuildEnv.setup_build_target('native')
+            nativeICU = Icu(subBuildEnv, True)
+            self.dependencies = [
+                             Xapian(buildEnv),
+                             CTPP2(buildEnv),
+                             Pugixml(buildEnv),
+                             Zimlib(buildEnv),
+                             MicroHttpd(buildEnv),
+                             nativeICU,
+                             Icu(buildEnv, True, nativeICU),
+                             Kiwixlib(buildEnv),
+                             KiwixTools(buildEnv)
+                            ]
+        else:
+            self.dependencies = [UUID(buildEnv),
                              Xapian(buildEnv),
                              CTPP2(buildEnv),
                              Pugixml(buildEnv),
@@ -567,8 +692,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('working_dir', default=".", nargs='?')
     parser.add_argument('--libprefix', default=None)
-    parser.add_argument('--target_arch', default="x86_64")
-    parser.add_argument('--build_static', action="store_true")
+    parser.add_argument('--build-static', action="store_true")
+    parser.add_argument('--build-target', default="native", choices=BuildEnv.build_targets)
     parser.add_argument('--verbose', '-v', action="store_true",
                         help=("Print all logs on stdout instead of in specific"
                               " log files per commands"))
