@@ -390,7 +390,7 @@ class GitClone(Source):
         self.buildEnv.run_command(command, self.buildEnv.source_dir, context)
 
     def _git_update(self, context):
-        self.buildEnv.run_command("git pull", self.git_path, context)
+        self.buildEnv.run_command("git fetch", self.git_path, context)
         self.buildEnv.run_command("git checkout "+self.git_ref, self.git_path, context)
 
     def prepare(self):
