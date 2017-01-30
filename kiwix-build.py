@@ -619,11 +619,6 @@ class Icu(Dependency):
     name = "icu4c"
     version = "56_1"
 
-    def __init__(self, buildEnv, cross_compile_process=False, cross_build=None):
-        Dependency.__init__(self, buildEnv)
-        self.builder.cross_compile_process = cross_compile_process
-        self.builder.cross_build = cross_build
-
     class Source(ReleaseDownload):
         archive = Remotefile('icu4c-56_1-src.tgz',
                              '3a64e9105c734dcf631c0b3ed60404531bce6c0f5a64bfe1a6402a4cc2314816'
@@ -654,14 +649,29 @@ class Icu(Dependency):
                 default_configure_option += " --enable-static --disable-shared"
             else:
                 default_configure_option += " --enable-shared --enable-shared"
-            if self.cross_build:
-                return default_configure_option + " --with-cross-build=" + self.cross_build.build_path
             return default_configure_option
 
+
+class Icu_native(Icu):
+    force_native_build = True
+
+    class Builder(Icu.Builder):
+        @property
+        def build_path(self):
+            return super().build_path+"_native"
+
         def _install(self, context):
-            if self.target.cross_compile_process and not self.target.cross_build:
-                raise SkipCommand()
-            return super()._install.(context)
+            raise SkipCommand()
+
+
+class Icu_cross_compile(Icu):
+    dependencies = ['Icu_native']
+
+    class Builder(Icu.Builder):
+        @property
+        def configure_option(self):
+            Icu_native = self.buildEnv.targetsDict['Icu_native']
+            return super().configure_option + " --with-cross-build=" + Icu_native.builder.build_path
 
 
 class Zimlib(Dependency):
@@ -705,7 +715,7 @@ class Builder:
         if buildEnv.build_target != 'native':
             subBuildEnv = BuildEnv(buildEnv.options)
             subBuildEnv.setup_build_target('native')
-            nativeICU = Icu(subBuildEnv, True)
+            nativeICU = Icu_native(subBuildEnv)
             self.dependencies = [
                              Xapian(buildEnv),
                              CTPP2(buildEnv),
@@ -713,7 +723,7 @@ class Builder:
                              Zimlib(buildEnv),
                              MicroHttpd(buildEnv),
                              nativeICU,
-                             Icu(buildEnv, True, nativeICU),
+                             Icu_cross_compile(buildEnv, True, nativeICU),
                              Kiwixlib(buildEnv),
                              KiwixTools(buildEnv)
                             ]
