@@ -569,6 +569,7 @@ class CMakeBuilder(MakeBuilder):
            env.update(self.configure_env)
         self.buildEnv.run_command(command, self.build_path, context, env=env, allow_wrapper=False)
 
+
 class MesonBuilder(Builder):
     configure_option = ""
     def _gen_env(self):
@@ -578,8 +579,6 @@ class MesonBuilder(Builder):
                                   else pj(self.buildEnv.install_dir, self.buildEnv.libprefix, 'pkgconfig')
                                  )
         env['PATH'] = ':'.join([pj(self.buildEnv.install_dir, 'bin'), env['PATH']])
-        if self.buildEnv.build_static:
-            env['LDFLAGS'] = env['LDFLAGS'] + " -static-libstdc++ --static"
         return env
 
     def _configure(self, context):
@@ -808,7 +807,12 @@ class KiwixTools(Dependency):
         git_dir = "kiwix-tools"
 
     class Builder(MesonBuilder):
-        configure_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
+        @property
+        def configure_option(self):
+           base_options = "-Dctpp2-install-prefix={buildEnv.install_dir}"
+           if self.buildEnv.build_static:
+               base_options += " -Dstatic-linkage=true"
+           return base_options
 
 
 class Builder:
