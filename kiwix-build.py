@@ -759,9 +759,6 @@ class Builder:
         for dep in dependencies_order:
              self.targets[dep] = _targets[dep]
 
-        self.sources = remove_duplicates(dep.source for dep in self.targets.values())
-        self.builders = (dep.builder for dep in self.targets.values())
-
     def add_targets(self, targetName, targets):
         if targetName in targets:
             return
@@ -780,15 +777,28 @@ class Builder:
             yield from self.order_dependencies(_targets, depName)
         yield targetName
 
-    def prepare(self):
-        for source in self.sources:
+    def prepare_sources(self):
+        sources = remove_duplicates(dep.source for dep in self.targets.values())
+        for source in sources:
             print("prepare sources {} :".format(source.name))
             source.prepare()
 
     def build(self):
-        for builder in self.builders:
+        builders = (dep.builder for dep in self.targets.values())
+        for builder in builders:
             print("build {} :".format(builder.name))
             builder.build()
+
+    def run(self):
+        try:
+            print("[INSTALL PACKAGES]")
+            self.buildEnv.install_packages()
+            print("[PREPARE]")
+            self.prepare_sources()
+            print("[BUILD]")
+            self.build()
+        except StopBuild:
+            print("Stopping build due to errors")
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -805,10 +815,4 @@ if __name__ == "__main__":
     options = parse_args()
     options.working_dir = os.path.abspath(options.working_dir)
     builder = Builder(options)
-    try:
-        print("[PREPARE]")
-        builder.prepare()
-        print("[BUILD]")
-        builder.build()
-    except StopBuild:
-        print("Stopping build due to errors")
+    builder.run()
