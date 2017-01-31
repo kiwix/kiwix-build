@@ -9,6 +9,7 @@ import hashlib
 import shutil
 import tempfile
 import configparser
+import platform
 from collections import defaultdict, namedtuple, OrderedDict
 
 
@@ -18,6 +19,33 @@ REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
+
+PACKAGE_NAME_MAPPERS = {
+    'fedora_native_dyn': {
+        'COMMON' : ['gcc-c++', 'cmake', 'automake'],
+        'uuid': ['libuuid-devel'],
+        'xapian-core' : None, # Not the right version on fedora 25
+        'ctpp2' : None,
+        'pugixml' : None, # ['pugixml-devel'] but package doesn't provide pkg-config file
+        'libmicrohttpd' : ['libmicrohttpd-devel'],
+        'icu4c': None,
+        'zimlib': None,
+    },
+    'fedora_native_static' : {
+        'COMMON' : ['gcc-c++', 'cmake', 'automake', 'glibc-static', 'libstdc++-static'],
+        # Either there is no packages, or no static or too old
+    },
+    'fedora_win32_dyn' : {
+        'COMMON' : ['mingw32-gcc-c++', 'mingw32-zlib', 'mingw32-bzip2', 'mingw32-win-iconv', 'mingw32-winpthreads', 'wine'],
+        'libmicrohttpd' : ['mingw32-libmicrohttpd'],
+    },
+    'fedora_win32_static' : {
+        'COMMON' : ['mingw32-gcc-c++', 'mingw32-zlib-static', 'mingw32-bzip2-static', 'mingw32-win-iconv-static', 'mingw32-winpthreads-static', 'wine'],
+        'libmicrohttpd' : None, # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
+                                # gcc cannot found them.
+    }
+    # TODO : Add ubuntu packages
+}
 
 class Defaultdict(defaultdict):
     def __getattr__(self, name):
@@ -118,12 +146,19 @@ class BuildEnv:
         os.makedirs(self.build_dir, exist_ok=True)
         os.makedirs(self.log_dir, exist_ok=True)
         os.makedirs(self.install_dir, exist_ok=True)
+        self.detect_platform()
         self.setup_build_target(options.build_target)
         self.ninja_command = self._detect_ninja()
         self.meson_command = self._detect_meson()
         self.options = options
         self.libprefix = options.libprefix or self._detect_libdir()
         self.targetsDict = targetsDict
+
+    def detect_platform(self):
+        _platform = platform.system()
+        if _platform != 'Linux':
+            sys.exit('ERROR: kiwix-build is intented to run only on Linux platform')
+        self.distname, self.distversion, _ = platform.dist()
 
     def setup_build_target(self, build_target):
         self.build_target = build_target
@@ -265,6 +300,38 @@ class BuildEnv:
             os.remove(file_path)
             raise StopBuild()
 
+    def install_packages(self):
+        autoskip_file = pj(self.build_dir, ".install_packages_ok")
+        if os.path.exists(autoskip_file):
+            print("SKIP")
+            return
+
+        if self.distname in ('fedora', 'redhat', 'centos'):
+            package_installer = 'dnf'
+        elif self.distname in ('debian', 'ubuntu'):
+            package_installer = 'apt-get'
+        mapper_name = "{host}_{target}_{build_type}".format(
+            host = self.distname,
+            target = self.build_target,
+            build_type = 'static' if self.options.build_static else 'dyn')
+        package_name_mapper = PACKAGE_NAME_MAPPERS[mapper_name]
+        packages_list = package_name_mapper.get('COMMON', [])
+        for dep in self.targetsDict.values():
+            packages = package_name_mapper.get(dep.name)
+            if packages:
+                packages_list += packages
+                dep.skip = True
+        if packages_list:
+            command = "sudo {package_installer} install {packages_list}".format(
+                package_installer = package_installer,
+                packages_list = " ".join(packages_list)
+            )
+            print(command)
+            subprocess.check_call(command, shell=True)
+        else:
+            print("SKIP, No package to install.")
+
+        with open(autoskip_file, 'w') as f: pass
 
 ################################################################################
 ##### PROJECT
@@ -286,6 +353,7 @@ class Dependency(metaclass=_MetaDependency):
         self.buildEnv = buildEnv
         self.source = self.Source(self)
         self.builder = self.Builder(self)
+        self.skip = False
 
     @property
     def full_name(self):
@@ -781,14 +849,14 @@ class Builder:
         yield targetName
 
     def prepare_sources(self):
-        sources = (dep.source for dep in self.targets.values())
+        sources = (dep.source for dep in self.targets.values() if not dep.skip)
         sources = remove_duplicates(sources, lambda s:s.__class__)
         for source in sources:
             print("prepare sources {} :".format(source.name))
             source.prepare()
 
     def build(self):
-        builders = (dep.builder for dep in self.targets.values())
+        builders = (dep.builder for dep in self.targets.values() if not dep.skip)
         for builder in builders:
             print("build {} :".format(builder.name))
             builder.build()
