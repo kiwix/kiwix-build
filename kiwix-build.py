@@ -114,6 +114,17 @@ PACKAGE_NAME_MAPPERS = {
         'uuid' : ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
     },
+    'debian_native_dyn' : {
+        'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
+        'uuid' : ['uuid-dev'],
+        'ctpp2': ['libctpp2-dev'],
+        'libmicrohttpd' : ['libmicrohttpd-dev']
+    },
+    'debian_native_static' : {
+        'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
+        'uuid' : ['uuid-dev'],
+        'ctpp2': ['libctpp2-dev'],
+    },
 }
 
 class Defaultdict(defaultdict):
