@@ -320,7 +320,17 @@ class BuildEnv:
             host = self.distname,
             target = self.build_target,
             build_type = 'static' if self.options.build_static else 'dyn')
-        package_name_mapper = PACKAGE_NAME_MAPPERS[mapper_name]
+        try:
+            package_name_mapper = PACKAGE_NAME_MAPPERS[mapper_name]
+        except KeyError:
+            print("SKIP : We don't know which packages we must install to compile"
+                  " a {target} {build_type} version on a {host} host.".format(
+                      target = self.build_target,
+                      build_type = 'static' if self.options.build_static else 'dyn',
+                      host = self.distname
+                 ))
+            return
+
         packages_list = package_name_mapper.get('COMMON', [])
         for dep in self.targetsDict.values():
             packages = package_name_mapper.get(dep.name)
