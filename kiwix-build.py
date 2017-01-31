@@ -23,12 +23,15 @@ class Defaultdict(defaultdict):
     def __getattr__(self, name):
         return self[name]
 
-def remove_duplicates(iterable):
+def remove_duplicates(iterable, key_function=None):
     seen = set()
+    if key_function is None:
+        key_function = lambda e:e
     for elem in iterable:
-        if elem in seen:
+        key = key_function(elem)
+        if key in seen:
             continue
-        seen.add(elem)
+        seen.add(key)
         yield elem
 
 def get_sha256(path):
@@ -778,7 +781,8 @@ class Builder:
         yield targetName
 
     def prepare_sources(self):
-        sources = remove_duplicates(dep.source for dep in self.targets.values())
+        sources = (dep.source for dep in self.targets.values())
+        sources = remove_duplicates(sources, lambda s:s.__class__)
         for source in sources:
             print("prepare sources {} :".format(source.name))
             source.prepare()
