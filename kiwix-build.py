@@ -302,10 +302,6 @@ class BuildEnv:
 
     def install_packages(self):
         autoskip_file = pj(self.build_dir, ".install_packages_ok")
-        if os.path.exists(autoskip_file):
-            print("SKIP")
-            return
-
         if self.distname in ('fedora', 'redhat', 'centos'):
             package_installer = 'dnf'
         elif self.distname in ('debian', 'ubuntu'):
@@ -321,6 +317,9 @@ class BuildEnv:
             if packages:
                 packages_list += packages
                 dep.skip = True
+        if os.path.exists(autoskip_file):
+            print("SKIP")
+            return
         if packages_list:
             command = "sudo {package_installer} install {packages_list}".format(
                 package_installer = package_installer,
