@@ -43,8 +43,18 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON' : ['mingw32-gcc-c++', 'mingw32-zlib-static', 'mingw32-bzip2-static', 'mingw32-win-iconv-static', 'mingw32-winpthreads-static', 'wine'],
         'libmicrohttpd' : None, # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
                                 # gcc cannot found them.
-    }
-    # TODO : Add ubuntu packages
+    },
+    'Ubuntu_native_dyn' : {
+        'COMMON' : ['gcc-5', 'cmake', 'libbz2-dev'],
+        'uuid' : ['uuid-dev'],
+        'ctpp2': ['libctpp2-dev'],
+        'libmicrohttpd' : ['libmicrohttpd-dev']
+    },
+    'Ubuntu_native_static' : {
+        'COMMON' : ['gcc-5', 'cmake', 'libbz2-dev'],
+        'uuid' : ['uuid-dev'],
+        'ctpp2': ['libctpp2-dev'],
+    },
 }
 
 class Defaultdict(defaultdict):
@@ -304,7 +314,7 @@ class BuildEnv:
         autoskip_file = pj(self.build_dir, ".install_packages_ok")
         if self.distname in ('fedora', 'redhat', 'centos'):
             package_installer = 'dnf'
-        elif self.distname in ('debian', 'ubuntu'):
+        elif self.distname in ('debian', 'Ubuntu'):
             package_installer = 'apt-get'
         mapper_name = "{host}_{target}_{build_type}".format(
             host = self.distname,
