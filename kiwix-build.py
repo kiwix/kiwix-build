@@ -55,30 +55,36 @@ PACKAGE_NAME_MAPPERS = {
         'ctpp2' : None,
         'pugixml' : None, # ['pugixml-devel'] but package doesn't provide pkg-config file
         'libmicrohttpd' : ['libmicrohttpd-devel'],
+        'zlib' : ['zlib-devel'],
         'icu4c': None,
         'zimlib': None,
     },
     'fedora_native_static' : {
         'COMMON' : ['gcc-c++', 'cmake', 'automake', 'glibc-static', 'libstdc++-static'],
+        'zlib' : ['zlib-devel', 'zlib-static']
         # Either there is no packages, or no static or too old
     },
     'fedora_win32_dyn' : {
-        'COMMON' : ['mingw32-gcc-c++', 'mingw32-zlib', 'mingw32-bzip2', 'mingw32-win-iconv', 'mingw32-winpthreads', 'wine'],
+        'COMMON' : ['mingw32-gcc-c++', 'mingw32-bzip2', 'mingw32-win-iconv', 'mingw32-winpthreads', 'wine'],
+        'zlib' : ['mingw32-zlib'],
         'libmicrohttpd' : ['mingw32-libmicrohttpd'],
     },
     'fedora_win32_static' : {
-        'COMMON' : ['mingw32-gcc-c++', 'mingw32-zlib-static', 'mingw32-bzip2-static', 'mingw32-win-iconv-static', 'mingw32-winpthreads-static', 'wine'],
+        'COMMON' : ['mingw32-gcc-c++', 'mingw32-bzip2-static', 'mingw32-win-iconv-static', 'mingw32-winpthreads-static', 'wine'],
+        'zlib' : ['mingw32-zlib-static'],
         'libmicrohttpd' : None, # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
                                 # gcc cannot found them.
     },
     'Ubuntu_native_dyn' : {
         'COMMON' : ['gcc-5', 'cmake', 'libbz2-dev'],
+        'zlib' : ['zlib1g-dev'],
         'uuid' : ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
         'libmicrohttpd' : ['libmicrohttpd-dev']
     },
     'Ubuntu_native_static' : {
         'COMMON' : ['gcc-5', 'cmake', 'libbz2-dev'],
+        'zlib' : ['zlib1g-dev'],
         'uuid' : ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
     },
@@ -688,6 +694,19 @@ class MesonBuilder(Builder):
 # gettext
 # *************************************
 
+class zlib(Dependency):
+    name = 'zlib'
+    version = '1.2.8'
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('zlib-1.2.8.tar.gz',
+                             '36658cb768a54c1d4dec43c3116c27ed893e88b02ecfcb44f2166f9c0b7f2a0d')
+
+    class Builder(CMakeBuilder):
+        @property
+        def configure_option(self):
+            return "-DINSTALL_PKGCONFIG_DIR={}".format(pj(self.buildEnv.install_dir, self.buildEnv.libprefix, 'pkgconfig'))
+
 class UUID(Dependency):
     name = 'uuid'
     version = "1.42"
@@ -722,9 +741,10 @@ class Xapian(Dependency):
 
     @property
     def dependencies(self):
+        deps = ['zlib']
         if self.buildEnv.build_target == 'win32':
-            return []
-        return ['UUID']
+            return deps
+        return deps + ['UUID']
 
 
 class CTPP2(Dependency):
@@ -840,6 +860,8 @@ class Zimlib(Dependency):
 
 class Kiwixlib(Dependency):
     name = "kiwix-lib"
+    dependencies = ['zlib']
+
     @property
     def dependencies(self):
         if self.buildEnv.build_target == 'win32':
@@ -856,7 +878,7 @@ class Kiwixlib(Dependency):
 
 class KiwixTools(Dependency):
     name = "kiwix-tools"
-    dependencies = ["Kiwixlib", "MicroHttpd"]
+    dependencies = ["Kiwixlib", "MicroHttpd", "zlib"]
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-tools.git"
