@@ -2,11 +2,11 @@ SET(CMAKE_SYSTEM_NAME Windows)
 SET(CMAKE_SYSTEM_PROCESSOR x86)
 
 # specify the cross compiler
-SET(CMAKE_C_COMPILER {which.i686-w64-mingw32-gcc})
-SET(CMAKE_CXX_COMPILER {which.i686-w64-mingw32-g++})
-SET(CMAKE_RC_COMPILER {which.i686-w64-mingw32-windres})
-SET(CMAKE_AR:FILEPATH {which.i686-w64-mingw32-ar})
-SET(CMAKE_RANLIB:FILEPATH {which.i686-w64-mingw32-ranlib})
+SET(CMAKE_C_COMPILER {which:{binaries[c]}})
+SET(CMAKE_CXX_COMPILER {which:{binaries[cpp]}})
+SET(CMAKE_RC_COMPILER {which:{binaries[windres]}})
+SET(CMAKE_AR:FILEPATH {which:{binaries[ar]}})
+SET(CMAKE_RANLIB:FILEPATH {which:{binaries[ranlib]}})
 
 # where is the target environment
 SET(CMAKE_FIND_ROOT_PATH {root_path})

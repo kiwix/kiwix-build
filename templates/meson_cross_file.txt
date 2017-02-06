@@ -1,9 +1,9 @@
 [binaries]
 pkgconfig = 'pkg-config'
-c = '{which.i686-w64-mingw32-gcc}'
-ar = '{which.i686-w64-mingw32-ar}'
-cpp = '{which.i686-w64-mingw32-g++}'
-strip = '{which.i686-w64-mingw32-strip}'
+c = '{which:{binaries[c]}}'
+ar = '{which:{binaries[ar]}}'
+cpp = '{which:{binaries[cpp]}}'
+strip = '{which:{binaries[strip]}}'
 exe_wrapper = 'wine'
 
 [properties]

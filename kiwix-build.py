@@ -27,6 +27,8 @@ CROSS_ENV = {
             'cpp' : 'i686-w64-mingw32-g++',
             'ar' : 'i686-w64-mingw32-ar',
             'strip' : 'i686-w64-mingw32-strip',
+            'windres' : 'i686-w64-mingw32-windres',
+            'ranlib'  : 'i686-w64-mingw32-ranlib',
             'pkgconfig' : 'i686-w64-mingw32-pkg-config',
             'exe_wrapper' : 'wine'
         },
@@ -100,6 +102,9 @@ class Which():
         command = "which {}".format(name)
         output = subprocess.check_output(command, shell=True)
         return output[:-1].decode()
+
+    def __format__(self, format_spec):
+        return getattr(self, format_spec)
 
 def remove_duplicates(iterable, key_function=None):
     seen = set()
@@ -230,7 +235,7 @@ class BuildEnv:
             template = f.read()
         content = template.format(
             which=Which(),
-            root_path=self.cross_env['root_path']
+            **self.cross_env
         )
         with open(crossfile, 'w') as outfile:
             outfile.write(content)
