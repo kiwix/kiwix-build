@@ -846,11 +846,10 @@ class Builder:
 
         _targets = {}
         self.add_targets(targetDef, _targets)
+        dependencies = self.order_dependencies(_targets, targetDef)
+        dependencies = list(remove_duplicates(dependencies))
 
-        dependencies_order = list(remove_duplicates(self.order_dependencies(_targets, targetDef)))
-        dependencies_order.append(targetDef)
-
-        for dep in dependencies_order:
+        for dep in dependencies:
              self.targets[dep] = _targets[dep]
 
     def add_targets(self, targetName, targets):
