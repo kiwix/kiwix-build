@@ -20,7 +20,7 @@ REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 CROSS_ENV = {
-    'win32' : {
+    'fedora_win32' : {
         'root_path' : '/usr/i686-w64-mingw32/sys-root/mingw',
         'binaries' : {
             'c' : 'i686-w64-mingw32-gcc',
@@ -237,7 +237,18 @@ class BuildEnv:
         return crossfile
 
     def setup_win32(self):
-        self.cross_env = CROSS_ENV['win32']
+        cross_name = "{host}_{target}".format(
+            host = self.distname,
+            target = self.build_target)
+        try:
+            self.cross_env = CROSS_ENV[cross_name]
+        except KeyError:
+            sys.exit("ERROR : We don't know how to set env to compile"
+                     " a {target} version on a {host} host.".format(
+                        target = self.build_target,
+                        host = self.distname
+                    ))
+
         self.wrapper = self._gen_crossfile('bash_wrapper.sh')
         current_permissions = stat.S_IMODE(os.lstat(self.wrapper).st_mode)
         os.chmod(self.wrapper, current_permissions | stat.S_IXUSR)
