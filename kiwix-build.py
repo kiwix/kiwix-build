@@ -519,7 +519,7 @@ class Builder:
 
 
 class MakeBuilder(Builder):
-    configure_option = ""
+    configure_option = static_configure_option = dynamic_configure_option = ""
     make_option = ""
     install_option = ""
     configure_script = "configure"
@@ -529,10 +529,14 @@ class MakeBuilder(Builder):
 
     def _configure(self, context):
         context.try_skip(self.build_path)
+        configure_option = "{} {} {}".format(
+            self.configure_option,
+            self.static_configure_option if self.buildEnv.build_static else self.dynamic_configure_option,
+            self.buildEnv.configure_option)
         command = "{configure_script} {configure_option} --prefix {install_dir} --libdir {libdir}"
         command = command.format(
             configure_script = pj(self.source_path, self.configure_script),
-            configure_option = "{} {}".format(self.configure_option, self.buildEnv.configure_option),
+            configure_option = configure_option,
             install_dir = self.buildEnv.install_dir,
             libdir = pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
         )
@@ -674,8 +678,9 @@ class Xapian(Dependency):
         patches = ["xapian_pkgconfig.patch"]
 
     class Builder(MakeBuilder):
-        configure_option = ("--enable-shared --enable-static --disable-sse "
-                            "--disable-backend-inmemory --disable-documentation")
+        configure_option = "--disable-sse --disable-backend-inmemory --disable-documentation"
+        dynamic_configure_option = "--enable-shared --disable-static"
+        static_configure_option = "--enable-static --disable-shared"
         configure_env = {'_format_LDFLAGS' : "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
                          '_format_CXXFLAGS' : "-I{buildEnv.install_dir}/include"}
 
@@ -726,7 +731,9 @@ class MicroHttpd(Dependency):
                              'http://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.46.tar.gz')
 
     class Builder(MakeBuilder):
-        configure_option = "--enable-shared --enable-static --disable-https --without-libgcrypt --without-libcurl"
+        configure_option = "--disable-https --without-libgcrypt --without-libcurl"
+        dynamic_configure_option = "--enable-shared --disable-static"
+        static_configure_option = "--enable-static --disable-shared"
 
 
 class Icu(Dependency):
@@ -755,15 +762,9 @@ class Icu(Dependency):
 
     class Builder(MakeBuilder):
         subsource_dir = "source"
-
-        @property
-        def configure_option(self):
-            default_configure_option = "--disable-samples --disable-tests --disable-extras --disable-dyload"
-            if self.buildEnv.build_static:
-                default_configure_option += " --enable-static --disable-shared"
-            else:
-                default_configure_option += " --enable-shared --enable-shared"
-            return default_configure_option
+        configure_option = "--disable-samples --disable-tests --disable-extras --disable-dyload"
+        dynamic_configure_option = "--enable-shared --disable-static"
+        static_configure_option = "--enable-static --disable-shared"
 
 
 class Icu_native(Icu):
