@@ -29,7 +29,31 @@ CROSS_ENV = {
             'strip' : 'i686-w64-mingw32-strip',
             'windres' : 'i686-w64-mingw32-windres',
             'ranlib'  : 'i686-w64-mingw32-ranlib',
-            'pkgconfig' : 'i686-w64-mingw32-pkg-config',
+            'exe_wrapper' : 'wine'
+        },
+        'properties' : {
+            'c_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4'],
+            'cpp_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4']
+        },
+        'host_machine' : {
+            'system' : 'windows',
+            'cpu_family' : 'x86',
+            'cpu' : 'i686',
+            'endian' : 'little'
+        },
+        'env': {
+            '_format_PKG_CONFIG_LIBDIR' : '{root_path}/lib/pkgconfig'
+        }
+    },
+    'Ubuntu_win32' : {
+        'root_path' : '/usr/i686-w64-mingw32/',
+        'binaries' : {
+            'c' : 'i686-w64-mingw32-gcc',
+            'cpp' : 'i686-w64-mingw32-g++',
+            'ar' : 'i686-w64-mingw32-ar',
+            'strip' : 'i686-w64-mingw32-strip',
+            'windres' : 'i686-w64-mingw32-windres',
+            'ranlib'  : 'i686-w64-mingw32-ranlib',
             'exe_wrapper' : 'wine'
         },
         'properties' : {
