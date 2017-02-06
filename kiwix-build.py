@@ -284,17 +284,36 @@ class BuildEnv:
             if retcode == 0:
                 return n
 
-    def run_command(self, command, cwd, context, env=None, input=None, allow_wrapper=True):
-        os.makedirs(cwd, exist_ok=True)
-        if allow_wrapper and self.wrapper:
-            command = "{} {}".format(self.wrapper, command)
+    def _set_env(self, env):
         if env is None:
-            env = dict(os.environ)
+            env = Defaultdict(str, os.environ)
         for k, v in self.cross_env.get('env', {}).items():
             if k.startswith('_format_'):
                 v = v.format(**self.cross_env)
                 k = k[8:]
             env[k] = v
+        pkgconfig_path = pj(self.install_dir, self.libprefix, 'pkgconfig')
+        env['PKG_CONFIG_PATH'] = (env['PKG_CONFIG_PATH'] + ':' + pkgconfig_path
+                                  if env['PKG_CONFIG_PATH']
+                                  else pkgconfig_path
+                                 )
+        env['PATH'] = ':'.join([pj(self.install_dir, 'bin'), env['PATH']])
+        ld_library_path = ':'.join([
+            pj(self.install_dir, 'lib'),
+            pj(self.install_dir, 'lib64')
+        ])
+        env['LD_LIBRARY_PATH'] = (env['LD_LIBRARY_PATH'] + ':' + ld_library_path
+                                  if env['LD_LIBRARY_PATH']
+                                  else ld_library_path
+                                 )
+        env['LDFLAGS'] = '-L'+pj(self.install_dir, 'lib')
+        return env
+
+    def run_command(self, command, cwd, context, env=None, input=None, allow_wrapper=True):
+        os.makedirs(cwd, exist_ok=True)
+        if allow_wrapper and self.wrapper:
+            command = "{} {}".format(self.wrapper, command)
+        env = self._set_env(env)
         log = None
         try:
             if not self.options.verbose:
@@ -617,21 +636,12 @@ class CMakeBuilder(MakeBuilder):
 
 class MesonBuilder(Builder):
     configure_option = ""
-    def _gen_env(self):
-        env = Defaultdict(str, os.environ)
-        env['PKG_CONFIG_PATH'] = (env['PKG_CONFIG_PATH'] + ':' + pj(self.buildEnv.install_dir, self.buildEnv.libprefix, 'pkgconfig')
-                                  if env['PKG_CONFIG_PATH']
-                                  else pj(self.buildEnv.install_dir, self.buildEnv.libprefix, 'pkgconfig')
-                                 )
-        env['PATH'] = ':'.join([pj(self.buildEnv.install_dir, 'bin'), env['PATH']])
-        return env
 
     def _configure(self, context):
         context.try_skip(self.build_path)
         if os.path.exists(self.build_path):
             shutil.rmtree(self.build_path)
         os.makedirs(self.build_path)
-        env = self._gen_env()
         if self.buildEnv.build_static:
             library_type = 'static'
         else:
@@ -651,15 +661,13 @@ class MesonBuilder(Builder):
             buildEnv=self.buildEnv,
             cross_option = "--cross-file {}".format(self.buildEnv.meson_crossfile) if self.buildEnv.meson_crossfile else ""
         )
-        self.buildEnv.run_command(command, self.source_path, context, env=env, allow_wrapper=False)
+        self.buildEnv.run_command(command, self.source_path, context, allow_wrapper=False)
 
     def _compile(self, context):
-        env = self._gen_env()
         command = "{} -v".format(self.buildEnv.ninja_command)
-        self.buildEnv.run_command(command, self.build_path, context, env=env, allow_wrapper=False)
+        self.buildEnv.run_command(command, self.build_path, context, allow_wrapper=False)
 
     def _install(self, context):
-        env = self._gen_env()
         command = "{} -v install".format(self.buildEnv.ninja_command)
         self.buildEnv.run_command(command, self.build_path, context, allow_wrapper=False)
 
