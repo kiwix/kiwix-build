@@ -19,6 +19,33 @@ REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
+CROSS_ENV = {
+    'win32' : {
+        'root_path' : '/usr/i686-w64-mingw32/sys-root/mingw',
+        'binaries' : {
+            'c' : 'i686-w64-mingw32-gcc',
+            'cpp' : 'i686-w64-mingw32-g++',
+            'ar' : 'i686-w64-mingw32-ar',
+            'strip' : 'i686-w64-mingw32-strip',
+            'pkgconfig' : 'i686-w64-mingw32-pkg-config',
+            'exe_wrapper' : 'wine'
+        },
+        'properties' : {
+            'c_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4'],
+            'cpp_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4']
+        },
+        'host_machine' : {
+            'system' : 'windows',
+            'cpu_family' : 'x86',
+            'cpu' : 'i686',
+            'endian' : 'little'
+        },
+        'env': {
+            '_format_PKG_CONFIG_LIBDIR' : '{root_path}/lib/pkgconfig'
+        }
+    }
+}
+
 
 PACKAGE_NAME_MAPPERS = {
     'fedora_native_dyn': {
@@ -60,6 +87,13 @@ PACKAGE_NAME_MAPPERS = {
 class Defaultdict(defaultdict):
     def __getattr__(self, name):
         return self[name]
+
+
+class Which():
+    def __getattr__(self, name):
+        command = "which {}".format(name)
+        output = subprocess.check_output(command, shell=True)
+        return output[:-1].decode()
 
 def remove_duplicates(iterable, key_function=None):
     seen = set()
@@ -176,57 +210,35 @@ class BuildEnv:
         getattr(self, 'setup_{}'.format(self.build_target))()
 
     def setup_native(self):
+        self.cross_env = {}
         self.wrapper = None
-        self.cmake_command = "cmake"
         self.configure_option = ""
         self.cmake_option = ""
+        self.cmake_crossfile = None
         self.meson_crossfile = None
 
-    def _get_rpm_mingw32(self, value):
-        command = "rpm --eval %{{mingw32_{}}}".format(value)
-        output = subprocess.check_output(command, shell=True)
-        return output[:-1].decode()
-
-    def _gen_meson_crossfile(self):
-        self.meson_crossfile = pj(self.build_dir, 'cross_file.txt')
-        config = configparser.ConfigParser()
-        config['binaries'] = {
-            'c' : repr(self._get_rpm_mingw32('cc')),
-            'cpp' : repr(self._get_rpm_mingw32('cxx')),
-            'ar' : repr(self._get_rpm_mingw32('ar')),
-            'strip' : repr(self._get_rpm_mingw32('strip')),
-            'pkgconfig' : repr(self._get_rpm_mingw32('pkg_config')),
-            'exe_wrapper' : repr('wine') # A command used to run generated executables.
-        }
-        config['properties'] = {
-            'c_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4'],
-            'cpp_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4']
-        }
-        config['host_machine'] = {
-            'system' : repr('windows'),
-            'cpu_family' : repr('x86'),
-            'cpu' : repr('i586'),
-            'endian' : repr('little')
-        }
-        with open(self.meson_crossfile, 'w') as configfile:
-            config.write(configfile)
+    def _gen_crossfile(self, name):
+        crossfile = pj(self.build_dir, name)
+        template_file = pj(SCRIPT_DIR, 'templates', name)
+        with open(template_file, 'r') as f:
+            template = f.read()
+        content = template.format(
+            which=Which(),
+            root_path=self.cross_env['root_path']
+        )
+        with open(crossfile, 'w') as outfile:
+            outfile.write(content)
+        return crossfile
 
     def setup_win32(self):
-        command = "rpm --eval %{mingw32_env}"
-        self.wrapper = pj(self.build_dir, 'mingw32-wrapper.sh')
-        with open(self.wrapper, 'w') as output:
-            output.write("#!/usr/bin/sh\n\n")
-            output.flush()
-            output.write(self._get_rpm_mingw32('env'))
-            output.write('\n\nexec "$@"\n')
-            output.flush()
+        self.cross_env = CROSS_ENV['win32']
+        self.wrapper = self._gen_crossfile('bash_wrapper.sh')
         current_permissions = stat.S_IMODE(os.lstat(self.wrapper).st_mode)
         os.chmod(self.wrapper, current_permissions | stat.S_IXUSR)
         self.configure_option = "--host=i686-w64-mingw32"
-        self.cmake_command = "mingw32-cmake"
         self.cmake_option = ""
-
-        self._gen_meson_crossfile()
+        self.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
+        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
     def __getattr__(self, name):
         return getattr(self.options, name)
@@ -278,6 +290,11 @@ class BuildEnv:
             command = "{} {}".format(self.wrapper, command)
         if env is None:
             env = dict(os.environ)
+        for k, v in self.cross_env.get('env', {}).items():
+            if k.startswith('_format_'):
+                v = v.format(**self.cross_env)
+                k = k[8:]
+            env[k] = v
         log = None
         try:
             if not self.options.verbose:
@@ -572,13 +589,18 @@ class MakeBuilder(Builder):
 class CMakeBuilder(MakeBuilder):
     def _configure(self, context):
         context.try_skip(self.build_path)
-        command = "{command} {configure_option} -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_INSTALL_PREFIX={install_dir} -DCMAKE_INSTALL_LIBDIR={libdir} {source_path}"
+        command = ("cmake {configure_option}"
+                   " -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+                   " -DCMAKE_INSTALL_PREFIX={install_dir}"
+                   " -DCMAKE_INSTALL_LIBDIR={libdir}"
+                   " {source_path}"
+                   " {cross_option}")
         command = command.format(
-            command = self.buildEnv.cmake_command,
             configure_option = "{} {}".format(self.buildEnv.cmake_option, self.configure_option),
             install_dir = self.buildEnv.install_dir,
             libdir = self.buildEnv.libprefix,
-            source_path = self.source_path
+            source_path = self.source_path,
+            cross_option = "-DCMAKE_TOOLCHAIN_FILE={}".format(self.buildEnv.cmake_crossfile) if self.buildEnv.cmake_crossfile else ""
         )
         env = Defaultdict(str, os.environ)
         if self.buildEnv.build_static:
@@ -615,7 +637,13 @@ class MesonBuilder(Builder):
         else:
             library_type = 'shared'
         configure_option = self.configure_option.format(buildEnv=self.buildEnv)
-        command = "{command} --default-library={library_type} {configure_option} . {build_path} --prefix={buildEnv.install_dir} --libdir={buildEnv.libprefix} {cross_option}".format(
+        command = ("{command} . {build_path}"
+                   " --default-library={library_type}"
+                   " {configure_option}"
+                   " --prefix={buildEnv.install_dir}"
+                   " --libdir={buildEnv.libprefix}"
+                   " {cross_option}")
+        command = command.format(
             command = self.buildEnv.meson_command,
             library_type=library_type,
             configure_option=configure_option,
