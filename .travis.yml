@@ -1,8 +1,17 @@
 language: cpp
 dist: trusty
 sudo: required
+before_install:
+- openssl aes-256-cbc -K $encrypted_eba2f7543984_key -iv $encrypted_eba2f7543984_iv
+  -in travis/travisci_builder_id_key.enc -out travis/travisci_builder_id_key -d
 install: travis/install_extra_deps.sh
 script: travis/compile_all.sh
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: travis/deploy.sh
+  on:
+    condition: ( "$STATIC_BUILD" = "true" ) && ( "$TRAVIS_EVENT_TYPE" = "cron" )
 env:
  - STATIC_BUILD=true BUILD_TARGET=native
  - STATIC_BUILD=true BUILD_TARGET=win32
