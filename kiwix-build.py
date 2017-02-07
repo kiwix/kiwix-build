@@ -254,6 +254,8 @@ class BuildEnv:
     def setup_build_target(self, build_target):
         self.build_target = build_target
         self.target_env = self._targets_env[self.build_target]
+
+    def finalize_setup(self):
         getattr(self, 'setup_{}'.format(self.build_target))()
 
     def setup_native(self):
@@ -1002,6 +1004,9 @@ class Builder:
         try:
             print("[INSTALL PACKAGES]")
             self.buildEnv.install_packages()
+            self.buildEnv.finalize_setup()
+            if self.nativeBuildEnv != self.buildEnv:
+                self.nativeBuildEnv.finalize_setup()
             print("[PREPARE]")
             self.prepare_sources()
             print("[BUILD]")
