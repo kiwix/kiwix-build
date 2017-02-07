@@ -4,7 +4,6 @@ c = '{which:{binaries[c]}}'
 ar = '{which:{binaries[ar]}}'
 cpp = '{which:{binaries[cpp]}}'
 strip = '{which:{binaries[strip]}}'
-exe_wrapper = 'wine'
 
 [properties]
 c_link_args = ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4']
