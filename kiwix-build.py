@@ -45,7 +45,7 @@ CROSS_ENV = {
             '_format_PKG_CONFIG_LIBDIR' : '{root_path}/lib/pkgconfig'
         }
     },
-    'Ubuntu_win32' : {
+    'debian_win32' : {
         'root_path' : '/usr/i686-w64-mingw32/',
         'binaries' : {
             'c' : 'i686-w64-mingw32-gcc',
@@ -100,19 +100,6 @@ PACKAGE_NAME_MAPPERS = {
         'zlib' : ['mingw32-zlib-static'],
         'libmicrohttpd' : None, # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
                                 # gcc cannot found them.
-    },
-    'Ubuntu_native_dyn' : {
-        'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
-        'zlib' : ['zlib1g-dev'],
-        'uuid' : ['uuid-dev'],
-        'ctpp2': ['libctpp2-dev'],
-        'libmicrohttpd' : ['libmicrohttpd-dev']
-    },
-    'Ubuntu_native_static' : {
-        'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
-        'zlib' : ['zlib1g-dev'],
-        'uuid' : ['uuid-dev'],
-        'ctpp2': ['libctpp2-dev'],
     },
     'debian_native_dyn' : {
         'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
@@ -253,6 +240,8 @@ class BuildEnv:
         if _platform != 'Linux':
             sys.exit('ERROR: kiwix-build is intented to run only on Linux platform')
         self.distname, self.distversion, _ = platform.dist()
+        if self.distname == 'Ubuntu':
+            self.distname = 'debian'
 
     def setup_build_target(self, build_target):
         self.build_target = build_target
