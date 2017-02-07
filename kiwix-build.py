@@ -239,7 +239,11 @@ class BuildEnv:
         self.detect_platform()
         self.setup_build_target(options.build_target)
         self.ninja_command = self._detect_ninja()
+        if not self.ninja_command:
+            sys.exit("ERROR: ninja command not found")
         self.meson_command = self._detect_meson()
+        if not self.meson_command:
+            sys.exit("ERROR: meson command not fount")
         self.options = options
         self.libprefix = options.libprefix or self._detect_libdir()
         self.targetsDict = targetsDict
