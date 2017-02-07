@@ -1,0 +1,10 @@
+language: cpp
+dist: trusty
+sudo: required
+install: travis/install_extra_deps.sh
+script: travis/compile_all.sh
+env:
+ - STATIC_BUILD=true BUILD_TARGET=native
+ - STATIC_BUILD=true BUILD_TARGET=win32
+ - STATIC_BUILD=false BUILD_TARGET=native
+ - STATIC_BUILD=false BUILD_TARGET=win32

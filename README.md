@@ -1,3 +1,6 @@
+Build status : [![Build Status](https://travis-ci.org/kiwix/kiwix-build.svg?branch=master)](https://travis-ci.org/kiwix/kiwix-build)
+
+
 Kiwix is an offline reader for Web content. It's especially thought to
 make Wikipedia available offline.  This is done by reading the content
 of the project stored in a file format ZIM, a high compressed open
