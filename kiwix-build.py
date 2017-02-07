@@ -102,14 +102,14 @@ PACKAGE_NAME_MAPPERS = {
                                 # gcc cannot found them.
     },
     'Ubuntu_native_dyn' : {
-        'COMMON' : ['gcc-5', 'cmake', 'libbz2-dev'],
+        'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
         'zlib' : ['zlib1g-dev'],
         'uuid' : ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
         'libmicrohttpd' : ['libmicrohttpd-dev']
     },
     'Ubuntu_native_static' : {
-        'COMMON' : ['gcc-5', 'cmake', 'libbz2-dev'],
+        'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
         'zlib' : ['zlib1g-dev'],
         'uuid' : ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
