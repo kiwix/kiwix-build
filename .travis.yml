@@ -8,3 +8,9 @@ env:
  - STATIC_BUILD=true BUILD_TARGET=win32
  - STATIC_BUILD=false BUILD_TARGET=native
  - STATIC_BUILD=false BUILD_TARGET=win32
+notifications:
+  irc:
+    channels:
+     - "chat.freenode.net#kiwix"
+    on_success: change
+    on_failure: always
