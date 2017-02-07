@@ -367,6 +367,7 @@ class BuildEnv:
                                   if env['LD_LIBRARY_PATH']
                                   else ld_library_path
                                  )
+        env['CPPFLAGS'] = '-I'+pj(self.install_dir, 'include')
         env['LDFLAGS'] = '-L'+pj(self.install_dir, 'lib')
         return env
 
