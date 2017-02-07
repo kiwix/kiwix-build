@@ -103,12 +103,14 @@ PACKAGE_NAME_MAPPERS = {
     },
     'debian_native_dyn' : {
         'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
+        'zlib' : ['zlib1g-dev'],
         'uuid' : ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
         'libmicrohttpd' : ['libmicrohttpd-dev']
     },
     'debian_native_static' : {
         'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
+        'zlib' : ['zlib1g-dev'],
         'uuid' : ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
     },
