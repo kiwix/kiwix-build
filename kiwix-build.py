@@ -810,7 +810,8 @@ class CTPP2(Dependency):
                "ctpp2_fix-static-libname.patch",
                "ctpp2_mingw32.patch",
                "ctpp2_dll_export_VMExecutable.patch",
-               "ctpp2_win_install_lib_in_lib_dir.patch"]
+               "ctpp2_win_install_lib_in_lib_dir.patch",
+               "ctpp2_iconv_support.patch"]
 
     class Builder(CMakeBuilder):
         configure_option = "-DMD5_SUPPORT=OFF"
