@@ -23,3 +23,5 @@ notifications:
      - "chat.freenode.net#kiwix"
     on_success: change
     on_failure: always
+addons:
+  ssh_known_hosts: download.kiwix.org

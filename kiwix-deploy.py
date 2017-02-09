@@ -53,7 +53,7 @@ class Deployer:
     def deploy(self, *files):
         if not files:
             return
-        command = "scp -v -p -i -o StrictHostKeyChecking=no {id_file} {files_list} {host_addr}".format(
+        command = "scp -v -p -i {id_file} {files_list} {host_addr}".format(
             id_file=self.options.ssh_private_key,
             files_list=' '.join("'{}'".format(f) for f in files),
             host_addr="{}:{}".format(self.options.server, self.options.base_path)
