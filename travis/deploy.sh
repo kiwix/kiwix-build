@@ -2,7 +2,7 @@
 
 SSH_KEY=travis/travisci_builder_id_key
 
-chmod 644 ${SSH_KEY}
+chmod 600 ${SSH_KEY}
 
 
 BASE_DIR="BUILD_${BUILD_TARGET}_static/INSTALL"
