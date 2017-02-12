@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+SSH_KEY=travis/travisci_builder_id_key
+
+chmod 644 ${SSH_KEY}
+
+
 BASE_DIR="BUILD_${BUILD_TARGET}_static/INSTALL"
 if [ "${BUILD_TARGET}" = "win32" ]; then
     ARCHIVE_OPTION="--zip"
@@ -8,6 +13,6 @@ else
 fi
 ./kiwix-deploy.py ${BASE_DIR} ${ARCHIVE_OPTION} \
     --deploy \
-    --ssh_private_key=travis/travisci_builder_id_key \
+    --ssh_private_key=${SSH_KEY} \
     --server=nightlybot@download.kiwix.org \
     --base_path=/var/www/download.kiwix.org/nightly
