@@ -76,7 +76,7 @@ CROSS_ENV = {
 
 PACKAGE_NAME_MAPPERS = {
     'fedora_native_dyn': {
-        'COMMON' : ['gcc-c++', 'cmake', 'automake'],
+        'COMMON' : ['gcc-c++', 'cmake', 'automake', 'ccache'],
         'uuid': ['libuuid-devel'],
         'xapian-core' : None, # Not the right version on fedora 25
         'ctpp2' : None,
@@ -87,39 +87,39 @@ PACKAGE_NAME_MAPPERS = {
         'zimlib': None,
     },
     'fedora_native_static' : {
-        'COMMON' : ['gcc-c++', 'cmake', 'automake', 'glibc-static', 'libstdc++-static'],
+        'COMMON' : ['gcc-c++', 'cmake', 'automake', 'glibc-static', 'libstdc++-static', 'ccache'],
         'zlib' : ['zlib-devel', 'zlib-static']
         # Either there is no packages, or no static or too old
     },
     'fedora_win32_dyn' : {
-        'COMMON' : ['mingw32-gcc-c++', 'mingw32-bzip2', 'mingw32-win-iconv', 'mingw32-winpthreads', 'wine'],
+        'COMMON' : ['mingw32-gcc-c++', 'mingw32-bzip2', 'mingw32-win-iconv', 'mingw32-winpthreads', 'wine', 'ccache'],
         'zlib' : ['mingw32-zlib'],
         'libmicrohttpd' : ['mingw32-libmicrohttpd'],
     },
     'fedora_win32_static' : {
-        'COMMON' : ['mingw32-gcc-c++', 'mingw32-bzip2-static', 'mingw32-win-iconv-static', 'mingw32-winpthreads-static', 'wine'],
+        'COMMON' : ['mingw32-gcc-c++', 'mingw32-bzip2-static', 'mingw32-win-iconv-static', 'mingw32-winpthreads-static', 'wine', 'ccache'],
         'zlib' : ['mingw32-zlib-static'],
         'libmicrohttpd' : None, # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
                                 # gcc cannot found them.
     },
     'debian_native_dyn' : {
-        'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
+        'COMMON' : ['gcc', 'cmake', 'libbz2-dev', 'ccache'],
         'zlib' : ['zlib1g-dev'],
         'uuid' : ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
-        'libmicrohttpd' : ['libmicrohttpd-dev']
+        'libmicrohttpd' : ['libmicrohttpd-dev', 'ccache']
     },
     'debian_native_static' : {
-        'COMMON' : ['gcc', 'cmake', 'libbz2-dev'],
+        'COMMON' : ['gcc', 'cmake', 'libbz2-dev', 'ccache'],
         'zlib' : ['zlib1g-dev'],
         'uuid' : ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
     },
     'debian_win32_dyn' : {
-        'COMMON' : ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools']
+        'COMMON' : ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools', 'ccache']
     },
     'debian_win32_static' : {
-        'COMMON' : ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools']
+        'COMMON' : ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools', 'ccache']
     },
 }
 
