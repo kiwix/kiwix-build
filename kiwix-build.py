@@ -767,9 +767,10 @@ class UUID(Dependency):
     version = "1.42"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('e2fsprogs-1.42.tar.gz',
-                             '55b46db0cec3e2eb0e5de14494a88b01ff6c0500edf8ca8927cad6da7b5e4a46')
-        extract_dir = 'e2fsprogs-1.42'
+        archive = Remotefile('e2fsprogs-1.43.4.tar.gz',
+                             '1644db4fc58300c363ba1ab688cf9ca1e46157323aee1029f8255889be4bc856',
+                             'https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.43.4/e2fsprogs-1.43.4.tar.gz')
+        extract_dir = 'e2fsprogs-1.43.4'
 
     class Builder(MakeBuilder):
         configure_option = "--enable-libuuid"
