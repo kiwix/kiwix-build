@@ -358,7 +358,14 @@ class BuildEnv:
                                   if env['PKG_CONFIG_PATH']
                                   else pkgconfig_path
                                  )
-        env['PATH'] = ':'.join([pj(self.install_dir, 'bin'), env['PATH']])
+        # Add ccache path
+        for p in ('/usr/lib/ccache', '/usr/lib64/ccache'):
+            if os.path.isdir(p):
+                ccache_path=[p]
+                break
+        else:
+            ccache_path = []
+        env['PATH'] = ':'.join([pj(self.install_dir, 'bin')] + ccache_path + [env['PATH']])
         ld_library_path = ':'.join([
             pj(self.install_dir, 'lib'),
             pj(self.install_dir, 'lib64')
