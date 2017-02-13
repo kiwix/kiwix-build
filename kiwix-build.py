@@ -252,7 +252,8 @@ class BuildEnv:
                   'Tests, bug reports and patches are welcomed.')
         if _platform == 'Linux':
             self.distname, _, _ = platform.linux_distribution()
-            if self.distname == 'Ubuntu':
+            self.distname = self.distname.lower()
+            if self.distname == 'ubuntu':
                 self.distname = 'debian'
 
     def finalize_setup(self):
