@@ -21,6 +21,8 @@ FILES_TO_UPLOAD = [
 class Archiver:
     def __init__(self, options):
         self.options = options
+        self.working_directory = "nightly_{:%Y-%m-%d}".format(datetime.date.today())
+        os.makedirs(self.working_directory, exist_ok=True)
         self.archive_basename = "kiwix-tools.{:%Y-%m-%d}".format(datetime.date.today())
         self.files_to_upload = list(self._gen_file_list())
 
@@ -33,6 +35,7 @@ class Archiver:
 
     def build_tar(self):
         archive_name = "{}.tar.gz".format(self.archive_basename)
+        archive_name = pj(self.working_directory, archive_name)
         with tarfile.open(archive_name, "w:gz") as archive:
             for filename, arcname in self.files_to_upload:
                 archive.add(filename, arcname=arcname)
@@ -40,6 +43,7 @@ class Archiver:
 
     def build_zip(self):
         archive_name = "{}.zip".format(self.archive_basename)
+        archive_name = pj(self.working_directory, archive_name)
         with zipfile.ZipFile(archive_name, "w") as archive:
             for filename, arcname in self.files_to_upload:
                 archive.write(filename, arcname)
@@ -50,12 +54,12 @@ class Deployer:
     def __init__(self, options):
         self.options = options
 
-    def deploy(self, *files):
-        if not files:
+    def deploy(self, directory):
+        if not os.path.isdir(directory):
             return
-        command = "scp -v -p -i {id_file} {files_list} {host_addr}".format(
+        command = "scp -v -r -p -i {id_file} {directory} {host_addr}".format(
             id_file=self.options.ssh_private_key,
-            files_list=' '.join("'{}'".format(f) for f in files),
+            directory=directory,
             host_addr="{}:{}".format(self.options.server, self.options.base_path)
         )
         return subprocess.check_call(command, shell=True)
@@ -91,4 +95,4 @@ if __name__ == "__main__":
 
     if options.deploy:
        deployer = Deployer(options)
-       deployer.deploy(*archive_list)
+       deployer.deploy(archiver.working_directory)
