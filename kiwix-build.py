@@ -211,11 +211,6 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
 class BuildEnv:
     build_targets = ['native', 'win32']
 
-    _targets_env = {
-        'native' : {},
-        'win32'  : {'wrapper': 'mingw32-env'}
-    }
-
     def __init__(self, options, targetsDict):
         self.source_dir = pj(options.working_dir, "SOURCE")
         build_dir = "BUILD_{target}_{libmod}".format(
@@ -232,7 +227,6 @@ class BuildEnv:
         os.makedirs(self.log_dir, exist_ok=True)
         os.makedirs(self.install_dir, exist_ok=True)
         self.detect_platform()
-        self.setup_build_target(options.build_target)
         self.ninja_command = self._detect_ninja()
         if not self.ninja_command:
             sys.exit("ERROR: ninja command not found")
@@ -250,10 +244,6 @@ class BuildEnv:
         self.distname, self.distversion, _ = platform.dist()
         if self.distname == 'Ubuntu':
             self.distname = 'debian'
-
-    def setup_build_target(self, build_target):
-        self.build_target = build_target
-        self.target_env = self._targets_env[self.build_target]
 
     def finalize_setup(self):
         getattr(self, 'setup_{}'.format(self.build_target))()
@@ -957,7 +947,7 @@ class Builder:
         self.buildEnv = buildEnv = BuildEnv(options, self.targets)
         if buildEnv.build_target != 'native':
             self.nativeBuildEnv = BuildEnv(options, self.targets)
-            self.nativeBuildEnv.setup_build_target('native')
+            self.nativeBuildEnv.build_target = 'native'
         else:
             self.nativeBuildEnv = buildEnv
 
