@@ -764,7 +764,7 @@ class zlib(Dependency):
 
 class UUID(Dependency):
     name = 'uuid'
-    version = "1.42"
+    version = "1.43.4"
 
     class Source(ReleaseDownload):
         archive = Remotefile('e2fsprogs-1.43.4.tar.gz',
