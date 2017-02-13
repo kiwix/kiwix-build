@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 orig_dir=$(pwd)
 
 sudo apt-get update -qq

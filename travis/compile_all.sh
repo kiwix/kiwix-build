@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 OPTION=""
 if [ "${STATIC_BUILD}" = "true" ]; then
     OPTION="--build-static"

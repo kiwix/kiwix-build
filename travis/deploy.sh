@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 SSH_KEY=travis/travisci_builder_id_key
 
 chmod 600 ${SSH_KEY}

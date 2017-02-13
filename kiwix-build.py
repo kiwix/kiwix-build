@@ -245,7 +245,7 @@ class BuildEnv:
                   'It should probably not work, but well, you still can have a try.')
             cont = input('Do you want to continue ? [y/N]')
             if cont.lower() != 'y':
-                sys.exit(0, 'Exiting...')
+                sys.exit(0)
         if _platform == 'Darwin':
             print('WARNING: kiwix-build has not been tested on MacOS platfrom.\n'
                   'Tests, bug reports and patches are welcomed.')
@@ -1011,7 +1011,7 @@ class Builder:
             print("[BUILD]")
             self.build()
         except StopBuild:
-            print("Stopping build due to errors")
+            sys.exit("Stopping build due to errors")
 
 def parse_args():
     parser = argparse.ArgumentParser()
