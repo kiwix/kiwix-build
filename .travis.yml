@@ -4,6 +4,7 @@ sudo: required
 before_install:
 - openssl aes-256-cbc -K $encrypted_eba2f7543984_key -iv $encrypted_eba2f7543984_iv
   -in travis/travisci_builder_id_key.enc -out travis/travisci_builder_id_key -d
+cache: ccache
 install: travis/install_extra_deps.sh
 script: travis/compile_all.sh
 deploy:
