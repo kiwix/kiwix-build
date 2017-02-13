@@ -239,11 +239,20 @@ class BuildEnv:
 
     def detect_platform(self):
         _platform = platform.system()
-        if _platform != 'Linux':
-            sys.exit('ERROR: kiwix-build is intented to run only on Linux platform')
-        self.distname, self.distversion, _ = platform.dist()
-        if self.distname == 'Ubuntu':
-            self.distname = 'debian'
+        self.distname = _platform
+        if _platform == 'Windows':
+            print('ERROR: kiwix-build is not intented to run on Windows platform.\n'
+                  'It should probably not work, but well, you still can have a try.')
+            cont = input('Do you want to continue ? [y/N]')
+            if cont.lower() != 'y':
+                sys.exit(0, 'Exiting...')
+        if _platform == 'Darwin':
+            print('WARNING: kiwix-build has not been tested on MacOS platfrom.\n'
+                  'Tests, bug reports and patches are welcomed.')
+        if _platform == 'Linux':
+            self.distname, _, _ = platform.linux_distribution()
+            if self.distname == 'Ubuntu':
+                self.distname = 'debian'
 
     def finalize_setup(self):
         getattr(self, 'setup_{}'.format(self.build_target))()
