@@ -21,9 +21,9 @@ FILES_TO_UPLOAD = [
 class Archiver:
     def __init__(self, options):
         self.options = options
-        self.working_directory = "nightly_{:%Y-%m-%d}".format(datetime.date.today())
+        self.working_directory = "{:%Y-%m-%d}".format(datetime.date.today())
         os.makedirs(self.working_directory, exist_ok=True)
-        self.archive_basename = "kiwix-tools.{:%Y-%m-%d}".format(datetime.date.today())
+        self.archive_basename = "kiwix-tools_{:%Y-%m-%d}".format(datetime.date.today())
         self.files_to_upload = list(self._gen_file_list())
 
     def _gen_file_list(self):
