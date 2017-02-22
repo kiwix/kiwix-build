@@ -287,10 +287,8 @@ class BuildEnv:
                 bin_dirs += tlc.get_bin_dir()
 
         pkgconfig_path = pj(self.install_dir, self.libprefix, 'pkgconfig')
-        env['PKG_CONFIG_PATH'] = (env['PKG_CONFIG_PATH'] + ':' + pkgconfig_path
-                                  if env['PKG_CONFIG_PATH']
-                                  else pkgconfig_path
-                                  )
+        env['PKG_CONFIG_PATH'] = ':'.join([env['PKG_CONFIG_PATH'], pkgconfig_path])
+
         # Add ccache path
         for p in ('/usr/lib/ccache', '/usr/lib64/ccache'):
             if os.path.isdir(p):
@@ -302,14 +300,12 @@ class BuildEnv:
                                [pj(self.install_dir, 'bin')] +
                                ccache_path +
                                [env['PATH']])
-        ld_library_path = ':'.join([
-            pj(self.install_dir, 'lib'),
-            pj(self.install_dir, 'lib64')
-        ])
-        env['LD_LIBRARY_PATH'] = (env['LD_LIBRARY_PATH'] + ':' + ld_library_path
-                                  if env['LD_LIBRARY_PATH']
-                                  else ld_library_path
-                                  )
+
+        env['LD_LIBRARY_PATH'] = ':'.join([env['LD_LIBRARY_PATH'],
+                                          pj(self.install_dir, 'lib'),
+                                          pj(self.install_dir, 'lib64')
+                                          ])
+
         env['CPPFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['CPPFLAGS']])
         env['LDFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'), env['LDFLAGS']])
         return env
