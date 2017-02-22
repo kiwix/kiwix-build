@@ -44,7 +44,7 @@ class Dependency(metaclass=_MetaDependency):
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
         log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
-        context = Context(name, log)
+        context = Context(name, log, self.force_native_build)
         try:
             ret = function(*args, context=context)
             context._finalise()
@@ -106,9 +106,10 @@ class ReleaseDownload(Source):
 
     def _patch(self, context):
         context.try_skip(self.extract_path)
+        context.force_native_build = True
         for p in self.patches:
             with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input, allow_wrapper=False)
+                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input)
 
     def prepare(self):
         self.command('download', self._download)
@@ -129,12 +130,14 @@ class GitClone(Source):
         return pj(self.buildEnv.source_dir, self.git_dir)
 
     def _git_clone(self, context):
+        context.force_native_build = True
         if os.path.exists(self.git_path):
             raise SkipCommand()
         command = "git clone " + self.git_remote
         self.buildEnv.run_command(command, self.buildEnv.source_dir, context)
 
     def _git_update(self, context):
+        context.force_native_build = True
         self.buildEnv.run_command("git fetch", self.git_path, context)
         self.buildEnv.run_command("git checkout "+self.git_ref, self.git_path, context)
 
@@ -188,7 +191,7 @@ class MakeBuilder(Builder):
         configure_option = "{} {} {}".format(
             self.configure_option,
             self.static_configure_option if self.buildEnv.build_static else self.dynamic_configure_option,
-            self.buildEnv.configure_option)
+            self.buildEnv.configure_option if not self.target.force_native_build else "")
         command = "{configure_script} {configure_option} --prefix {install_dir} --libdir {libdir}"
         command = command.format(
             configure_script=pj(self.source_path, self.configure_script),
@@ -251,7 +254,7 @@ class CMakeBuilder(MakeBuilder):
                     v = v.format(buildEnv=self.buildEnv, env=env)
                     self.configure_env[k[8:]] = v
             env.update(self.configure_env)
-        self.buildEnv.run_command(command, self.build_path, context, env=env, allow_wrapper=False)
+        self.buildEnv.run_command(command, self.build_path, context, env=env, cross_path_only=True)
 
 
 class MesonBuilder(Builder):
@@ -281,12 +284,12 @@ class MesonBuilder(Builder):
             buildEnv=self.buildEnv,
             cross_option="--cross-file {}".format(self.buildEnv.meson_crossfile) if self.buildEnv.meson_crossfile else ""
         )
-        self.buildEnv.run_command(command, self.source_path, context, allow_wrapper=False)
+        self.buildEnv.run_command(command, self.source_path, context, cross_path_only=True)
 
     def _compile(self, context):
         command = "{} -v".format(self.buildEnv.ninja_command)
-        self.buildEnv.run_command(command, self.build_path, context, allow_wrapper=False)
+        self.buildEnv.run_command(command, self.build_path, context)
 
     def _install(self, context):
         command = "{} -v install".format(self.buildEnv.ninja_command)
-        self.buildEnv.run_command(command, self.build_path, context, allow_wrapper=False)
+        self.buildEnv.run_command(command, self.build_path, context)

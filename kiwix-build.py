@@ -23,16 +23,8 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 CROSS_ENV = {
     'fedora_win32': {
+        'toolchain_names': ['mingw32_toolchain'],
         'root_path': '/usr/i686-w64-mingw32/sys-root/mingw',
-        'binaries': {
-            'c': 'i686-w64-mingw32-gcc',
-            'cpp': 'i686-w64-mingw32-g++',
-            'ar': 'i686-w64-mingw32-ar',
-            'strip': 'i686-w64-mingw32-strip',
-            'windres': 'i686-w64-mingw32-windres',
-            'ranlib': 'i686-w64-mingw32-ranlib',
-            'exe_wrapper': 'wine'
-        },
         'properties': {
             'c_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4'],
             'cpp_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4']
@@ -48,16 +40,8 @@ CROSS_ENV = {
         }
     },
     'debian_win32': {
+        'toolchain_names': ['mingw32_toolchain'],
         'root_path': '/usr/i686-w64-mingw32/',
-        'binaries': {
-            'c': 'i686-w64-mingw32-gcc',
-            'cpp': 'i686-w64-mingw32-g++',
-            'ar': 'i686-w64-mingw32-ar',
-            'strip': 'i686-w64-mingw32-strip',
-            'windres': 'i686-w64-mingw32-windres',
-            'ranlib': 'i686-w64-mingw32-ranlib',
-            'exe_wrapper': 'wine'
-        },
         'properties': {
             'c_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4'],
             'cpp_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4']
@@ -129,14 +113,10 @@ PACKAGE_NAME_MAPPERS = {
 }
 
 
-class Which():
-    def __getattr__(self, name):
-        command = "which {}".format(name)
-        output = subprocess.check_output(command, shell=True)
-        return output[:-1].decode()
-
-    def __format__(self, format_spec):
-        return getattr(self, format_spec)
+def which(name):
+    command = "which {}".format(name)
+    output = subprocess.check_output(command, shell=True)
+    return output[:-1].decode()
 
 
 class BuildEnv:
@@ -165,6 +145,8 @@ class BuildEnv:
         self.meson_command = self._detect_meson()
         if not self.meson_command:
             sys.exit("ERROR: meson command not fount")
+        self.setup_build(options.build_target)
+        self.setup_toolchains()
         self.options = options
         self.libprefix = options.libprefix or self._detect_libdir()
         self.targetsDict = targetsDict
@@ -187,14 +169,32 @@ class BuildEnv:
             if self.distname == 'ubuntu':
                 self.distname = 'debian'
 
+    def setup_build(self, target):
+        self.build_target = target
+        if target == 'native':
+            self.cross_env = {}
+        else:
+            cross_name = "{host}_{target}".format(
+                host = self.distname,
+                target = self.build_target)
+            try:
+                self.cross_env = CROSS_ENV[cross_name]
+            except KeyError:
+                sys.exit("ERROR : We don't know how to set env to compile"
+                         " a {target} version on a {host} host.".format(
+                            target = self.build_target,
+                            host = self.distname
+                        ))
+
+    def setup_toolchains(self):
+        toolchain_names = self.cross_env.get('toolchain_names', [])
+        self.toolchains =[Toolchain.all_toolchains[toolchain_name](self)
+                              for toolchain_name in toolchain_names]
+
     def finalize_setup(self):
         getattr(self, 'setup_{}'.format(self.build_target))()
 
     def setup_native(self):
-        self.cross_env = {}
-        self.wrapper = None
-        self.configure_option = ""
-        self.cmake_option = ""
         self.cmake_crossfile = None
         self.meson_crossfile = None
 
@@ -204,7 +204,7 @@ class BuildEnv:
         with open(template_file, 'r') as f:
             template = f.read()
         content = template.format(
-            which=Which(),
+            toolchain=self.toolchains[0],
             **self.cross_env
         )
         with open(crossfile, 'w') as outfile:
@@ -212,23 +212,6 @@ class BuildEnv:
         return crossfile
 
     def setup_win32(self):
-        cross_name = "{host}_{target}".format(
-            host=self.distname,
-            target=self.build_target)
-        try:
-            self.cross_env = CROSS_ENV[cross_name]
-        except KeyError:
-            sys.exit("ERROR : We don't know how to set env to compile"
-                     " a {target} version on a {host} host.".format(
-                        target=self.build_target,
-                        host=self.distname
-                     ))
-
-        self.wrapper = self._gen_crossfile('bash_wrapper.sh')
-        current_permissions = stat.S_IMODE(os.lstat(self.wrapper).st_mode)
-        os.chmod(self.wrapper, current_permissions | stat.S_IXUSR)
-        self.configure_option = "--host=i686-w64-mingw32"
-        self.cmake_option = ""
         self.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
         self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
@@ -276,14 +259,33 @@ class BuildEnv:
             if retcode == 0:
                 return n
 
-    def _set_env(self, env):
+    @property
+    def configure_option(self):
+        configure_options = [tlc.configure_option for tlc in self.toolchains]
+        return " ".join(configure_options)
+
+    @property
+    def cmake_option(self):
+        cmake_options = [tlc.cmake_option for tlc in self.toolchains]
+        return " ".join(cmake_options)
+
+    def _set_env(self, env, cross_compile_env, cross_compile_path):
         if env is None:
             env = Defaultdict(str, os.environ)
-        for k, v in self.cross_env.get('env', {}).items():
-            if k.startswith('_format_'):
-                v = v.format(**self.cross_env)
-                k = k[8:]
-            env[k] = v
+
+        bin_dirs = []
+        if cross_compile_env:
+            for k, v in self.cross_env.get('env', {}).items():
+                if k.startswith('_format_'):
+                    v = v.format(**self.cross_env)
+                    k = k[8:]
+                env[k] = v
+            for toolchain in self.toolchains:
+                toolchain.set_env(env)
+        if cross_compile_path:
+            for tlc in self.toolchains:
+                bin_dirs += tlc.get_bin_dir()
+
         pkgconfig_path = pj(self.install_dir, self.libprefix, 'pkgconfig')
         env['PKG_CONFIG_PATH'] = (env['PKG_CONFIG_PATH'] + ':' + pkgconfig_path
                                   if env['PKG_CONFIG_PATH']
@@ -296,7 +298,10 @@ class BuildEnv:
                 break
         else:
             ccache_path = []
-        env['PATH'] = ':'.join([pj(self.install_dir, 'bin')] + ccache_path + [env['PATH']])
+        env['PATH'] = ':'.join(bin_dirs +
+                               [pj(self.install_dir, 'bin')] +
+                               ccache_path +
+                               [env['PATH']])
         ld_library_path = ':'.join([
             pj(self.install_dir, 'lib'),
             pj(self.install_dir, 'lib64')
@@ -305,15 +310,20 @@ class BuildEnv:
                                   if env['LD_LIBRARY_PATH']
                                   else ld_library_path
                                   )
-        env['CPPFLAGS'] = '-I'+pj(self.install_dir, 'include')
-        env['LDFLAGS'] = '-L'+pj(self.install_dir, 'lib')
+        env['CPPFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['CPPFLAGS']])
+        env['LDFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'), env['LDFLAGS']])
         return env
 
-    def run_command(self, command, cwd, context, env=None, input=None, allow_wrapper=True):
+    def run_command(self, command, cwd, context, env=None, input=None, cross_path_only=False):
         os.makedirs(cwd, exist_ok=True)
-        if allow_wrapper and self.wrapper:
-            command = "{} {}".format(self.wrapper, command)
-        env = self._set_env(env)
+        cross_compile_env = True
+        cross_compile_path = True
+        if context.force_native_build:
+            cross_compile_env = False
+            cross_compile_path = False
+        if cross_path_only:
+            cross_compile_env = False
+        env = self._set_env(env, cross_compile_env, cross_compile_path)
         log = None
         try:
             if not self.options.verbose:
@@ -414,16 +424,71 @@ class BuildEnv:
         with open(autoskip_file, 'w'):
             pass
 
+class _MetaToolchain(type):
+    def __new__(cls, name, bases, dct):
+        _class = type.__new__(cls, name, bases, dct)
+        if name != 'Toolchain':
+            Toolchain.all_toolchains[name] = _class
+        return _class
+
+
+class Toolchain(metaclass=_MetaToolchain):
+    all_toolchains = {}
+    configure_option = ""
+    cmake_option = ""
+
+    def __init__(self, buildEnv):
+        self.buildEnv = buildEnv
+
+    @property
+    def full_name(self):
+        return "{name}-{version}".format(
+            name = self.name,
+            version = self.version)
+
+    def set_env(self, env):
+        pass
+
+
+class mingw32_toolchain(Toolchain):
+    name = 'mingw32'
+    arch_full = 'i686-w64-mingw32'
+
+    @property
+    def root_path(self):
+        return self.buildEnv.cross_env['root_path']
+
+    @property
+    def binaries(self):
+        return {k:which('{}-{}'.format(self.arch_full, v))
+                for k, v in (('CC', 'gcc'),
+                             ('CXX', 'g++'),
+                             ('AR', 'ar'),
+                             ('STRIP', 'strip'),
+                             ('WINDRES', 'windres'),
+                             ('RANLIB', 'ranlib'))
+               }
+
+    @property
+    def configure_option(self):
+        return '--host={}'.format(self.arch_full)
+
+    def get_bin_dir(self):
+        return [pj(self.root_path, 'bin')]
+
+    def set_env(self, env):
+        for k, v in self.binaries.items():
+            env[k] = v
+
+        env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
+        env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
+        env['CXXFLAGS'] =" -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
+
 
 class Builder:
     def __init__(self, options, targetDef='KiwixTools'):
         self.targets = OrderedDict()
         self.buildEnv = buildEnv = BuildEnv(options, self.targets)
-        if buildEnv.build_target != 'native':
-            self.nativeBuildEnv = BuildEnv(options, self.targets)
-            self.nativeBuildEnv.build_target = 'native'
-        else:
-            self.nativeBuildEnv = buildEnv
 
         _targets = {}
         self.add_targets(targetDef, _targets)
@@ -437,10 +502,7 @@ class Builder:
         if targetName in targets:
             return
         targetClass = Dependency.all_deps[targetName]
-        if targetClass.force_native_build:
-            target = targetClass(self.nativeBuildEnv)
-        else:
-            target = targetClass(self.buildEnv)
+        target = targetClass(self.buildEnv)
         targets[targetName] = target
         for dep in target.dependencies:
             self.add_targets(dep, targets)
@@ -452,6 +514,11 @@ class Builder:
         yield targetName
 
     def prepare_sources(self):
+        toolchain_sources = (tlc.source for tlc in self.buildEnv.toolchains if tlc.source)
+        for toolchain_source in toolchain_sources:
+            print("prepare sources for toolchain {} :".format(toolchain_source.name))
+            toolchain_source.prepare()
+
         sources = (dep.source for dep in self.targets.values() if not dep.skip)
         sources = remove_duplicates(sources, lambda s: s.__class__)
         for source in sources:
@@ -469,8 +536,6 @@ class Builder:
             print("[INSTALL PACKAGES]")
             self.buildEnv.install_packages()
             self.buildEnv.finalize_setup()
-            if self.nativeBuildEnv != self.buildEnv:
-                self.nativeBuildEnv.finalize_setup()
             print("[PREPARE]")
             self.prepare_sources()
             print("[BUILD]")

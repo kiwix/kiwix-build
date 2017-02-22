@@ -45,9 +45,10 @@ class Remotefile(namedtuple('Remotefile', ('name', 'sha256', 'url'))):
 
 
 class Context:
-    def __init__(self, command_name, log_file):
+    def __init__(self, command_name, log_file, force_native_build):
         self.command_name = command_name
         self.log_file = log_file
+        self.force_native_build = force_native_build
         self.autoskip_file = None
 
     def try_skip(self, path):
