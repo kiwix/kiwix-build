@@ -172,11 +172,12 @@ class MicroHttpd(Dependency):
 
 class Icu(Dependency):
     name = "icu4c"
-    version = "56_1"
+    version = "58_2"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('icu4c-56_1-src.tgz',
-                             '3a64e9105c734dcf631c0b3ed60404531bce6c0f5a64bfe1a6402a4cc2314816')
+        archive = Remotefile('icu4c-58_2-src.tgz',
+                             '2b0a4410153a9b20de0e20c7d8b66049a72aef244b53683d0d7521371683da0c',
+                             'https://freefr.dl.sourceforge.net/project/icu/ICU4C/58.2/icu4c-58_2-src.tgz')
         patches = ["icu4c_fix_static_lib_name_mingw.patch",
                    "icu4c_android_elf64_st_info.patch"]
         data = Remotefile('icudt56l.dat',
