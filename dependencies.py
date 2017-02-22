@@ -202,6 +202,7 @@ class Icu_native(Icu):
     force_native_build = True
 
     class Builder(Icu.Builder):
+        name = "icu_native"
         @property
         def build_path(self):
             return super().build_path+"_native"
@@ -214,6 +215,7 @@ class Icu_cross_compile(Icu):
     dependencies = ['Icu_native']
 
     class Builder(Icu.Builder):
+        name = "icu_cross-compile"
         @property
         def configure_option(self):
             Icu_native = self.buildEnv.targetsDict['Icu_native']
