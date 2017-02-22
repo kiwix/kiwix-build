@@ -1,33 +1,44 @@
-diff -ur xapian-core-1.4.0/configure.ac xapian-core-1.4.0.patched/configure.ac
+diff -ur xapian-core-1.4.0/configure.ac xapian-core-1.4.0-patched/configure.ac
 --- xapian-core-1.4.0/configure.ac	2016-06-25 17:36:49.000000000 +0200
-+++ xapian-core-1.4.0.patched/configure.ac	2017-01-17 14:33:42.268536542 +0100
-@@ -393,6 +393,7 @@
++++ xapian-core-1.4.0-patched/configure.ac	2017-02-22 17:45:57.066365636 +0100
+@@ -393,22 +393,25 @@
  esac
  
  dnl We use timer_create() if available to implement a search time limit.
 +use_rt_lib=0
  SAVE_LIBS=$LIBS
- AC_SEARCH_LIBS([timer_create], [rt],
- 	       [
-@@ -403,12 +404,14 @@
+-AC_SEARCH_LIBS([timer_create], [rt],
+-	       [
++AC_SEARCH_LIBS([timer_create], [rt], [
+     AC_MSG_CHECKING([for timer_create() usability])
+-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
++    AC_COMPILE_IFELSE(
++      [AC_LANG_PROGRAM(
+ [[#if defined _AIX || defined __GNU__
+ #error timer_create known not to work
  #endif]])],
- 	[AC_MSG_RESULT([yes])
- 	XAPIAN_LIBS="$LIBS $XAPIAN_LIBS"
+-	[AC_MSG_RESULT([yes])
+-	XAPIAN_LIBS="$LIBS $XAPIAN_LIBS"
 -	AC_DEFINE([HAVE_TIMER_CREATE], [1], [Define to 1 if you have the 'timer_create' function.])]
-+	AC_DEFINE([HAVE_TIMER_CREATE], [1], [Define to 1 if you have the 'timer_create' function.])
-+        use_rt_lib=1]
- 	,
- 	[AC_MSG_RESULT([no])
-     ])
+-	,
+-	[AC_MSG_RESULT([no])
+-    ])
++	  [AC_MSG_RESULT([yes])
++	  XAPIAN_LIBS="$LIBS $XAPIAN_LIBS"
++	  AC_DEFINE([HAVE_TIMER_CREATE], [1], [Define to 1 if you have the 'timer_create' function.])
++	  AS_IF([test "$ac_res" != "none required"], use_rt_lib=1)
++      ],
++	  [AC_MSG_RESULT([no])]
++	)
  ])
  LIBS=$SAVE_LIBS
-+AM_CONDITIONAL([USE_RT_LIB], [test "$use_win32_uuid_api" = 1])
++AM_CONDITIONAL([USE_RT_LIB], [test "$use_rt_lib" = 1])
  
  dnl Used by tests/soaktest/soaktest.cc
  AC_CHECK_FUNCS([srandom random])
-diff -ur xapian-core-1.4.0/configure xapian-core-1.4.0.patched/configure
+diff -ur xapian-core-1.4.0/configure xapian-core-1.4.0-patched/configure
 --- xapian-core-1.4.0/configure	2016-06-25 17:39:25.000000000 +0200
-+++ xapian-core-1.4.0.patched/configure	2017-01-17 15:43:07.929290801 +0100
++++ xapian-core-1.4.0-patched/configure	2017-02-22 17:45:44.472585524 +0100
 @@ -671,6 +671,8 @@
  DOCUMENTATION_RULES_FALSE
  DOCUMENTATION_RULES_TRUE
@@ -45,15 +56,22 @@ diff -ur xapian-core-1.4.0/configure xapian-core-1.4.0.patched/configure
  SAVE_LIBS=$LIBS
  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing timer_create" >&5
  $as_echo_n "checking for library containing timer_create... " >&6; }
-@@ -18324,6 +18327,7 @@
+@@ -18320,10 +18323,13 @@
+ if ac_fn_cxx_try_compile "$LINENO"; then :
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+ $as_echo "yes" >&6; }
+-	XAPIAN_LIBS="$LIBS $XAPIAN_LIBS"
++	  XAPIAN_LIBS="$LIBS $XAPIAN_LIBS"
  
  $as_echo "#define HAVE_TIMER_CREATE 1" >>confdefs.h
  
-+        use_rt_lib=1
++	  if test "$ac_res" != "none required"; then :
++  use_rt_lib=1
++fi
  
  else
    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-@@ -18335,6 +18339,14 @@
+@@ -18335,6 +18341,14 @@
  fi
  
  LIBS=$SAVE_LIBS
@@ -68,7 +86,7 @@ diff -ur xapian-core-1.4.0/configure xapian-core-1.4.0.patched/configure
  
  for ac_func in srandom random
  do :
-@@ -20854,6 +20866,10 @@
+@@ -20854,6 +20868,10 @@
  Usually this means the macro was only invoked conditionally." "$LINENO" 5
  fi
  
@@ -79,9 +97,9 @@ diff -ur xapian-core-1.4.0/configure xapian-core-1.4.0.patched/configure
  if test -z "${DOCUMENTATION_RULES_TRUE}" && test -z "${DOCUMENTATION_RULES_FALSE}"; then
    as_fn_error $? "conditional \"DOCUMENTATION_RULES\" was never defined.
  Usually this means the macro was only invoked conditionally." "$LINENO" 5
-diff -ur xapian-core-1.4.0/pkgconfig/xapian-core.pc.in xapian-core-1.4.0.patched/pkgconfig/xapian-core.pc.in
---- xapian-core-1.4.0/pkgconfig/xapian-core.pc.in	2017-01-17 15:22:40.184786108 +0100
-+++ xapian-core-1.4.0.patched/pkgconfig/xapian-core.pc.in	2017-01-17 14:34:17.692972977 +0100
+diff -ur xapian-core-1.4.0/pkgconfig/xapian-core.pc.in xapian-core-1.4.0-patched/pkgconfig/xapian-core.pc.in
+--- xapian-core-1.4.0/pkgconfig/xapian-core.pc.in	2016-06-25 17:36:49.000000000 +0200
++++ xapian-core-1.4.0-patched/pkgconfig/xapian-core.pc.in	2017-02-22 17:09:12.488793901 +0100
 @@ -11,4 +11,6 @@
  URL: https://xapian.org/
  Version: @VERSION@
@@ -90,4 +108,3 @@ diff -ur xapian-core-1.4.0/pkgconfig/xapian-core.pc.in xapian-core-1.4.0.patched
 +@USE_RT_LIB_TRUE@Libs: @ldflags@ -L${libdir} -lxapian@LIBRARY_VERSION_SUFFIX@ -lrt
 +@USE_RT_LIB_FALSE@Libs: @ldflags@ -L${libdir} -lxapian@LIBRARY_VERSION_SUFFIX@
 +@USE_WIN32_UUID_API_FALSE@Requires: uuid
-
