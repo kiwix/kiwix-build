@@ -482,11 +482,12 @@ class mingw32_toolchain(Toolchain):
 
 
 class Builder:
-    def __init__(self, options, targetDef='KiwixTools'):
+    def __init__(self, options):
         self.targets = OrderedDict()
         self.buildEnv = buildEnv = BuildEnv(options, self.targets)
 
         _targets = {}
+        targetDef = options.targets
         self.add_targets(targetDef, _targets)
         dependencies = self.order_dependencies(_targets, targetDef)
         dependencies = list(remove_duplicates(dependencies))
@@ -542,7 +543,8 @@ class Builder:
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('working_dir', default=".", nargs='?')
+    parser.add_argument('targets', default='KiwixTools', nargs='?')
+    parser.add_argument('--working-dir', default=".")
     parser.add_argument('--libprefix', default=None)
     parser.add_argument('--build-static', action="store_true")
     parser.add_argument('--build-target', default="native", choices=BuildEnv.build_targets)
