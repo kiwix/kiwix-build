@@ -188,16 +188,19 @@ class MakeBuilder(Builder):
     make_target = ""
     make_install_target = "install"
 
-    def _configure(self, context):
-        context.try_skip(self.build_path)
-        configure_option = "{} {} {}".format(
+    @property
+    def all_configure_option(self):
+        return "{} {} {}".format(
             self.configure_option,
             self.static_configure_option if self.buildEnv.build_static else self.dynamic_configure_option,
             self.buildEnv.configure_option if not self.target.force_native_build else "")
+
+    def _configure(self, context):
+        context.try_skip(self.build_path)
         command = "{configure_script} {configure_option} --prefix {install_dir} --libdir {libdir}"
         command = command.format(
             configure_script=pj(self.source_path, self.configure_script),
-            configure_option=configure_option,
+            configure_option=self.all_configure_option,
             install_dir=self.buildEnv.install_dir,
             libdir=pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
         )
@@ -262,15 +265,15 @@ class CMakeBuilder(MakeBuilder):
 class MesonBuilder(Builder):
     configure_option = ""
 
+    @property
+    def library_type(self):
+        return 'static' if self.buildEnv.build_static else 'shared'
+
     def _configure(self, context):
         context.try_skip(self.build_path)
         if os.path.exists(self.build_path):
             shutil.rmtree(self.build_path)
         os.makedirs(self.build_path)
-        if self.buildEnv.build_static:
-            library_type = 'static'
-        else:
-            library_type = 'shared'
         configure_option = self.configure_option.format(buildEnv=self.buildEnv)
         command = ("{command} . {build_path}"
                    " --default-library={library_type}"
@@ -280,7 +283,7 @@ class MesonBuilder(Builder):
                    " {cross_option}")
         command = command.format(
             command=self.buildEnv.meson_command,
-            library_type=library_type,
+            library_type=self.library_type,
             configure_option=configure_option,
             build_path=self.build_path,
             buildEnv=self.buildEnv,
