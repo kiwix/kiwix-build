@@ -12,12 +12,12 @@ deploy:
   skip_cleanup: true
   script: travis/deploy.sh
   on:
-    condition: ( "$STATIC_BUILD" = "true" ) && ( "$TRAVIS_EVENT_TYPE" = "cron" )
+    condition: ( "$DEPLOY" = "true" ) && ( "$TRAVIS_EVENT_TYPE" = "cron" )
 env:
- - STATIC_BUILD=true BUILD_TARGET=native
- - STATIC_BUILD=true BUILD_TARGET=win32
- - STATIC_BUILD=false BUILD_TARGET=native
- - STATIC_BUILD=false BUILD_TARGET=win32
+ - BUILD_OPTION="--target-platform=native_dyn"
+ - BUILD_OPTION="--target-platform=native_static" ARCHIVE_TYPE="--tar" DEPLOY=true
+ - BUILD_OPTION="--target-platform=win32_dyn"
+ - BUILD_OPTION="--target-platform=win32_static" ARCHIVE_TYPE="--zip" DEPLOY=true
 notifications:
   irc:
     channels:

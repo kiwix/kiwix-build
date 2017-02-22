@@ -196,7 +196,7 @@ class MakeBuilder(Builder):
     def all_configure_option(self):
         return "{} {} {}".format(
             self.configure_option,
-            self.static_configure_option if self.buildEnv.build_static else self.dynamic_configure_option,
+            self.static_configure_option if self.buildEnv.platform_info.static else self.dynamic_configure_option,
             self.buildEnv.configure_option if not self.target.force_native_build else "")
 
     def _configure(self, context):
@@ -209,7 +209,7 @@ class MakeBuilder(Builder):
             libdir=pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
         )
         env = Defaultdict(str, os.environ)
-        if self.buildEnv.build_static:
+        if self.buildEnv.platform_info.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
         if self.configure_env:
             for k in self.configure_env:
@@ -254,7 +254,7 @@ class CMakeBuilder(MakeBuilder):
             cross_option="-DCMAKE_TOOLCHAIN_FILE={}".format(self.buildEnv.cmake_crossfile) if self.buildEnv.cmake_crossfile else ""
         )
         env = Defaultdict(str, os.environ)
-        if self.buildEnv.build_static:
+        if self.buildEnv.platform_info.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
         if self.configure_env:
             for k in self.configure_env:
@@ -271,7 +271,7 @@ class MesonBuilder(Builder):
 
     @property
     def library_type(self):
-        return 'static' if self.buildEnv.build_static else 'shared'
+        return 'static' if self.buildEnv.platform_info.static else 'shared'
 
     def _configure(self, context):
         context.try_skip(self.build_path)
