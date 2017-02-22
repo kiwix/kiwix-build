@@ -84,22 +84,26 @@ PACKAGE_NAME_MAPPERS = {
         'pugixml': None, # ['pugixml-devel'] but package doesn't provide pkg-config file
         'libmicrohttpd': ['libmicrohttpd-devel'],
         'zlib': ['zlib-devel'],
+        'lzma': ['xz-devel'],
         'icu4c': None,
         'zimlib': None,
     },
     'fedora_native_static': {
         'COMMON': ['gcc-c++', 'cmake', 'automake', 'glibc-static', 'libstdc++-static', 'ccache'],
-        'zlib': ['zlib-devel', 'zlib-static']
+        'zlib': ['zlib-devel', 'zlib-static'],
+        'lzma': ['xz-devel', 'xz-static']
         # Either there is no packages, or no static or too old
     },
     'fedora_win32_dyn': {
         'COMMON': ['mingw32-gcc-c++', 'mingw32-bzip2', 'mingw32-win-iconv', 'mingw32-winpthreads', 'wine', 'ccache'],
         'zlib': ['mingw32-zlib'],
+        'lzma': ['mingw32-xz-libs'],
         'libmicrohttpd': ['mingw32-libmicrohttpd'],
     },
     'fedora_win32_static': {
         'COMMON': ['mingw32-gcc-c++', 'mingw32-bzip2-static', 'mingw32-win-iconv-static', 'mingw32-winpthreads-static', 'wine', 'ccache'],
         'zlib': ['mingw32-zlib-static'],
+        'lzma': ['mingw32-xz-libs-static'],
         'libmicrohttpd': None, # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
                                # gcc cannot found them.
     },

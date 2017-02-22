@@ -16,8 +16,6 @@ from utils import Remotefile, pj, SkipCommand
 # exist in your "distri" (linux/mac) ?
 # If not, we need to compile them here
 # *************************************
-# Zlib
-# LZMA
 # aria2
 # Argtable
 # MSVirtual
@@ -41,6 +39,19 @@ class zlib(Dependency):
         def configure_option(self):
             return "-DINSTALL_PKGCONFIG_DIR={}".format(pj(self.buildEnv.install_dir, self.buildEnv.libprefix, 'pkgconfig'))
 
+
+class lzma(Dependency):
+    name = 'lzma'
+    version = '5.0.4'
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('xz-5.0.4.tar.bz2',
+                             '5cd9b060d3a1ad396b3be52c9b9311046a1c369e6062aea752658c435629ce92')
+
+    class Builder(MakeBuilder):
+        @property
+        def configure_option(self):
+            return "--disable-assembler"
 
 class UUID(Dependency):
     name = 'uuid'
@@ -77,7 +88,7 @@ class Xapian(Dependency):
 
     @property
     def dependencies(self):
-        deps = ['zlib']
+        deps = ['zlib', 'lzma']
         if self.buildEnv.build_target == 'win32':
             return deps
         return deps + ['UUID']
@@ -196,7 +207,7 @@ class Zimlib(Dependency):
 
 class Kiwixlib(Dependency):
     name = "kiwix-lib"
-    dependencies = ['zlib']
+    dependencies = ['zlib', 'lzma']
 
     @property
     def dependencies(self):
