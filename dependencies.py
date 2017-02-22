@@ -66,6 +66,7 @@ class UUID(Dependency):
     class Builder(MakeBuilder):
         configure_option = "--enable-libuuid"
         configure_env = {'_format_CFLAGS': "{env.CFLAGS} -fPIC"}
+        static_configure_option = dynamic_configure_option = ""
         make_target = 'libs'
         make_install_target = 'install-libs'
 
@@ -81,8 +82,6 @@ class Xapian(Dependency):
 
     class Builder(MakeBuilder):
         configure_option = "--disable-sse --disable-backend-inmemory --disable-documentation"
-        dynamic_configure_option = "--enable-shared --disable-static"
-        static_configure_option = "--enable-static --disable-shared"
         configure_env = {'_format_LDFLAGS': "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
                          '_format_CXXFLAGS': "-I{buildEnv.install_dir}/include"}
 
@@ -136,8 +135,6 @@ class MicroHttpd(Dependency):
 
     class Builder(MakeBuilder):
         configure_option = "--disable-https --without-libgcrypt --without-libcurl"
-        dynamic_configure_option = "--enable-shared --disable-static"
-        static_configure_option = "--enable-static --disable-shared"
 
 
 class Icu(Dependency):
@@ -166,8 +163,6 @@ class Icu(Dependency):
     class Builder(MakeBuilder):
         subsource_dir = "source"
         configure_option = "--disable-samples --disable-tests --disable-extras --disable-dyload"
-        dynamic_configure_option = "--enable-shared --disable-static"
-        static_configure_option = "--enable-static --disable-shared"
 
 
 class Icu_native(Icu):

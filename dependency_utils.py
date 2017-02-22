@@ -178,7 +178,9 @@ class Builder:
 
 
 class MakeBuilder(Builder):
-    configure_option = static_configure_option = dynamic_configure_option = ""
+    configure_option = ""
+    dynamic_configure_option = "--enable-shared --disable-static"
+    static_configure_option = "--enable-static --disable-shared"
     make_option = ""
     install_option = ""
     configure_script = "configure"
