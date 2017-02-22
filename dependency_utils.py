@@ -172,9 +172,13 @@ class Builder:
         return self.target.command(*args, **kwargs)
 
     def build(self):
+        if hasattr(self, '_pre_build_script'):
+            self.command('pre_build_script', self._pre_build_script)
         self.command('configure', self._configure)
         self.command('compile', self._compile)
         self.command('install', self._install)
+        if hasattr(self, '_post_build_script'):
+            self.command('post_build_script', self._post_build_script)
 
 
 class MakeBuilder(Builder):
