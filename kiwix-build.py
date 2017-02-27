@@ -359,9 +359,11 @@ class BuildEnv:
     def install_packages(self):
         autoskip_file = pj(self.build_dir, ".install_packages_ok")
         if self.distname in ('fedora', 'redhat', 'centos'):
-            package_installer = 'dnf'
+            package_installer = 'sudo dnf install {}'
+            package_checker = 'rpm -q --quiet {}'
         elif self.distname in ('debian', 'Ubuntu'):
-            package_installer = 'apt-get'
+            package_installer = 'sudo apt-get install {}'
+            package_checker = 'LANG=C dpkg -s {} 2>&1 | grep Status | grep "ok installed" 1>/dev/null 2>&1'
         mapper_name = "{host}_{target}_{build_type}".format(
             host=self.distname,
             target=self.build_target,
@@ -385,11 +387,21 @@ class BuildEnv:
         if os.path.exists(autoskip_file):
             print("SKIP")
             return
-        if packages_list:
-            command = "sudo {package_installer} install {packages_list}".format(
-                package_installer=package_installer,
-                packages_list=" ".join(packages_list)
-            )
+
+        packages_to_install = []
+        for package in packages_list:
+            print(" - {} : ".format(package), end="")
+            command = package_checker.format(package)
+            try:
+                subprocess.check_call(command, shell=True)
+            except subprocess.CalledProcessError:
+                print("NEEDED")
+                packages_to_install.append(package)
+            else:
+                print("SKIP")
+
+        if packages_to_install:
+            command = package_installer.format(" ".join(packages_to_install))
             print(command)
             subprocess.check_call(command, shell=True)
         else:
