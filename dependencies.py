@@ -281,7 +281,6 @@ class KiwixTools(Dependency):
     class Builder(MesonBuilder):
         @property
         def configure_option(self):
-            base_options = "-Dctpp2-install-prefix={buildEnv.install_dir}"
             if self.buildEnv.platform_info.static:
-                base_options += " -Dstatic-linkage=true"
-            return base_options
+                return "-Dstatic-linkage=true"
+            return ""
