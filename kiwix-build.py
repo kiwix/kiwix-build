@@ -148,11 +148,12 @@ class BuildEnv:
         self.archive_dir = pj(options.working_dir, "ARCHIVE")
         self.log_dir = pj(options.working_dir, 'LOGS')
         self.install_dir = pj(self.build_dir, "INSTALL")
-        os.makedirs(self.source_dir, exist_ok=True)
-        os.makedirs(self.archive_dir, exist_ok=True)
-        os.makedirs(self.build_dir, exist_ok=True)
-        os.makedirs(self.log_dir, exist_ok=True)
-        os.makedirs(self.install_dir, exist_ok=True)
+        for d in (self.source_dir,
+                  self.build_dir,
+                  self.archive_dir,
+                  self.log_dir,
+                  self.install_dir):
+            os.makedirs(d, exist_ok=True)
         self.detect_platform()
         self.ninja_command = self._detect_ninja()
         if not self.ninja_command:
