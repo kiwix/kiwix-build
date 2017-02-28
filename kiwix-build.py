@@ -183,7 +183,7 @@ class BuildEnv:
         build_dir = "BUILD_{}".format(options.target_platform)
         self.build_dir = pj(options.working_dir, build_dir)
         self.archive_dir = pj(options.working_dir, "ARCHIVE")
-        self.log_dir = pj(options.working_dir, 'LOGS')
+        self.log_dir = pj(self.build_dir, 'LOGS')
         self.install_dir = pj(self.build_dir, "INSTALL")
         for d in (self.source_dir,
                   self.build_dir,
