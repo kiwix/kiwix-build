@@ -5,7 +5,7 @@ set -e
 orig_dir=$(pwd)
 
 sudo apt-get update -qq
-sudo apt-get install -qq uuid-dev libicu-dev libctpp2-dev automake libtool python3-pip zlib1g-dev lzma-dev libbz2-dev cmake
+sudo apt-get install -qq python3-pip
 pip3 install meson
 
 # ninja
