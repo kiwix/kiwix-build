@@ -2,7 +2,7 @@ import os.path
 import hashlib
 import tarfile, zipfile
 import tempfile
-import os
+import os, stat
 from collections import namedtuple, defaultdict
 
 pj = os.path.join
@@ -31,6 +31,10 @@ def get_sha256(path):
         sha256.update(f.read())
     return sha256.hexdigest()
 
+
+def add_execution_right(file_path):
+    current_permissions = stat.S_IMODE(os.lstat(file_path).st_mode)
+    os.chmod(file_path, current_permissions | stat.S_IXUSR)
 
 class SkipCommand(Exception):
     pass

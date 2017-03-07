@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys, stat
+import os, sys
 import argparse
 import ssl
 import urllib.request
@@ -13,6 +13,7 @@ from dependency_utils import ReleaseDownload, Builder
 from utils import (
     pj,
     remove_duplicates,
+    add_execution_right,
     get_sha256,
     StopBuild,
     SkipCommand,
@@ -667,8 +668,7 @@ class android_ndk(Toolchain):
         def _build_platform(self, context):
             context.try_skip(self.build_path)
             script = pj(self.source_path, 'build/tools/make_standalone_toolchain.py')
-            current_permissions = stat.S_IMODE(os.lstat(script).st_mode)
-            os.chmod(script, current_permissions | stat.S_IXUSR)
+            add_execution_right(script)
             command = '{script} --arch={arch} --api={api} --install-dir={install_dir} --force'
             command = command.format(
                 script=script,
@@ -692,8 +692,7 @@ class android_ndk(Toolchain):
                     file_path = pj(root, file_)
                     if os.path.islink(file_path):
                         continue
-                    current_permissions = stat.S_IMODE(os.lstat(file_path).st_mode)
-                    os.chmod(file_path, current_permissions | stat.S_IXUSR)
+                    add_execution_right(file_path)
 
         def build(self):
             self.command('build_platform', self._build_platform)
