@@ -110,7 +110,7 @@ class ReleaseDownload(Source):
         context.force_native_build = True
         for p in self.patches:
             with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input)
+                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input.read())
 
     def prepare(self):
         self.command('download', self._download)

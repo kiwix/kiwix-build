@@ -397,8 +397,13 @@ class BuildEnv:
 
             kwargs = dict()
             if input:
-                kwargs['stdin'] = input
-            return subprocess.check_call(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+                kwargs['stdin'] = subprocess.PIPE
+            process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+            if input:
+                process.communicate(input.encode())
+            retcode = process.wait()
+            if retcode:
+                raise subprocess.CalledProcessError(retcode, command)
         finally:
             if log:
                 log.close()
