@@ -6,8 +6,8 @@ cpp = '{toolchain.binaries[CXX]}'
 strip = '{toolchain.binaries[STRIP]}'
 
 [properties]
-c_link_args = {properties[c_link_args]!r}
-cpp_link_args = {properties[cpp_link_args]!r}
+c_link_args = {extra_libs!r}
+cpp_link_args = {extra_libs!r}
 
 [host_machine]
 cpu_family = '{host_machine[cpu_family]}'

@@ -25,10 +25,7 @@ CROSS_ENV = {
     'fedora_win32': {
         'toolchain_names': ['mingw32_toolchain'],
         'root_path': '/usr/i686-w64-mingw32/sys-root/mingw',
-        'properties': {
-            'c_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4'],
-            'cpp_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4']
-        },
+        'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90'],
         'host_machine': {
             'system': 'windows',
             'cpu_family': 'x86',
@@ -42,10 +39,7 @@ CROSS_ENV = {
     'debian_win32': {
         'toolchain_names': ['mingw32_toolchain'],
         'root_path': '/usr/i686-w64-mingw32/',
-        'properties': {
-            'c_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4'],
-            'cpp_link_args': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4']
-        },
+        'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90'],
         'host_machine': {
             'system': 'windows',
             'cpu_family': 'x86',
@@ -487,7 +481,8 @@ class mingw32_toolchain(Toolchain):
 
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
         env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
-        env['CXXFLAGS'] =" -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
+        env['CXXFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
+        env['LIBS'] = " ".join(self.buildEnv.cross_env['extra_libs']) + " " +env['LIBS']
 
 
 class Builder:
