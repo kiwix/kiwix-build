@@ -9,13 +9,16 @@ import platform
 from collections import OrderedDict
 
 from dependencies import Dependency
+from dependency_utils import ReleaseDownload, Builder
 from utils import (
     pj,
     remove_duplicates,
     get_sha256,
     StopBuild,
     SkipCommand,
-    Defaultdict)
+    Defaultdict,
+    Remotefile,
+    Context)
 
 REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 
@@ -31,9 +34,16 @@ CROSS_ENV = {
             'cpu_family': 'x86',
             'cpu': 'i686',
             'endian': 'little'
-        },
-        'env': {
-            '_format_PKG_CONFIG_LIBDIR': '{root_path}/lib/pkgconfig'
+        }
+    },
+    'fedora_android': {
+        'toolchain_names': ['android_ndk'],
+        'extra_libs': [],
+        'host_machine': {
+            'system': 'Android',
+            'cpu_family': 'x86',
+            'cpu': 'i686',
+            'endian': 'little'
         }
     },
     'debian_win32': {
@@ -45,9 +55,16 @@ CROSS_ENV = {
             'cpu_family': 'x86',
             'cpu': 'i686',
             'endian': 'little'
-        },
-        'env': {
-            '_format_PKG_CONFIG_LIBDIR': '{root_path}/lib/pkgconfig'
+        }
+    },
+    'debian_android': {
+        'toolchain_names': ['android_ndk'],
+        'extra_libs': [],
+        'host_machine': {
+            'system': 'Android',
+            'cpu_family': 'x86',
+            'cpu': 'i686',
+            'endian': 'little'
         }
     }
 }
@@ -85,6 +102,9 @@ PACKAGE_NAME_MAPPERS = {
         'libmicrohttpd': None, # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
                                # gcc cannot found them.
     },
+    'fedora_android': {
+        'COMMON': ['gcc-c++', 'cmake', 'automake', 'ccache', 'java-1.8.0-openjdk-devel']
+    },
     'debian_native_dyn': {
         'COMMON': ['gcc', 'cmake', 'libbz2-dev', 'ccache'],
         'zlib': ['zlib1g-dev'],
@@ -104,6 +124,9 @@ PACKAGE_NAME_MAPPERS = {
     'debian_win32_static': {
         'COMMON': ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools', 'ccache']
     },
+    'debian_android': {
+        'COMMON': ['gcc', 'cmake', 'ccache']
+    },
 }
 
 
@@ -122,12 +145,37 @@ class TargetInfo:
         return "{}_{}".format(self.build, 'static' if self.static else 'dyn')
 
 
+class AndroidTargetInfo(TargetInfo):
+    __arch_infos = {
+        'arm' : ('arm-linux-androideabi'),
+        'arm64': ('aarch64-linux-android'),
+        'mips': ('mipsel-linux-android'),
+        'mips64': ('mips64el-linux-android'),
+        'x86': ('i686-linux-android'),
+        'x86_64': ('x86_64-linux-android'),
+    }
+
+    def __init__(self, arch):
+        super().__init__('android', True)
+        self.arch = arch
+        self.arch_full = self.__arch_infos[arch]
+
+    def __str__(self):
+        return "android"
+
+
 class BuildEnv:
     target_platforms = {
         'native_dyn': TargetInfo('native', False),
         'native_static': TargetInfo('native', True),
         'win32_dyn': TargetInfo('win32', False),
-        'win32_static': TargetInfo('win32', True)
+        'win32_static': TargetInfo('win32', True),
+        'android_arm': AndroidTargetInfo('arm'),
+        'android_arm64': AndroidTargetInfo('arm64'),
+        'android_mips': AndroidTargetInfo('mips'),
+        'android_mips64': AndroidTargetInfo('mips64'),
+        'android_x86': AndroidTargetInfo('x86'),
+        'android_x86_64': AndroidTargetInfo('x86_64'),
     }
 
     def __init__(self, options, targetsDict):
@@ -218,6 +266,10 @@ class BuildEnv:
 
     def setup_win32(self):
         self.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
+        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
+
+    def setup_android(self):
+        self.cmake_crossfile = self._gen_crossfile('cmake_android_cross_file.txt')
         self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
     def __getattr__(self, name):
@@ -449,8 +501,39 @@ class Toolchain(metaclass=_MetaToolchain):
             name = self.name,
             version = self.version)
 
+    @property
+    def source_path(self):
+        return pj(self.buildEnv.source_dir, self.source.source_dir)
+
+    @property
+    def _log_dir(self):
+        return self.buildEnv.log_dir
+
     def set_env(self, env):
         pass
+
+    def command(self, name, function, *args):
+        print("  {} {} : ".format(name, self.name), end="", flush=True)
+        log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
+        context = Context(name, log, True)
+        try:
+            ret = function(*args, context=context)
+            context._finalise()
+            print("OK")
+            return ret
+        except SkipCommand:
+            print("SKIP")
+        except subprocess.CalledProcessError:
+            print("ERROR")
+            try:
+                with open(log, 'r') as f:
+                    print(f.read())
+            except:
+                pass
+            raise StopBuild()
+        except:
+            print("ERROR")
+            raise
 
 
 class mingw32_toolchain(Toolchain):
@@ -487,6 +570,133 @@ class mingw32_toolchain(Toolchain):
         env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
         env['CXXFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
         env['LIBS'] = " ".join(self.buildEnv.cross_env['extra_libs']) + " " +env['LIBS']
+
+
+class android_ndk(Toolchain):
+    name = 'android-ndk'
+    version = 'r13b'
+    gccver = '4.9.x'
+
+    @property
+    def api(self):
+        return '21' if self.arch in ('arm64', 'mips64', 'x86_64') else '14'
+
+    @property
+    def platform(self):
+        return 'android-'+self.api
+
+    @property
+    def arch(self):
+        return self.buildEnv.platform_info.arch
+
+    @property
+    def arch_full(self):
+        return self.buildEnv.platform_info.arch_full
+
+    @property
+    def toolchain(self):
+        return self.arch_full+"-4.9"
+
+    @property
+    def root_path(self):
+        return pj(self.builder.install_path, 'sysroot')
+
+    @property
+    def binaries(self):
+        binaries = ((k,'{}-{}'.format(self.arch_full, v))
+                for k, v in (('CC', 'gcc'),
+                             ('CXX', 'g++'),
+                             ('AR', 'ar'),
+                             ('STRIP', 'strip'),
+                             ('WINDRES', 'windres'),
+                             ('RANLIB', 'ranlib'),
+                             ('LD', 'ld'))
+               )
+        return {k:pj(self.builder.install_path, 'bin', v)
+                for k,v in binaries}
+
+    @property
+    def configure_option(self):
+        return '--host={}'.format(self.arch_full)
+
+    @property
+    def full_name(self):
+        return "{name}-{version}-{arch}-{api}".format(
+            name = self.name,
+            version = self.version,
+            arch = self.arch,
+            api = self.api)
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('android-ndk-r13b-linux-x86_64.zip',
+                             '3524d7f8fca6dc0d8e7073a7ab7f76888780a22841a6641927123146c3ffd29c',
+                             'https://dl.google.com/android/repository/android-ndk-r13b-linux-x86_64.zip')
+
+        @property
+        def source_dir(self):
+            return "{}-{}".format(
+                self.target.name,
+                self.target.version)
+
+
+    class Builder(Builder):
+
+        @property
+        def install_path(self):
+            return self.build_path
+
+        def _build_platform(self, context):
+            context.try_skip(self.build_path)
+            script = pj(self.source_path, 'build/tools/make_standalone_toolchain.py')
+            current_permissions = stat.S_IMODE(os.lstat(script).st_mode)
+            os.chmod(script, current_permissions | stat.S_IXUSR)
+            command = '{script} --arch={arch} --api={api} --install-dir={install_dir} --force'
+            command = command.format(
+                script=script,
+                arch=self.target.arch,
+                api=self.target.api,
+                install_dir=self.install_path
+            )
+            self.buildEnv.run_command(command, self.build_path, context)
+
+        def _fix_permission_right(self, context):
+            context.try_skip(self.build_path)
+            bin_dirs = [pj(self.install_path, 'bin'),
+                        pj(self.install_path, self.target.arch_full, 'bin'),
+                        pj(self.install_path, 'libexec', 'gcc', self.target.arch_full, self.target.gccver)
+                       ]
+            for root, dirs, files in os.walk(self.install_path):
+                if not root in bin_dirs:
+                    continue
+
+                for file_ in files:
+                    file_path = pj(root, file_)
+                    if os.path.islink(file_path):
+                        continue
+                    current_permissions = stat.S_IMODE(os.lstat(file_path).st_mode)
+                    os.chmod(file_path, current_permissions | stat.S_IXUSR)
+
+        def build(self):
+            self.command('build_platform', self._build_platform)
+            self.command('fix_permission_right', self._fix_permission_right)
+
+    def get_bin_dir(self):
+        return [pj(self.builder.install_path, 'bin')]
+
+    def set_env(self, env):
+        env['CC'] = self.binaries['CC']
+        env['CXX'] = self.binaries['CXX']
+
+        env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
+        env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(self.root_path) + env['CFLAGS']
+        env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(self.root_path) + env['CXXFLAGS']
+        env['LDFLAGS'] = ' -fPIE -pie --sysroot={} '.format(self.root_path) + env['LDFLAGS']
+        #env['CFLAGS'] = ' -fPIC -D_FILE_OFFSET_BITS=64 -O3 '+env['CFLAGS']
+        #env['CXXFLAGS'] = (' -D__OPTIMIZE__ -fno-strict-aliasing '
+        #                   ' -DU_HAVE_NL_LANGINFO_CODESET=0 '
+        #                   '-DU_STATIC_IMPLEMENTATION -O3 '
+        #                   '-DU_HAVE_STD_STRING -DU_TIMEZONE=0 ')+env['CXXFLAGS']
+        env['NDK_DEBUG'] = '0'
 
 
 class Builder:

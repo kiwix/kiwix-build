@@ -18,6 +18,12 @@ env:
  - BUILD_OPTION="--target-platform=native_static" ARCHIVE_TYPE="--tar" DEPLOY=true
  - BUILD_OPTION="--target-platform=win32_dyn"
  - BUILD_OPTION="--target-platform=win32_static" ARCHIVE_TYPE="--zip" DEPLOY=true
+ - BUILD_OPTION="--target-platform=android_arm Kiwixlib"
+ - BUILD_OPTION="--target-platform=android_arm64 Kiwixlib"
+ - BUILD_OPTION="--target-platform=android_mips Kiwixlib"
+ - BUILD_OPTION="--target-platform=android_mips64 Kiwixlib"
+ - BUILD_OPTION="--target-platform=android_x86 Kiwixlib"
+ - BUILD_OPTION="--target-platform=android_x86_64 Kiwixlib"
 notifications:
   irc:
     channels:

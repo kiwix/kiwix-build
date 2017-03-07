@@ -241,16 +241,31 @@ class Kiwixlib(Dependency):
 
     @property
     def dependencies(self):
-        if self.buildEnv.platform_info.build == 'win32':
-            return ["Xapian", "CTPP2", "Pugixml", "Icu_cross_compile", "Zimlib"]
-        return ["Xapian", "CTPP2", "Pugixml", "Icu", "Zimlib"]
+        base_dependencies = ["Xapian", "Pugixml", "Zimlib"]
+        if self.buildEnv.platform_info.build != 'android':
+            base_dependencies += ['CTPP2']
+        if self.buildEnv.platform_info.build != 'native':
+            return base_dependencies + ["Icu_cross_compile"]
+        else:
+            return base_dependencies + ["Icu"]
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-lib.git"
         git_dir = "kiwix-lib"
 
     class Builder(MesonBuilder):
-        configure_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
+        @property
+        def configure_option(self):
+            base_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
+            if self.buildEnv.platform_info.build == 'android':
+                base_option += ' -Dandroid=true'
+            return base_option
+
+        @property
+        def library_type(self):
+            if self.buildEnv.platform_info.build == 'android':
+                return 'shared'
+            return super().library_type
 
 
 class KiwixTools(Dependency):
