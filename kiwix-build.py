@@ -2,6 +2,7 @@
 
 import os, sys, stat
 import argparse
+import ssl
 import urllib.request
 import tarfile
 import subprocess
@@ -399,7 +400,21 @@ class BuildEnv:
             if what.sha256 == get_sha256(file_path):
                 raise SkipCommand()
             os.remove(file_path)
-        urllib.request.urlretrieve(file_url, file_path)
+
+        if options.no_cert_check == True:
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+        else:
+            context = None
+        batch_size = 1024 * 8
+        with urllib.request.urlopen(file_url, context=context) as resource, open(file_path, 'wb') as file:
+            while True:
+                batch = resource.read(batch_size)
+                if not batch:
+                    break
+                file.write(batch)
+
         if not what.sha256:
             print('Sha256 for {} not set, do no verify download'.format(what.name))
         elif what.sha256 != get_sha256(file_path):
@@ -1022,6 +1037,8 @@ def parse_args():
     parser.add_argument('--verbose', '-v', action="store_true",
                         help=("Print all logs on stdout instead of in specific"
                               " log files per commands"))
+    parser.add_argument('--no-cert-check', action='store_true',
+                        help="Skip SSL certificate verification during download")
     return parser.parse_args()
 
 if __name__ == "__main__":
