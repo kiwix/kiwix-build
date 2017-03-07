@@ -435,9 +435,13 @@ class Toolchain(metaclass=_MetaToolchain):
     all_toolchains = {}
     configure_option = ""
     cmake_option = ""
+    Builder = None
+    Source = None
 
     def __init__(self, buildEnv):
         self.buildEnv = buildEnv
+        self.source = self.Source(self) if self.Source else None
+        self.builder = self.Builder(self) if self.Builder else None
 
     @property
     def full_name(self):
@@ -527,7 +531,12 @@ class Builder:
             source.prepare()
 
     def build(self):
-        builders = (dep.builder for dep in self.targets.values() if not dep.skip)
+        toolchain_builders = (tlc.builder for tlc in self.buildEnv.toolchains if tlc.builder)
+        for toolchain_builder in toolchain_builders:
+            print("build toolchain {} :".format(toolchain_builder.name))
+            toolchain_builder.build()
+
+        builders = (dep.builder for dep in self.targets.values() if (dep.builder and not dep.skip))
         for builder in builders:
             print("build {} :".format(builder.name))
             builder.build()
