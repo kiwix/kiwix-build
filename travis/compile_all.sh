@@ -14,7 +14,7 @@ if [[ "$TRAVIS_EVENT_TYPE" = "cron" ]]
 then
   if [[ ${PLATFORM} = android* ]]
   then
-    TARGETS="libzim kiwix-lib"
+    TARGETS="libzim kiwix-lib kiwix-android"
   else
     TARGETS="libzim kiwix-lib kiwix-tools"
   fi
@@ -77,7 +77,7 @@ else
   # No a cron job, we just have to build to be sure nothing is broken.
   if [[ ${PLATFORM} = android* ]]
   then
-    TARGET=kiwix-lib
+    TARGET=kiwix-android
   else
     TARGET=kiwix-tools
   fi

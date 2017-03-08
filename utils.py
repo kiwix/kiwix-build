@@ -2,6 +2,7 @@ import os.path
 import hashlib
 import tarfile, zipfile
 import tempfile
+import shutil
 import os, stat
 from collections import namedtuple, defaultdict
 
@@ -35,6 +36,18 @@ def get_sha256(path):
 def add_execution_right(file_path):
     current_permissions = stat.S_IMODE(os.lstat(file_path).st_mode)
     os.chmod(file_path, current_permissions | stat.S_IXUSR)
+
+def copy_tree(src, dst, post_copy_function=None):
+    os.makedirs(dst, exist_ok=True)
+    for root, dirs, files in os.walk(src):
+        r = os.path.relpath(root, src)
+        dstdir = pj(dst, r)
+        os.makedirs(dstdir, exist_ok=True)
+        for f in files:
+            dstfile = pj(dstdir, f)
+            shutil.copy2(pj(root, f), dstfile)
+            if post_copy_function is not None:
+                post_copy_function(dstfile)
 
 class SkipCommand(Exception):
     pass
