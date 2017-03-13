@@ -364,7 +364,9 @@ class BuildEnv:
                                           ])
 
         env['CPPFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['CPPFLAGS']])
-        env['LDFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'), env['LDFLAGS']])
+        env['LDFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'),
+                                   '-L'+pj(self.install_dir, 'lib64'),
+                                   env['LDFLAGS']])
         return env
 
     def run_command(self, command, cwd, context, env=None, input=None, cross_path_only=False):
