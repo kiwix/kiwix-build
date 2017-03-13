@@ -224,14 +224,15 @@ class Icu_cross_compile(Icu):
             return super().configure_option + " --with-cross-build=" + Icu_native.builder.build_path
 
 
+class OpenzimSource(GitClone):
+    git_remote = "https://gerrit.wikimedia.org/r/p/openzim.git"
+    git_dir = "openzim"
+
+
 class Zimlib(Dependency):
     name = "zimlib"
 
-    class Source(GitClone):
-        #git_remote = "https://gerrit.wikimedia.org/r/p/openzim.git"
-        git_remote = "https://github.com/mgautierfr/openzim"
-        git_dir = "openzim"
-        git_ref = "meson"
+    Source = OpenzimSource
 
     class Builder(MesonBuilder):
         subsource_dir = "zimlib"
