@@ -382,6 +382,7 @@ class BuildEnv:
             if not self.options.verbose:
                 log = open(context.log_file, 'w')
             print("run command '{}'".format(command), file=log)
+            print("current directory is '{}'".format(cwd), file=log)
             print("env is :", file=log)
             for k, v in env.items():
                 print("  {} : {!r}".format(k, v), file=log)
