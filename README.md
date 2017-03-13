@@ -54,7 +54,7 @@ LD_LIBRARY_PATH :
 To build a static binary simply add the --build_static option to the 
 kiwix-build.py script :
 
-    $ kiwix-build.py --build_static <INSTALL_DIR>
+    $ kiwix-build.py --build-static <INSTALL_DIR>
 
 Notes: You cannot use the same working directory to build a dynamic and static.
 
