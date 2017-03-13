@@ -1,0 +1,13 @@
+diff -ur icu4c-58_2/source/tools/toolutil/pkg_genc.c icu4c-58_2.patched/source/tools/toolutil/pkg_genc.c
+--- icu4c-58_2/source/tools/toolutil/pkg_genc.c	2016-06-15 20:58:17.000000000 +0200
++++ icu4c-58_2.patched/source/tools/toolutil/pkg_genc.c	2017-02-27 10:23:39.985471339 +0100
+@@ -35,6 +35,9 @@
+ #       define EM_X86_64 62
+ #   endif
+ #   define ICU_ENTRY_OFFSET 0
++#   ifndef ELF64_ST_INFO
++#       define ELF64_ST_INFO(b,t)      (((b) << 4) + ((t) & 0xf))
++#   endif
+ #endif
+ 
+ #include <stdio.h>

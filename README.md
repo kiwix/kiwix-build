@@ -20,66 +20,120 @@ Take care, the paragraphs are about the *target platforms*. If you
 want to build Kiwix for Android on a GNU/Linux system, you should
 follow the instructions of the "Android" paragraph.
 
-## GNU/Linux
-Install pre-requisties in your distro, eg, in Debian based:
+## Preparing environment
 
-    sudo apt install git cmake meson python3-virtualenv virtualenvwrapper zlib1g-dev libicu-dev aria2 libtool
+You will need a recent version of meson (0.34) and ninja (1.6)
+If your distribution provide a recent enough versions for them, just install
+them with your package manager.
 
-### Dynamic
+Else you can install them manually
 
-Pretty simple once all dependencies are installed :
+### Meson
 
-The archives and sources will be copied in your current working dir so
-I recommend you to create a working directory:
+```
+pip install meson --user # Install Meson
+```
 
-    $ mkdir <MY_WORKING_DIR>
-    $ cd <MY_WOKRING_DIR>
+(You may want to install meson in a virtualenv if you prefer)
 
-Once ready, just run the script with the install dir as argument:
+### ninja
 
-    $ <right/path/to/>kiwix-build.py <INSTALL_DIR>
+```
+git clone git://github.com/ninja-build/ninja.git
+cd ninja
+git checkout release
+./configure.py --bootstrap
+cp ninja <a_directory_in_your_path>
+```
 
-The script will download and install all the needed dependencies and
-kiwix related repository.
+## Buildings
 
-At the end of the script you will found the binaries in <INSTALL_DIR>/bin.
+This is the simple one.
 
-As it is a dynamic linked binary, you will need to add the lib directory to
-LD_LIBRARY_PATH :
+```
+./kiwix-build.py
+```
 
-    $ LD_LIBRARY_PATH=<INSTALL_DIR>/lib <INSTALL_DIR>/bin/kiwix-serve
+It will compile everything.
+If you are using a supported platform (redhad or debian based) it will install
+missing packages using sudo.
+If you don't want to trust kiwix-build.py and give it the root right, just
+launch yourself the the printed command.
 
-### Static
+### Outputs
 
-To build a static binary simply add the --build_static option to the 
-kiwix-build.py script :
+Kiwix-build.py will create several directories:
 
-    $ kiwix-build.py --build_static <INSTALL_DIR>
+- ARCHIVES : All the downloaded archives go there.
+- SOURCES : All the sources (extracted from archives and patched) go there.
+- BUILD_native_dyn : All the build files go there.
+- BUILD_native_dyn/INSTALL : The installed files go there.
+- BUILD_native_dyn/LOGS: The logs files of the build.
 
-Notes: You cannot use the same working directory to build a dynamic and static.
+ARCHIVES and SOURCES are independent of the build type you choose.
 
-Notes: At the end of the script, meson may raise a error when it install the
-kiwix-server binary. This is a meson bug and it has been fixed here
-(https://github.com/mesonbuild/meson/pull/1240) but your meson version may
-not include this fix.
-However, the kiwix-server binary is valid and ready to use.
+If you want to install all those directories elsewhere, you can pass the
+`--working-dir` option:
 
-## Mac OSX Universal
+```
+./kiwix-build.py --working-dir <a_directory_somewhere>
+```
 
-The script has not been tested on Mac OSX.
+### Other target
 
-Please, if you have a Mac OSX, try to run the kiwix-build script and
-report errors or, better, fixes :)
+By default, kiwix-build will build kiwix-tools and all its dependencies.
+If you want to compile another target only (let's said kiwixlib), you can
+specify it:
 
-## Android and Windows
+```
+./kiwix-build Kiwixlib
+```
 
-Cross compilation and strange stuff are to come.
+### Other target platforms.
 
-If you wich to help, you're welcome.
+By default, kiwix-build will build everything for the current (native) platform
+using dynamic linkage (hence the `native_dyn` of the BUILD_* directory).
+
+But you can select another target platforms using the option `target-platform`.
+For now, there is ten different platform supported :
+
+- native_dyn
+- native_static
+- win32_dyn
+- win32_static
+- android_arm
+- android_arm64
+- android_mips
+- android_mips64
+- android_x86
+- android_x86_64
+
+So, if you want to compile for win32 using static linkage:
+
+```
+./kiwix-build.py --target-platform win32_dyn
+```
+
+As said before, the ARCHIVES and SOURCES directories are common of the target
+platform. So, if you always work in the same working directory the sources will
+not be downloaded and prepared again.
+
+On android* platforms, only kiwixlib is supported. So you must ask to
+kiwix-build to compile only kiwixlib:
+
+```
+./kiwix-build.py --target-platform android_arm Kiwixlib
+```
+
+## Know bugs
+
+- The script has not been tested on Mac OSX.
+- Cross-compilation to arm (raspberry-PI) is missing.
+
+Help is welcome on those parts.
+
 
 # CONTACT
-
-Email: kiwix-developer@lists.sourceforge.net
 
 IRC: #kiwix on irc.freenode.net  
 (I'm hidding myself under the starmad pseudo)
