@@ -16,9 +16,8 @@ script.
 
 This script has been tested of Fedora 23 and Ubuntu 16.10
 
-Take care, the paragraphs are about the *target platforms*. If you
-want to build Kiwix for Android on a GNU/Linux system, you should
-follow the instructions of the "Android" paragraph.
+If you want to cross-compile for other platforms as windows or android, you
+should read the "Other target platform" section.
 
 ## Preparing environment
 
@@ -89,13 +88,13 @@ specify it:
 ./kiwix-build Kiwixlib
 ```
 
-### Other target platforms.
+### Other target platform.
 
 By default, kiwix-build will build everything for the current (native) platform
-using dynamic linkage (hence the `native_dyn` of the BUILD_* directory).
+using dynamic linkage (hence the `native_dyn` of the BUILD_native_dyn directory).
 
-But you can select another target platforms using the option `target-platform`.
-For now, there is ten different platform supported :
+But you can select another target platform using the option `target-platform`.
+For now, there is ten different supported platforms :
 
 - native_dyn
 - native_static
@@ -114,9 +113,9 @@ So, if you want to compile for win32 using static linkage:
 ./kiwix-build.py --target-platform win32_dyn
 ```
 
-As said before, the ARCHIVES and SOURCES directories are common of the target
-platform. So, if you always work in the same working directory the sources will
-not be downloaded and prepared again.
+As said before, the ARCHIVES and SOURCES directories are common to all target
+platforms. So, if you always work in the same working directory the sources
+will not be downloaded and prepared again.
 
 On android* platforms, only kiwixlib is supported. So you must ask to
 kiwix-build to compile only kiwixlib:
