@@ -452,6 +452,10 @@ class BuildEnv:
             if packages:
                 packages_list += packages
                 dep.skip = True
+        for dep in self.targetsDict.values():
+            packages = getattr(dep, 'extra_packages', [])
+            for package in packages:
+                packages_list += package_name_mapper.get(package, [])
         if os.path.exists(autoskip_file):
             print("SKIP")
             return
