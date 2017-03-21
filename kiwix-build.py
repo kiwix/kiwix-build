@@ -82,6 +82,8 @@ PACKAGE_NAME_MAPPERS = {
         'lzma': ['xz-devel'],
         'icu4c': None,
         'zimlib': None,
+        'file' : ['file-devel'],
+        'gumbo' : ['gumbo-parser-devel'],
     },
     'fedora_native_static': {
         'COMMON': ['gcc-c++', 'cmake', 'automake', 'glibc-static', 'libstdc++-static', 'ccache'],

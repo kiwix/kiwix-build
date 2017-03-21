@@ -228,6 +228,11 @@ class OpenzimSource(GitClone):
     git_remote = "https://gerrit.wikimedia.org/r/p/openzim.git"
     git_dir = "openzim"
 
+    def _post_prepare_script(self, context):
+        context.try_skip(self.git_path)
+        command = "./autogen.sh"
+        self.buildEnv.run_command(command, pj(self.git_path, 'zimwriterfs'), context)
+
 
 class Zimlib(Dependency):
     name = "zimlib"
@@ -236,6 +241,24 @@ class Zimlib(Dependency):
 
     class Builder(MesonBuilder):
         subsource_dir = "zimlib"
+
+
+class Zimwriterfs(Dependency):
+    name = "zimwriterfs"
+    extra_packages = ['file', 'gumbo']
+
+    @property
+    def dependencies(self):
+        base_dependencies = ['Zimlib', 'zlib', 'lzma', 'Xapian']
+        if self.buildEnv.platform_info.build != 'native':
+            return base_dependencies + ["Icu_cross_compile"]
+        else:
+            return base_dependencies + ["Icu"]
+
+    Source = OpenzimSource
+
+    class Builder(MakeBuilder):
+        subsource_dir = "zimwriterfs"
 
 
 class Kiwixlib(Dependency):
