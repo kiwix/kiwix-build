@@ -240,11 +240,10 @@ class Zimlib(Dependency):
 
 class Kiwixlib(Dependency):
     name = "kiwix-lib"
-    dependencies = ['zlib', 'lzma']
 
     @property
     def dependencies(self):
-        base_dependencies = ["Xapian", "Pugixml", "Zimlib"]
+        base_dependencies = ["Xapian", "Pugixml", "Zimlib", "zlib", "lzma"]
         if self.buildEnv.platform_info.build != 'android':
             base_dependencies += ['CTPP2']
         if self.buildEnv.platform_info.build != 'native':
