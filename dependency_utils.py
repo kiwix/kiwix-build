@@ -144,6 +144,8 @@ class GitClone(Source):
     def prepare(self):
         self.command('gitclone', self._git_clone)
         self.command('gitupdate', self._git_update)
+        if hasattr(self, '_post_prepare_script'):
+            self.command('post_prepare_script', self._post_prepare_script)
 
 
 class Builder:

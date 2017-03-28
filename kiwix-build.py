@@ -82,6 +82,8 @@ PACKAGE_NAME_MAPPERS = {
         'lzma': ['xz-devel'],
         'icu4c': None,
         'zimlib': None,
+        'file' : ['file-devel'],
+        'gumbo' : ['gumbo-parser-devel'],
     },
     'fedora_native_static': {
         'COMMON': ['gcc-c++', 'cmake', 'automake', 'glibc-static', 'libstdc++-static', 'ccache'],
@@ -364,7 +366,9 @@ class BuildEnv:
                                           ])
 
         env['CPPFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['CPPFLAGS']])
-        env['LDFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'), env['LDFLAGS']])
+        env['LDFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'),
+                                   '-L'+pj(self.install_dir, 'lib64'),
+                                   env['LDFLAGS']])
         return env
 
     def run_command(self, command, cwd, context, env=None, input=None, cross_path_only=False):
@@ -382,6 +386,7 @@ class BuildEnv:
             if not self.options.verbose:
                 log = open(context.log_file, 'w')
             print("run command '{}'".format(command), file=log)
+            print("current directory is '{}'".format(cwd), file=log)
             print("env is :", file=log)
             for k, v in env.items():
                 print("  {} : {!r}".format(k, v), file=log)
@@ -449,6 +454,10 @@ class BuildEnv:
             if packages:
                 packages_list += packages
                 dep.skip = True
+        for dep in self.targetsDict.values():
+            packages = getattr(dep, 'extra_packages', [])
+            for package in packages:
+                packages_list += package_name_mapper.get(package, [])
         if os.path.exists(autoskip_file):
             print("SKIP")
             return

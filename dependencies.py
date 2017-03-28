@@ -224,26 +224,49 @@ class Icu_cross_compile(Icu):
             return super().configure_option + " --with-cross-build=" + Icu_native.builder.build_path
 
 
+class OpenzimSource(GitClone):
+    git_remote = "https://gerrit.wikimedia.org/r/p/openzim.git"
+    git_dir = "openzim"
+
+    def _post_prepare_script(self, context):
+        context.try_skip(self.git_path)
+        command = "./autogen.sh"
+        self.buildEnv.run_command(command, pj(self.git_path, 'zimwriterfs'), context)
+
+
 class Zimlib(Dependency):
     name = "zimlib"
 
-    class Source(GitClone):
-        #git_remote = "https://gerrit.wikimedia.org/r/p/openzim.git"
-        git_remote = "https://github.com/mgautierfr/openzim"
-        git_dir = "openzim"
-        git_ref = "meson"
+    Source = OpenzimSource
 
     class Builder(MesonBuilder):
         subsource_dir = "zimlib"
 
 
-class Kiwixlib(Dependency):
-    name = "kiwix-lib"
-    dependencies = ['zlib', 'lzma']
+class Zimwriterfs(Dependency):
+    name = "zimwriterfs"
+    extra_packages = ['file', 'gumbo']
 
     @property
     def dependencies(self):
-        base_dependencies = ["Xapian", "Pugixml", "Zimlib"]
+        base_dependencies = ['Zimlib', 'zlib', 'lzma', 'Xapian']
+        if self.buildEnv.platform_info.build != 'native':
+            return base_dependencies + ["Icu_cross_compile"]
+        else:
+            return base_dependencies + ["Icu"]
+
+    Source = OpenzimSource
+
+    class Builder(MakeBuilder):
+        subsource_dir = "zimwriterfs"
+
+
+class Kiwixlib(Dependency):
+    name = "kiwix-lib"
+
+    @property
+    def dependencies(self):
+        base_dependencies = ["Xapian", "Pugixml", "Zimlib", "zlib", "lzma"]
         if self.buildEnv.platform_info.build != 'android':
             base_dependencies += ['CTPP2']
         if self.buildEnv.platform_info.build != 'native':
