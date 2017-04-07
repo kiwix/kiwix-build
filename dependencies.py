@@ -232,7 +232,14 @@ class Icu_cross_compile(Icu):
 
 class Libzim(Dependency):
     name = "libzim"
-    dependencies = ['zlib', 'lzma']
+
+    @property
+    def dependencies(self):
+        base_dependencies = ['zlib', 'lzma', 'xapian-core']
+        if self.buildEnv.platform_info.build != 'native':
+            return base_dependencies + ["icu4c_cross-compile"]
+        else:
+            return base_dependencies + ["icu4c"]
 
     class Source(GitClone):
         git_remote = "https://github.com/openzim/libzim.git"
@@ -270,7 +277,7 @@ class Kiwixlib(Dependency):
 
     @property
     def dependencies(self):
-        base_dependencies = ["xapian-core", "pugixml", "libzim", "zlib", "lzma"]
+        base_dependencies = ["pugixml", "libzim", "zlib", "lzma"]
         if self.buildEnv.platform_info.build != 'android':
             base_dependencies += ['ctpp2']
         if self.buildEnv.platform_info.build != 'native':
