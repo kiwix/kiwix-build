@@ -721,6 +721,8 @@ class Builder:
         dependencies = list(remove_duplicates(dependencies))
 
         for dep in dependencies:
+            if self.options.build_deps_only and dep == targetDef:
+                continue
             self.targets[dep] = _targets[dep]
 
     def add_targets(self, targetName, targets):
@@ -792,6 +794,9 @@ def parse_args():
                         help="Skip SSL certificate verification during download")
     parser.add_argument('--skip-source-prepare', action='store_true',
                         help="Skip the source download part")
+    parser.add_argument('--build-deps-only', action='store_true',
+                        help=("Build only the dependencies of the specified targets."))
+
     return parser.parse_args()
 
 
