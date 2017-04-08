@@ -230,23 +230,14 @@ class Icu_cross_compile(Icu):
             return super().configure_option + " --with-cross-build=" + icu_native_dep.builder.build_path
 
 
-class OpenzimSource(GitClone):
-    git_remote = "https://gerrit.wikimedia.org/r/p/openzim.git"
-    git_dir = "openzim"
-
-    def _post_prepare_script(self, context):
-        context.try_skip(self.git_path)
-        command = "./autogen.sh"
-        self.buildEnv.run_command(command, pj(self.git_path, 'zimwriterfs'), context)
-
-
 class Libzim(Dependency):
     name = "libzim"
 
-    Source = OpenzimSource
+    class Source(GitClone):
+        git_remote = "https://github.com/openzim/libzim.git"
+        git_dir = "libzim"
 
-    class Builder(MesonBuilder):
-        subsource_dir = "zimlib"
+    Builder = MesonBuilder
 
 
 class Zimwriterfs(Dependency):
@@ -261,10 +252,16 @@ class Zimwriterfs(Dependency):
         else:
             return base_dependencies + ["icu4c"]
 
-    Source = OpenzimSource
+    class Source(GitClone):
+        git_remote = "https://github.com/openzim/zimwriterfs.git"
+        git_dir = "zimwriterfs"
 
-    class Builder(MakeBuilder):
-        subsource_dir = "zimwriterfs"
+        def _post_prepare_script(self, context):
+            context.try_skip(self.git_path)
+            command = "./autogen.sh"
+            self.buildEnv.run_command(command, self.git_path, context)
+
+    Builder = MakeBuilder
 
 
 class Kiwixlib(Dependency):
