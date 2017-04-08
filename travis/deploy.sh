@@ -4,7 +4,6 @@ set -e
 
 SSH_KEY=travis/travisci_builder_id_key
 
-chmod 600 ${SSH_KEY}
 
 BASE_DIR="BUILD_*/INSTALL"
 ./kiwix-deploy.py ${BASE_DIR} ${ARCHIVE_TYPE} \
