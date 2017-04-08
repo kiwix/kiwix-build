@@ -11,7 +11,8 @@ class _MetaDependency(type):
     def __new__(cls, name, bases, dct):
         _class = type.__new__(cls, name, bases, dct)
         if name != 'Dependency':
-            Dependency.all_deps[name] = _class
+            dep_name = dct['name']
+            Dependency.all_deps[dep_name] = _class
         return _class
 
 

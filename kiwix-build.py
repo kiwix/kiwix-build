@@ -710,6 +710,7 @@ class android_ndk(Toolchain):
 
 class Builder:
     def __init__(self, options):
+        self.options = options
         self.targets = OrderedDict()
         self.buildEnv = buildEnv = BuildEnv(options, self.targets)
 
@@ -738,6 +739,10 @@ class Builder:
         yield targetName
 
     def prepare_sources(self):
+        if self.options.skip_source_prepare:
+            print("SKIP")
+            return
+
         toolchain_sources = (tlc.source for tlc in self.buildEnv.toolchains if tlc.source)
         for toolchain_source in toolchain_sources:
             print("prepare sources for toolchain {} :".format(toolchain_source.name))
@@ -775,7 +780,8 @@ class Builder:
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('targets', default='KiwixTools', nargs='?')
+    parser.add_argument('targets', default='kiwix-tools', nargs='?',
+                        choices=Dependency.all_deps.keys())
     parser.add_argument('--working-dir', default=".")
     parser.add_argument('--libprefix', default=None)
     parser.add_argument('--target-platform', default="native_dyn", choices=BuildEnv.target_platforms)
@@ -784,6 +790,8 @@ def parse_args():
                               " log files per commands"))
     parser.add_argument('--no-cert-check', action='store_true',
                         help="Skip SSL certificate verification during download")
+    parser.add_argument('--skip-source-prepare', action='store_true',
+                        help="Skip the source download part")
     return parser.parse_args()
 
 
