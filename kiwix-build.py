@@ -780,7 +780,7 @@ class Builder:
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('targets', default='KiwixTools', nargs='?')
+    parser.add_argument('targets', default='kiwix-tools', nargs='?')
     parser.add_argument('--working-dir', default=".")
     parser.add_argument('--libprefix', default=None)
     parser.add_argument('--target-platform', default="native_dyn", choices=BuildEnv.target_platforms)
