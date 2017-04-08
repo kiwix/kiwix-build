@@ -232,6 +232,7 @@ class Icu_cross_compile(Icu):
 
 class Libzim(Dependency):
     name = "libzim"
+    dependencies = ['zlib', 'lzma']
 
     class Source(GitClone):
         git_remote = "https://github.com/openzim/libzim.git"

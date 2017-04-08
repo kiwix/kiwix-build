@@ -4,6 +4,7 @@ sudo: required
 before_install:
 - openssl aes-256-cbc -K $encrypted_eba2f7543984_key -iv $encrypted_eba2f7543984_iv
   -in travis/travisci_builder_id_key.enc -out travis/travisci_builder_id_key -d
+- chmod 600 travis/travisci_builder_id_key
 cache: ccache
 install: travis/install_extra_deps.sh
 script: travis/compile_all.sh
@@ -12,18 +13,18 @@ deploy:
   skip_cleanup: true
   script: travis/deploy.sh
   on:
-    condition: ( "$DEPLOY" = "true" ) && ( "$TRAVIS_EVENT_TYPE" = "cron" )
+    condition: ( "$TRAVIS_EVENT_TYPE" = "cron" )
 env:
- - BUILD_OPTION="--target-platform=native_dyn"
- - BUILD_OPTION="--target-platform=native_static" ARCHIVE_TYPE="--tar" DEPLOY=true
- - BUILD_OPTION="--target-platform=win32_dyn"
- - BUILD_OPTION="--target-platform=win32_static" ARCHIVE_TYPE="--zip" DEPLOY=true
- - BUILD_OPTION="--target-platform=android_arm kiwix-lib"
- - BUILD_OPTION="--target-platform=android_arm64 kiwix-lib"
- - BUILD_OPTION="--target-platform=android_mips kiwix-lib"
- - BUILD_OPTION="--target-platform=android_mips64 kiwix-lib"
- - BUILD_OPTION="--target-platform=android_x86 kiwix-lib"
- - BUILD_OPTION="--target-platform=android_x86_64 kiwix-lib"
+ - PLATFORM="native_dyn"
+ - PLATFORM="native_static"
+ - PLATFORM="win32_dyn"
+ - PLATFORM="win32_static"
+ - PLATFORM="android_arm"
+ - PLATFORM="android_arm64"
+ - PLATFORM="android_mips"
+ - PLATFORM="android_mips64"
+ - PLATFORM="android_x86"
+ - PLATFORM="android_x86_64"
 notifications:
   irc:
     channels:
