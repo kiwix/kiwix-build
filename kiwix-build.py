@@ -108,14 +108,14 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON': ['gcc-c++', 'cmake', 'automake', 'ccache', 'java-1.8.0-openjdk-devel']
     },
     'debian_native_dyn': {
-        'COMMON': ['gcc', 'cmake', 'libbz2-dev', 'ccache'],
+        'COMMON': ['automake', 'gcc', 'cmake', 'libbz2-dev', 'ccache'],
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
         'libmicrohttpd': ['libmicrohttpd-dev', 'ccache']
     },
     'debian_native_static': {
-        'COMMON': ['gcc', 'cmake', 'libbz2-dev', 'ccache'],
+        'COMMON': ['automake', 'gcc', 'cmake', 'libbz2-dev', 'ccache'],
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
@@ -127,7 +127,7 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON': ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools', 'ccache']
     },
     'debian_android': {
-        'COMMON': ['gcc', 'cmake', 'ccache']
+        'COMMON': ['automake', 'gcc', 'cmake', 'ccache']
     },
 }
 
