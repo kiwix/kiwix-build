@@ -29,6 +29,7 @@ CROSS_ENV = {
         'toolchain_names': ['mingw32_toolchain'],
         'root_path': '/usr/i686-w64-mingw32/sys-root/mingw',
         'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90'],
+        'extra_cflags': ['-DWIN32'],
         'host_machine': {
             'system': 'windows',
             'cpu_family': 'x86',
@@ -39,6 +40,7 @@ CROSS_ENV = {
     'fedora_android': {
         'toolchain_names': ['android_ndk'],
         'extra_libs': [],
+        'extra_cflags': [],
         'host_machine': {
             'system': 'Android',
             'cpu_family': 'x86',
@@ -50,6 +52,7 @@ CROSS_ENV = {
         'toolchain_names': ['mingw32_toolchain'],
         'root_path': '/usr/i686-w64-mingw32/',
         'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90'],
+        'extra_cflags': ['-DWIN32'],
         'host_machine': {
             'system': 'windows',
             'cpu_family': 'x86',
@@ -60,6 +63,7 @@ CROSS_ENV = {
     'debian_android': {
         'toolchain_names': ['android_ndk'],
         'extra_libs': [],
+        'extra_cflags': [],
         'host_machine': {
             'system': 'Android',
             'cpu_family': 'x86',
