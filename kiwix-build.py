@@ -103,7 +103,7 @@ class TargetInfo:
     def __str__(self):
         return "{}_{}".format(self.build, 'static' if self.static else 'dyn')
 
-    def get_cross_env(self, host):
+    def get_cross_config(self, host):
         if self.build == 'native':
             return {}
         elif self.build == 'win32':
@@ -143,7 +143,7 @@ class AndroidTargetInfo(TargetInfo):
     def __str__(self):
         return "android"
 
-    def get_cross_env(self, host):
+    def get_cross_config(self, host):
         return {
             'extra_libs': [],
             'extra_cflags': [],
@@ -229,7 +229,7 @@ class BuildEnv:
 
     def setup_build(self, target_platform):
         self.platform_info = platform_info = self.target_platforms[target_platform]
-        self.cross_env = self.platform_info.get_cross_env(self.distname)
+        self.cross_config = self.platform_info.get_cross_config(self.distname)
 
     def setup_toolchains(self):
         toolchain_names = self.platform_info.toolchains
@@ -250,7 +250,7 @@ class BuildEnv:
             template = f.read()
         content = template.format(
             toolchain=self.toolchains[0],
-            **self.cross_env
+            **self.cross_config
         )
         with open(crossfile, 'w') as outfile:
             outfile.write(content)
@@ -324,9 +324,9 @@ class BuildEnv:
 
         bin_dirs = []
         if cross_compile_env:
-            for k, v in self.cross_env.get('env', {}).items():
+            for k, v in self.cross_config.get('env', {}).items():
                 if k.startswith('_format_'):
-                    v = v.format(**self.cross_env)
+                    v = v.format(**self.cross_config)
                     k = k[8:]
                 env[k] = v
             for toolchain in self.toolchains:
@@ -547,7 +547,7 @@ class mingw32_toolchain(Toolchain):
 
     @property
     def root_path(self):
-        return self.buildEnv.cross_env['root_path']
+        return self.buildEnv.cross_config['root_path']
 
     @property
     def binaries(self):
@@ -574,7 +574,7 @@ class mingw32_toolchain(Toolchain):
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
         env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
         env['CXXFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
-        env['LIBS'] = " ".join(self.buildEnv.cross_env['extra_libs']) + " " +env['LIBS']
+        env['LIBS'] = " ".join(self.buildEnv.cross_config['extra_libs']) + " " +env['LIBS']
 
 
 class android_ndk(Toolchain):
