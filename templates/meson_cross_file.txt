@@ -14,5 +14,5 @@ cpp_args = {extra_cflags!r}
 [host_machine]
 cpu_family = '{host_machine[cpu_family]}'
 cpu = '{host_machine[cpu]}'
-system = '{host_machine[system]}'
+system = '{host_machine[lsystem]}'
 endian = '{host_machine[endian]}'

@@ -116,7 +116,8 @@ class TargetInfo:
                 'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90'],
                 'extra_cflags': ['-DWIN32'],
                 'host_machine': {
-                    'system': 'windows',
+                    'system': 'Windows',
+                    'lsystem': 'windows',
                     'cpu_family': 'x86',
                     'cpu': 'i686',
                     'endian': 'little'
@@ -148,6 +149,7 @@ class AndroidTargetInfo(TargetInfo):
             'extra_cflags': [],
             'host_machine': {
                 'system': 'Android',
+                'lsystem': 'android',
                 'cpu_family': self.arch,
                 'cpu': self.cpu,
                 'endian': 'little'
