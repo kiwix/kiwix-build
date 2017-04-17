@@ -419,7 +419,8 @@ class BuildEnv:
         else:
             context = None
         batch_size = 1024 * 8
-        with urllib.request.urlopen(file_url, context=context) as resource, open(file_path, 'wb') as file:
+        extra_args = {'context':context} if sys.version_info >= (3, 4, 3) else {}
+        with urllib.request.urlopen(file_url, **extra_args) as resource, open(file_path, 'wb') as file:
             while True:
                 batch = resource.read(batch_size)
                 if not batch:
