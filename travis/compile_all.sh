@@ -35,7 +35,17 @@ then
         MESON_FILE=meson_cross_file.txt
       fi
       ANDROID_NDK_DIR=$(find . -name "android-ndk*")
-      tar -czf "${DEPS_ARCHIVES_DIR}/deps_${PLATFORM}_${TARGET}.tar.gz" INSTALL ${MESON_FILE} ${ANDROID_NDK_DIR}
+      ARCHIVE_NAME="deps_${PLATFORM}_${TARGET}.tar.gz"
+
+      cat <<EOF > manifest.txt
+${ARCHIVE_NAME}
+*********************************
+
+Dependencies archive for ${TARGET} on platform ${PLATFORM}
+Generated at $(date)
+EOF
+
+      tar -czf ${ARCHIVE_NAME} INSTALL manifest.txt ${MESON_FILE} ${ANDROID_NDK_DIR}
     )
 
     ${TRAVIS_BUILD_DIR}/kiwix-build.py --target-platform $PLATFORM ${TARGET}
