@@ -19,6 +19,8 @@ env:
  - PLATFORM="native_static"
  - PLATFORM="win32_dyn"
  - PLATFORM="win32_static"
+ - PLATFORM="armhf_dyn"
+ - PLATFORM="armhf_static"
  - PLATFORM="android_arm"
  - PLATFORM="android_arm64"
  - PLATFORM="android_mips"
