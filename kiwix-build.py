@@ -9,7 +9,7 @@ import platform
 from collections import OrderedDict
 
 from dependencies import Dependency
-from dependency_utils import ReleaseDownload, Builder
+from dependency_utils import ReleaseDownload, Builder, GitClone
 from utils import (
     pj,
     remove_duplicates,
@@ -60,6 +60,12 @@ PACKAGE_NAME_MAPPERS = {
         'libmicrohttpd': None, # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
                                # gcc cannot found them.
     },
+    'fedora_armhf_static': {
+        'COMMON': ['cmake', 'automake', 'ccache']
+    },
+    'fedora_armhf_dyn': {
+        'COMMON': ['cmake', 'automake', 'ccache']
+    },
     'fedora_android': {
         'COMMON': ['gcc-c++', 'cmake', 'automake', 'ccache', 'java-1.8.0-openjdk-devel']
     },
@@ -81,6 +87,12 @@ PACKAGE_NAME_MAPPERS = {
     },
     'debian_win32_static': {
         'COMMON': ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools', 'cmake', 'ccache']
+    },
+    'debian_armhf_static': {
+        'COMMON': ['cmake', 'automake', 'ccache']
+    },
+    'debian_armhf_dyn': {
+        'COMMON': ['cmake', 'automake', 'ccache']
     },
     'debian_android': {
         'COMMON': ['automake', 'gcc', 'cmake', 'ccache', 'default-jdk']
@@ -121,9 +133,20 @@ class TargetInfo:
                     'cpu_family': 'x86',
                     'cpu': 'i686',
                     'endian': 'little'
-                 }
-             }
-
+                }
+            }
+        elif self.build == 'armhf':
+            return {
+                'extra_libs': [],
+                'extra_cflags': [],
+                'host_machine': {
+                    'system': 'linux',
+                    'lsystem': 'linux',
+                    'cpu_family': 'arm',
+                    'cpu': 'armhf',
+                    'endian': 'little'
+                }
+            }
 
 class AndroidTargetInfo(TargetInfo):
     __arch_infos = {
@@ -163,6 +186,8 @@ class BuildEnv:
         'native_static': TargetInfo('native', True, []),
         'win32_dyn': TargetInfo('win32', False, ['mingw32_toolchain']),
         'win32_static': TargetInfo('win32', True, ['mingw32_toolchain']),
+        'armhf_dyn': TargetInfo('armhf', False, ['armhf_toolchain']),
+        'armhf_static': TargetInfo('armhf', True, ['armhf_toolchain']),
         'android_arm': AndroidTargetInfo('arm'),
         'android_arm64': AndroidTargetInfo('arm64'),
         'android_mips': AndroidTargetInfo('mips'),
@@ -262,6 +287,10 @@ class BuildEnv:
 
     def setup_android(self):
         self.cmake_crossfile = self._gen_crossfile('cmake_android_cross_file.txt')
+        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
+
+    def setup_armhf(self):
+        self.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
         self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
     def __getattr__(self, name):
@@ -750,6 +779,49 @@ class android_sdk(Toolchain):
 
     def set_env(self, env):
         env['ANDROID_HOME'] = self.builder.install_path
+
+
+class armhf_toolchain(Toolchain):
+    name = 'armhf'
+    arch_full = 'arm-linux-gnueabihf'
+
+    class Source(GitClone):
+        git_remote = "https://github.com/raspberrypi/tools"
+        git_dir = "raspberrypi-tools"
+
+    @property
+    def root_path(self):
+        return pj(self.source_path, 'arm-bcm2708', 'gcc-linaro-arm-linux-gnueabihf-raspbian-x64')
+
+    @property
+    def binaries(self):
+        binaries = ((k,'{}-{}'.format(self.arch_full, v))
+                for k, v in (('CC', 'gcc'),
+                             ('CXX', 'g++'),
+                             ('AR', 'ar'),
+                             ('STRIP', 'strip'),
+                             ('WINDRES', 'windres'),
+                             ('RANLIB', 'ranlib'),
+                             ('LD', 'ld'))
+               )
+        return {k:pj(self.root_path, 'bin', v)
+                for k,v in binaries}
+
+    @property
+    def configure_option(self):
+        return '--host={}'.format(self.arch_full)
+
+    def get_bin_dir(self):
+        return [pj(self.root_path, 'bin')]
+
+    def set_env(self, env):
+        env['CC'] = self.binaries['CC']
+        env['CXX'] = self.binaries['CXX']
+
+        env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
+        env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
+        env['CXXFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
+        env['LIBS'] = " ".join(self.buildEnv.cross_config['extra_libs']) + " " +env['LIBS']
 
 
 class Builder:
