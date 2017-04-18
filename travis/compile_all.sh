@@ -3,9 +3,9 @@
 set -e
 
 BASE_DIR="BUILD_${PLATFORM}"
-DEPS_ARCHIVES_DIR=${HOME}/DEPS_ARCHIVES
-mkdir -p ${DEPS_ARCHIVES_DIR}
 NIGHTLY_ARCHIVES_DIR=${HOME}/NIGHTLY_ARCHIVES
+SSH_KEY=travis/travisci_builder_id_key
+
 mkdir -p ${NIGHTLY_ARCHIVES_DIR}
 
 cd ${HOME}
@@ -37,7 +37,7 @@ then
       ANDROID_NDK_DIR=$(find . -name "android-ndk*")
       ARCHIVE_NAME="deps_${PLATFORM}_${TARGET}.tar.gz"
 
-      cat <<EOF > manifest.txt
+      cat <<EOF > manifest.txt
 ${ARCHIVE_NAME}
 *********************************
 
@@ -46,6 +46,7 @@ Generated at $(date)
 EOF
 
       tar -czf ${ARCHIVE_NAME} INSTALL manifest.txt ${MESON_FILE} ${ANDROID_NDK_DIR}
+      scp -i ${SSH_KEY} ${ARCHIVE_NAME} nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/
     )
 
     ${TRAVIS_BUILD_DIR}/kiwix-build.py --target-platform $PLATFORM ${TARGET}
