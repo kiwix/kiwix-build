@@ -4,7 +4,7 @@ set -e
 
 BASE_DIR="BUILD_${PLATFORM}"
 NIGHTLY_ARCHIVES_DIR=${HOME}/NIGHTLY_ARCHIVES
-SSH_KEY=travis/travisci_builder_id_key
+SSH_KEY=${TRAVIS_BUILD_DIR}/travis/travisci_builder_id_key
 
 mkdir -p ${NIGHTLY_ARCHIVES_DIR}
 
