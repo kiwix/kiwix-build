@@ -213,6 +213,16 @@ class BuildEnv:
         self.libprefix = options.libprefix or self._detect_libdir()
         self.targetsDict = targetsDict
 
+    def clean_intermediate_directories(self):
+        for subdir in os.listdir(self.build_dir):
+            subpath = pj(self.build_dir, subdir)
+            if subpath == self.install_dir:
+                continue
+            if os.path.isdir(subpath):
+                shutil.rmtree(subpath)
+            else:
+                os.remove(subpath)
+
     def detect_platform(self):
         _platform = platform.system()
         self.distname = _platform
@@ -837,6 +847,12 @@ class Builder:
             self.prepare_sources()
             print("[BUILD]")
             self.build()
+            # No error, clean intermediate file at end of build if needed.
+            print("[CLEAN]")
+            if self.buildEnv.options.clean_at_end:
+                self.buildEnv.clean_intermediate_directories()
+            else:
+                print("SKIP")
         except StopBuild:
             sys.exit("Stopping build due to errors")
 
@@ -857,6 +873,8 @@ def parse_args():
                         help="Skip the source download part")
     parser.add_argument('--build-deps-only', action='store_true',
                         help=("Build only the dependencies of the specified targets."))
+    parser.add_argument('--clean-at-end', action='store_true',
+                        help="Clean all intermediate files after the (successfull) build")
 
     return parser.parse_args()
 
