@@ -83,3 +83,27 @@ diff -ur ctpp2-2.8.3/src/functions/FnRandom.cpp ctpp2-2.8.3.patched/src/function
  	srandomdev();
  #else
  	srandom(time(NULL));
+diff -ur ctpp2-2.8.3/include/CTPP2GlobalDefines.h ctpp2-2.8.3.patche/include/CTPP2GlobalDefines.h
+--- ctpp2-2.8.3/include/CTPP2GlobalDefines.h	2012-08-02 09:22:44.000000000 +0200
++++ ctpp2-2.8.3.patched/include/CTPP2GlobalDefines.h	2017-04-24 10:59:54.236256866 +0200
+@@ -92,7 +92,7 @@
+ /*
+  * Header files
+  */
+-#ifndef WIN32
++#if !defined(WIN32) && !defined(__MINGW32__)
+ 
+     #ifndef HAVE_SYS_TIME_H
+         #error "Cannot find header file `sys/time.h'"
+diff -ur ctpp2-2.8.3/include/CTPP2SysTypes.h ctpp2-2.8.3.patche/include/CTPP2SysTypes.h
+--- ctpp2-2.8.3/include/CTPP2SysTypes.h	2012-08-02 09:22:44.000000000 +0200
++++ ctpp2-2.8.3.patched/include/CTPP2SysTypes.h	2017-04-24 11:00:42.284545293 +0200
+@@ -227,7 +227,7 @@
+ typedef UCCHAR_8                  * UCCHAR_P;
+ 
+ 
+-#elif WIN32 /* FreeBSD End, start of Win32 declarations */
++#elif WIN32 || __MINGW32__ /* FreeBSD End, start of Win32 declarations */
+ 
+ /**
+   @var typedef __int16           INT_16
