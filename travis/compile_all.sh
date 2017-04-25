@@ -14,7 +14,7 @@ if [[ "$TRAVIS_EVENT_TYPE" = "cron" ]]
 then
   if [[ ${PLATFORM} = android* ]]
   then
-    TARGETS="libzim kiwix-lib"
+    TARGETS="libzim kiwix-lib kiwix-android"
   else
     TARGETS="libzim kiwix-lib kiwix-tools"
   fi
@@ -71,13 +71,18 @@ EOF
         tar -czf "${NIGHTLY_ARCHIVES_DIR}/$ARCHIVE_NAME" $FILES_LIST
       )
       ;;
+    android_*)
+      APK_NAME="kiwix-${PLATFORM}"
+      cp ${BASE_DIR}/kiwix-android/app/build/outputs/apk/app-kiwix-debug.apk ${NIGHTLY_ARCHIVES_DIR}/${APK_NAME}-debug.apk
+      cp ${BASE_DIR}/kiwix-android/app/build/outputs/apk/app-kiwix-release-unsigned.apk ${NIGHTLY_ARCHIVES_DIR}/${APK_NAME}-release-unsigned.apk
+      ;;
   esac
 
 else
   # No a cron job, we just have to build to be sure nothing is broken.
   if [[ ${PLATFORM} = android* ]]
   then
-    TARGET=kiwix-lib
+    TARGET=kiwix-android
   else
     TARGET=kiwix-tools
   fi

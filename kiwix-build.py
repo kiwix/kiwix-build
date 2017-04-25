@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, sys, stat
+import os, sys, shutil
 import argparse
 import ssl
 import urllib.request
@@ -13,6 +13,7 @@ from dependency_utils import ReleaseDownload, Builder
 from utils import (
     pj,
     remove_duplicates,
+    add_execution_right,
     get_sha256,
     StopBuild,
     SkipCommand,
@@ -38,7 +39,7 @@ CROSS_ENV = {
         }
     },
     'fedora_android': {
-        'toolchain_names': ['android_ndk'],
+        'toolchain_names': ['android_ndk', 'android_sdk'],
         'extra_libs': [],
         'extra_cflags': [],
         'host_machine': {
@@ -61,7 +62,7 @@ CROSS_ENV = {
         }
     },
     'debian_android': {
-        'toolchain_names': ['android_ndk'],
+        'toolchain_names': ['android_ndk', 'android_sdk'],
         'extra_libs': [],
         'extra_cflags': [],
         'host_machine': {
@@ -189,11 +190,13 @@ class BuildEnv:
         build_dir = "BUILD_{}".format(options.target_platform)
         self.build_dir = pj(options.working_dir, build_dir)
         self.archive_dir = pj(options.working_dir, "ARCHIVE")
+        self.toolchain_dir = pj(options.working_dir, "TOOLCHAINS")
         self.log_dir = pj(self.build_dir, 'LOGS')
         self.install_dir = pj(self.build_dir, "INSTALL")
         for d in (self.source_dir,
                   self.build_dir,
                   self.archive_dir,
+                  self.toolchain_dir,
                   self.log_dir,
                   self.install_dir):
             os.makedirs(d, exist_ok=True)
@@ -209,6 +212,16 @@ class BuildEnv:
         self.options = options
         self.libprefix = options.libprefix or self._detect_libdir()
         self.targetsDict = targetsDict
+
+    def clean_intermediate_directories(self):
+        for subdir in os.listdir(self.build_dir):
+            subpath = pj(self.build_dir, subdir)
+            if subpath == self.install_dir:
+                continue
+            if os.path.isdir(subpath):
+                shutil.rmtree(subpath)
+            else:
+                os.remove(subpath)
 
     def detect_platform(self):
         _platform = platform.system()
@@ -397,8 +410,13 @@ class BuildEnv:
 
             kwargs = dict()
             if input:
-                kwargs['stdin'] = input
-            return subprocess.check_call(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+                kwargs['stdin'] = subprocess.PIPE
+            process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+            if input:
+                process.communicate(input.encode())
+            retcode = process.wait()
+            if retcode:
+                raise subprocess.CalledProcessError(retcode, command)
         finally:
             if log:
                 log.close()
@@ -662,8 +680,7 @@ class android_ndk(Toolchain):
         def _build_platform(self, context):
             context.try_skip(self.build_path)
             script = pj(self.source_path, 'build/tools/make_standalone_toolchain.py')
-            current_permissions = stat.S_IMODE(os.lstat(script).st_mode)
-            os.chmod(script, current_permissions | stat.S_IXUSR)
+            add_execution_right(script)
             command = '{script} --arch={arch} --api={api} --install-dir={install_dir} --force'
             command = command.format(
                 script=script,
@@ -687,8 +704,7 @@ class android_ndk(Toolchain):
                     file_path = pj(root, file_)
                     if os.path.islink(file_path):
                         continue
-                    current_permissions = stat.S_IMODE(os.lstat(file_path).st_mode)
-                    os.chmod(file_path, current_permissions | stat.S_IXUSR)
+                    add_execution_right(file_path)
 
         def build(self):
             self.command('build_platform', self._build_platform)
@@ -711,6 +727,56 @@ class android_ndk(Toolchain):
         #                   '-DU_STATIC_IMPLEMENTATION -O3 '
         #                   '-DU_HAVE_STD_STRING -DU_TIMEZONE=0 ')+env['CXXFLAGS']
         env['NDK_DEBUG'] = '0'
+
+
+class android_sdk(Toolchain):
+    name = 'android-sdk'
+    version = 'r25.2.3'
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('tools_r25.2.3-linux.zip',
+                             '1b35bcb94e9a686dff6460c8bca903aa0281c6696001067f34ec00093145b560',
+                             'https://dl.google.com/android/repository/tools_r25.2.3-linux.zip')
+
+    class Builder(Builder):
+
+        @property
+        def install_path(self):
+            return pj(self.buildEnv.toolchain_dir, self.target.full_name)
+
+        def _build_platform(self, context):
+            context.try_skip(self.install_path)
+            tools_dir = pj(self.install_path, 'tools')
+            shutil.copytree(self.source_path, tools_dir)
+            script = pj(tools_dir, 'android')
+            command = '{script} --verbose update sdk -a --no-ui --filter {packages}'
+            command = command.format(
+                script=script,
+                packages = ','.join(str(i) for i in [1,2,8,34,162])
+            )
+            # packages correspond to :
+            # - 1 : Android SDK Tools, revision 25.2.5
+            # - 2 : Android SDK Platform-tools, revision 25.0.3
+            # - 8 : Android SDK Build-tools, revision 24.0.1
+            # - 34 : SDK Platform Android 7.0, API 24, revision 2
+            # - 162 : Android Support Repository, revision 44
+            self.buildEnv.run_command(command, self.install_path, context, input="y\n")
+
+        def _fix_licenses(self, context):
+            context.try_skip(self.install_path)
+            os.makedirs(pj(self.install_path, 'licenses'), exist_ok=True)
+            with open(pj(self.install_path, 'licenses', 'android-sdk-license'), 'w') as f:
+                f.write("\n8933bad161af4178b1185d1a37fbf41ea5269c55")
+
+        def build(self):
+            self.command('build_platform', self._build_platform)
+            self.command('fix_licenses', self._fix_licenses)
+
+    def get_bin_dir(self):
+        return []
+
+    def set_env(self, env):
+        env['ANDROID_HOME'] = self.builder.install_path
 
 
 class Builder:
@@ -781,6 +847,12 @@ class Builder:
             self.prepare_sources()
             print("[BUILD]")
             self.build()
+            # No error, clean intermediate file at end of build if needed.
+            print("[CLEAN]")
+            if self.buildEnv.options.clean_at_end:
+                self.buildEnv.clean_intermediate_directories()
+            else:
+                print("SKIP")
         except StopBuild:
             sys.exit("Stopping build due to errors")
 
@@ -801,6 +873,8 @@ def parse_args():
                         help="Skip the source download part")
     parser.add_argument('--build-deps-only', action='store_true',
                         help=("Build only the dependencies of the specified targets."))
+    parser.add_argument('--clean-at-end', action='store_true',
+                        help="Clean all intermediate files after the (successfull) build")
 
     return parser.parse_args()
 

@@ -110,7 +110,7 @@ class ReleaseDownload(Source):
         context.force_native_build = True
         for p in self.patches:
             with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input)
+                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input.read())
 
     def prepare(self):
         self.command('download', self._download)
@@ -305,3 +305,28 @@ class MesonBuilder(Builder):
     def _install(self, context):
         command = "{} -v install".format(self.buildEnv.ninja_command)
         self.buildEnv.run_command(command, self.build_path, context)
+
+
+class GradleBuilder(Builder):
+    def build(self):
+        self.command('configure', self._configure)
+        if hasattr(self, '_pre_compile_script'):
+            self.command('pre_compile_script', self._pre_compile_script)
+        self.command('compile', self._compile)
+        self.command('install', self._install)
+
+    def _configure(self, context):
+        # We don't have a lot to configure by itself
+        context.try_skip(self.build_path)
+        if os.path.exists(self.build_path):
+            shutil.rmtree(self.build_path)
+        shutil.copytree(self.source_path, self.build_path)
+
+    def _compile(self, context):
+        command = "gradle clean assemble --info"
+        self.buildEnv.run_command(command, self.build_path, context)
+        command = "gradle build  --info"
+        self.buildEnv.run_command(command, self.build_path, context)
+
+    def _install(self, context):
+        pass

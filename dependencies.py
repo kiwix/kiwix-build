@@ -1,4 +1,4 @@
-import shutil
+import shutil,os
 
 from dependency_utils import (
     Dependency,
@@ -6,9 +6,11 @@ from dependency_utils import (
     GitClone,
     MakeBuilder,
     CMakeBuilder,
-    MesonBuilder)
+    MesonBuilder,
+    GradleBuilder,
+    Builder as BaseBuilder)
 
-from utils import Remotefile, pj, SkipCommand
+from utils import Remotefile, pj, SkipCommand, copy_tree, add_execution_right
 
 # *************************************
 # Missing dependencies
@@ -318,3 +320,42 @@ class KiwixTools(Dependency):
             if self.buildEnv.platform_info.static:
                 return "-Dstatic-linkage=true"
             return ""
+
+
+class Gradle(Dependency):
+    name = "Gradle"
+    version = "3.4"
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('gradle-3.4-bin.zip',
+                             '72d0cd4dcdd5e3be165eb7cd7bbd25cf8968baf400323d9ab1bba622c3f72205',
+                             'https://services.gradle.org/distributions/gradle-3.4-bin.zip')
+
+    class Builder(BaseBuilder):
+        def build(self):
+            self.command('install', self._install)
+
+        def _install(self, context):
+            copy_tree(
+                pj(self.source_path, "bin"),
+                pj(self.buildEnv.install_dir, "bin"),
+                post_copy_function = add_execution_right)
+            copy_tree(
+                pj(self.source_path, "lib"),
+                pj(self.buildEnv.install_dir, "lib"))
+
+
+class KiwixAndroid(Dependency):
+    name = "kiwix-android"
+    dependencies = ["Gradle", "kiwix-lib"]
+
+    class Source(GitClone):
+        git_remote = "https://github.com/kiwix/kiwix-android"
+        git_dir = "kiwix-android"
+
+    class Builder(GradleBuilder):
+        def _configure(self, context):
+            if not os.path.exists(self.build_path):
+                shutil.copytree(self.source_path, self.build_path)
+            shutil.rmtree(pj(self.build_path, 'kiwixlib', 'src', 'main'))
+            shutil.copytree(pj(self.buildEnv.install_dir, 'kiwix-lib'), pj(self.build_path, 'kiwixlib', 'src', 'main'))
