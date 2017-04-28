@@ -25,55 +25,6 @@ REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
-CROSS_ENV = {
-    'fedora_win32': {
-        'toolchain_names': ['mingw32_toolchain'],
-        'root_path': '/usr/i686-w64-mingw32/sys-root/mingw',
-        'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90'],
-        'extra_cflags': ['-DWIN32'],
-        'host_machine': {
-            'system': 'windows',
-            'cpu_family': 'x86',
-            'cpu': 'i686',
-            'endian': 'little'
-        }
-    },
-    'fedora_android': {
-        'toolchain_names': ['android_ndk', 'android_sdk'],
-        'extra_libs': [],
-        'extra_cflags': [],
-        'host_machine': {
-            'system': 'Android',
-            'cpu_family': 'x86',
-            'cpu': 'i686',
-            'endian': 'little'
-        }
-    },
-    'debian_win32': {
-        'toolchain_names': ['mingw32_toolchain'],
-        'root_path': '/usr/i686-w64-mingw32/',
-        'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90'],
-        'extra_cflags': ['-DWIN32'],
-        'host_machine': {
-            'system': 'windows',
-            'cpu_family': 'x86',
-            'cpu': 'i686',
-            'endian': 'little'
-        }
-    },
-    'debian_android': {
-        'toolchain_names': ['android_ndk', 'android_sdk'],
-        'extra_libs': [],
-        'extra_cflags': [],
-        'host_machine': {
-            'system': 'Android',
-            'cpu_family': 'x86',
-            'cpu': 'i686',
-            'endian': 'little'
-        }
-    }
-}
-
 
 PACKAGE_NAME_MAPPERS = {
     'fedora_native_dyn': {
@@ -144,39 +95,72 @@ def which(name):
 
 
 class TargetInfo:
-    def __init__(self, build, static):
+    def __init__(self, build, static, toolchains):
         self.build = build
         self.static = static
+        self.toolchains = toolchains
 
     def __str__(self):
         return "{}_{}".format(self.build, 'static' if self.static else 'dyn')
 
+    def get_cross_env(self, host):
+        if self.build == 'native':
+            return {}
+        elif self.build == 'win32':
+            root_paths = {
+                'fedora': '/usr/i686-w64-mingw32/sys-root/mingw',
+                'debian': '/usr/i686-w64-mingw32'
+            }
+            return {
+                'root_path': root_paths[host],
+                'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90'],
+                'extra_cflags': ['-DWIN32'],
+                'host_machine': {
+                    'system': 'windows',
+                    'cpu_family': 'x86',
+                    'cpu': 'i686',
+                    'endian': 'little'
+                 }
+             }
+
 
 class AndroidTargetInfo(TargetInfo):
     __arch_infos = {
-        'arm' : ('arm-linux-androideabi'),
-        'arm64': ('aarch64-linux-android'),
-        'mips': ('mipsel-linux-android'),
-        'mips64': ('mips64el-linux-android'),
-        'x86': ('i686-linux-android'),
-        'x86_64': ('x86_64-linux-android'),
+        'arm' : ('arm-linux-androideabi', 'arm'),
+        'arm64': ('aarch64-linux-android', 'aarch64'),
+        'mips': ('mipsel-linux-android', 'mipsel'),
+        'mips64': ('mips64el-linux-android', 'mips64el'),
+        'x86': ('i686-linux-android', 'i686'),
+        'x86_64': ('x86_64-linux-android', 'x86_64'),
     }
 
     def __init__(self, arch):
-        super().__init__('android', True)
+        super().__init__('android', True, ['android_ndk', 'android_sdk'])
         self.arch = arch
-        self.arch_full = self.__arch_infos[arch]
+        self.arch_full, self.cpu = self.__arch_infos[arch]
 
     def __str__(self):
         return "android"
 
+    def get_cross_env(self, host):
+        return {
+            'extra_libs': [],
+            'extra_cflags': [],
+            'host_machine': {
+                'system': 'Android',
+                'cpu_family': self.arch,
+                'cpu': self.cpu,
+                'endian': 'little'
+            }
+        }
+
 
 class BuildEnv:
     target_platforms = {
-        'native_dyn': TargetInfo('native', False),
-        'native_static': TargetInfo('native', True),
-        'win32_dyn': TargetInfo('win32', False),
-        'win32_static': TargetInfo('win32', True),
+        'native_dyn': TargetInfo('native', False, []),
+        'native_static': TargetInfo('native', True, []),
+        'win32_dyn': TargetInfo('win32', False, ['mingw32_toolchain']),
+        'win32_static': TargetInfo('win32', True, ['mingw32_toolchain']),
         'android_arm': AndroidTargetInfo('arm'),
         'android_arm64': AndroidTargetInfo('arm64'),
         'android_mips': AndroidTargetInfo('mips'),
@@ -243,23 +227,10 @@ class BuildEnv:
 
     def setup_build(self, target_platform):
         self.platform_info = platform_info = self.target_platforms[target_platform]
-        if platform_info.build == 'native':
-            self.cross_env = {}
-        else:
-            cross_name = "{host}_{target}".format(
-                host = self.distname,
-                target = platform_info.build)
-            try:
-                self.cross_env = CROSS_ENV[cross_name]
-            except KeyError:
-                sys.exit("ERROR : We don't know how to set env to compile"
-                         " a {target} version on a {host} host.".format(
-                            target = platform_info.build,
-                            host = self.distname
-                        ))
+        self.cross_env = self.platform_info.get_cross_env(self.distname)
 
     def setup_toolchains(self):
-        toolchain_names = self.cross_env.get('toolchain_names', [])
+        toolchain_names = self.platform_info.toolchains
         self.toolchains =[Toolchain.all_toolchains[toolchain_name](self)
                               for toolchain_name in toolchain_names]
 
