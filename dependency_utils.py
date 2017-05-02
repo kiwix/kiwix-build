@@ -308,12 +308,14 @@ class MesonBuilder(Builder):
 
 
 class GradleBuilder(Builder):
+    gradle_target = "build"
+    gradle_option = "-i"
+
     def build(self):
         self.command('configure', self._configure)
         if hasattr(self, '_pre_compile_script'):
             self.command('pre_compile_script', self._pre_compile_script)
         self.command('compile', self._compile)
-        self.command('install', self._install)
 
     def _configure(self, context):
         # We don't have a lot to configure by itself
@@ -323,10 +325,8 @@ class GradleBuilder(Builder):
         shutil.copytree(self.source_path, self.build_path)
 
     def _compile(self, context):
-        command = "gradle clean assemble --info"
+        command = "gradle {gradle_target} {gradle_option}"
+        command = command.format(
+            gradle_target=self.gradle_target,
+            gradle_option=self.gradle_option)
         self.buildEnv.run_command(command, self.build_path, context)
-        command = "gradle build  --info"
-        self.buildEnv.run_command(command, self.build_path, context)
-
-    def _install(self, context):
-        pass
