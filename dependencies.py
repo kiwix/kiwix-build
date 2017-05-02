@@ -357,5 +357,8 @@ class KiwixAndroid(Dependency):
         def _configure(self, context):
             if not os.path.exists(self.build_path):
                 shutil.copytree(self.source_path, self.build_path)
-            shutil.rmtree(pj(self.build_path, 'kiwixlib', 'src', 'main'))
+            try:
+                shutil.rmtree(pj(self.build_path, 'kiwixlib', 'src', 'main'))
+            except FileNotFoundError:
+                pass
             shutil.copytree(pj(self.buildEnv.install_dir, 'kiwix-lib'), pj(self.build_path, 'kiwixlib', 'src', 'main'))
