@@ -933,7 +933,20 @@ def parse_args():
     parser.add_argument('--clean-at-end', action='store_true',
                         help="Clean all intermediate files after the (successfull) build")
 
-    return parser.parse_args()
+    subgroup = parser.add_argument_group('custom app',
+                                         description="Android custom app specific options")
+    subgroup.add_argument('--android-custom-app',
+                          help="The custom android app to build")
+    subgroup.add_argument('--zim-file-url',
+                          help="The url of the zim file to download")
+    options = parser.parse_args()
+
+    if options.targets == 'kiwix-android-custom':
+        if not options.android_custom_app or not options.zim_file_url:
+            print("You need to specify ANDROID_CUSTOM_APP and ZIM_FILE_URL if "
+                  "want to build a kiwix-android-custom target")
+            sys.exit(1)
+    return options
 
 
 if __name__ == "__main__":
