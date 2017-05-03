@@ -82,6 +82,14 @@ class Source:
     def source_dir(self):
         return self.target.full_name
 
+    def _patch(self, context):
+        source_path = pj(self.buildEnv.source_dir, self.source_dir)
+        context.try_skip(source_path)
+        context.force_native_build = True
+        for p in self.patches:
+            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
+                self.buildEnv.run_command("patch -p1", source_path, context, input=patch_input.read())
+
     def command(self, *args, **kwargs):
         return self.target.command(*args, **kwargs)
 
@@ -104,13 +112,6 @@ class ReleaseDownload(Source):
                         self.buildEnv.source_dir,
                         topdir=self.archive_top_dir,
                         name=self.source_dir)
-
-    def _patch(self, context):
-        context.try_skip(self.extract_path)
-        context.force_native_build = True
-        for p in self.patches:
-            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input.read())
 
     def prepare(self):
         self.command('download', self._download)
