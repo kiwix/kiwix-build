@@ -190,7 +190,13 @@ class Icu(Dependency):
 
     class Builder(MakeBuilder):
         subsource_dir = "source"
-        configure_option = "--disable-samples --disable-tests --disable-extras --disable-dyload"
+
+        @property
+        def configure_option(self):
+            options = "--disable-samples --disable-tests --disable-extras --disable-dyload"
+            if self.buildEnv.platform_info.build == 'android':
+                options += " --with-data-packaging=archive"
+            return options
 
 
 class Icu_native(Icu):
@@ -347,6 +353,7 @@ class KiwixAndroid(Dependency):
             except FileNotFoundError:
                 pass
             shutil.copytree(pj(self.buildEnv.install_dir, 'kiwix-lib'), pj(self.build_path, 'kiwixlib', 'src', 'main'))
+            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '58.2', 'icudt58l.dat'), pj(self.build_path, 'app', 'src', 'main', 'assets', 'icudt.dat'))
 
 
 class KiwixCustomApp(Dependency):
@@ -409,6 +416,7 @@ class KiwixCustomApp(Dependency):
             except FileNotFoundError:
                 pass
             shutil.copytree(pj(self.buildEnv.install_dir, 'kiwix-lib'), pj(self.build_path, 'kiwixlib', 'src', 'main'))
+            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '58.2', 'icudt58l.dat'), pj(self.build_path, 'app', 'src', 'main', 'assets', 'icudt.dat'))
 
             # Generate custom directory
             try:
