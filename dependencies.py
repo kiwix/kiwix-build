@@ -5,6 +5,7 @@ from dependency_utils import (
     Dependency,
     ReleaseDownload,
     GitClone,
+    SvnClone,
     MakeBuilder,
     CMakeBuilder,
     MesonBuilder,
@@ -175,34 +176,16 @@ class MicroHttpd(Dependency):
 
 class Icu(Dependency):
     name = "icu4c"
-    version = "58_2"
+    version = "58.2"
 
-    class Source(ReleaseDownload):
+    class Source(SvnClone):
         name = "icu4c"
+        svn_remote = "http://source.icu-project.org/repos/icu/tags/release-58-2/icu4c"
+        svn_dir = "icu4c"
 
-        @property
-        def source_dir(self):
-            return "{}-{}".format(self.name, self.target.version)
-
-        archive = Remotefile('icu4c-58_2-src.tgz',
-                             '2b0a4410153a9b20de0e20c7d8b66049a72aef244b53683d0d7521371683da0c',
-                             'https://freefr.dl.sourceforge.net/project/icu/ICU4C/58.2/icu4c-58_2-src.tgz')
         patches = ["icu4c_fix_static_lib_name_mingw.patch",
                    "icu4c_android_elf64_st_info.patch"]
-        data = Remotefile('icudt56l.dat',
-                          'e23d85eee008f335fc49e8ef37b1bc2b222db105476111e3d16f0007d371cbca')
 
-        def _download_data(self, context):
-            self.buildEnv.download(self.data)
-
-        def _copy_data(self, context):
-            context.try_skip(self.extract_path)
-            shutil.copyfile(pj(self.buildEnv.archive_dir, self.data.name), pj(self.extract_path, 'source', 'data', 'in', self.data.name))
-
-        def prepare(self):
-            super().prepare()
-            self.command("download_data", self._download_data)
-            self.command("copy_data", self._copy_data)
 
     class Builder(MakeBuilder):
         subsource_dir = "source"
