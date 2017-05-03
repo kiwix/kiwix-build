@@ -150,6 +150,33 @@ class GitClone(Source):
             self.command('post_prepare_script', self._post_prepare_script)
 
 
+class SvnClone(Source):
+    @property
+    def source_dir(self):
+        return self.svn_dir
+
+    @property
+    def svn_path(self):
+        return pj(self.buildEnv.source_dir, self.svn_dir)
+
+    def _svn_checkout(self, context):
+        context.force_native_build = True
+        if os.path.exists(self.svn_path):
+            raise SkipCommand()
+        command = "svn checkout {} {}".format(self.svn_remote, self.svn_dir)
+        self.buildEnv.run_command(command, self.buildEnv.source_dir, context)
+
+    def _svn_update(self, context):
+        context.force_native_build = True
+        self.buildEnv.run_command("svn update", self.svn_path, context)
+
+    def prepare(self):
+        self.command('svncheckout', self._svn_checkout)
+        self.command('svnupdate', self._svn_update)
+        if hasattr(self, 'patches'):
+            self.command('patch', self._patch)
+
+
 class Builder:
     subsource_dir = None
 
