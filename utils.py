@@ -27,11 +27,23 @@ def remove_duplicates(iterable, key_function=None):
 
 
 def get_sha256(path):
+    progress_chars = "/-\|"
+    current = 0
+    batch_size = 1024 * 8
     sha256 = hashlib.sha256()
     with open(path, 'br') as f:
-        sha256.update(f.read())
+        while True:
+            batch = f.read(batch_size)
+            if not batch:
+                break
+            sha256.update(batch)
+            print_status(progress_chars[current])
+            current = (current+1)%4
     return sha256.hexdigest()
 
+def print_status(status):
+    text = "{}\033[{}D".format(status, len(status))
+    print(text, end="")
 
 def add_execution_right(file_path):
     current_permissions = stat.S_IMODE(os.lstat(file_path).st_mode)
