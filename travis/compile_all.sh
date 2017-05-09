@@ -25,6 +25,7 @@ then
     ${TRAVIS_BUILD_DIR}/kiwix-build.py \
       --target-platform $PLATFORM \
       --build-deps-only \
+      --hide-progress \
       ${TARGET}
     rm ${BASE_DIR}/.install_packages_ok
 
@@ -49,7 +50,7 @@ EOF
       scp -i ${SSH_KEY} ${ARCHIVE_NAME} nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/
     )
 
-    ${TRAVIS_BUILD_DIR}/kiwix-build.py --target-platform $PLATFORM ${TARGET}
+    ${TRAVIS_BUILD_DIR}/kiwix-build.py --hide-progress --target-platform $PLATFORM ${TARGET}
     rm ${BASE_DIR}/.install_packages_ok
   done
 
@@ -96,5 +97,6 @@ else
   fi
   ${TRAVIS_BUILD_DIR}/kiwix-build.py \
     --target-platform $PLATFORM \
+    --hide-progress \
     ${TARGET}
 fi
