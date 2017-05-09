@@ -8,6 +8,13 @@ from collections import namedtuple, defaultdict
 
 pj = os.path.join
 
+g_print_progress = True
+
+
+def setup_print_progress(print_progress):
+    global g_print_progress
+    g_print_progress = print_progress
+
 
 class Defaultdict(defaultdict):
     def __getattr__(self, name):
@@ -37,13 +44,16 @@ def get_sha256(path):
             if not batch:
                 break
             sha256.update(batch)
-            print_status(progress_chars[current])
+            print_progress(progress_chars[current])
             current = (current+1)%4
     return sha256.hexdigest()
 
-def print_status(status):
-    text = "{}\033[{}D".format(status, len(status))
-    print(text, end="")
+
+def print_progress(progress):
+    if g_print_progress:
+        text = "{}\033[{}D".format(progress, len(progress))
+        print(text, end="")
+
 
 def add_execution_right(file_path):
     current_permissions = stat.S_IMODE(os.lstat(file_path).st_mode)

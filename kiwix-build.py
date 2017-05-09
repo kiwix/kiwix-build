@@ -15,7 +15,8 @@ from utils import (
     remove_duplicates,
     add_execution_right,
     get_sha256,
-    print_status,
+    print_progress,
+    setup_print_progress,
     StopBuild,
     SkipCommand,
     Defaultdict,
@@ -453,9 +454,9 @@ class BuildEnv:
                     break
                 if tsize:
                     current += batch_size
-                    print_status("{:.2%}".format(current/tsize))
+                    print_progress("{:.2%}".format(current/tsize))
                 else:
-                    print_status(progress_chars[current])
+                    print_progress(progress_chars[current])
                     current = (current+1)%4
                 file.write(batch)
 
@@ -924,6 +925,8 @@ def parse_args():
     parser.add_argument('--verbose', '-v', action="store_true",
                         help=("Print all logs on stdout instead of in specific"
                               " log files per commands"))
+    parser.add_argument('--hide-progress', action='store_false', dest='show_progress',
+                        help="Hide intermediate progress information.")
     parser.add_argument('--no-cert-check', action='store_true',
                         help="Skip SSL certificate verification during download")
     parser.add_argument('--skip-source-prepare', action='store_true',
@@ -952,5 +955,6 @@ def parse_args():
 if __name__ == "__main__":
     options = parse_args()
     options.working_dir = os.path.abspath(options.working_dir)
+    setup_print_progress(options.show_progress)
     builder = Builder(options)
     builder.run()
