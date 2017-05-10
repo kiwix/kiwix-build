@@ -255,7 +255,7 @@ class BuildEnv:
                 self.distname = 'debian'
 
     def setup_build(self, target_platform):
-        self.platform_info = platform_info = self.target_platforms[target_platform]
+        self.platform_info = self.target_platforms[target_platform]
         self.cross_config = self.platform_info.get_cross_config(self.distname)
 
     def setup_toolchains(self):
@@ -614,8 +614,6 @@ class mingw32_toolchain(Toolchain):
             env[k] = v
 
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
-        env['CXXFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
         env['LIBS'] = " ".join(self.buildEnv.cross_config['extra_libs']) + " " +env['LIBS']
 
 
@@ -917,7 +915,7 @@ class Builder:
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('targets', default='kiwix-tools', nargs='?',
+    parser.add_argument('targets', default='kiwix-tools', nargs='?', metavar='TARGET',
                         choices=Dependency.all_deps.keys())
     parser.add_argument('--working-dir', default=".")
     parser.add_argument('--libprefix', default=None)
@@ -927,15 +925,15 @@ def parse_args():
                               " log files per commands"))
     parser.add_argument('--hide-progress', action='store_false', dest='show_progress',
                         help="Hide intermediate progress information.")
-    parser.add_argument('--no-cert-check', action='store_true',
-                        help="Skip SSL certificate verification during download")
     parser.add_argument('--skip-source-prepare', action='store_true',
                         help="Skip the source download part")
     parser.add_argument('--build-deps-only', action='store_true',
                         help=("Build only the dependencies of the specified targets."))
-    parser.add_argument('--clean-at-end', action='store_true',
-                        help="Clean all intermediate files after the (successfull) build")
-
+    subgroup = parser.add_argument_group('advanced')
+    subgroup.add_argument('--no-cert-check', action='store_true',
+                          help="Skip SSL certificate verification during download")
+    subgroup.add_argument('--clean-at-end', action='store_true',
+                          help="Clean all intermediate files after the (successfull) build")
     subgroup = parser.add_argument_group('custom app',
                                          description="Android custom app specific options")
     subgroup.add_argument('--android-custom-app',

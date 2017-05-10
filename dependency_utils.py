@@ -82,6 +82,14 @@ class Source:
     def source_dir(self):
         return self.target.full_name
 
+    def _patch(self, context):
+        source_path = pj(self.buildEnv.source_dir, self.source_dir)
+        context.try_skip(source_path)
+        context.force_native_build = True
+        for p in self.patches:
+            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
+                self.buildEnv.run_command("patch -p1", source_path, context, input=patch_input.read())
+
     def command(self, *args, **kwargs):
         return self.target.command(*args, **kwargs)
 
@@ -104,13 +112,6 @@ class ReleaseDownload(Source):
                         self.buildEnv.source_dir,
                         topdir=self.archive_top_dir,
                         name=self.source_dir)
-
-    def _patch(self, context):
-        context.try_skip(self.extract_path)
-        context.force_native_build = True
-        for p in self.patches:
-            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                self.buildEnv.run_command("patch -p1", self.extract_path, context, input=patch_input.read())
 
     def prepare(self):
         self.command('download', self._download)
@@ -147,6 +148,33 @@ class GitClone(Source):
         self.command('gitupdate', self._git_update)
         if hasattr(self, '_post_prepare_script'):
             self.command('post_prepare_script', self._post_prepare_script)
+
+
+class SvnClone(Source):
+    @property
+    def source_dir(self):
+        return self.svn_dir
+
+    @property
+    def svn_path(self):
+        return pj(self.buildEnv.source_dir, self.svn_dir)
+
+    def _svn_checkout(self, context):
+        context.force_native_build = True
+        if os.path.exists(self.svn_path):
+            raise SkipCommand()
+        command = "svn checkout {} {}".format(self.svn_remote, self.svn_dir)
+        self.buildEnv.run_command(command, self.buildEnv.source_dir, context)
+
+    def _svn_update(self, context):
+        context.force_native_build = True
+        self.buildEnv.run_command("svn update", self.svn_path, context)
+
+    def prepare(self):
+        self.command('svncheckout', self._svn_checkout)
+        self.command('svnupdate', self._svn_update)
+        if hasattr(self, 'patches'):
+            self.command('patch', self._patch)
 
 
 class Builder:

@@ -1,0 +1,92 @@
+diff -ur icu4c/source/data/coll/colfiles.mk icu4c.patched/source/data/coll/colfiles.mk
+--- icu4c/source/data/coll/colfiles.mk	2017-05-02 17:16:35.894345704 +0200
++++ icu4c.patched/source/data/coll/colfiles.mk	2017-05-02 17:00:55.244124482 +0200
+@@ -56,7 +56,7 @@
+  fr.txt fr_CA.txt ga.txt gl.txt gu.txt\
+  ha.txt haw.txt he.txt hi.txt hr.txt\
+  hsb.txt hu.txt hy.txt id.txt ig.txt\
+- is.txt it.txt ja.txt ka.txt kk.txt\
++ is.txt it.txt ka.txt kk.txt\
+  kl.txt km.txt kn.txt ko.txt kok.txt\
+  ky.txt lb.txt lkt.txt ln.txt lo.txt\
+  lt.txt lv.txt mk.txt ml.txt mn.txt\
+diff -ur icu4c/source/data/Makefile.in icu4c.patched/source/data/Makefile.in
+--- icu4c/source/data/Makefile.in	2017-05-02 17:16:41.485257459 +0200
++++ icu4c.patched/source/data/Makefile.in	2017-05-02 16:55:36.419069746 +0200
+@@ -277,10 +277,10 @@
+ CFU_FILES=$(BUILDDIR)/$(CFU_FILES_SHORT)
+ 
+ ## UCM files
+--include $(UCMSRCDIR)/ucmcore.mk
+--include $(UCMSRCDIR)/ucmfiles.mk
+--include $(UCMSRCDIR)/ucmebcdic.mk
+--include $(UCMSRCDIR)/ucmlocal.mk
++#-include $(UCMSRCDIR)/ucmcore.mk
++#-include $(UCMSRCDIR)/ucmfiles.mk
++#-include $(UCMSRCDIR)/ucmebcdic.mk
++#-include $(UCMSRCDIR)/ucmlocal.mk
+ ALL_UCM_SOURCE=ibm-37_P100-1995.ucm ibm-1047_P100-1995.ucm $(UCM_SOURCE_CORE) $(UCM_SOURCE_FILES) $(UCM_SOURCE_EBCDIC) $(UCM_SOURCE_LOCAL)
+ UCM_FILES = $(ALL_UCM_SOURCE:%=$(SRCDATADIR)/%)
+ CNV_FILES = $(ALL_UCM_SOURCE:%.ucm=$(BUILDDIR)/%.cnv)
+@@ -291,24 +291,24 @@
+ CNV_FILES_SHORT_SPECIAL=$(UCM_SOURCE_SPECIAL:%.ucm=%.cnv) 
+ 
+ ## RES files
+--include $(LOCSRCDIR)/resfiles.mk
+--include $(CURRSRCDIR)/resfiles.mk
+--include $(LANGSRCDIR)/resfiles.mk
+--include $(REGIONSRCDIR)/resfiles.mk
+--include $(ZONESRCDIR)/resfiles.mk
+--include $(UNITSRCDIR)/resfiles.mk
++#-include $(LOCSRCDIR)/resfiles.mk
++#-include $(CURRSRCDIR)/resfiles.mk
++#-include $(LANGSRCDIR)/resfiles.mk
++#-include $(REGIONSRCDIR)/resfiles.mk
++#-include $(ZONESRCDIR)/resfiles.mk
++#-include $(UNITSRCDIR)/resfiles.mk
+ -include $(COLSRCDIR)/colfiles.mk
+--include $(RBNFSRCDIR)/rbnffiles.mk
++#-include $(RBNFSRCDIR)/rbnffiles.mk
+ -include $(TRANSLITSRCDIR)/trnsfiles.mk
+--include $(LOCSRCDIR)/reslocal.mk
+--include $(CURRSRCDIR)/reslocal.mk
+--include $(LANGSRCDIR)/reslocal.mk
+--include $(REGIONSRCDIR)/reslocal.mk
+--include $(ZONESRCDIR)/reslocal.mk
+--include $(UNITSRCDIR)/reslocal.mk
++#-include $(LOCSRCDIR)/reslocal.mk
++#-include $(CURRSRCDIR)/reslocal.mk
++#-include $(LANGSRCDIR)/reslocal.mk
++#-include $(REGIONSRCDIR)/reslocal.mk
++#-include $(ZONESRCDIR)/reslocal.mk
++#-include $(UNITSRCDIR)/reslocal.mk
+ -include $(COLSRCDIR)/collocal.mk
+--include $(BRKSRCDIR)/brslocal.mk
+--include $(RBNFSRCDIR)/rbnflocal.mk
++#-include $(BRKSRCDIR)/brslocal.mk
++#-include $(RBNFSRCDIR)/rbnflocal.mk
+ -include $(TRANSLITSRCDIR)/trnslocal.mk
+ ifdef GENRB_SOURCE
+ RES_SRC= root.txt $(GENRB_SOURCE) $(GENRB_ALIAS_SOURCE) $(GENRB_SOURCE_LOCAL) $(GENRB_ALIAS_SOURCE_LOCAL)
+@@ -358,8 +358,8 @@
+ GENRBOPTS=-k
+ 
+ ## MISC files
+--include $(MISCSRCDIR)/miscfiles.mk
+--include $(MISCSRCDIR)/misclocal.mk
++#-include $(MISCSRCDIR)/miscfiles.mk
++#-include $(MISCSRCDIR)/misclocal.mk
+ MSC_SOURCE= $(MISC_SOURCE) $(MISC_SOURCE_LOCAL)
+ MSC_SRC_FILES=$(MSC_SOURCE:%=$(MISCSRCDIR)/%)
+ 
+@@ -436,8 +436,8 @@
+ TRANSLIT_FILES_SHORT = $(TRANSLIT_SRC:%.txt=$(TRANSLIT_TREE)/%.res)
+ 
+ ## SPP files
+--include $(SPREPSRCDIR)/sprepfiles.mk
+--include $(SPREPSRCDIR)/spreplocal.mk
++#-include $(SPREPSRCDIR)/sprepfiles.mk
++#-include $(SPREPSRCDIR)/spreplocal.mk
+ ALL_SPREP_SOURCE=$(SPREP_SOURCE) $(SPREP_SOURCE_LOCAL)
+ SPREP_FILES = $(ALL_SPREP_SOURCE:%.txt=$(BUILDDIR)/%.spp)
+ SPREP_FILES_SHORT = $(ALL_SPREP_SOURCE:%.txt=%.spp)
