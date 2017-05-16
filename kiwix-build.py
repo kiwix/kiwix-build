@@ -72,14 +72,14 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON': ['gcc-c++', 'cmake', 'automake', 'ccache', 'java-1.8.0-openjdk-devel']
     },
     'debian_native_dyn': {
-        'COMMON': ['automake', 'gcc', 'cmake', 'libbz2-dev', 'ccache'],
+        'COMMON': ['automake', 'gcc', 'cmake', 'libbz2-dev', 'ccache', 'pkg-config'],
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
         'libmicrohttpd': ['libmicrohttpd-dev', 'ccache']
     },
     'debian_native_static': {
-        'COMMON': ['automake', 'gcc', 'cmake', 'libbz2-dev', 'ccache'],
+        'COMMON': ['automake', 'gcc', 'cmake', 'libbz2-dev', 'ccache', 'pkg-config'],
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
@@ -219,7 +219,7 @@ class BuildEnv:
             sys.exit("ERROR: ninja command not found")
         self.meson_command = self._detect_meson()
         if not self.meson_command:
-            sys.exit("ERROR: meson command not fount")
+            sys.exit("ERROR: meson command not found")
         self.setup_build(options.target_platform)
         self.setup_toolchains()
         self.options = options

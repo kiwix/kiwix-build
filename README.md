@@ -14,10 +14,12 @@ of kiwix.
 Most of the compilation steps are handled by the kiwix-build.py
 script.
 
-This script has been tested of Fedora 23 and Ubuntu 16.10
+This script has been tested on Fedora 23 and Ubuntu 16.10
 
 If you want to cross-compile for other platforms as windows or android, you
 should read the "Other target platform" section.
+
+This script is not officially supported on Debian 8, but has been reported to work, after adding ~/.local/bin to the PATH.
 
 ## Preparing environment
 
@@ -28,14 +30,16 @@ them with your package manager.
 Else you can install them manually
 
 ### Meson
+You need to install python 3 and pip. On debian and ubuntu, they are provided by the package python3-pip
 
 ```
-pip install meson --user # Install Meson
+pip3 install meson --user # Install Meson
 ```
 
 (You may want to install meson in a virtualenv if you prefer)
 
 ### ninja
+You need git to be installed
 
 ```
 git clone git://github.com/ninja-build/ninja.git
@@ -54,10 +58,10 @@ This is the simple one.
 ```
 
 It will compile everything.
-If you are using a supported platform (redhad or debian based) it will install
+If you are using a supported platform (redhat or debian based) it will install
 missing packages using sudo.
 If you don't want to trust kiwix-build.py and give it the root right, just
-launch yourself the the printed command.
+launch yourself the printed command.
 
 ### Outputs
 
