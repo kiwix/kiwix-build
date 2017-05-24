@@ -135,12 +135,15 @@ class GitClone(Source):
         context.force_native_build = True
         if os.path.exists(self.git_path):
             raise SkipCommand()
-        command = "git clone --depth=1 {} {}".format(self.git_remote, self.git_dir)
+        command = "git clone --depth=1 --branch {} {} {}".format(
+            self.git_ref, self.git_remote, self.git_dir)
         self.buildEnv.run_command(command, self.buildEnv.source_dir, context)
 
     def _git_update(self, context):
         context.force_native_build = True
-        self.buildEnv.run_command("git fetch", self.git_path, context)
+        command = "git fetch origin {}".format(
+            self.git_ref)
+        self.buildEnv.run_command(command, self.git_path, context)
         self.buildEnv.run_command("git checkout "+self.git_ref, self.git_path, context)
 
     def prepare(self):
