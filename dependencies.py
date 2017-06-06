@@ -291,6 +291,7 @@ class Kiwixlib(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-lib.git"
         git_dir = "kiwix-lib"
+        git_ref = "macos"
 
     class Builder(MesonBuilder):
         @property
