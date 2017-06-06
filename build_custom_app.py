@@ -173,32 +173,34 @@ def travis_launch_build(organisation, repository, options, zim_size):
         { 'EXTRA_CODE': options.extra_code},
         { 'CONTENT_VERSION_CODE': gen_version_code(0, options.base_version)},
         { 'VERSION': options.version},
-        { 'secure': ('u6MCvCQhAlvU0jNojLVatNXHr6AYj4rjU9CY9JcUUG9CKMsls1t3ERz'
-                     'aab0vY1H7EIYl8uMgJcE71lF+61/sVOz7DPJVbKBorivnOlvMvyG2xU'
-                     'su/q3ddMcAkuyixtW2Yo7oq8Tug5PbL5qybrZ+TD0BplS/XcpgljMTH'
-                     'gxWDYion5Y1/Udz5zg1VIxHGAcv3lKYqtbPzA5gR7scLhFVMVulpFDC'
-                     'Ps9MS/jEpwJtHrSZPrRmkOdLCJJNgOnQmRe0ib6NsmhO9KgpeEZRgUx'
-                     'bSaOOiXKBwN7MdWHCZKczZbwVBEA9Izw29hVh0fQZpZNuC3GAICydyK'
-                     'XmbGLNy+GqIPOJPXbAgfT8zRK2IN+PuUHL0xizK4QALMX1jTiiJ65i1'
-                     'vWy1NZ3fS7kbgulPUXvkIs2PoSULVEAqhhanp+1ICcEVKs5ffc3e0WP'
-                     '/p7NSTIL8QF58QYPOIqWXX17IP3kfrWURIWCdPHCHKEGkg0S+HyqKa6'
-                     '/pdR5CeBCeECLraupzJ+ZfKIfsFFyrOgCWRYe1pIAD5C1f/0jM6T+9h'
-                     'Vsc2ktgjM8GpujTztzMKNrVJ80mNBtdXbFGYn01B/zhVSsxPIrbROVp'
-                     '5UL/lFxJVPIrSe2nIs4AFhanhSDK5ro9qCI6GotPqhyd+RhuJMY/p36'
-                     'fs/srp3KL+aNd8JFxWj45M0=') },
-        { 'secure': ('xotOZyUbkcgoZhS4ZAaNtqaxhxRV03rgWRSxaccI+INczLNK18xiVUj'
-                     'I/1zdAil+ck8rXDMYVuXGo860UIaxt7Sxa7j24+nu6KNpDmlB2a1xyd'
-                     'Ls8RNL9tUpx4t+DooTHmUuUJSipUcchK6ZRAKFYOHB9Lumkbz2H2Ifs'
-                     'U1AYnLZfcGC7U63DojGFYJmgXwCgHJ25Zq00SCYdHq1b5vpvQ3ZVviI'
-                     '0+OTXCK804sSiLu3g6EamsQn7+P5F4RnMrKtm6kP2iTZ3sbED6L6adA'
-                     'mtOWKDfgrMIbYO3kgYemfNE12KG+Lfey10RiheC/CbUZHV3jSl+LE1z'
-                     'hY8Nqcf6rYQZ8QceE9gW53MrILpUxi7oSltR/pwenNNS5uEox1SrMtY'
-                     '2/O0K0dixHHgF96RV5YuqJQurzTEXTt4T9Uu1ZItp3rauSwcj6wbTYu'
-                     'fWnGeUzNVItZkSruysBY5mrcvkH6lQpCMk5x6kAzvHCQM4DtIWcep3P'
-                     'LG0lj034OuZc7MxIh9GzReeYw/gawF2xEgmiitlBaPVvYUff0BaJ8K7'
-                     'R0bbbYOuIibxrXsiAIZwa0d9vS2PBoerORD/hiE3QD+c0o3uEn8btw+'
-                     'pebokk6SizfS1q44tcWWRpaovm8uD3rhJ0alm6Ht0V7ErGzXafAzsiR'
-                     'B/o4trHiAeJUJuSIKDyvmWk=') }
+        # google_key
+        { 'secure': ('VAgKBMx0KEIyJlSnpM4YrHKLALIbaibkhlsgiv19ITa6dODoEIqeYHz'
+                     'wFTiL3mRHU6HwtXtdNb/JeMle9NfHJVFSV56ZgFzX7ev9zr0YG0qZQv'
+                     'tl8vHQlFPBErARder/L2tblOTM194/TiJk/q89a0XWDanKswXExwjcW'
+                     'Z0tnDYQXTHSAKEt+xW8hjbnhqqB/v16lX6dUjZI+sVlsw+qAM4VT/qf'
+                     'FCyDO5eJCzWIEL2LDUWI7jKSETNih5hl5fMMvCCNRPnkgGnytw5kF/t'
+                     'Lw8YAbLRxkGsO4FCx5mB7HF5pNHyWOCCalMTKheyg/qUV/VcXW9Unlr'
+                     'puMu0+d3hpLZESplS/NkvDxSrx16ank7EORS8OxLOufu56TW2hDuBzz'
+                     'w1CBAj1p6s+Z6Kc4RMYYdxRgR1TjXg/ZVUn3T69d9igdS/5lAPFx2Ww'
+                     '8x82FWCLSaiXymxXRNsNcKx5ifuvtv307r4yh31QjlKFYwadOCaCHHZ'
+                     'zGE1mXcOu3j6W9WIaZfYRTpxmOrcfDIHxZSdLf11hOSZEUUFpj9hQlV'
+                     'Op0RHkDEJUMNs6vkXUhZq9yPuqgrcb6GaN+UhOT8iHlijKmlG8NJEPk'
+                     'Hp8RnL1hsr44N57ZzLqmSUZtvC83u/5e+YUb7beUDGsMyJV/fcMiGMM'
+                     'LVtRnuPCFyNVNQUf2CphtG0=') },
+        # pass
+        { 'secure': ('AtbgKUukES2uJPpEWNEDHLg0WcghLlCGL171Ah3+4CckBI8y1Fn+VpH'
+                     'U2vEXzsV8tKoxX1IyB2tFivzuyo6CQXHSuWGJYQexwkBeGCgOfzKJLj'
+                     'MAy75ATYA6JnFrikV+UcqdEz/9Dow3J1K7Slp3jpsQhERHbNeqkr4I+'
+                     'XCL1LLnpewfOZo9OIEu93p6b6YlqvIPXJHyQe5xnMd8jFWg3/uIYqFn'
+                     'XPvigeZqC2lhNp48mj4JdwwF2tmiArgyXOmgxiuHJNVVI7okbhc7kmI'
+                     'Y3MmCSFgG0XPUEBU3Kdr4o/2hy8DDP6Gff+rUZW8nPI/2UWXRLWtOxv'
+                     'XGGRyjHHTxGWzI4JyZbli9dls5M32MMjsXVKtciSFVwsMM8qn7wFnRi'
+                     'q248a1Sg5fDNX/WYowmsHlWjffHZ7+UqUqJxAKtZ0vpQL+4SPIALPnK'
+                     'V6j6CoorQp+VhMF01EFlZ0c8bkNmk4YW7R7RyNLIcaHKfd1ud8QF9PD'
+                     'AnQ7Jr1GRBxzkjHvHfFrE14WPUu+FjVvDO7UPVMNQX7RS1IVACpKSRu'
+                     '7N8KnIK3vSnLpn5GXKsbx0JB2vtyoTaFZvC9c3qyAw1nlpn7Lp3sPs3'
+                     'bgIBU4tWOzg5g46eHbc4ad5nyB9Soz715lbMdECvKs2HHJUG3tubLKj'
+                     'L0S/LRGRQ+IDgC7xrjQj8aA=') },
     ]
 
     env = {
@@ -219,8 +221,8 @@ def travis_launch_build(organisation, repository, options, zim_size):
                       ' -out travis/googleplay_android_developer-5a411156212c.json'
                       ' -d'),
                     ( 'openssl aes-256-cbc -k $google_key'
-                      ' -in travis/test_ks.ks.enc'
-                      ' -out travis/test_ks.ks -d'),
+                      ' -in travis/kiwix-android.keystore.enc'
+                      ' -out travis/kiwix-android.keystore -d'),
                     ( 'openssl aes-256-cbc -K $encrypted_eba2f7543984_key'
                       ' -iv $encrypted_eba2f7543984_iv'
                       ' -in travis/travisci_builder_id_key.enc'
