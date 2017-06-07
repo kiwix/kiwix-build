@@ -48,11 +48,11 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--custom-app')
     parser.add_argument('--travis-token')
-    parser.add_argument('--zim-url')
 
     advance = parser.add_argument_group('advance', "Some advanced options.")
     advance.add_argument('--extra-code', type=int, default=0)
     advance.add_argument('--check-certificate', default=True)
+    advance.add_argument('--zim-url', default=None)
     advance.add_argument('--no-android-upload', action='store_false', dest='android_upload')
 
     # Hidden options
@@ -65,8 +65,11 @@ def parse_args():
 
     options = parser.parse_args()
 
-    if not options.package_name:
-        print("Try to get package name from info.json file")
+    if not options.package_name or not options.zim_url:
+        if not options.package_name:
+            print("Try to get package name from info.json file")
+        if not options.zim_url:
+            print("Try to get zim url from info.json file")
         request_url = ('https://raw.githubusercontent.com/kiwix/kiwix-android-custom/master/{}/info.json'
                       .format(options.custom_app))
         json_request = requests.get(request_url)
@@ -75,8 +78,12 @@ def parse_args():
             print("Reason is '{}'".format(json_request.reason))
             sys.exit(-1)
         json_data = json.loads(json_request.text)
-        print("Found package_name '{}'".format(json_data['package']))
-        options.package_name = json_data['package']
+        if not options.package_name:
+            print("Found package_name '{}'".format(json_data['package']))
+            options.package_name = json_data['package']
+        if not options.zim_url:
+            print("Found zim_url '{}'".format(json_data['zim_url']))
+            options.zim_url = json_data['zim_url']
 
     options.base_version = "{}{}".format(
         datetime.date.today().strftime('%y%j'),
