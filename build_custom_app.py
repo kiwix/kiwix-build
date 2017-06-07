@@ -53,6 +53,7 @@ def parse_args():
     advance = parser.add_argument_group('advance', "Some advanced options.")
     advance.add_argument('--extra-code', type=int, default=0)
     advance.add_argument('--check-certificate', default=True)
+    advance.add_argument('--no-android-upload', action='store_false', dest='android_upload')
 
     # Hidden options
     parser.add_argument('--step', default='launch', choices=['launch', 'publish'], help=argparse.SUPPRESS)
@@ -163,7 +164,6 @@ def travis_launch_build(organisation, repository, options, zim_size):
         { 'PACKAGE_NAME': options.package_name},
         { 'ZIM_URL': options.zim_url},
         { 'EXTRA_CODE': options.extra_code},
-        { 'BASE_VERSION': options.base_version},
         { 'CONTENT_VERSION_CODE': gen_version_code(0, options.base_version)},
         { 'VERSION': options.version},
         { 'secure': ('u6MCvCQhAlvU0jNojLVatNXHr6AYj4rjU9CY9JcUUG9CKMsls1t3ERz'
@@ -201,56 +201,67 @@ def travis_launch_build(organisation, repository, options, zim_size):
 
     data = {
         'request': {
-             'message' : tmpl_message.format(app=options.custom_app, zim=options.zim_url, uuid=uuid),
-             'branch'  : "custom_app",
-             'config'  : {
-                 'before_install' : [
-                     ( 'pip3 install pyOpenSSl google-api-python-client'
-                       ' httplib2 apiclient requests'),
-                     ( 'openssl aes-256-cbc -k $google_key'
-                       ' -in travis/googleplay_android_developer-5a411156212c.json.enc'
-                       ' -out travis/googleplay_android_developer-5a411156212c.json'
-                       ' -d'),
-                     ( 'openssl aes-256-cbc -k $google_key'
-                       ' -in travis/test_ks.ks.enc'
-                       ' -out travis/test_ks.ks -d'),
-                     ( 'openssl aes-256-cbc -K $encrypted_eba2f7543984_key'
-                       ' -iv $encrypted_eba2f7543984_iv'
-                       ' -in travis/travisci_builder_id_key.enc'
-                       ' -out travis/travisci_builder_id_key -d'),
-                     'chmod 600 travis/travisci_builder_id_key'
-                 ],
-                 'env' : env,
-                 'script' : 'travis_wait 30 travis/compile_custom_app.sh',
-                 'deploy' : {
-                      'provider': 'script',
-                      'skip_cleanup': True,
-                      'script': 'travis/deploy_apk.sh',
-                      'on': {
-                          'branch': 'custom_app'
-                      }
-                 },
-                 'jobs': {
-                     'include': [
-                         {
-                             'stage' : 'make_release',
-                             'install': 'pip3 install -r requirements_build_custom_app.txt',
-                             'script': True,
-                             'env': global_env,
-                             'deploy' : {
-                                 'provider': 'script',
-                                 'skip_cleanup': True,
-                                 'script': 'travis/make_release.sh',
-                                 'on': {
-                                     'branch': 'custom_app'
-                                 }
-                             }
-                         }
-                     ]
-                 }
-             }
+            'message' : tmpl_message.format(app=options.custom_app, zim=options.zim_url, uuid=uuid),
+            'branch'  : "custom_app",
+            'config'  : {
+                'before_install' : [
+                    ( 'pip3 install pyOpenSSl google-api-python-client'
+                      ' httplib2 apiclient requests'),
+                    ( 'openssl aes-256-cbc -k $google_key'
+                      ' -in travis/googleplay_android_developer-5a411156212c.json.enc'
+                      ' -out travis/googleplay_android_developer-5a411156212c.json'
+                      ' -d'),
+                    ( 'openssl aes-256-cbc -k $google_key'
+                      ' -in travis/test_ks.ks.enc'
+                      ' -out travis/test_ks.ks -d'),
+                    ( 'openssl aes-256-cbc -K $encrypted_eba2f7543984_key'
+                      ' -iv $encrypted_eba2f7543984_iv'
+                      ' -in travis/travisci_builder_id_key.enc'
+                      ' -out travis/travisci_builder_id_key -d'),
+                    'chmod 600 travis/travisci_builder_id_key'
+                ],
+                'env' : env,
+                'script' : 'travis_wait 30 travis/compile_custom_app.sh',
+                'deploy' : {
+                     'provider': 'script',
+                     'skip_cleanup': True,
+                     'script': 'travis/deploy_apk.sh',
+                     'on': {
+                         'branch': 'custom_app'
+                     }
+                }
+            }
         }
     }
+
+    if options.android_upload:
+        data['request']['config']['jobs'] = {
+            'include': [
+                {
+                    'stage' : 'make_release',
+                    'install': 'pip3 install -r requirements_build_custom_app.txt',
+                    'script': True,
+                    'env': global_env,
+                    'deploy' : {
+                        'provider': 'script',
+                        'skip_cleanup': True,
+                        'script': 'travis/make_release.sh',
+                        'on': {
+                            'branch': 'custom_app'
+                        }
+                    }
+                }
+            ]
+        }
+        global_env.append({
+            'DEPLOY_DIR' : '/home/nightlybot/apks/{}_{}'.format(
+                options.custom_app, options.base_version)
+        })
+    else:
+        global_env.append({
+            'DEPLOY_DIR' : '/var/www/tmp.kiwix.org/custom_apps/{}_{}'.format(
+                options.custom_app, options.base_version)
+        })
 
 
     r = requests.post(request_url, headers=headers, json=data)
@@ -293,6 +304,11 @@ def travis_launch_build(organisation, repository, options, zim_size):
                   "the associated build. Have a look here "
                   "https://travis-ci.org/kiwix/kiwix-build/builds"
                   "if you found it.")
+        if not options.android_upload:
+            print(("Automatic upload to android play store has been deactivated.\n"
+                   "You will find the apks at this address once they have been compiled :"
+                   " http://tmp.kiwix.org/custom_apps/{}_{}").format(
+                       options.custom_app, options.base_version))
 
 
 ERROR_MSG_EDIT_CHANGE = "A change was made to the application outside of this Edit, please create a new edit."
