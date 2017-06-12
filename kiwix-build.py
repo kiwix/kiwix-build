@@ -28,9 +28,11 @@ REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
+_fedora_common = ['automake', 'cmake', 'git', 'subversion', 'ccache', 'pkg-config', 'gcc-c++']
+_debian_common = ['automake', 'cmake', 'git', 'subversion', 'ccache', 'pkg-config', 'gcc']
 PACKAGE_NAME_MAPPERS = {
     'fedora_native_dyn': {
-        'COMMON': ['gcc-c++', 'cmake', 'automake', 'ccache'],
+        'COMMON': _fedora_common,
         'uuid': ['libuuid-devel'],
         'xapian-core': None, # Not the right version on fedora 25
         'ctpp2': None,
@@ -44,60 +46,60 @@ PACKAGE_NAME_MAPPERS = {
         'gumbo' : ['gumbo-parser-devel'],
     },
     'fedora_native_static': {
-        'COMMON': ['gcc-c++', 'cmake', 'automake', 'glibc-static', 'libstdc++-static', 'ccache'],
+        'COMMON': _fedora_common + ['glibc-static', 'libstdc++-static'],
         'zlib': ['zlib-devel', 'zlib-static'],
         'lzma': ['xz-devel', 'xz-static']
         # Either there is no packages, or no static or too old
     },
     'fedora_win32_dyn': {
-        'COMMON': ['mingw32-gcc-c++', 'mingw32-bzip2', 'mingw32-win-iconv', 'mingw32-winpthreads', 'wine', 'ccache'],
+        'COMMON': _fedora_common + ['mingw32-gcc-c++', 'mingw32-bzip2', 'mingw32-win-iconv', 'mingw32-winpthreads', 'wine'],
         'zlib': ['mingw32-zlib'],
         'lzma': ['mingw32-xz-libs'],
         'libmicrohttpd': ['mingw32-libmicrohttpd'],
     },
     'fedora_win32_static': {
-        'COMMON': ['mingw32-gcc-c++', 'mingw32-bzip2-static', 'mingw32-win-iconv-static', 'mingw32-winpthreads-static', 'wine', 'ccache'],
+        'COMMON': _fedora_common + ['mingw32-gcc-c++', 'mingw32-bzip2-static', 'mingw32-win-iconv-static', 'mingw32-winpthreads-static', 'wine'],
         'zlib': ['mingw32-zlib-static'],
         'lzma': ['mingw32-xz-libs-static'],
         'libmicrohttpd': None, # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
                                # gcc cannot found them.
     },
     'fedora_armhf_static': {
-        'COMMON': ['cmake', 'automake', 'ccache']
+        'COMMON': _fedora_common
     },
     'fedora_armhf_dyn': {
-        'COMMON': ['cmake', 'automake', 'ccache']
+        'COMMON': _fedora_common
     },
     'fedora_android': {
-        'COMMON': ['gcc-c++', 'cmake', 'automake', 'ccache', 'java-1.8.0-openjdk-devel']
+        'COMMON': _fedora_common + ['java-1.8.0-openjdk-devel']
     },
     'debian_native_dyn': {
-        'COMMON': ['automake', 'gcc', 'cmake', 'libbz2-dev', 'ccache'],
+        'COMMON': _debian_common + ['libbz2-dev'],
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
         'libmicrohttpd': ['libmicrohttpd-dev', 'ccache']
     },
     'debian_native_static': {
-        'COMMON': ['automake', 'gcc', 'cmake', 'libbz2-dev', 'ccache'],
+        'COMMON': _debian_common + ['libbz2-dev'],
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
     },
     'debian_win32_dyn': {
-        'COMMON': ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools', 'cmake', 'ccache']
+        'COMMON': _debian_common + ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools']
     },
     'debian_win32_static': {
-        'COMMON': ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools', 'cmake', 'ccache']
+        'COMMON': _debian_common + ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools']
     },
     'debian_armhf_static': {
-        'COMMON': ['cmake', 'automake', 'ccache']
+        'COMMON': _debian_common
     },
     'debian_armhf_dyn': {
-        'COMMON': ['cmake', 'automake', 'ccache']
+        'COMMON': _debian_common
     },
     'debian_android': {
-        'COMMON': ['automake', 'gcc', 'cmake', 'ccache', 'default-jdk']
+        'COMMON': _debian_common + ['default-jdk']
     },
 }
 
