@@ -10,6 +10,7 @@ c_link_args = {extra_libs!r}
 cpp_link_args = {extra_libs!r}
 c_args = {extra_cflags!r}
 cpp_args = {extra_cflags!r}
+android_abi = '{host_machine[abi]}'
 
 [host_machine]
 cpu_family = '{host_machine[cpu_family]}'
