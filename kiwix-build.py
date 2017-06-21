@@ -112,6 +112,9 @@ PACKAGE_NAME_MAPPERS = {
     'Darwin_native_dyn': {
         'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],
     },
+    'Darwin_iOS_static': {
+        'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],
+    },
 }
 
 
@@ -197,6 +200,11 @@ class AndroidTargetInfo(TargetInfo):
             },
         }
 
+class iOSTargetInfo(TargetInfo):
+    def __init__(self, arch):
+        super().__init__('iOS', True, ['iOS_sdk'])
+        self.arch = arch
+
 
 class BuildEnv:
     target_platforms = {
@@ -212,6 +220,7 @@ class BuildEnv:
         'android_mips64': AndroidTargetInfo('mips64'),
         'android_x86': AndroidTargetInfo('x86'),
         'android_x86_64': AndroidTargetInfo('x86_64'),
+        'iOS_arm64': iOSTargetInfo('arm64'),
     }
 
     def __init__(self, options, targetsDict):
@@ -310,6 +319,9 @@ class BuildEnv:
     def setup_armhf(self):
         self.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
         self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
+
+    def setup_iOS(self):
+        pass
 
     def __getattr__(self, name):
         return getattr(self.options, name)
@@ -826,6 +838,10 @@ class armhf_toolchain(Toolchain):
     def set_compiler(self, env):
         env['CC'] = self.binaries['CC']
         env['CXX'] = self.binaries['CXX']
+
+
+class iOS_sdk(Toolchain):
+    pass
 
 
 class Builder:
