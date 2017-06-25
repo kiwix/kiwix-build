@@ -345,6 +345,12 @@ class KiwixAndroid(Dependency):
         git_dir = "kiwix-android"
 
     class Builder(GradleBuilder):
+        def build(self):
+            if self.buildEnv.options.targets == 'kiwix-android-custom':
+                print("SKIP")
+            else:
+                super().build()
+
         def _configure(self, context):
             if not os.path.exists(self.build_path):
                 shutil.copytree(self.source_path, self.build_path)
@@ -375,7 +381,15 @@ class KiwixCustomApp(Dependency):
 
         @property
         def gradle_option(self):
-            return "-i -P customDir={}".format(pj(self.build_path, 'custom'))
+            template = ("-i -P customDir={customDir}"
+                        " -P zim_file_size={zim_size}"
+                        " -P version_code={version_code}"
+                        " -P content_version_code={content_version_code}")
+            return template.format(
+                customDir=pj(self.build_path, 'custom'),
+                zim_size=self._get_zim_size(),
+                version_code=os.environ['VERSION_CODE'],
+                content_version_code=os.environ['CONTENT_VERSION_CODE'])
 
         @property
         def build_path(self):
@@ -384,6 +398,15 @@ class KiwixCustomApp(Dependency):
         @property
         def custom_build_path(self):
             return pj(self.build_path, 'custom', self.target.custom_name)
+
+        def _get_zim_size(self):
+            try:
+                zim_size = self.buildEnv.options.zim_file_size
+            except AttributeError:
+                with open(pj(self.source_path, self.target.custom_name, 'info.json')) as f:
+                    app_info = json.load(f)
+                zim_size = os.path.getsize(pj(self.custom_build_path, app_info['zim_file']))
+            return zim_size
 
         def build(self):
             self.command('configure', self._configure)

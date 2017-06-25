@@ -3,12 +3,16 @@ import hashlib
 import tarfile, zipfile
 import tempfile
 import shutil
-import os, stat
+import os, stat, sys
+import urllib
+import ssl
 from collections import namedtuple, defaultdict
 
 pj = os.path.join
 
 g_print_progress = True
+
+REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 
 
 def setup_print_progress(print_progress):
@@ -70,6 +74,48 @@ def copy_tree(src, dst, post_copy_function=None):
             shutil.copy2(pj(root, f), dstfile)
             if post_copy_function is not None:
                 post_copy_function(dstfile)
+
+
+def download_remote(what, where, check_certificate=True):
+    file_path = pj(where, what.name)
+    file_url = what.url or (REMOTE_PREFIX + what.name)
+    if os.path.exists(file_path):
+        if what.sha256 == get_sha256(file_path):
+            raise SkipCommand()
+        os.remove(file_path)
+
+    if not check_certificate:
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+    else:
+        context = None
+    batch_size = 1024 * 8
+    extra_args = {'context':context} if sys.version_info >= (3, 4, 3) else {}
+    progress_chars = "/-\|"
+    with urllib.request.urlopen(file_url, **extra_args) as resource, open(file_path, 'wb') as file:
+        tsize = resource.getheader('Content-Length', None)
+        if tsize is not None:
+            tsize = int(tsize)
+        current = 0
+        while True:
+            batch = resource.read(batch_size)
+            if not batch:
+                break
+            if tsize:
+                current += batch_size
+                print_progress("{:.2%}".format(current/tsize))
+            else:
+                print_progress(progress_chars[current])
+                current = (current+1)%4
+            file.write(batch)
+
+    if not what.sha256:
+        print('Sha256 for {} not set, do no verify download'.format(what.name))
+    elif what.sha256 != get_sha256(file_path):
+        os.remove(file_path)
+        raise StopBuild()
+
 
 class SkipCommand(Exception):
     pass

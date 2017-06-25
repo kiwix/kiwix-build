@@ -17,6 +17,7 @@ from utils import (
     get_sha256,
     print_progress,
     setup_print_progress,
+    download_remote,
     StopBuild,
     SkipCommand,
     Defaultdict,
@@ -432,44 +433,7 @@ class BuildEnv:
 
     def download(self, what, where=None):
         where = where or self.archive_dir
-        file_path = pj(where, what.name)
-        file_url = what.url or (REMOTE_PREFIX + what.name)
-        if os.path.exists(file_path):
-            if what.sha256 == get_sha256(file_path):
-                raise SkipCommand()
-            os.remove(file_path)
-
-        if options.no_cert_check == True:
-            context = ssl.create_default_context()
-            context.check_hostname = False
-            context.verify_mode = ssl.CERT_NONE
-        else:
-            context = None
-        batch_size = 1024 * 8
-        extra_args = {'context':context} if sys.version_info >= (3, 4, 3) else {}
-        progress_chars = "/-\|"
-        with urllib.request.urlopen(file_url, **extra_args) as resource, open(file_path, 'wb') as file:
-            tsize = resource.getheader('Content-Length', None)
-            if tsize is not None:
-                tsize = int(tsize)
-            current = 0
-            while True:
-                batch = resource.read(batch_size)
-                if not batch:
-                    break
-                if tsize:
-                    current += batch_size
-                    print_progress("{:.2%}".format(current/tsize))
-                else:
-                    print_progress(progress_chars[current])
-                    current = (current+1)%4
-                file.write(batch)
-
-        if not what.sha256:
-            print('Sha256 for {} not set, do no verify download'.format(what.name))
-        elif what.sha256 != get_sha256(file_path):
-            os.remove(file_path)
-            raise StopBuild()
+        download_remote(what, where, not self.options.no_cert_check)
 
     def install_packages(self):
         autoskip_file = pj(self.build_dir, ".install_packages_ok")
@@ -945,12 +909,21 @@ def parse_args():
                           help="The custom android app to build")
     subgroup.add_argument('--zim-file-url',
                           help="The url of the zim file to download")
+    subgroup.add_argument('--zim-file-size',
+                          help="The size of the zim file.")
     options = parser.parse_args()
 
     if options.targets == 'kiwix-android-custom':
-        if not options.android_custom_app or not options.zim_file_url:
-            print("You need to specify ANDROID_CUSTOM_APP and ZIM_FILE_URL if "
+        err = False
+        if not options.android_custom_app:
+            print("You need to specify ANDROID_CUSTOM_APP if you "
                   "want to build a kiwix-android-custom target")
+            err = True
+        if not options.zim_file_url and not options.zim_file_size:
+            print("You need to specify ZIM_FILE_SIZE or ZIM_FILE_URL if you "
+                  "want to build a kiwix-android-custom target")
+            err = True
+        if err:
             sys.exit(1)
     return options
 
