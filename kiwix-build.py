@@ -29,7 +29,7 @@ REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
-_fedora_common = ['automake', 'cmake', 'git', 'subversion', 'ccache', 'pkg-config', 'gcc-c++']
+_fedora_common = ['automake', 'cmake', 'git', 'subversion', 'ccache', 'pkgconfig', 'gcc-c++']
 _debian_common = ['automake', 'cmake', 'git', 'subversion', 'ccache', 'pkg-config', 'gcc']
 PACKAGE_NAME_MAPPERS = {
     'fedora_native_dyn': {
