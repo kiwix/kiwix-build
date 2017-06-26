@@ -708,7 +708,7 @@ class android_ndk(Toolchain):
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
         env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(self.root_path) + env['CFLAGS']
         env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(self.root_path) + env['CXXFLAGS']
-        env['LDFLAGS'] = ' -fPIE -pie --sysroot={} '.format(self.root_path) + env['LDFLAGS']
+        env['LDFLAGS'] = '--sysroot={} '.format(self.root_path) + env['LDFLAGS']
         #env['CFLAGS'] = ' -fPIC -D_FILE_OFFSET_BITS=64 -O3 '+env['CFLAGS']
         #env['CXXFLAGS'] = (' -D__OPTIMIZE__ -fno-strict-aliasing '
         #                   ' -DU_HAVE_NL_LANGINFO_CODESET=0 '
