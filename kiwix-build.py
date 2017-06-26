@@ -355,7 +355,7 @@ class BuildEnv:
         cmake_options = [tlc.cmake_option for tlc in self.toolchains]
         return " ".join(cmake_options)
 
-    def _set_env(self, env, cross_compile_env, cross_compile_path):
+    def _set_env(self, env, cross_compile_env, cross_compile_compiler, cross_compile_path):
         if env is None:
             env = Defaultdict(str, os.environ)
 
@@ -368,6 +368,9 @@ class BuildEnv:
                 env[k] = v
             for toolchain in self.toolchains:
                 toolchain.set_env(env)
+        if cross_compile_compiler:
+            for toolchain in self.toolchains:
+                toolchain.set_compiler(env)
         if cross_compile_path:
             for tlc in self.toolchains:
                 bin_dirs += tlc.get_bin_dir()
@@ -398,16 +401,18 @@ class BuildEnv:
                                    env['LDFLAGS']])
         return env
 
-    def run_command(self, command, cwd, context, env=None, input=None, cross_path_only=False):
+    def run_command(self, command, cwd, context, env=None, input=None, cross_env_only=False):
         os.makedirs(cwd, exist_ok=True)
         cross_compile_env = True
+        cross_compile_compiler = True
         cross_compile_path = True
         if context.force_native_build:
             cross_compile_env = False
+            cross_compile_compiler = False
             cross_compile_path = False
-        if cross_path_only:
-            cross_compile_env = False
-        env = self._set_env(env, cross_compile_env, cross_compile_path)
+        if cross_env_only:
+            cross_compile_compiler = False
+        env = self._set_env(env, cross_compile_env, cross_compile_compiler, cross_compile_path)
         log = None
         try:
             if not self.options.verbose:
@@ -528,6 +533,9 @@ class Toolchain(metaclass=_MetaToolchain):
     def set_env(self, env):
         pass
 
+    def set_compiler(self, env):
+        pass
+
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
         log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
@@ -579,11 +587,12 @@ class mingw32_toolchain(Toolchain):
         return [pj(self.root_path, 'bin')]
 
     def set_env(self, env):
-        for k, v in self.binaries.items():
-            env[k] = v
-
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
         env['LIBS'] = " ".join(self.buildEnv.cross_config['extra_libs']) + " " +env['LIBS']
+
+    def set_compiler(self, env):
+        for k, v in self.binaries.items():
+            env[k] = v
 
 
 class android_ndk(Toolchain):
@@ -696,9 +705,6 @@ class android_ndk(Toolchain):
         return [pj(self.builder.install_path, 'bin')]
 
     def set_env(self, env):
-        env['CC'] = self.binaries['CC']
-        env['CXX'] = self.binaries['CXX']
-
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
         env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(self.root_path) + env['CFLAGS']
         env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(self.root_path) + env['CXXFLAGS']
@@ -709,6 +715,10 @@ class android_ndk(Toolchain):
         #                   '-DU_STATIC_IMPLEMENTATION -O3 '
         #                   '-DU_HAVE_STD_STRING -DU_TIMEZONE=0 ')+env['CXXFLAGS']
         env['NDK_DEBUG'] = '0'
+
+    def set_compiler(self, env):
+        env['CC'] = self.binaries['CC']
+        env['CXX'] = self.binaries['CXX']
 
 
 class android_sdk(Toolchain):
@@ -795,13 +805,14 @@ class armhf_toolchain(Toolchain):
         return [pj(self.root_path, 'bin')]
 
     def set_env(self, env):
-        env['CC'] = self.binaries['CC']
-        env['CXX'] = self.binaries['CXX']
-
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
         env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
         env['CXXFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
         env['LIBS'] = " ".join(self.buildEnv.cross_config['extra_libs']) + " " +env['LIBS']
+
+    def set_compiler(self, env):
+        env['CC'] = self.binaries['CC']
+        env['CXX'] = self.binaries['CXX']
 
 
 class Builder:

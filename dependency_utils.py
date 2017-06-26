@@ -297,7 +297,7 @@ class CMakeBuilder(MakeBuilder):
                     v = v.format(buildEnv=self.buildEnv, env=env)
                     self.configure_env[k[8:]] = v
             env.update(self.configure_env)
-        self.buildEnv.run_command(command, self.build_path, context, env=env, cross_path_only=True)
+        self.buildEnv.run_command(command, self.build_path, context, env=env, cross_env_only=True)
 
 
 class MesonBuilder(Builder):
@@ -327,7 +327,7 @@ class MesonBuilder(Builder):
             buildEnv=self.buildEnv,
             cross_option="--cross-file {}".format(self.buildEnv.meson_crossfile) if self.buildEnv.meson_crossfile else ""
         )
-        self.buildEnv.run_command(command, self.source_path, context, cross_path_only=True)
+        self.buildEnv.run_command(command, self.source_path, context, cross_env_only=True)
 
     def _compile(self, context):
         command = "{} -v".format(self.buildEnv.ninja_command)
