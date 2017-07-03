@@ -145,6 +145,7 @@ class GitClone(Source):
             self.git_ref)
         self.buildEnv.run_command(command, self.git_path, context)
         self.buildEnv.run_command("git checkout "+self.git_ref, self.git_path, context)
+        self.buildEnv.run_command("git pull", self.git_path, context)
 
     def prepare(self):
         self.command('gitclone', self._git_clone)
