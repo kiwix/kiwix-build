@@ -125,10 +125,11 @@ def which(name):
 
 
 class TargetInfo:
-    def __init__(self, build, static, toolchains):
+    def __init__(self, build, static, toolchains, hosts=None):
         self.build = build
         self.static = static
         self.toolchains = toolchains
+        self.compatible_hosts = hosts
 
     def __str__(self):
         return "{}_{}".format(self.build, 'static' if self.static else 'dyn')
@@ -179,7 +180,8 @@ class AndroidTargetInfo(TargetInfo):
     }
 
     def __init__(self, arch):
-        super().__init__('android', True, ['android_ndk', 'android_sdk'])
+        super().__init__('android', True, ['android_ndk', 'android_sdk'],
+                         hosts=['fedora', 'debian'])
         self.arch = arch
         self.arch_full, self.cpu, self.abi = self.__arch_infos[arch]
 
@@ -202,18 +204,25 @@ class AndroidTargetInfo(TargetInfo):
 
 class iOSTargetInfo(TargetInfo):
     def __init__(self, arch):
-        super().__init__('iOS', True, ['iOS_sdk'])
+        super().__init__('iOS', True, ['iOS_sdk'],
+                         hosts=['Darwin'])
         self.arch = arch
 
 
 class BuildEnv:
     target_platforms = {
-        'native_dyn': TargetInfo('native', False, []),
-        'native_static': TargetInfo('native', True, []),
-        'win32_dyn': TargetInfo('win32', False, ['mingw32_toolchain']),
-        'win32_static': TargetInfo('win32', True, ['mingw32_toolchain']),
-        'armhf_dyn': TargetInfo('armhf', False, ['armhf_toolchain']),
-        'armhf_static': TargetInfo('armhf', True, ['armhf_toolchain']),
+        'native_dyn': TargetInfo('native', False, [],
+                                 hosts=['fedora', 'debian', 'Darwin']),
+        'native_static': TargetInfo('native', True, [],
+                                 hosts=['fedora', 'debian']),
+        'win32_dyn': TargetInfo('win32', False, ['mingw32_toolchain'],
+                                 hosts=['fedora', 'debian']),
+        'win32_static': TargetInfo('win32', True, ['mingw32_toolchain'],
+                                 hosts=['fedora', 'debian']),
+        'armhf_dyn': TargetInfo('armhf', False, ['armhf_toolchain'],
+                                 hosts=['fedora', 'debian']),
+        'armhf_static': TargetInfo('armhf', True, ['armhf_toolchain'],
+                                 hosts=['fedora', 'debian']),
         'android_arm': AndroidTargetInfo('arm'),
         'android_arm64': AndroidTargetInfo('arm64'),
         'android_mips': AndroidTargetInfo('mips'),
@@ -281,6 +290,11 @@ class BuildEnv:
 
     def setup_build(self, target_platform):
         self.platform_info = self.target_platforms[target_platform]
+        if self.distname not in self.platform_info.compatible_hosts:
+            print(('ERROR: The target {} cannot be build on host {}.\n'
+                   'Select another target platform, or change your host system.'
+                  ).format(target_platform, self.distname))
+            sys.exit(-1)
         self.cross_config = self.platform_info.get_cross_config(self.distname)
 
     def setup_toolchains(self):
