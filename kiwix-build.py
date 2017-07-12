@@ -79,6 +79,7 @@ PACKAGE_NAME_MAPPERS = {
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
+        'ctpp2c': ['ctpp2-utils'],
         'libmicrohttpd': ['libmicrohttpd-dev', 'ccache']
     },
     'debian_native_static': {
@@ -86,21 +87,27 @@ PACKAGE_NAME_MAPPERS = {
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
+        'ctpp2c': ['ctpp2-utils'],
     },
     'debian_win32_dyn': {
-        'COMMON': _debian_common + ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools']
+        'COMMON': _debian_common + ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools'],
+        'ctpp2c': ['ctpp2-utils'],
     },
     'debian_win32_static': {
-        'COMMON': _debian_common + ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools']
+        'COMMON': _debian_common + ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools'],
+        'ctpp2c': ['ctpp2-utils'],
     },
     'debian_armhf_static': {
-        'COMMON': _debian_common
+        'COMMON': _debian_common,
+        'ctpp2c': ['ctpp2-utils'],
     },
     'debian_armhf_dyn': {
-        'COMMON': _debian_common
+        'COMMON': _debian_common,
+        'ctpp2c': ['ctpp2-utils'],
     },
     'debian_android': {
-        'COMMON': _debian_common + ['default-jdk']
+        'COMMON': _debian_common + ['default-jdk'],
+        'ctpp2c': ['ctpp2-utils'],
     },
 }
 
