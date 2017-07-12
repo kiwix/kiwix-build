@@ -143,10 +143,32 @@ class CTPP2(Dependency):
                    "ctpp2_mingw32.patch",
                    "ctpp2_dll_export_VMExecutable.patch",
                    "ctpp2_win_install_lib_in_lib_dir.patch",
-                   "ctpp2_iconv_support.patch"]
+                   "ctpp2_iconv_support.patch",
+                   "ctpp2_compile_ctpp2c_static.patch",
+                  ]
 
     class Builder(CMakeBuilder):
         configure_option = "-DMD5_SUPPORT=OFF"
+
+
+class CTPP2C(CTPP2):
+    name = "ctpp2c"
+    force_native_build = True
+
+    class Builder(CTPP2.Builder):
+        make_target = "ctpp2c"
+
+        @property
+        def build_path(self):
+            return super().build_path+"_native"
+
+        def _install(self, context):
+            context.try_skip(self.build_path)
+            command = "cp {ctpp2c}* {install_dir}".format(
+                ctpp2c=pj(self.build_path, 'ctpp2c'),
+                install_dir=pj(self.buildEnv.install_dir, 'bin')
+            )
+            self.buildEnv.run_command(command, self.build_path, context)
 
 
 class Pugixml(Dependency):
@@ -272,7 +294,7 @@ class Kiwixlib(Dependency):
     def dependencies(self):
         base_dependencies = ["pugixml", "libzim", "zlib", "lzma"]
         if self.buildEnv.platform_info.build != 'android':
-            base_dependencies += ['ctpp2']
+            base_dependencies += ['ctpp2', 'ctpp2c']
         if self.buildEnv.platform_info.build != 'native':
             return base_dependencies + ["icu4c_cross-compile"]
         else:
