@@ -1,0 +1,13 @@
+diff -u ctpp2-2.8.3/CMakeLists.txt ctpp2-2.8.3-static/CMakeLists.txt
+--- ctpp2-2.8.3/CMakeLists.txt	2017-07-12 11:53:28.656535071 +0200
++++ ctpp2-2.8.3-static/CMakeLists.txt	2017-07-12 11:52:15.358692988 +0200
+@@ -464,7 +464,8 @@
+ 
+ # CTPP Compiler
+ ADD_EXECUTABLE(ctpp2c                       tests/CTPP2Compiler.cpp)
+-TARGET_LINK_LIBRARIES(ctpp2c                ctpp2)
++TARGET_LINK_LIBRARIES(ctpp2c                ctpp2-static)
++TARGET_LINK_LIBRARIES(ctpp2c                "-static")
+ 
+ # CTPP2 Interpreter
+ ADD_EXECUTABLE(ctpp2i                       tests/CTPP2Interpreter.cpp)
