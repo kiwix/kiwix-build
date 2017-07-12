@@ -274,6 +274,9 @@ class MakeBuilder(Builder):
 class CMakeBuilder(MakeBuilder):
     def _configure(self, context):
         context.try_skip(self.build_path)
+        cross_option = ""
+        if not self.target.force_native_build and self.buildEnv.cmake_crossfile:
+            cross_option = "-DCMAKE_TOOLCHAIN_FILE={}".format(self.buildEnv.cmake_crossfile)
         command = ("cmake {configure_option}"
                    " -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
                    " -DCMAKE_INSTALL_PREFIX={install_dir}"
@@ -285,7 +288,7 @@ class CMakeBuilder(MakeBuilder):
             install_dir=self.buildEnv.install_dir,
             libdir=self.buildEnv.libprefix,
             source_path=self.source_path,
-            cross_option="-DCMAKE_TOOLCHAIN_FILE={}".format(self.buildEnv.cmake_crossfile) if self.buildEnv.cmake_crossfile else ""
+            cross_option=cross_option
         )
         env = Defaultdict(str, os.environ)
         if self.buildEnv.platform_info.static:
@@ -313,6 +316,10 @@ class MesonBuilder(Builder):
             shutil.rmtree(self.build_path)
         os.makedirs(self.build_path)
         configure_option = self.configure_option.format(buildEnv=self.buildEnv)
+        cross_option = ""
+        if not self.target.force_native_build and self.buildEnv.meson_crossfile:
+            cross_option = "--cross-file {}".format(
+                self.buildEnv.meson_crossfile)
         command = ("{command} . {build_path}"
                    " --default-library={library_type}"
                    " {configure_option}"
@@ -325,7 +332,7 @@ class MesonBuilder(Builder):
             configure_option=configure_option,
             build_path=self.build_path,
             buildEnv=self.buildEnv,
-            cross_option="--cross-file {}".format(self.buildEnv.meson_crossfile) if self.buildEnv.meson_crossfile else ""
+            cross_option=cross_option
         )
         self.buildEnv.run_command(command, self.source_path, context, cross_env_only=True)
 
