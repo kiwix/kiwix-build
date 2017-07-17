@@ -292,9 +292,9 @@ class Kiwixlib(Dependency):
 
     @property
     def dependencies(self):
-        base_dependencies = ["pugixml", "libzim", "zlib", "lzma"]
+        base_dependencies = ["pugixml", "libzim", "zlib", "lzma", "ctpp2c"]
         if self.buildEnv.platform_info.build != 'android':
-            base_dependencies += ['ctpp2', 'ctpp2c']
+            base_dependencies += ['ctpp2']
         if self.buildEnv.platform_info.build != 'native':
             return base_dependencies + ["icu4c_cross-compile"]
         else:

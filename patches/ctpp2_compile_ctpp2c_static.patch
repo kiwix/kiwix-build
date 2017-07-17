@@ -11,3 +11,27 @@ diff -u ctpp2-2.8.3/CMakeLists.txt ctpp2-2.8.3-static/CMakeLists.txt
  
  # CTPP2 Interpreter
  ADD_EXECUTABLE(ctpp2i                       tests/CTPP2Interpreter.cpp)
+@@ -794,7 +795,6 @@
+             DESTINATION .)
+ 
+     INSTALL(TARGETS ctpp2vm
+-                    ctpp2c
+                     ctpp2i
+                     ctpp2json
+             DESTINATION .)
+@@ -806,7 +806,6 @@
+ # Install Manpages
+ INSTALL(FILES
+               man/ctpp2-config.1
+-              man/ctpp2c.1
+               man/ctpp2i.1
+               man/ctpp2json.1
+               man/ctpp2vm.1
+@@ -904,7 +903,6 @@
+ 
+     # Install binaries
+     INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/ctpp2vm
+-                  ${CMAKE_CURRENT_BINARY_DIR}/ctpp2c
+                   ${CMAKE_CURRENT_BINARY_DIR}/ctpp2i
+                   ${CMAKE_CURRENT_BINARY_DIR}/ctpp2json
+                   ${CMAKE_CURRENT_BINARY_DIR}/ctpp2-config
