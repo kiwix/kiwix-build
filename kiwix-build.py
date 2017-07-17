@@ -109,6 +109,12 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON': _debian_common + ['default-jdk'],
         'ctpp2c': ['ctpp2-utils'],
     },
+    'Darwin_native_dyn': {
+        'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],
+    },
+    'Darwin_iOS_static': {
+        'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],
+    },
 }
 
 
@@ -119,10 +125,11 @@ def which(name):
 
 
 class TargetInfo:
-    def __init__(self, build, static, toolchains):
+    def __init__(self, build, static, toolchains, hosts=None):
         self.build = build
         self.static = static
         self.toolchains = toolchains
+        self.compatible_hosts = hosts
 
     def __str__(self):
         return "{}_{}".format(self.build, 'static' if self.static else 'dyn')
@@ -173,7 +180,8 @@ class AndroidTargetInfo(TargetInfo):
     }
 
     def __init__(self, arch):
-        super().__init__('android', True, ['android_ndk', 'android_sdk'])
+        super().__init__('android', True, ['android_ndk', 'android_sdk'],
+                         hosts=['fedora', 'debian'])
         self.arch = arch
         self.arch_full, self.cpu, self.abi = self.__arch_infos[arch]
 
@@ -194,21 +202,34 @@ class AndroidTargetInfo(TargetInfo):
             },
         }
 
+class iOSTargetInfo(TargetInfo):
+    def __init__(self, arch):
+        super().__init__('iOS', True, ['iOS_sdk'],
+                         hosts=['Darwin'])
+        self.arch = arch
+
 
 class BuildEnv:
     target_platforms = {
-        'native_dyn': TargetInfo('native', False, []),
-        'native_static': TargetInfo('native', True, []),
-        'win32_dyn': TargetInfo('win32', False, ['mingw32_toolchain']),
-        'win32_static': TargetInfo('win32', True, ['mingw32_toolchain']),
-        'armhf_dyn': TargetInfo('armhf', False, ['armhf_toolchain']),
-        'armhf_static': TargetInfo('armhf', True, ['armhf_toolchain']),
+        'native_dyn': TargetInfo('native', False, [],
+                                 hosts=['fedora', 'debian', 'Darwin']),
+        'native_static': TargetInfo('native', True, [],
+                                 hosts=['fedora', 'debian']),
+        'win32_dyn': TargetInfo('win32', False, ['mingw32_toolchain'],
+                                 hosts=['fedora', 'debian']),
+        'win32_static': TargetInfo('win32', True, ['mingw32_toolchain'],
+                                 hosts=['fedora', 'debian']),
+        'armhf_dyn': TargetInfo('armhf', False, ['armhf_toolchain'],
+                                 hosts=['fedora', 'debian']),
+        'armhf_static': TargetInfo('armhf', True, ['armhf_toolchain'],
+                                 hosts=['fedora', 'debian']),
         'android_arm': AndroidTargetInfo('arm'),
         'android_arm64': AndroidTargetInfo('arm64'),
         'android_mips': AndroidTargetInfo('mips'),
         'android_mips64': AndroidTargetInfo('mips64'),
         'android_x86': AndroidTargetInfo('x86'),
         'android_x86_64': AndroidTargetInfo('x86_64'),
+        'iOS_arm64': iOSTargetInfo('arm64'),
     }
 
     def __init__(self, options, targetsDict):
@@ -269,6 +290,11 @@ class BuildEnv:
 
     def setup_build(self, target_platform):
         self.platform_info = self.target_platforms[target_platform]
+        if self.distname not in self.platform_info.compatible_hosts:
+            print(('ERROR: The target {} cannot be build on host {}.\n'
+                   'Select another target platform, or change your host system.'
+                  ).format(target_platform, self.distname))
+            sys.exit(-1)
         self.cross_config = self.platform_info.get_cross_config(self.distname)
 
     def setup_toolchains(self):
@@ -307,6 +333,9 @@ class BuildEnv:
     def setup_armhf(self):
         self.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
         self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
+
+    def setup_iOS(self):
+        pass
 
     def __getattr__(self, name):
         return getattr(self.options, name)
@@ -455,6 +484,9 @@ class BuildEnv:
         elif self.distname in ('debian', 'Ubuntu'):
             package_installer = 'sudo apt-get install {}'
             package_checker = 'LANG=C dpkg -s {} 2>&1 | grep Status | grep "ok installed" 1>/dev/null 2>&1'
+        elif self.distname == 'Darwin':
+            package_installer = 'brew install {}'
+            package_checker = 'brew list -1 | grep -q {}'
         mapper_name = "{host}_{target}".format(
             host=self.distname,
             target=self.platform_info)
@@ -820,6 +852,10 @@ class armhf_toolchain(Toolchain):
     def set_compiler(self, env):
         env['CC'] = self.binaries['CC']
         env['CXX'] = self.binaries['CXX']
+
+
+class iOS_sdk(Toolchain):
+    pass
 
 
 class Builder:
