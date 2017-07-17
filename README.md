@@ -1,100 +1,78 @@
-Build status : [![Build Status](https://travis-ci.org/kiwix/kiwix-build.svg?branch=master)](https://travis-ci.org/kiwix/kiwix-build)
+Build status: [![Build Status](https://travis-ci.org/kiwix/kiwix-build.svg?branch=master)](https://travis-ci.org/kiwix/kiwix-build)
 
-
-Kiwix is an offline reader for Web content. It's especially thought to
-make Wikipedia available offline.  This is done by reading the content
+Kiwix is an offline reader for web content. It's especially thought to
+make Wikipedia available offline. This is done by reading the content
 of the project stored in a file format ZIM, a high compressed open
 format with additional meta-data.
 
-This repository contains a set of tools to help development or usage
-of kiwix.
+This repository contains advanced tools to (cross-)compile easily
+Kiwix softwares and library and deploy them. They have been tested on
+Fedora 23 and Ubuntu 16.10.
 
-# COMPILATION INSTRUCTIONS
+# Prerequesites
 
-Most of the compilation steps are handled by the kiwix-build.py
-script.
+You will need a recent version of `meson` (0.34) and `ninja` (1.6) If
+your distribution provides a recent enough versions for them, just
+install them with your package manager. Continue to read the
+instructions otherwise.
 
-This script has been tested of Fedora 23 and Ubuntu 16.10
-
-If you want to cross-compile for other platforms as windows or android, you
-should read the "Other target platform" section.
-
-## Preparing environment
-
-You will need a recent version of meson (0.34) and ninja (1.6)
-If your distribution provide a recent enough versions for them, just install
-them with your package manager.
-
-Else you can install them manually
-
-### Meson
+Before anything else you need to install Python3 related tools. On Debian
+based systems:
 
 ```
-pip install meson --user # Install Meson
+sudo apt-get install python3-pip virtualenv
 ```
 
-(You may want to install meson in a virtualenv if you prefer)
+Then install Meson:
+```
+virtualenv -p python3 ./ # Create virtualenv
+source bin/activate      # Activate the virtualenv
+pip3 install meson       # Install Meson
+hash -r                  # Refresh bash paths
+```
 
-### ninja
+Finally we need the Ninja tool (available in the $PATH). Here is a
+solution to download, build and install it locally:
 
 ```
 git clone git://github.com/ninja-build/ninja.git
 cd ninja
 git checkout release
 ./configure.py --bootstrap
-cp ninja <a_directory_in_your_path>
+mkdir ../bin
+cp ninja ../bin
+cd ..
 ```
 
-## Buildings
+# Compilation
 
-This is the simple one.
-
-```
-./kiwix-build.py
-```
-
-It will compile everything.
-If you are using a supported platform (redhad or debian based) it will install
-missing packages using sudo.
-If you don't want to trust kiwix-build.py and give it the root right, just
-launch yourself the the printed command.
-
-### Outputs
-
-Kiwix-build.py will create several directories:
-
-- ARCHIVES : All the downloaded archives go there.
-- SOURCES : All the sources (extracted from archives and patched) go there.
-- BUILD_native_dyn : All the build files go there.
-- BUILD_native_dyn/INSTALL : The installed files go there.
-- BUILD_native_dyn/LOGS: The logs files of the build.
-
-ARCHIVES and SOURCES are independent of the build type you choose.
-
-If you want to install all those directories elsewhere, you can pass the
-`--working-dir` option:
+The compilation is handled by `kiwix-build.py`. It will compile
+everything. If you are using a supported platform (Redhat or Debian
+based) it will install missing packages using `sudo`. You can get
+`kiwix-build.py` usage like this:
 
 ```
-./kiwix-build.py --working-dir <a_directory_somewhere>
+./kiwix-build.py -h
 ```
 
-### Other target
+## Target
 
-By default, kiwix-build will build kiwix-tools and all its dependencies.
-If you want to compile another target only (let's said kiwixlib), you can
-specify it:
+By default, `kiwix-build.py` will build `kiwix-tools`. If you want to
+compile another target only (let's said kiwixlib), you can specify it:
 
 ```
 ./kiwix-build Kiwixlib
 ```
 
-### Other target platform.
+## Target platform
 
-By default, kiwix-build will build everything for the current (native) platform
-using dynamic linkage (hence the `native_dyn` of the BUILD_native_dyn directory).
+By default, `kiwix-build.py` will build everything for the current (native)
+platform using dynamic linkage (hence the `native_dyn` of the
+BUILD_native_dyn directory).
 
-But you can select another target platform using the option `target-platform`.
-For now, there is ten different supported platforms :
+But you can select another target platform using the option
+`target-platform`. For now, there is ten different supported
+platforms :
 
 - native_dyn
 - native_static
@@ -113,34 +91,14 @@ So, if you want to compile for win32 using static linkage:
 ./kiwix-build.py --target-platform win32_dyn
 ```
 
-As said before, the ARCHIVES and SOURCES directories are common to all target
-platforms. So, if you always work in the same working directory the sources
-will not be downloaded and prepared again.
+# Outputs
 
-On android* platforms, only kiwixlib is supported. So you must ask to
-kiwix-build to compile only kiwixlib:
+Kiwix-build.py will create several directories:
+- `ARCHIVES`: All the downloaded archives go there.
+- `SOURCES`: All the sources (extracted from archives and patched) go there.
+- `BUILD_native_dyn`: All the build files go there.
+- `BUILD_native_dyn/INSTALL`: The installed files go there.
+- `BUILD_native_dyn/LOGS`: The logs files of the build.
 
-```
-./kiwix-build.py --target-platform android_arm Kiwixlib
-```
-
-## Know bugs
-
-- The script has not been tested on Mac OSX.
-- Cross-compilation to arm (raspberry-PI) is missing.
-
-Help is welcome on those parts.
-
-
-# CONTACT
-
-IRC: #kiwix on irc.freenode.net  
-(I'm hidding myself under the starmad pseudo)
-
-You can use IRC web interface on http://chat.kiwix.org/
-
-More... http://www.kiwix.org/wiki/Communication
-
-# LEGAL & DISCLAIMER
-
-Read 'COPYING' file
+If you want to install all those directories elsewhere, you can pass the
+`--working-dir` option to `kiwix-build.py`:
