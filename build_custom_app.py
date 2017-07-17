@@ -53,6 +53,7 @@ def parse_args():
     advance.add_argument('--extra-code', type=int, default=0)
     advance.add_argument('--check-certificate', default=True)
     advance.add_argument('--zim-url', default=None)
+    advance.add_argument('--zim-path', default=None)
     advance.add_argument('--no-android-upload', action='store_false', dest='android_upload')
 
     # Hidden options
@@ -65,7 +66,7 @@ def parse_args():
 
     options = parser.parse_args()
 
-    if not options.package_name or not options.zim_url:
+    if not options.package_name or not (options.zim_url or options.zim_path):
         if not options.package_name:
             print("Try to get package name from info.json file")
         if not options.zim_url:
@@ -102,38 +103,44 @@ def download_zim_file(zim_url, dest_dir=None):
     return os.path.join(dest_dir, out_filename)
 
 
-def get_zim_size(zim_url, check_certificate=True):
+def get_zim_size(*, zim_url=None, zim_path=None, check_certificate=True):
     print("Try to get zim size")
-    if not check_certificate:
-        context = ssl.create_default_context()
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-    else:
-        context = None
-    extra_args = {'context':context} if sys.version_info >= (3, 4, 3) else {}
-    with urllib.request.urlopen(zim_url, **extra_args) as resource:
-        size = resource.getheader('Content-Length', None)
-    if size is not None:
-        size = int(size)
-        print("Zim size is {}".format(size))
-        return size
-    else:
-        print("No 'Content-Length' header in http answer from the server.\n"
-              "We need to download the zim file to get its size.")
-        zim_path = download_zim_file(zim_url, tempfile.gettempdir())
-        size = os.path.getsize(zim_path)
-        print("Zim size is {}".format(size))
-        return size
+    if not zim_path:
+        if not check_certificate:
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+        else:
+            context = None
+        extra_args = {'context':context} if sys.version_info >= (3, 4, 3) else {}
+        with urllib.request.urlopen(zim_url, **extra_args) as resource:
+            size = resource.getheader('Content-Length', None)
+        if size is not None:
+            size = int(size)
+            print("Zim size is {}".format(size))
+            return size
+        else:
+            print("No 'Content-Length' header in http answer from the server.\n"
+                  "We need to download the zim file to get its size.")
+            zim_path = download_zim_file(zim_url, tempfile.gettempdir())
+
+    size = os.path.getsize(zim_path)
+    print("Zim size is {}".format(size))
+    return size
 
 
 def do_launch(options):
-    zim_size = get_zim_size(options.zim_url, options.check_certificate)
+    if options.zim_path:
+        zim_size = get_zim_size(zim_path=options.zim_path)
+    else:
+        zim_size = get_zim_size(zim_url=options.zim_url,
+                                check_certificate=options.check_certificate)
     travis_launch_build('kiwix', 'kiwix-build', options, zim_size)
     print("Travis build has been launch.")
 
 
 def do_publish(options):
-    zim_path = download_zim_file(options.zim_url)
+    zim_path = options.zim_path or download_zim_file(options.zim_url)
     googleService = Google(options)
     with googleService.new_request():
         versionCodes = []
