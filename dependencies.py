@@ -413,11 +413,13 @@ class KiwixCustomApp(Dependency):
             template = ("-i -P customDir={customDir}"
                         " -P zim_file_size={zim_size}"
                         " -P version_code={version_code}"
+                        " -P version_name={version_name}"
                         " -P content_version_code={content_version_code}")
             return template.format(
                 customDir=pj(self.build_path, 'custom'),
                 zim_size=self._get_zim_size(),
                 version_code=os.environ['VERSION_CODE'],
+                version_name=os.environ['VERSION_NAME'],
                 content_version_code=os.environ['CONTENT_VERSION_CODE'])
 
         @property

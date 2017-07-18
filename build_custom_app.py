@@ -51,6 +51,8 @@ def parse_args():
 
     advance = parser.add_argument_group('advance', "Some advanced options.")
     advance.add_argument('--extra-code', type=int, default=0)
+    advance.add_argument('--version-name', default=None,
+                         help="The version of the application (seen by user). Get from json info file by default.")
     advance.add_argument('--check-certificate', default=True)
     advance.add_argument('--zim-url', default=None)
     advance.add_argument('--no-android-upload', action='store_false', dest='android_upload')
@@ -58,7 +60,6 @@ def parse_args():
     # Hidden options
     parser.add_argument('--step', default='launch', choices=['launch', 'publish'], help=argparse.SUPPRESS)
     parser.add_argument('--apks-dir', help=argparse.SUPPRESS)
-    parser.add_argument('--version', default="0", help=argparse.SUPPRESS)
     parser.add_argument('--zim-path', default=None, help=argparse.SUPPRESS)
     parser.add_argument('--content-version-code', type=int)
     parser.add_argument('--package-name', default=None, help=argparse.SUPPRESS)
@@ -66,11 +67,15 @@ def parse_args():
 
     options = parser.parse_args()
 
-    if not options.package_name or not (options.zim_url or options.zim_path):
+    if (not options.package_name
+     or not (options.zim_url or options.zim_path)
+     or not options.version_name):
         if not options.package_name:
             print("Try to get package name from info.json file")
         if not options.zim_url:
             print("Try to get zim url from info.json file")
+        if not options.version_name:
+            print("Try to get version_name form info.json file")
         request_url = ('https://raw.githubusercontent.com/kiwix/kiwix-android-custom/master/{}/info.json'
                       .format(options.custom_app))
         json_request = requests.get(request_url)
@@ -85,6 +90,9 @@ def parse_args():
         if not options.zim_url:
             print("Found zim_url '{}'".format(json_data['zim_url']))
             options.zim_url = json_data['zim_url']
+        if not options.version_name:
+            print("Found version_name '{}'".format(json_data['version_name']))
+            options.version_name = json_data['version_name']
 
     options.base_version = "{}{}".format(
         datetime.date.today().strftime('%y%j'),
@@ -179,7 +187,7 @@ def travis_launch_build(organisation, repository, options, zim_size):
         { 'ZIM_URL': options.zim_url},
         { 'EXTRA_CODE': options.extra_code},
         { 'CONTENT_VERSION_CODE': gen_version_code(0, options.base_version)},
-        { 'VERSION': options.version},
+        { 'VERSION_NAME': options.version_name},
         # google_key
         { 'secure': ('VAgKBMx0KEIyJlSnpM4YrHKLALIbaibkhlsgiv19ITa6dODoEIqeYHz'
                      'wFTiL3mRHU6HwtXtdNb/JeMle9NfHJVFSV56ZgFzX7ev9zr0YG0qZQv'

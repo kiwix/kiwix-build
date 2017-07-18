@@ -22,7 +22,6 @@ ${TRAVIS_BUILD_DIR}/build_custom_app.py \
   --custom-app ${CUSTOM_APP} \
   --package-name ${PACKAGE_NAME} \
   --google-api-key ${GOOGLE_API_KEY} \
-  --version ${VERSION} \
   --zim-url ${ZIM_URL} \
   --apks-dir ${HOME}/APKS \
   --content-version-code ${CONTENT_VERSION_CODE}
