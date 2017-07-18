@@ -54,14 +54,14 @@ def parse_args():
     advance.add_argument('--version-name', default=None,
                          help="The version of the application (seen by user). Get from json info file by default.")
     advance.add_argument('--check-certificate', default=True)
-    advance.add_argument('--zim-url', default=None)
+    advance.add_argument('--zim-url', default=None, help="Get from json info file by default.")
     advance.add_argument('--no-android-upload', action='store_false', dest='android_upload')
 
     # Hidden options
     parser.add_argument('--step', default='launch', choices=['launch', 'publish'], help=argparse.SUPPRESS)
     parser.add_argument('--apks-dir', help=argparse.SUPPRESS)
     parser.add_argument('--zim-path', default=None, help=argparse.SUPPRESS)
-    parser.add_argument('--content-version-code', type=int)
+    parser.add_argument('--content-version-code', type=int, help=argparse.SUPPRESS)
     parser.add_argument('--package-name', default=None, help=argparse.SUPPRESS)
     parser.add_argument('--google-api-key', help=argparse.SUPPRESS)
 
