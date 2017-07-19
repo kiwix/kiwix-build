@@ -51,25 +51,31 @@ def parse_args():
 
     advance = parser.add_argument_group('advance', "Some advanced options.")
     advance.add_argument('--extra-code', type=int, default=0)
+    advance.add_argument('--version-name', default=None,
+                         help="The version of the application (seen by user). Get from json info file by default.")
     advance.add_argument('--check-certificate', default=True)
-    advance.add_argument('--zim-url', default=None)
+    advance.add_argument('--zim-url', default=None, help="Get from json info file by default.")
     advance.add_argument('--no-android-upload', action='store_false', dest='android_upload')
 
     # Hidden options
     parser.add_argument('--step', default='launch', choices=['launch', 'publish'], help=argparse.SUPPRESS)
     parser.add_argument('--apks-dir', help=argparse.SUPPRESS)
-    parser.add_argument('--version', default="0", help=argparse.SUPPRESS)
-    parser.add_argument('--content-version-code', type=int)
+    parser.add_argument('--zim-path', default=None, help=argparse.SUPPRESS)
+    parser.add_argument('--content-version-code', type=int, help=argparse.SUPPRESS)
     parser.add_argument('--package-name', default=None, help=argparse.SUPPRESS)
     parser.add_argument('--google-api-key', help=argparse.SUPPRESS)
 
     options = parser.parse_args()
 
-    if not options.package_name or not options.zim_url:
+    if (not options.package_name
+     or not (options.zim_url or options.zim_path)
+     or not options.version_name):
         if not options.package_name:
             print("Try to get package name from info.json file")
         if not options.zim_url:
             print("Try to get zim url from info.json file")
+        if not options.version_name:
+            print("Try to get version_name form info.json file")
         request_url = ('https://raw.githubusercontent.com/kiwix/kiwix-android-custom/master/{}/info.json'
                       .format(options.custom_app))
         json_request = requests.get(request_url)
@@ -84,6 +90,9 @@ def parse_args():
         if not options.zim_url:
             print("Found zim_url '{}'".format(json_data['zim_url']))
             options.zim_url = json_data['zim_url']
+        if not options.version_name:
+            print("Found version_name '{}'".format(json_data['version_name']))
+            options.version_name = json_data['version_name']
 
     options.base_version = "{}{}".format(
         datetime.date.today().strftime('%y%j'),
@@ -102,38 +111,44 @@ def download_zim_file(zim_url, dest_dir=None):
     return os.path.join(dest_dir, out_filename)
 
 
-def get_zim_size(zim_url, check_certificate=True):
+def get_zim_size(*, zim_url=None, zim_path=None, check_certificate=True):
     print("Try to get zim size")
-    if not check_certificate:
-        context = ssl.create_default_context()
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
-    else:
-        context = None
-    extra_args = {'context':context} if sys.version_info >= (3, 4, 3) else {}
-    with urllib.request.urlopen(zim_url, **extra_args) as resource:
-        size = resource.getheader('Content-Length', None)
-    if size is not None:
-        size = int(size)
-        print("Zim size is {}".format(size))
-        return size
-    else:
-        print("No 'Content-Length' header in http answer from the server.\n"
-              "We need to download the zim file to get its size.")
-        zim_path = download_zim_file(zim_url, tempfile.gettempdir())
-        size = os.path.getsize(zim_path)
-        print("Zim size is {}".format(size))
-        return size
+    if not zim_path:
+        if not check_certificate:
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+        else:
+            context = None
+        extra_args = {'context':context} if sys.version_info >= (3, 4, 3) else {}
+        with urllib.request.urlopen(zim_url, **extra_args) as resource:
+            size = resource.getheader('Content-Length', None)
+        if size is not None:
+            size = int(size)
+            print("Zim size is {}".format(size))
+            return size
+        else:
+            print("No 'Content-Length' header in http answer from the server.\n"
+                  "We need to download the zim file to get its size.")
+            zim_path = download_zim_file(zim_url, tempfile.gettempdir())
+
+    size = os.path.getsize(zim_path)
+    print("Zim size is {}".format(size))
+    return size
 
 
 def do_launch(options):
-    zim_size = get_zim_size(options.zim_url, options.check_certificate)
+    if options.zim_path:
+        zim_size = get_zim_size(zim_path=options.zim_path)
+    else:
+        zim_size = get_zim_size(zim_url=options.zim_url,
+                                check_certificate=options.check_certificate)
     travis_launch_build('kiwix', 'kiwix-build', options, zim_size)
     print("Travis build has been launch.")
 
 
 def do_publish(options):
-    zim_path = download_zim_file(options.zim_url)
+    zim_path = options.zim_path or download_zim_file(options.zim_url)
     googleService = Google(options)
     with googleService.new_request():
         versionCodes = []
@@ -172,7 +187,7 @@ def travis_launch_build(organisation, repository, options, zim_size):
         { 'ZIM_URL': options.zim_url},
         { 'EXTRA_CODE': options.extra_code},
         { 'CONTENT_VERSION_CODE': gen_version_code(0, options.base_version)},
-        { 'VERSION': options.version},
+        { 'VERSION_NAME': options.version_name},
         # google_key
         { 'secure': ('VAgKBMx0KEIyJlSnpM4YrHKLALIbaibkhlsgiv19ITa6dODoEIqeYHz'
                      'wFTiL3mRHU6HwtXtdNb/JeMle9NfHJVFSV56ZgFzX7ev9zr0YG0qZQv'

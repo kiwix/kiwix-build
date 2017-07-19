@@ -380,8 +380,15 @@ class KiwixAndroid(Dependency):
                 shutil.rmtree(pj(self.build_path, 'kiwixlib', 'src', 'main'))
             except FileNotFoundError:
                 pass
-            shutil.copytree(pj(self.buildEnv.install_dir, 'kiwix-lib'), pj(self.build_path, 'kiwixlib', 'src', 'main'))
-            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '58.2', 'icudt58l.dat'), pj(self.build_path, 'app', 'src', 'main', 'assets', 'icudt.dat'))
+            shutil.copytree(pj(self.buildEnv.install_dir, 'kiwix-lib'),
+                            pj(self.build_path, 'kiwixlib', 'src', 'main'))
+            os.makedirs(
+                pj(self.build_path, 'app', 'src', 'main', 'assets', 'icu'),
+                exist_ok=True)
+            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '58.2',
+                            'icudt58l.dat'),
+                         pj(self.build_path, 'app', 'src', 'main', 'assets',
+                            'icu', 'icudt58l.dat'))
 
 
 class KiwixCustomApp(Dependency):
@@ -406,11 +413,13 @@ class KiwixCustomApp(Dependency):
             template = ("-i -P customDir={customDir}"
                         " -P zim_file_size={zim_size}"
                         " -P version_code={version_code}"
+                        " -P version_name={version_name}"
                         " -P content_version_code={content_version_code}")
             return template.format(
                 customDir=pj(self.build_path, 'custom'),
                 zim_size=self._get_zim_size(),
                 version_code=os.environ['VERSION_CODE'],
+                version_name=os.environ['VERSION_NAME'],
                 content_version_code=os.environ['CONTENT_VERSION_CODE'])
 
         @property
@@ -460,8 +469,15 @@ class KiwixCustomApp(Dependency):
                 shutil.rmtree(pj(self.build_path, 'kiwixlib', 'src', 'main'))
             except FileNotFoundError:
                 pass
-            shutil.copytree(pj(self.buildEnv.install_dir, 'kiwix-lib'), pj(self.build_path, 'kiwixlib', 'src', 'main'))
-            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '58.2', 'icudt58l.dat'), pj(self.build_path, 'app', 'src', 'main', 'assets', 'icudt.dat'))
+            shutil.copytree(pj(self.buildEnv.install_dir, 'kiwix-lib'),
+                            pj(self.build_path, 'kiwixlib', 'src', 'main'))
+            os.makedirs(
+                pj(self.build_path, 'app', 'src', 'main', 'assets', 'icu'),
+                exist_ok=True)
+            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '58.2',
+                            'icudt58l.dat'),
+                         pj(self.build_path, 'app', 'src', 'main', 'assets',
+                            'icu', 'icudt58l.dat'))
 
             # Generate custom directory
             try:
