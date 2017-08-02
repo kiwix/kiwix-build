@@ -25,8 +25,11 @@ if (!$zim_url || !$custom_app || !$keystore || !$api_key) {
     exit;
 }
 
+# Clean signed ap
+$cmd = "rm ./signed_apks/*apk"; `$cmd`;
+
 # Download ZIM file
-#$cmd = "wget \"$zim_url\" -O content.zim"; `$cmd`;
+$cmd = "wget \"$zim_url\" -O content.zim"; `$cmd`;
 
 # Get ZIM file size
 $cmd = "stat -c %s content.zim";
@@ -38,7 +41,7 @@ $cmd = "date +%y%j";
 my $version_code_base = `$cmd` =~ s/\n//gr . "0";
 
 # Compute content version code
-my $content_version_code = "0" . $version_code_base;
+my $content_version_code = $version_code_base;
 $ENV{CONTENT_VERSION_CODE} = $content_version_code;
 
 # Compute custom app date
@@ -47,7 +50,7 @@ my $date = `$cmd` =~ s/\n//gr;
 $ENV{VERSION_NAME} = $date;
 
 # Compile apps
-$ENV{VERSION_CODE} = "0" . $version_code_base;
+$ENV{VERSION_CODE} = $version_code_base;
 $cmd = "./kiwix-build.py --target-platform android_arm --android-custom-app $custom_app --zim-file-size $zim_size kiwix-android-custom"; system $cmd;
 
 $ENV{VERSION_CODE} = "1" . $version_code_base;
@@ -66,7 +69,7 @@ $ENV{VERSION_CODE} = "5" . $version_code_base;
 $cmd = "./kiwix-build.py --target-platform android_mips64 --android-custom-app $custom_app --zim-file-size $zim_size kiwix-android-custom"; system $cmd;
 
 # Sign apps
-$cmd = "./TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign -ks \"${keystore}\" --out signed_apks/app-0${version_code_base}-release-signed.apk BUILD_android_arm/kiwix-android-custom_${custom_app}/app/build/outputs/apk/app-${custom_app}-release-unsigned.apk";
+$cmd = "./TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign -ks \"${keystore}\" --out signed_apks/app-${version_code_base}-release-signed.apk BUILD_android_arm/kiwix-android-custom_${custom_app}/app/build/outputs/apk/app-${custom_app}-release-unsigned.apk";
 system $cmd;
 
 $cmd = "./TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign -ks \"${keystore}\" --out signed_apks/app-1${version_code_base}-release-signed.apk BUILD_android_arm64/kiwix-android-custom_${custom_app}/app/build/outputs/apk/app-${custom_app}-release-unsigned.apk";
