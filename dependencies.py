@@ -125,7 +125,8 @@ class Xapian(Dependency):
     @property
     def dependencies(self):
         deps = ['zlib', 'lzma']
-        if self.buildEnv.platform_info.build == 'win32':
+        if (self.buildEnv.platform_info.build == 'win32'
+         or self.buildEnv.distname == 'Darwin'):
             return deps
         return deps + ['uuid']
 
