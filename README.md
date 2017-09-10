@@ -25,10 +25,10 @@ sudo apt-get install python3-pip virtualenv
 
 Then install Meson:
 ```
-virtualenv -p python3 ./ # Create virtualenv
-source bin/activate      # Activate the virtualenv
-pip3 install meson       # Install Meson
-hash -r                  # Refresh bash paths
+virtualenv -p python3 ./         # Create virtualenv
+source bin/activate              # Activate the virtualenv
+pip3 install -r requirements.txt # Install Python dependencies
+hash -r                          # Refresh bash paths
 ```
 
 Finally we need the Ninja tool (available in the $PATH). Here is a

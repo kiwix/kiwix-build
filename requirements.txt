@@ -1,0 +1,3 @@
+requests>=0.34
+pil
+
