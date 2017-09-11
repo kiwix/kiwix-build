@@ -6,8 +6,8 @@ orig_dir=$(pwd)
 
 sudo apt-get update -qq
 sudo apt-get install -qq python3-pip zlib1g-dev libjpeg-dev
-pip3 install meson
-pip3 install pillow
+pip3 install --user meson
+pip3 install --user pillow
 
 # ninja
 git clone git://github.com/ninja-build/ninja.git
