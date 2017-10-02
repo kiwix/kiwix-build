@@ -254,6 +254,7 @@ class BuildEnv:
         self.meson_command = self._detect_meson()
         if not self.meson_command:
             sys.exit("ERROR: meson command not fount")
+        self.mesontest_command = "mesontest"
         self.setup_build(options.target_platform)
         self.setup_toolchains()
         self.options = options
@@ -328,7 +329,7 @@ class BuildEnv:
 
     def setup_android(self):
         self.cmake_crossfile = self._gen_crossfile('cmake_android_cross_file.txt')
-        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
+        self.meson_crossfile = self._gen_crossfile('meson_android_cross_file.txt')
 
     def setup_armhf(self):
         self.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
@@ -428,12 +429,12 @@ class BuildEnv:
 
         env['LD_LIBRARY_PATH'] = ':'.join([env['LD_LIBRARY_PATH'],
                                           pj(self.install_dir, 'lib'),
-                                          pj(self.install_dir, 'lib64')
+                                          pj(self.install_dir, self.libprefix)
                                           ])
 
         env['CPPFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['CPPFLAGS']])
         env['LDFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'),
-                                   '-L'+pj(self.install_dir, 'lib64'),
+                                   '-L'+pj(self.install_dir, self.libprefix),
                                    env['LDFLAGS']])
         return env
 
@@ -547,6 +548,7 @@ class Toolchain(metaclass=_MetaToolchain):
     all_toolchains = {}
     configure_option = ""
     cmake_option = ""
+    exec_wrapper_def = ""
     Builder = None
     Source = None
 
@@ -617,6 +619,16 @@ class mingw32_toolchain(Toolchain):
                              ('WINDRES', 'windres'),
                              ('RANLIB', 'ranlib'))
                }
+
+    @property
+    def exec_wrapper_def(self):
+        try:
+            which('wine')
+        except subprocess.CalledProcessError:
+            return ""
+        else:
+            return "exec_wrapper = 'wine'"
+
 
     @property
     def configure_option(self):
@@ -837,6 +849,15 @@ class armhf_toolchain(Toolchain):
                 for k,v in binaries}
 
     @property
+    def exec_wrapper_def(self):
+        try:
+            which('qemu-arm')
+        except subprocess.CalledProcessError:
+            return ""
+        else:
+            return "exec_wrapper = 'qemu-arm'"
+
+    @property
     def configure_option(self):
         return '--host={}'.format(self.arch_full)
 
@@ -848,6 +869,13 @@ class armhf_toolchain(Toolchain):
         env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
         env['CXXFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
         env['LIBS'] = " ".join(self.buildEnv.cross_config['extra_libs']) + " " +env['LIBS']
+        env['QEMU_LD_PREFIX'] = pj(self.root_path, "arm-linux-gnueabihf", "libc")
+        env['QEMU_SET_ENV'] = "LD_LIBRARY_PATH={}".format(
+            ':'.join([
+                pj(self.root_path, "arm-linux-gnueabihf", "lib"),
+                pj(self.buildEnv.install_dir, 'lib'),
+                pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
+        ]))
 
     def set_compiler(self, env):
         env['CC'] = self.binaries['CC']

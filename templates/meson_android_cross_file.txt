@@ -4,7 +4,6 @@ c = '{toolchain.binaries[CC]}'
 ar = '{toolchain.binaries[AR]}'
 cpp = '{toolchain.binaries[CXX]}'
 strip = '{toolchain.binaries[STRIP]}'
-{toolchain.exec_wrapper_def}
 
 [properties]
 c_link_args = {extra_libs!r}

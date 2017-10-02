@@ -210,6 +210,8 @@ class Builder:
             self.command('pre_build_script', self._pre_build_script)
         self.command('configure', self._configure)
         self.command('compile', self._compile)
+        if hasattr(self, '_test'):
+            self.command('test', self._test)
         self.command('install', self._install)
         if hasattr(self, '_post_build_script'):
             self.command('post_build_script', self._post_build_script)
@@ -338,6 +340,15 @@ class MesonBuilder(Builder):
 
     def _compile(self, context):
         command = "{} -v".format(self.buildEnv.ninja_command)
+        self.buildEnv.run_command(command, self.build_path, context)
+
+    def _test(self, context):
+        if ( self.buildEnv.platform_info.build == 'android'
+             or (self.buildEnv.platform_info.build != 'native'
+                 and not self.buildEnv.platform_info.static)
+           ):
+            raise SkipCommand()
+        command = "{} --verbose".format(self.buildEnv.mesontest_command)
         self.buildEnv.run_command(command, self.build_path, context)
 
     def _install(self, context):
