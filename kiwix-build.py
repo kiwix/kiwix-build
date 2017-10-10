@@ -329,7 +329,7 @@ class BuildEnv:
 
     def setup_android(self):
         self.cmake_crossfile = self._gen_crossfile('cmake_android_cross_file.txt')
-        self.meson_crossfile = self._gen_crossfile('meson_android_cross_file.txt')
+        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
     def setup_armhf(self):
         self.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
