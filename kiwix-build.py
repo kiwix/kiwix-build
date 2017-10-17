@@ -809,7 +809,7 @@ class android_sdk(Toolchain):
             context.try_skip(self.install_path)
             os.makedirs(pj(self.install_path, 'licenses'), exist_ok=True)
             with open(pj(self.install_path, 'licenses', 'android-sdk-license'), 'w') as f:
-                f.write("\n8933bad161af4178b1185d1a37fbf41ea5269c55")
+                f.write("\n8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e")
 
         def build(self):
             self.command('build_platform', self._build_platform)
