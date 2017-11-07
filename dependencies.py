@@ -110,12 +110,11 @@ class UUID(Dependency):
 
 class Xapian(Dependency):
     name = "xapian-core"
-    version = "1.4.2"
+    version = "1.4.5"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('xapian-core-1.4.2.tar.xz',
-                             'aec2c4352998127a2f2316218bf70f48cef0a466a87af3939f5f547c5246e1ce')
-        patches = ["xapian_pkgconfig.patch"]
+        archive = Remotefile('xapian-core-1.4.5.tar.xz',
+                             '85b5f952de9df925fd13e00f6e82484162fd506d38745613a50b0a2064c6b02b')
 
     class Builder(MakeBuilder):
         configure_option = "--disable-sse --disable-backend-inmemory --disable-documentation"
