@@ -196,6 +196,23 @@ class MicroHttpd(Dependency):
         configure_option = "--disable-https --without-libgcrypt --without-libcurl"
 
 
+class Gumbo(Dependency):
+    name = "gumbo"
+    version = "0.10.1"
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('gumbo-0.10.1.tar.gz',
+                             '28463053d44a5dfbc4b77bcf49c8cee119338ffa636cc17fc3378421d714efad',
+                             'https://github.com/google/gumbo-parser/archive/v0.10.1.tar.gz')
+
+        def _post_prepare_script(self, context):
+            context.try_skip(self.extract_path)
+            command = "./autogen.sh"
+            self.buildEnv.run_command(command, self.extract_path, context)
+
+    Builder = MakeBuilder
+
+
 class Icu(Dependency):
     name = "icu4c"
     version = "58.2"
@@ -280,11 +297,11 @@ class ZimTools(Dependency):
 
 class Zimwriterfs(Dependency):
     name = "zimwriterfs"
-    extra_packages = ['file', 'gumbo']
+    extra_packages = ['file']
 
     @property
     def dependencies(self):
-        base_dependencies = ['libzim', 'zlib', 'lzma', 'xapian-core']
+        base_dependencies = ['libzim', 'zlib', 'lzma', 'xapian-core', 'gumbo']
         if self.buildEnv.platform_info.build != 'native':
             return base_dependencies + ["icu4c_cross-compile"]
         else:
