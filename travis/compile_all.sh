@@ -27,7 +27,7 @@ then
   then
     TARGETS="libzim zimwriterfs zim-tools kiwix-lib kiwix-tools"
   else
-    TARGETS="libzim zim-tools kiwix-lib kiwix-tools"
+    TARGETS="libzim kiwix-lib kiwix-tools"
   fi
 
   for TARGET in ${TARGETS}
@@ -74,11 +74,9 @@ EOF
       ;;
     win32_static)
       make_nightly_archive kiwix-tools_win32 "kiwix-install.exe kiwix-manage.exe kiwix-read.exe kiwix-search.exe kiwix-serve.exe"
-      make_nightly_archive zim-tools_win32 "zimbench.exe zimdump.exe zimsearch.exe zimdiff.exe zimpatch.exe zimsplit.exe"
       ;;
     armhf_static)
       make_nightly_archive kiwix-tools_armhf "kiwix-install kiwix-manage kiwix-read kiwix-search kiwix-serve"
-      make_nightly_archive zim-tools_armhf "zimbench zimdump zimsearch zimdiff zimpatch zimsplit"
       ;;
     android_*)
       APK_NAME="kiwix-${PLATFORM}"
@@ -96,7 +94,7 @@ else
   then
     TARGETS="kiwix-tools zim-tools zimwriterfs"
   else
-    TARGETS="kiwix-tools zim-tools"
+    TARGETS="kiwix-tools"
   fi
   for TARGET in ${TARGETS}
   do
