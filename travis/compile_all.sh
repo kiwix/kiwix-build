@@ -8,6 +8,14 @@ SSH_KEY=${TRAVIS_BUILD_DIR}/travis/travisci_builder_id_key
 
 mkdir -p ${NIGHTLY_ARCHIVES_DIR}
 
+function make_nightly_archive {
+  ARCHIVE_NAME="${1}_$(date +%Y-%m-%d).tar.gz"
+  (
+    cd ${BASE_DIR}/INSTALL/bin
+    tar -czf "${NIGHTLY_ARCHIVES_DIR}/$ARCHIVE_NAME" $2
+  )
+}
+
 cd ${HOME}
 
 if [[ "$TRAVIS_EVENT_TYPE" = "cron" ]]
@@ -16,7 +24,7 @@ then
   then
     TARGETS="libzim kiwix-lib kiwix-android"
   else
-    TARGETS="libzim kiwix-lib kiwix-tools"
+    TARGETS="libzim zimwriterfs zim-tools kiwix-lib kiwix-tools"
   fi
 
   for TARGET in ${TARGETS}
@@ -57,28 +65,19 @@ EOF
   # We have build every thing. Now create archives for public deployement.
   case ${PLATFORM} in
     native_static)
-      ARCHIVE_NAME="kiwix-tools_linux64_$(date +%Y-%m-%d).tar.gz"
-      FILES_LIST="kiwix-install kiwix-manage kiwix-read kiwix-search kiwix-serve"
-      (
-        cd ${BASE_DIR}/INSTALL/bin
-        tar -czf "${NIGHTLY_ARCHIVES_DIR}/$ARCHIVE_NAME" $FILES_LIST
-      )
+      make_nightly_archive kiwix_tools_linux64 "kiwix-install kiwix-manage kiwix-read kiwix-search kiwix-serve"
+      make_nightly_archive zim-tools_linux64 "zimbench zimdump zimsearch zimdiff zimpatch zimsplit"
+      make_nightly_archive zimwriterfs_linux64 "zimwriterfs"
       ;;
     win32_static)
-      ARCHIVE_NAME="kiwix-tools_win32_$(date +%Y-%m-%d).tar.gz"
-      FILES_LIST="kiwix-install.exe kiwix-manage.exe kiwix-read.exe kiwix-search.exe kiwix-serve.exe"
-      (
-        cd ${BASE_DIR}/INSTALL/bin
-        tar -czf "${NIGHTLY_ARCHIVES_DIR}/$ARCHIVE_NAME" $FILES_LIST
-      )
+      make_nightly_archive kiwix-tools_win32 "kiwix-install.exe kiwix-manage.exe kiwix-read.exe kiwix-search.exe kiwix-serve.exe"
+      make_nightly_archive zim-tools_win32 "zimbench.exe zimdump.exe zimsearch.exe zimdiff.exe zimpatch.exe zimsplit.exe"
+      make_nightly_archive zimwriterfs_win32 "zimwriterfs.exe"
       ;;
     armhf_static)
-      ARCHIVE_NAME="kiwix-tools_armhf_$(date +%Y-%m-%d).tar.gz"
-      FILES_LIST="kiwix-install kiwix-manage kiwix-read kiwix-search kiwix-serve"
-      (
-        cd ${BASE_DIR}/INSTALL/bin
-        tar -czf "${NIGHTLY_ARCHIVES_DIR}/$ARCHIVE_NAME" $FILES_LIST
-      )
+      make_nightly_archive kiwix-tools_armhf "kiwix-install kiwix-manage kiwix-read kiwix-search kiwix-serve"
+      make_nightly_archive zim-tools_armhf "zimbench zimdump zimsearch zimdiff zimpatch zimsplit"
+      make_nightly_archive zimwriterfs_armhf "zimwriterfs"
       ;;
     android_*)
       APK_NAME="kiwix-${PLATFORM}"
@@ -91,12 +90,15 @@ else
   # No a cron job, we just have to build to be sure nothing is broken.
   if [[ ${PLATFORM} = android* ]]
   then
-    TARGET=kiwix-android
+    TARGETS="kiwix-android"
   else
-    TARGET=kiwix-tools
+    TARGETS="kiwix-tools zim-tools zimwriterfs"
   fi
-  ${TRAVIS_BUILD_DIR}/kiwix-build.py \
-    --target-platform $PLATFORM \
-    --hide-progress \
-    ${TARGET}
+  for TARGET in ${TARGETS}
+  do
+    ${TRAVIS_BUILD_DIR}/kiwix-build.py \
+      --target-platform $PLATFORM \
+      --hide-progress \
+      ${TARGET}
+  done
 fi
