@@ -23,8 +23,11 @@ then
   if [[ ${PLATFORM} = android* ]]
   then
     TARGETS="libzim kiwix-lib kiwix-android"
-  else
+  elif [[ ${PLATFORM} =~ native_* ]]
+  then
     TARGETS="libzim zimwriterfs zim-tools kiwix-lib kiwix-tools"
+  else
+    TARGETS="libzim zim-tools kiwix-lib kiwix-tools"
   fi
 
   for TARGET in ${TARGETS}
@@ -72,12 +75,10 @@ EOF
     win32_static)
       make_nightly_archive kiwix-tools_win32 "kiwix-install.exe kiwix-manage.exe kiwix-read.exe kiwix-search.exe kiwix-serve.exe"
       make_nightly_archive zim-tools_win32 "zimbench.exe zimdump.exe zimsearch.exe zimdiff.exe zimpatch.exe zimsplit.exe"
-      make_nightly_archive zimwriterfs_win32 "zimwriterfs.exe"
       ;;
     armhf_static)
       make_nightly_archive kiwix-tools_armhf "kiwix-install kiwix-manage kiwix-read kiwix-search kiwix-serve"
       make_nightly_archive zim-tools_armhf "zimbench zimdump zimsearch zimdiff zimpatch zimsplit"
-      make_nightly_archive zimwriterfs_armhf "zimwriterfs"
       ;;
     android_*)
       APK_NAME="kiwix-${PLATFORM}"
@@ -91,8 +92,11 @@ else
   if [[ ${PLATFORM} = android* ]]
   then
     TARGETS="kiwix-android"
-  else
+  elif [[ ${PLATFORM} =~ native_* ]]
+  then
     TARGETS="kiwix-tools zim-tools zimwriterfs"
+  else
+    TARGETS="kiwix-tools zim-tools"
   fi
   for TARGET in ${TARGETS}
   do

@@ -75,7 +75,7 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON': _fedora_common + ['java-1.8.0-openjdk-devel']
     },
     'debian_native_dyn': {
-        'COMMON': _debian_common + ['libbz2-dev'],
+        'COMMON': _debian_common + ['libbz2-dev', 'libmagic-dev'],
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
@@ -83,7 +83,7 @@ PACKAGE_NAME_MAPPERS = {
         'libmicrohttpd': ['libmicrohttpd-dev', 'ccache']
     },
     'debian_native_static': {
-        'COMMON': _debian_common + ['libbz2-dev'],
+        'COMMON': _debian_common + ['libbz2-dev', 'libmagic-dev'],
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
