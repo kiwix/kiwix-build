@@ -118,6 +118,8 @@ class ReleaseDownload(Source):
         self.command('extract', self._extract)
         if hasattr(self, 'patches'):
             self.command('patch', self._patch)
+        if hasattr(self, '_post_prepare_script'):
+            self.command('post_prepare_script', self._post_prepare_script)
 
 
 class GitClone(Source):

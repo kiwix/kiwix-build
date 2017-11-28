@@ -196,6 +196,23 @@ class MicroHttpd(Dependency):
         configure_option = "--disable-https --without-libgcrypt --without-libcurl"
 
 
+class Gumbo(Dependency):
+    name = "gumbo"
+    version = "0.10.1"
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('gumbo-0.10.1.tar.gz',
+                             '28463053d44a5dfbc4b77bcf49c8cee119338ffa636cc17fc3378421d714efad',
+                             'https://github.com/google/gumbo-parser/archive/v0.10.1.tar.gz')
+
+        def _post_prepare_script(self, context):
+            context.try_skip(self.extract_path)
+            command = "./autogen.sh"
+            self.buildEnv.run_command(command, self.extract_path, context)
+
+    Builder = MakeBuilder
+
+
 class Icu(Dependency):
     name = "icu4c"
     version = "58.2"
@@ -280,11 +297,11 @@ class ZimTools(Dependency):
 
 class Zimwriterfs(Dependency):
     name = "zimwriterfs"
-    extra_packages = ['file', 'gumbo']
+    extra_packages = ['file']
 
     @property
     def dependencies(self):
-        base_dependencies = ['libzim', 'zlib', 'lzma', 'xapian-core']
+        base_dependencies = ['libzim', 'zlib', 'lzma', 'xapian-core', 'gumbo']
         if self.buildEnv.platform_info.build != 'native':
             return base_dependencies + ["icu4c_cross-compile"]
         else:
@@ -356,9 +373,9 @@ class Gradle(Dependency):
     version = "3.4"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('gradle-3.4-bin.zip',
-                             '72d0cd4dcdd5e3be165eb7cd7bbd25cf8968baf400323d9ab1bba622c3f72205',
-                             'https://services.gradle.org/distributions/gradle-3.4-bin.zip')
+        archive = Remotefile('gradle-4.1-bin.zip',
+                             'd55dfa9cfb5a3da86a1c9e75bb0b9507f9a8c8c100793ccec7beb6e259f9ed43',
+                             'https://services.gradle.org/distributions/gradle-4.1-bin.zip')
 
     class Builder(BaseBuilder):
         def build(self):
