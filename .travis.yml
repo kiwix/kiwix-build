@@ -40,6 +40,15 @@ env:
     - PLATFORM="android_mips64"
     - PLATFORM="android_x86"
     - PLATFORM="android_x86_64"
+matrix:
+  allow_failures:
+    - env: PLATFORM="android_arm"
+    - env: PLATFORM="android_arm64"
+    - env: PLATFORM="android_mips"
+    - env: PLATFORM="android_mips64"
+    - env: PLATFORM="android_x86"
+    - env: PLATFORM="android_x86_64"
+
 notifications:
   irc:
     channels:
