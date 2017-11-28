@@ -373,9 +373,9 @@ class Gradle(Dependency):
     version = "3.4"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('gradle-3.4-bin.zip',
-                             '72d0cd4dcdd5e3be165eb7cd7bbd25cf8968baf400323d9ab1bba622c3f72205',
-                             'https://services.gradle.org/distributions/gradle-3.4-bin.zip')
+        archive = Remotefile('gradle-4.1-bin.zip',
+                             'd55dfa9cfb5a3da86a1c9e75bb0b9507f9a8c8c100793ccec7beb6e259f9ed43',
+                             'https://services.gradle.org/distributions/gradle-4.1-bin.zip')
 
     class Builder(BaseBuilder):
         def build(self):
