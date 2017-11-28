@@ -123,22 +123,33 @@ class ReleaseDownload(Source):
 
 
 class GitClone(Source):
-    git_ref = "master"
+    base_git_ref = "master"
+    release_git_ref = "master"
 
     @property
     def source_dir(self):
-        return self.git_dir
+        if self.buildEnv.make_release:
+            return "{}_release".format(self.git_dir)
+        else:
+            return self.git_dir
 
     @property
     def git_path(self):
-        return pj(self.buildEnv.source_dir, self.git_dir)
+        return pj(self.buildEnv.source_dir, self.source_dir)
+
+    @property
+    def git_ref(self):
+        if self.buildEnv.make_release:
+            return self.release_git_ref
+        else:
+            return self.base_git_ref
 
     def _git_clone(self, context):
         context.force_native_build = True
         if os.path.exists(self.git_path):
             raise SkipCommand()
         command = "git clone --depth=1 --branch {} {} {}".format(
-            self.git_ref, self.git_remote, self.git_dir)
+            self.git_ref, self.git_remote, self.source_dir)
         self.buildEnv.run_command(command, self.buildEnv.source_dir, context)
 
     def _git_update(self, context):

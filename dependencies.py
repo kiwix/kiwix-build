@@ -276,8 +276,10 @@ class Libzim(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/openzim/libzim.git"
         git_dir = "libzim"
+        release_git_ref = "3.0.0"
 
     Builder = MesonBuilder
+
 
 class ZimTools(Dependency):
     name = "zim-tools"
@@ -336,6 +338,7 @@ class Kiwixlib(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-lib.git"
         git_dir = "kiwix-lib"
+        release_git_ref = "1.0.1"
 
     class Builder(MesonBuilder):
         @property
@@ -359,6 +362,7 @@ class KiwixTools(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-tools.git"
         git_dir = "kiwix-tools"
+        release_git_ref = "0.3.0"
 
     class Builder(MesonBuilder):
         @property

@@ -979,7 +979,9 @@ def parse_args():
     parser.add_argument('--skip-source-prepare', action='store_true',
                         help="Skip the source download part")
     parser.add_argument('--build-deps-only', action='store_true',
-                        help=("Build only the dependencies of the specified targets."))
+                        help="Build only the dependencies of the specified targets.")
+    parser.add_argument('--make-release', action='store_true',
+                        help="Build a release version")
     subgroup = parser.add_argument_group('advanced')
     subgroup.add_argument('--no-cert-check', action='store_true',
                           help="Skip SSL certificate verification during download")
