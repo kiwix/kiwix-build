@@ -135,6 +135,8 @@ class CTPP2(Dependency):
     version = "2.8.3"
 
     class Source(ReleaseDownload):
+        name = "ctpp2"
+        source_dir = "ctpp2-2.8.3"
         archive = Remotefile('ctpp2-2.8.3.tar.gz',
                              'a83ffd07817adb575295ef40fbf759892512e5a63059c520f9062d9ab8fb42fc')
         patches = ["ctpp2_include.patch",
