@@ -942,8 +942,16 @@ class Builder:
 
         builders = (dep.builder for dep in self.targets.values() if (dep.builder and not dep.skip))
         for builder in builders:
+            if self.options.make_dist and builder.name == self.options.targets:
+                continue
             print("build {} :".format(builder.name))
             builder.build()
+
+        if self.options.make_dist:
+            dep = self.targets[self.options.targets]
+            builder = dep.builder
+            print("make dist {}:".format(builder.name))
+            builder.make_dist()
 
     def run(self):
         try:
@@ -979,7 +987,11 @@ def parse_args():
     parser.add_argument('--skip-source-prepare', action='store_true',
                         help="Skip the source download part")
     parser.add_argument('--build-deps-only', action='store_true',
-                        help=("Build only the dependencies of the specified targets."))
+                        help="Build only the dependencies of the specified targets.")
+    parser.add_argument('--make-dist', action='store_true',
+                        help="Build distrubution (dist) source archive")
+    parser.add_argument('--make-release', action='store_true',
+                        help="Build a release version")
     subgroup = parser.add_argument_group('advanced')
     subgroup.add_argument('--no-cert-check', action='store_true',
                           help="Skip SSL certificate verification during download")
