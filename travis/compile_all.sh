@@ -84,6 +84,14 @@ EOF
             --hide-progress \
             --make-release \
             --target-platform $PLATFORM ${TARGET}
+        if [[ "$PLATFORM" == "native_dyn" ]]
+        then
+            ${TRAVIS_BUILD_DIR}/kiwix-build.py \
+                --hide-progress \
+                --make-release \
+                --make-dist \
+                --target-platform $PLATFORM ${TARGET}
+        fi
     else
         ${TRAVIS_BUILD_DIR}/kiwix-build.py \
             --hide-progress \
@@ -94,6 +102,10 @@ EOF
 
   # We have build every thing. Now create archives for public deployement.
   case ${PLATFORM} in
+    native_dyn)
+      #[TODO] Copy archive somewhere
+      #scp ${BASE_DIR}/${TARGET}/${TARGET}-${TARGET-version}.tar.gz ${SOMEWHERE}
+      ;;
     native_static)
       make_archive kiwix_tools_linux64 "kiwix-install kiwix-manage kiwix-read kiwix-search kiwix-serve"
       make_archive zim-tools_linux64 "zimbench zimdump zimsearch zimdiff zimpatch zimsplit"
