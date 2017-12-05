@@ -229,6 +229,12 @@ class Builder:
         if hasattr(self, '_post_build_script'):
             self.command('post_build_script', self._post_build_script)
 
+    def make_dist(self):
+        if hasattr(self, '_pre_build_script'):
+            self.command('pre_build_script', self._pre_build_script)
+        self.command('configure', self._configure)
+        self.command('make_dist', self._make_dist)
+
 
 class MakeBuilder(Builder):
     configure_option = ""
@@ -283,6 +289,11 @@ class MakeBuilder(Builder):
             make_install_target=self.make_install_target,
             make_option=self.make_option
         )
+        self.buildEnv.run_command(command, self.build_path, context)
+
+    def _make_dist(self, context):
+        context.try_skip(self.build_path)
+        command = "make dist"
         self.buildEnv.run_command(command, self.build_path, context)
 
 
@@ -366,6 +377,10 @@ class MesonBuilder(Builder):
 
     def _install(self, context):
         command = "{} -v install".format(self.buildEnv.ninja_command)
+        self.buildEnv.run_command(command, self.build_path, context)
+
+    def _make_dist(self, context):
+        command = "{} -v dist".format(self.buildEnv.ninja_command)
         self.buildEnv.run_command(command, self.build_path, context)
 
 
