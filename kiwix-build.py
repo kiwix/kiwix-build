@@ -254,7 +254,7 @@ class BuildEnv:
         self.meson_command = self._detect_meson()
         if not self.meson_command:
             sys.exit("ERROR: meson command not fount")
-        self.mesontest_command = "mesontest"
+        self.mesontest_command = "meson test"
         self.setup_build(options.target_platform)
         self.setup_toolchains()
         self.options = options
