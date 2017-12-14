@@ -386,7 +386,7 @@ class MesonBuilder(Builder):
 
 class GradleBuilder(Builder):
     gradle_target = "build"
-    gradle_option = "-i"
+    gradle_option = ""
 
     def build(self):
         self.command('configure', self._configure)
