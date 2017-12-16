@@ -119,8 +119,8 @@ EOF
       ;;
     android_*)
       APK_NAME="kiwix-${PLATFORM}"
-      cp ${BASE_DIR}/kiwix-android/app/build/outputs/apk/app-kiwix-debug.apk ${NIGHTLY_ARCHIVES_DIR}/${APK_NAME}-debug.apk
-      cp ${BASE_DIR}/kiwix-android/app/build/outputs/apk/app-kiwix-release-unsigned.apk ${NIGHTLY_ARCHIVES_DIR}/${APK_NAME}-release-unsigned.apk
+      cp ${BASE_DIR}/kiwix-android/app/build/outputs/apk/kiwix/release/app-kiwix-debug.apk ${NIGHTLY_ARCHIVES_DIR}/${APK_NAME}-debug.apk
+      cp ${BASE_DIR}/kiwix-android/app/build/outputs/apk/kiwix/release/app-kiwix-release-unsigned.apk ${NIGHTLY_ARCHIVES_DIR}/${APK_NAME}-release-unsigned.apk
       ;;
   esac
 

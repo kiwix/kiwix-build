@@ -11,7 +11,7 @@ cd ${HOME}
 # Sign apk file
 
 BASE_DIR="BUILD_${PLATFORM}"
-INPUT_APK_FILE=${BASE_DIR}/kiwix-android-custom_${CUSTOM_APP}/app/build/outputs/apk/app-${CUSTOM_APP}-release-unsigned.apk
+INPUT_APK_FILE=${BASE_DIR}/kiwix-android-custom_${CUSTOM_APP}/app/build/outputs/apk/${CUSTOM_APP}/release/app-${CUSTOM_APP}-release-unsigned.apk
 SIGNED_APK=${BASE_DIR}/app-${CUSTOM_APP}_${VERSION_CODE}-release-signed.apk
 
 TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign \
