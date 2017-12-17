@@ -107,7 +107,7 @@ EOF
       #scp ${BASE_DIR}/${TARGET}/${TARGET}-${TARGET-version}.tar.gz ${SOMEWHERE}
       ;;
     native_static)
-      make_archive kiwix_tools_linux64 "kiwix-install kiwix-manage kiwix-read kiwix-search kiwix-serve"
+      make_archive kiwix-tools_linux64 "kiwix-install kiwix-manage kiwix-read kiwix-search kiwix-serve"
       make_archive zim-tools_linux64 "zimbench zimdump zimsearch zimdiff zimpatch zimsplit"
       make_archive zimwriterfs_linux64 "zimwriterfs"
       ;;
