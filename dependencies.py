@@ -217,11 +217,11 @@ class Gumbo(Dependency):
 
 class Icu(Dependency):
     name = "icu4c"
-    version = "58.2"
+    version = "60.1"
 
     class Source(SvnClone):
         name = "icu4c"
-        svn_remote = "http://source.icu-project.org/repos/icu/tags/release-58-2/icu4c"
+        svn_remote = "http://source.icu-project.org/repos/icu/tags/release-60-1/icu4c"
         svn_dir = "icu4c"
 
         patches = ["icu4c_fix_static_lib_name_mingw.patch",
@@ -425,10 +425,10 @@ class KiwixAndroid(Dependency):
             os.makedirs(
                 pj(self.build_path, 'app', 'src', 'main', 'assets', 'icu'),
                 exist_ok=True)
-            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '58.2',
-                            'icudt58l.dat'),
+            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '60.1',
+                            'icudt60l.dat'),
                          pj(self.build_path, 'app', 'src', 'main', 'assets',
-                            'icu', 'icudt58l.dat'))
+                            'icu', 'icudt60l.dat'))
 
 
 class KiwixCustomApp(Dependency):
@@ -514,10 +514,10 @@ class KiwixCustomApp(Dependency):
             os.makedirs(
                 pj(self.build_path, 'app', 'src', 'main', 'assets', 'icu'),
                 exist_ok=True)
-            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '58.2',
-                            'icudt58l.dat'),
+            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '60.1',
+                            'icudt60l.dat'),
                          pj(self.build_path, 'app', 'src', 'main', 'assets',
-                            'icu', 'icudt58l.dat'))
+                            'icu', 'icudt60l.dat'))
 
             # Generate custom directory
             try:
