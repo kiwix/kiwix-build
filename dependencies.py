@@ -262,7 +262,7 @@ class Icu_cross_compile(Icu):
         @property
         def configure_option(self):
             icu_native_dep = self.buildEnv.targetsDict['icu4c_native']
-            return super().configure_option + " --with-cross-build=" + icu_native_dep.builder.build_path
+            return super().configure_option + " --with-cross-build={} --disable-tools".format(icu_native_dep.builder.build_path)
 
 
 class Libzim(Dependency):
