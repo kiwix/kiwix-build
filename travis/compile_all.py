@@ -106,7 +106,7 @@ for target in TARGETS:
         run_kiwix_build(target,
                         platform=PLATFORM,
                         build_deps_only=True)
-        (BASE_DIR/'.install_package_ok').unlink()
+        (BASE_DIR/'.install_packages_ok').unlink()
 
         archive_name = "deps_{}_{}.tar.gz".format(PLATFORM, target)
         files_to_archive = [BASE_DIR/'INSTALL']
