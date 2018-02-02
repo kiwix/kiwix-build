@@ -22,8 +22,6 @@ deploy:
   provider: script
   skip_cleanup: true
   script: travis/deploy.sh
-  on:
-    condition: ( "$TRAVIS_EVENT_TYPE" = "cron" )
 env:
   global:
     - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
