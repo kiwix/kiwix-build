@@ -68,7 +68,7 @@ def make_archive(archive_name, file_to_archives):
 
 
 def scp(what, where):
-    command = ['scp', '-i', SSH_KEY, what, where]
+    command = ['scp', '-i', str(SSH_KEY), what, where]
     subprocess.check_call(command)
 
 
