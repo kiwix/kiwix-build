@@ -31,7 +31,8 @@ VERSIONS = {
 
 
 def write_manifest(manifest_file, archive_name, target, platform):
-    manifest_file.write_text('''{archive_name}
+    with manifest_file.open(mode='w') as f:
+        f.write('''{archive_name}
 ***************************
 
 Dependencies archive for {target} on platform {platform}
