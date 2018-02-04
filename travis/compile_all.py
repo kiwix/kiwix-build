@@ -19,7 +19,7 @@ NIGHTLY_ARCHIVES_DIR = home()/'NIGTHLY_ARCHIVES'
 RELEASE_ARCHIVES_DIR = home()/'RELEASE_ARCHIVES'
 DIST_KIWIX_ARCHIVES_DIR = home()/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = home()/'DIST_ZIM_ARCHIVES'
-SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travis_ci_builder_id_key'
+SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
 
 VERSIONS = {
     'kiwix-lib': '1.0.2',
