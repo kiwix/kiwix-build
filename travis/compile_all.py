@@ -121,7 +121,7 @@ for target in TARGETS:
         with tarfile.open(str(BASE_DIR/archive_name), 'w:gz') as tar:
             for name in files_to_archive:
                 tar.add(str(name))
-        scp(str(archive_name), 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/')
+        scp(str(BASE_DIR/archive_name), 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/')
 
     run_kiwix_build(target,
                     platform=PLATFORM,
