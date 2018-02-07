@@ -20,6 +20,7 @@ then
 fi
 
 if [[ "x$TRAVIS_TAG" != "x" ]]
+then
   RELEASE_ARCHIVES=$(find $RELEASE_ARCHIVES_DIR -type f)
   if [[ "x$RELEASE_ARCHIVES" != "x" ]]
   then
