@@ -120,7 +120,7 @@ for target in TARGETS:
         files_to_archive.append(manifest_file)
         with tarfile.open(str(BASE_DIR/archive_name), 'w:gz') as tar:
             for name in files_to_archive:
-                tar.add(str(name))
+                tar.add(str(name), arcname=str(name.relative_to(BASE_DIR)))
         scp(str(BASE_DIR/archive_name), 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/')
 
     run_kiwix_build(target,
