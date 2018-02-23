@@ -3,6 +3,7 @@ import os
 import shutil
 
 from utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild
+from dependency_versions import main_project_versions, base_deps_versions
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -20,13 +21,16 @@ class Dependency(metaclass=_MetaDependency):
     all_deps = {}
     dependencies = []
     force_native_build = False
-    version = None
 
     def __init__(self, buildEnv):
         self.buildEnv = buildEnv
         self.source = self.Source(self)
         self.builder = self.Builder(self)
         self.skip = False
+
+    @property
+    def version(self):
+        return base_deps_versions.get(self.name, None)
 
     @property
     def full_name(self):
@@ -124,7 +128,10 @@ class ReleaseDownload(Source):
 
 class GitClone(Source):
     base_git_ref = "master"
-    release_git_ref = "master"
+
+    @property
+    def release_git_ref(self):
+        return main_project_versions.get(self.name, "master")
 
     @property
     def source_dir(self):
