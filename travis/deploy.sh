@@ -17,16 +17,14 @@ then
       ${NIGHTLY_ARCHIVES} \
       nightlybot@download.kiwix.org:/var/www/download.kiwix.org/nightly/$(date +%Y-%m-%d)
   fi
-fi
-
-if [[ "x$TRAVIS_TAG" != "x" ]]
+elif [[ "x$TRAVIS_TAG" != "x" ]]
 then
   RELEASE_ARCHIVES=$(find $RELEASE_ARCHIVES_DIR -type f)
   if [[ "x$RELEASE_ARCHIVES" != "x" ]]
   then
     scp -vrp -i ${SSH_KEY} \
       ${RELEASE_ARCHIVES} \
-      nightlybot@downoald.kiwix.org:/var/www/download.kiwix.org/releases
+      nightlybot@download.kiwix.org:/var/www/download.kiwix.org/releases
   fi
 
   DIST_KIWIX_ARCHIVES=$(find $DIST_KIWIX_ARCHIVES_DIR -type f)
