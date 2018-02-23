@@ -1,6 +1,10 @@
 language: cpp
 dist: trusty
 sudo: required
+branches:
+  only:
+  - master
+  - /\d+\.\d+\.\d+$/
 before_install:
 - eval "${MATRIX_EVAL}"
 - ${CXX} --version
@@ -19,9 +23,17 @@ cache:
 install: travis/install_extra_deps.sh
 script: travis_wait 30 travis/compile_all.py
 deploy:
-  provider: script
-  skip_cleanup: true
-  script: travis/deploy.sh
+  - provider: script
+    skip_cleanup: true
+    script: travis/deploy.sh
+    on:
+      tags: true
+  - provider: script
+    skip_cleanup: true
+    script: travis/deploy.sh
+    on:
+      branch: master
+      condition: $TRAVIS_ENV_TYPE = cron
 env:
   global:
     - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
