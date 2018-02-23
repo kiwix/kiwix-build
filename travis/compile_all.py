@@ -96,7 +96,12 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
     sys.exit(0)
 
 if PLATFORM.startswith('android'):
-    TARGETS = ('libzim', 'kiwix-lib', 'kiwix-android')
+    if make_release:
+        # (For now ?) kiwix-android follow it own release process.
+        # Do not try to make a release of it
+        TARGETS = ('libzim', 'kiwix-lib')
+    else:
+        TARGETS = ('libzim', 'kiwix-lib', 'kiwix-android')
 elif PLATFORM.startswith('native_'):
     TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 else:
