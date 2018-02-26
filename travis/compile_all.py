@@ -168,7 +168,7 @@ elif PLATFORM == 'win32_static':
                  ('{}.exe'.format(b) for b in kiwix_tools_bins))
 elif PLATFORM == 'armhf_static':
     make_archive('kiwix-tools_armhf-{}'.format(kiwix_tools_postfix), kiwix_tools_bins)
-elif PLATFORM.startswith('android_'):
+elif PLATFORM.startswith('android_') and 'kiwix-android' in TARGETS:
     APK_NAME = "kiwix-{}".format(PLATFORM)
     source_debug_dir = BASE_DIR/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'debug'
     source_release_dir = BASE_DIR/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'release'

@@ -24,7 +24,7 @@ then
   then
     scp -vrp -i ${SSH_KEY} \
       ${RELEASE_ARCHIVES} \
-      nightlybot@download.kiwix.org:/var/www/download.kiwix.org/releases
+      nightlybot@download.kiwix.org:/var/www/download.kiwix.org/release
   fi
 
   DIST_KIWIX_ARCHIVES=$(find $DIST_KIWIX_ARCHIVES_DIR -type f)
