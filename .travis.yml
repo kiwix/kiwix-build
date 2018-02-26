@@ -33,7 +33,7 @@ deploy:
     script: travis/deploy.sh
     on:
       branch: master
-      condition: $TRAVIS_ENV_TYPE = cron
+      condition: $TRAVIS_EVENT_TYPE = cron
 env:
   global:
     - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
