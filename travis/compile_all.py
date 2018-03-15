@@ -58,8 +58,12 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
     subprocess.check_call(command, cwd=str(home()))
 
 
-def make_archive(archive_name, file_to_archives):
-    archive_dir = RELEASE_ARCHIVES_DIR if make_release else NIGHTLY_ARCHIVES_DIR
+def make_archive(project, platform, post_fix, file_to_archives):
+    archive_name = "{}_{}-{}".format(project, platform, post_fix)
+    if make_release:
+        archive_dir = RELEASE_ARCHIVES_DIR
+    else:
+        archive_dir = NIGHTLY_ARCHIVES_DIR
     archive = archive_dir/'{}.tar.gz'.format(archive_name)
     base_bin_dir = BASE_DIR/'INSTALL'/'bin'
     with tarfile.open(str(archive), 'w:gz') as arch:
@@ -160,14 +164,14 @@ if make_release and PLATFORM == 'native_dyn':
             shutil.copy(str(BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(target, VERSIONS[target])),
                         str(out_dir))
 elif PLATFORM == 'native_static':
-    make_archive('kiwix-tools_linux64-{}'.format(kiwix_tools_postfix), kiwix_tools_bins)
-    make_archive('zim-tools_linux64-{}'.format(zim_tools_postfix), zim_tools_bins)
-    make_archive('zimwriterfs_linux64-{}'.format(zimwriterfs_postfix), zimwriterfs_bins)
+    make_archive('kiwix-tools', 'linux64', kiwix_tools_postfix, kiwix_tools_bins)
+    make_archive('zim-tools', 'linux64', zim_tools_postfix, zim_tools_bins)
+    make_archive('zimwriterfs', 'linux64', zimwriterfs_postfix, zimwriterfs_bins)
 elif PLATFORM == 'win32_static':
-    make_archive('kiwix-tools_win32-{}'.format(kiwix_tools_postfix),
+    make_archive('kiwix-tools', 'win32', kiwix_tools_postfix,
                  ('{}.exe'.format(b) for b in kiwix_tools_bins))
 elif PLATFORM == 'armhf_static':
-    make_archive('kiwix-tools_armhf-{}'.format(kiwix_tools_postfix), kiwix_tools_bins)
+    make_archive('kiwix-tools', 'armhf', kiwix_tools_postfix, kiwix_tools_bins)
 elif PLATFORM.startswith('android_') and 'kiwix-android' in TARGETS:
     APK_NAME = "kiwix-{}".format(PLATFORM)
     source_debug_dir = BASE_DIR/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'debug'
