@@ -29,6 +29,16 @@ VERSIONS = {
     'zimwriterfs': '1.0'
 }
 
+# We have build everything. Now create archives for public deployement.
+BINARIES = {
+    'kiwix-tools': ('kiwix-install', 'kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve'),
+    'zim-tools': ('zimbench', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit'),
+    'zimwriterfs': ('zimwriterfs',)
+}
+
+_date = date.today().isoformat()
+
+
 
 def write_manifest(manifest_file, archive_name, target, platform):
     with manifest_file.open(mode='w') as f:
@@ -58,12 +68,17 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
     subprocess.check_call(command, cwd=str(home()))
 
 
-def make_archive(project, platform, post_fix, file_to_archives):
-    archive_name = "{}_{}-{}".format(project, platform, post_fix)
+def make_archive(project, platform):
+    file_to_archives = BINARIES[project]
+    if platform == "win32":
+        file_to_archives = ['{}.exe'.format(f) for f in file_to_archives]
     if make_release:
+        postfix = VERSIONS[project]
         archive_dir = RELEASE_ARCHIVES_DIR
     else:
+        postfix = _date
         archive_dir = NIGHTLY_ARCHIVES_DIR
+    archive_name = "{}_{}-{}".format(project, platform, postfix)
     archive = archive_dir/'{}.tar.gz'.format(archive_name)
     base_bin_dir = BASE_DIR/'INSTALL'/'bin'
     with tarfile.open(str(archive), 'w:gz') as arch:
@@ -144,11 +159,6 @@ for target in TARGETS:
 
 
 # We have build everything. Now create archives for public deployement.
-kiwix_tools_bins = ('kiwix-install', 'kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve')
-zim_tools_bins = ('zimbench', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit')
-zimwriterfs_bins = ('zimwriterfs',)
-
-_date = date.today().isoformat()
 kiwix_tools_postfix = VERSIONS['kiwix-tools'] if make_release else _date
 zim_tools_postfix = VERSIONS['zim-tools'] if make_release else _date
 zimwriterfs_postfix = VERSIONS['zimwriterfs'] if make_release else _date
@@ -164,14 +174,12 @@ if make_release and PLATFORM == 'native_dyn':
             shutil.copy(str(BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(target, VERSIONS[target])),
                         str(out_dir))
 elif PLATFORM == 'native_static':
-    make_archive('kiwix-tools', 'linux64', kiwix_tools_postfix, kiwix_tools_bins)
-    make_archive('zim-tools', 'linux64', zim_tools_postfix, zim_tools_bins)
-    make_archive('zimwriterfs', 'linux64', zimwriterfs_postfix, zimwriterfs_bins)
+    for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
+        make_archive(target, 'linux64')
 elif PLATFORM == 'win32_static':
-    make_archive('kiwix-tools', 'win32', kiwix_tools_postfix,
-                 ('{}.exe'.format(b) for b in kiwix_tools_bins))
+    make_archive('kiwix-tools', 'win32')
 elif PLATFORM == 'armhf_static':
-    make_archive('kiwix-tools', 'armhf', kiwix_tools_postfix, kiwix_tools_bins)
+    make_archive('kiwix-tools', 'armhf')
 elif PLATFORM.startswith('android_') and 'kiwix-android' in TARGETS:
     APK_NAME = "kiwix-{}".format(PLATFORM)
     source_debug_dir = BASE_DIR/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'debug'
