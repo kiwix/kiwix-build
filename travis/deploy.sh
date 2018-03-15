@@ -3,7 +3,8 @@
 set -e
 
 NIGHTLY_ARCHIVES_DIR=${HOME}/NIGHTLY_ARCHIVES
-RELEASE_ARCHIVES_DIR=${HOME}/RELEASE_ARCHIVES
+RELEASE_KIWIX_ARCHIVES_DIR=${HOME}/RELEASE_KIWIX_ARCHIVES
+RELEASE_ZIM_ARCHIVES_DIR=${HOME}/RELEASE_ZIM_ARCHIVES
 DIST_KIWIX_ARCHIVES_DIR=${HOME}/DIST_KIWIX_ARCHIVES
 DIST_ZIM_ARCHIVES_DIR=${HOME}/DIST_ZIM_ARCHIVES
 SSH_KEY=travis/travisci_builder_id_key
@@ -19,12 +20,28 @@ then
   fi
 elif [[ "x$TRAVIS_TAG" != "x" ]]
 then
-  RELEASE_ARCHIVES=$(find $RELEASE_ARCHIVES_DIR -type f)
+  RELEASE_ARCHIVES=$(find $RELEASE_KIWIX_ARCHIVES_DIR -type f)
   if [[ "x$RELEASE_ARCHIVES" != "x" ]]
   then
-    scp -vrp -i ${SSH_KEY} \
-      ${RELEASE_ARCHIVES} \
-      nightlybot@download.kiwix.org:/var/www/download.kiwix.org/release
+    for archive in $RELEASE_ARCHIVES
+    do
+      subdir=$(basename $(dirname $archive))
+      scp -vrp -i ${SSH_KEY} \
+        ${archive} \
+        nightlybot@download.kiwix.org:/var/www/download.kiwix.org/release/${subdir}
+    done
+  fi
+
+  RELEASE_ARCHIVES=$(find $RELEASE_ZIM_ARCHIVES_DIR -type f)
+  if [[ "x$RELEASE_ARCHIVES" != "x" ]]
+  then
+    for archive in $RELEASE_ARCHIVES
+    do
+      subdir=$(basename $(dirname $archive))
+      scp -vrp -i ${SSH_KEY} \
+        ${archive} \
+        nightlybot@download.openzim.org:/var/www/download.openzim.org/release/${subdir}
+    done
   fi
 
   DIST_KIWIX_ARCHIVES=$(find $DIST_KIWIX_ARCHIVES_DIR -type f)

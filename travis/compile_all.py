@@ -16,7 +16,8 @@ def home():
 
 BASE_DIR = home()/"BUILD_{}".format(PLATFORM)
 NIGHTLY_ARCHIVES_DIR = home()/'NIGHTLY_ARCHIVES'
-RELEASE_ARCHIVES_DIR = home()/'RELEASE_ARCHIVES'
+RELEASE_KIWIX_ARCHIVES_DIR = home()/'RELEASE_KIWIX_ARCHIVES'
+RELEASE_ZIM_ARCHIVES_DIR = home()/'RELEASE_ZIM_ARCHIVES'
 DIST_KIWIX_ARCHIVES_DIR = home()/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = home()/'DIST_ZIM_ARCHIVES'
 SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
@@ -26,7 +27,7 @@ VERSIONS = {
     'kiwix-tools': '0.3.0',
     'libzim': '3.0.0',
     'zim-tools': '0.0.1',
-    'zimwriterfs': '1.0'
+    'zimwriterfs': '1.1'
 }
 
 # We have build everything. Now create archives for public deployement.
@@ -74,12 +75,16 @@ def make_archive(project, platform):
         file_to_archives = ['{}.exe'.format(f) for f in file_to_archives]
     if make_release:
         postfix = VERSIONS[project]
-        archive_dir = RELEASE_ARCHIVES_DIR
+        if project in ('kiwix-lib', 'kiwix-tools'):
+            archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/project
+        else:
+            archive_dir = RELEASE_ZIM_ARCHIVES_DIR/project
     else:
         postfix = _date
         archive_dir = NIGHTLY_ARCHIVES_DIR
     archive_name = "{}_{}-{}".format(project, platform, postfix)
     archive = archive_dir/'{}.tar.gz'.format(archive_name)
+    archive_dir.mkdir(parents=True)
     base_bin_dir = BASE_DIR/'INSTALL'/'bin'
     with tarfile.open(str(archive), 'w:gz') as arch:
         for f in file_to_archives:
@@ -91,7 +96,11 @@ def scp(what, where):
     subprocess.check_call(command)
 
 
-for p in (NIGHTLY_ARCHIVES_DIR, RELEASE_ARCHIVES_DIR, DIST_KIWIX_ARCHIVES_DIR, DIST_ZIM_ARCHIVES_DIR):
+for p in (NIGHTLY_ARCHIVES_DIR,
+          RELEASE_KIWIX_ARCHIVES_DIR,
+          RELEASE_ZIM_ARCHIVES_DIR,
+          DIST_KIWIX_ARCHIVES_DIR,
+          DIST_ZIM_ARCHIVES_DIR):
     try:
         p.mkdir(parents=True)
     except FileExistsError:
@@ -170,8 +179,11 @@ if make_release and PLATFORM == 'native_dyn':
         else:
             out_dir = DIST_ZIM_ARCHIVES_DIR
 
-        if target in ('kiwix-lib', 'kiwix-tools', 'libzim'):
+        if target in ('kiwix-lib', 'kiwix-tools', 'libzim', 'zim-tools'):
             shutil.copy(str(BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(target, VERSIONS[target])),
+                        str(out_dir))
+        if target in ('zimwriterfs',):
+            shutil.copy(str(BASE_DIR/target/'{}-{}.tar.gz'.format(target, VERSIONS[target])),
                         str(out_dir))
 elif PLATFORM == 'native_static':
     for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
