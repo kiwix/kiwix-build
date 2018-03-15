@@ -316,6 +316,7 @@ class Zimwriterfs(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/openzim/zimwriterfs.git"
         git_dir = "zimwriterfs"
+        release_git_ref = "1.1"
 
         def _post_prepare_script(self, context):
             context.try_skip(self.git_path)
