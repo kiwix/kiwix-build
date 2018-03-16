@@ -16,7 +16,8 @@ def home():
 
 BASE_DIR = home()/"BUILD_{}".format(PLATFORM)
 NIGHTLY_ARCHIVES_DIR = home()/'NIGHTLY_ARCHIVES'
-RELEASE_ARCHIVES_DIR = home()/'RELEASE_ARCHIVES'
+RELEASE_KIWIX_ARCHIVES_DIR = home()/'RELEASE_KIWIX_ARCHIVES'
+RELEASE_ZIM_ARCHIVES_DIR = home()/'RELEASE_ZIM_ARCHIVES'
 DIST_KIWIX_ARCHIVES_DIR = home()/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = home()/'DIST_ZIM_ARCHIVES'
 SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
@@ -26,8 +27,18 @@ VERSIONS = {
     'kiwix-tools': '0.3.0',
     'libzim': '3.0.0',
     'zim-tools': '0.0.1',
-    'zimwriterfs': '1.0'
+    'zimwriterfs': '1.1'
 }
+
+# We have build everything. Now create archives for public deployement.
+BINARIES = {
+    'kiwix-tools': ('kiwix-install', 'kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve'),
+    'zim-tools': ('zimbench', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit'),
+    'zimwriterfs': ('zimwriterfs',)
+}
+
+_date = date.today().isoformat()
+
 
 
 def write_manifest(manifest_file, archive_name, target, platform):
@@ -58,9 +69,22 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
     subprocess.check_call(command, cwd=str(home()))
 
 
-def make_archive(archive_name, file_to_archives):
-    archive_dir = RELEASE_ARCHIVES_DIR if make_release else NIGHTLY_ARCHIVES_DIR
+def make_archive(project, platform):
+    file_to_archives = BINARIES[project]
+    if platform == "win32":
+        file_to_archives = ['{}.exe'.format(f) for f in file_to_archives]
+    if make_release:
+        postfix = VERSIONS[project]
+        if project in ('kiwix-lib', 'kiwix-tools'):
+            archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/project
+        else:
+            archive_dir = RELEASE_ZIM_ARCHIVES_DIR/project
+    else:
+        postfix = _date
+        archive_dir = NIGHTLY_ARCHIVES_DIR
+    archive_name = "{}_{}-{}".format(project, platform, postfix)
     archive = archive_dir/'{}.tar.gz'.format(archive_name)
+    archive_dir.mkdir(parents=True)
     base_bin_dir = BASE_DIR/'INSTALL'/'bin'
     with tarfile.open(str(archive), 'w:gz') as arch:
         for f in file_to_archives:
@@ -72,7 +96,11 @@ def scp(what, where):
     subprocess.check_call(command)
 
 
-for p in (NIGHTLY_ARCHIVES_DIR, RELEASE_ARCHIVES_DIR, DIST_KIWIX_ARCHIVES_DIR, DIST_ZIM_ARCHIVES_DIR):
+for p in (NIGHTLY_ARCHIVES_DIR,
+          RELEASE_KIWIX_ARCHIVES_DIR,
+          RELEASE_ZIM_ARCHIVES_DIR,
+          DIST_KIWIX_ARCHIVES_DIR,
+          DIST_ZIM_ARCHIVES_DIR):
     try:
         p.mkdir(parents=True)
     except FileExistsError:
@@ -140,11 +168,6 @@ for target in TARGETS:
 
 
 # We have build everything. Now create archives for public deployement.
-kiwix_tools_bins = ('kiwix-install', 'kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve')
-zim_tools_bins = ('zimbench', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit')
-zimwriterfs_bins = ('zimwriterfs',)
-
-_date = date.today().isoformat()
 kiwix_tools_postfix = VERSIONS['kiwix-tools'] if make_release else _date
 zim_tools_postfix = VERSIONS['zim-tools'] if make_release else _date
 zimwriterfs_postfix = VERSIONS['zimwriterfs'] if make_release else _date
@@ -156,18 +179,19 @@ if make_release and PLATFORM == 'native_dyn':
         else:
             out_dir = DIST_ZIM_ARCHIVES_DIR
 
-        if target in ('kiwix-lib', 'kiwix-tools', 'libzim'):
+        if target in ('kiwix-lib', 'kiwix-tools', 'libzim', 'zim-tools'):
             shutil.copy(str(BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(target, VERSIONS[target])),
                         str(out_dir))
+        if target in ('zimwriterfs',):
+            shutil.copy(str(BASE_DIR/target/'{}-{}.tar.gz'.format(target, VERSIONS[target])),
+                        str(out_dir))
 elif PLATFORM == 'native_static':
-    make_archive('kiwix-tools_linux64-{}'.format(kiwix_tools_postfix), kiwix_tools_bins)
-    make_archive('zim-tools_linux64-{}'.format(zim_tools_postfix), zim_tools_bins)
-    make_archive('zimwriterfs_linux64-{}'.format(zimwriterfs_postfix), zimwriterfs_bins)
+    for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
+        make_archive(target, 'linux64')
 elif PLATFORM == 'win32_static':
-    make_archive('kiwix-tools_win32-{}'.format(kiwix_tools_postfix),
-                 ('{}.exe'.format(b) for b in kiwix_tools_bins))
+    make_archive('kiwix-tools', 'win32')
 elif PLATFORM == 'armhf_static':
-    make_archive('kiwix-tools_armhf-{}'.format(kiwix_tools_postfix), kiwix_tools_bins)
+    make_archive('kiwix-tools', 'armhf')
 elif PLATFORM.startswith('android_') and 'kiwix-android' in TARGETS:
     APK_NAME = "kiwix-{}".format(PLATFORM)
     source_debug_dir = BASE_DIR/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'debug'
