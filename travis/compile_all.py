@@ -9,6 +9,9 @@ import tarfile
 import subprocess
 import re
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import dependency_versions
+
 PLATFORM = environ['PLATFORM']
 
 def home():
@@ -21,14 +24,6 @@ RELEASE_ZIM_ARCHIVES_DIR = home()/'RELEASE_ZIM_ARCHIVES'
 DIST_KIWIX_ARCHIVES_DIR = home()/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = home()/'DIST_ZIM_ARCHIVES'
 SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
-
-VERSIONS = {
-    'kiwix-lib': '1.0.2',
-    'kiwix-tools': '0.3.0',
-    'libzim': '3.0.0',
-    'zim-tools': '0.0.1',
-    'zimwriterfs': '1.1'
-}
 
 # We have build everything. Now create archives for public deployement.
 BINARIES = {
@@ -74,7 +69,7 @@ def make_archive(project, platform):
     if platform == "win32":
         file_to_archives = ['{}.exe'.format(f) for f in file_to_archives]
     if make_release:
-        postfix = VERSIONS[project]
+        postfix = dependency_versions.main_project_versions[project]
         if project in ('kiwix-lib', 'kiwix-tools'):
             archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/project
         else:
@@ -171,10 +166,6 @@ for target in TARGETS:
 
 
 # We have build everything. Now create archives for public deployement.
-kiwix_tools_postfix = VERSIONS['kiwix-tools'] if make_release else _date
-zim_tools_postfix = VERSIONS['zim-tools'] if make_release else _date
-zimwriterfs_postfix = VERSIONS['zimwriterfs'] if make_release else _date
-
 if make_release and PLATFORM == 'native_dyn':
     for target in TARGETS:
         if target in ('kiwix-lib', 'kiwix-tools'):
@@ -183,10 +174,14 @@ if make_release and PLATFORM == 'native_dyn':
             out_dir = DIST_ZIM_ARCHIVES_DIR
 
         if target in ('kiwix-lib', 'kiwix-tools', 'libzim', 'zim-tools'):
-            shutil.copy(str(BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(target, VERSIONS[target])),
+            shutil.copy(str(BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(
+                            target,
+                            dependency_versions.main_project_versions[target])),
                         str(out_dir))
         if target in ('zimwriterfs',):
-            shutil.copy(str(BASE_DIR/target/'{}-{}.tar.gz'.format(target, VERSIONS[target])),
+            shutil.copy(str(BASE_DIR/target/'{}-{}.tar.gz'.format(
+                            target,
+                            dependency_versions.main_project_versions[target])),
                         str(out_dir))
 elif PLATFORM == 'native_static':
     for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
