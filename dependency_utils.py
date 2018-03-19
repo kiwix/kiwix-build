@@ -98,6 +98,11 @@ class Source:
         return self.target.command(*args, **kwargs)
 
 
+class NoopSource(Source):
+    def prepare(self):
+        pass
+
+
 class ReleaseDownload(Source):
     archive_top_dir = None
 
@@ -241,6 +246,14 @@ class Builder:
             self.command('pre_build_script', self._pre_build_script)
         self.command('configure', self._configure)
         self.command('make_dist', self._make_dist)
+
+
+class NoopBuilder(Builder):
+    def build(self):
+        pass
+
+    def make_dist(self):
+        pass
 
 
 class MakeBuilder(Builder):

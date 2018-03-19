@@ -6,10 +6,12 @@ from dependency_utils import (
     ReleaseDownload,
     GitClone,
     SvnClone,
+    NoopSource,
     MakeBuilder,
     CMakeBuilder,
     MesonBuilder,
     GradleBuilder,
+    NoopBuilder,
     Builder as BaseBuilder)
 
 from utils import Remotefile, pj, SkipCommand, copy_tree, add_execution_right
@@ -384,6 +386,29 @@ class Gradle(Dependency):
             copy_tree(
                 pj(self.source_path, "lib"),
                 pj(self.buildEnv.install_dir, "lib"))
+
+
+class AllBaseDependencies(Dependency):
+    name = "alldependencies"
+
+    @property
+    def dependencies(self):
+        base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd']
+        if self.buildEnv.platform_info.build != 'native':
+            base_deps += ["icu4c_cross-compile"]
+        else:
+            base_deps += ["icu4c"]
+        if ( self.buildEnv.platform_info.build != 'android'
+           and self.buildEnv.distname != 'Darwin'):
+            base_deps += ['ctpp2c', 'ctpp2']
+        if self.buildEnv.platform_info.build == 'android':
+            base_deps += ['Gradle']
+
+        return base_deps
+
+
+    Source = NoopSource
+    Builder = NoopBuilder
 
 
 class KiwixAndroid(Dependency):
