@@ -108,7 +108,7 @@ def make_deps_archive(target):
 
 
 def scp(what, where):
-    command = ['scp', '-i', str(SSH_KEY), what, where]
+    command = ['scp', '-i', str(SSH_KEY), str(what), str(where)]
     subprocess.check_call(command)
 
 
@@ -157,7 +157,7 @@ for target in TARGETS:
                         platform=PLATFORM,
                         build_deps_only=True)
         archive = make_deps_archive(target)
-        scp(str(archive), 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/')
+        scp(archive, 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/')
 
     run_kiwix_build(target,
                     platform=PLATFORM,
