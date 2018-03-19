@@ -8,6 +8,8 @@ from datetime import date
 import tarfile
 import subprocess
 import re
+from urllib.request import urlretrieve
+from urllib.error import URLError
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import dependency_versions
@@ -18,6 +20,9 @@ def home():
     return Path(os.path.expanduser('~'))
 
 BASE_DIR = home()/"BUILD_{}".format(PLATFORM)
+SOURCE_DIR = home()/"SOURCE"
+ARCHIVE_DIR = home()/"ARCHIVE"
+TOOLCHAINS_DIR = home()/"TOOLCHAINS"
 NIGHTLY_ARCHIVES_DIR = home()/'NIGHTLY_ARCHIVES'
 RELEASE_KIWIX_ARCHIVES_DIR = home()/'RELEASE_KIWIX_ARCHIVES'
 RELEASE_ZIM_ARCHIVES_DIR = home()/'RELEASE_ZIM_ARCHIVES'
@@ -61,6 +66,8 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
         command.append('--make-release')
     if make_dist:
         command.append('--make-dist')
+    print("--- Build {} (deps={}, release={}, dist={}) ---".format(
+        target, build_deps_only, make_release, make_dist), flush=True)
     subprocess.check_call(command, cwd=str(home()))
 
 
@@ -89,7 +96,7 @@ def make_archive(project, platform):
             arch.add(str(base_bin_dir/f), arcname=str(f))
 
 
-def make_deps_archive(target):
+def make_deps_archive(target, full=False):
     (BASE_DIR/'.install_packages_ok').unlink()
 
     archive_name = "deps_{}_{}.tar.gz".format(PLATFORM, target)
@@ -101,10 +108,24 @@ def make_deps_archive(target):
     manifest_file = BASE_DIR/'manifest.txt'
     write_manifest(manifest_file, archive_name, target, PLATFORM)
     files_to_archive.append(manifest_file)
-    with tarfile.open(str(BASE_DIR/archive_name), 'w:gz') as tar:
+
+    relative_path = BASE_DIR
+    if full:
+        files_to_archive += [ARCHIVE_DIR]
+        files_to_archive += BASE_DIR.glob('*/.*_ok')
+        files_to_archive += SOURCE_DIR.glob('*/.*_ok')
+        files_to_archive += [SOURCE_DIR/'pugixml-{}'.format(
+            dependency_versions.base_deps_versions['pugixml'])]
+        files_to_archive += [BASE_DIR/'pugixml-{}'.format(
+            dependency_versions.base_deps_versions['pugixml'])]
+        if (TOOLCHAINS_DIR).exists():
+            files_to_archive.append(TOOLCHAINS_DIR)
+        relative_path = home()
+
+    with tarfile.open(str(relative_path/archive_name), 'w:gz') as tar:
         for name in files_to_archive:
-            tar.add(str(name), arcname=str(name.relative_to(BASE_DIR)))
-    return BASE_DIR/archive_name
+            tar.add(str(name), arcname=str(name.relative_to(relative_path)))
+    return relative_path/archive_name
 
 
 def scp(what, where):
@@ -123,6 +144,27 @@ for p in (NIGHTLY_ARCHIVES_DIR,
         pass
 
 make_release = re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", environ.get('TRAVIS_TAG', '')) is not None
+
+# The first thing we need to do is to (potentially) download already compiled base dependencies.
+BASE_DEP_VERSION = dependency_versions.base_deps_meta_version
+base_dep_archive_name = "base_deps_{}_{}.tar.gz".format(PLATFORM, BASE_DEP_VERSION)
+
+print("--- Getting archive {} ---".format(base_dep_archive_name), flush=True)
+try:
+    local_filename, headers = urlretrieve(
+        'http://tmp.kiwix.org/ci/{}'.format(base_dep_archive_name))
+    with tarfile.open(local_filename) as f:
+        f.extractall(str(home()))
+except URLError:
+    print("--- Cannot get archive. Build dependencies ---", flush=True)
+    run_kiwix_build('alldependencies', platform=PLATFORM)
+    archive = make_deps_archive('alldependencies', full=True)
+    destination = 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/{}'
+    destination = destination.format(base_dep_archive_name)
+    scp(archive, destination)
+
+
+
 
 # A basic compilation to be sure everything is working (for a PR)
 if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
