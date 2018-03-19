@@ -21,7 +21,7 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
 install: travis/install_extra_deps.sh
-script: travis_wait 30 travis/compile_all.py
+script: travis/compile_all.py
 deploy:
   - provider: script
     skip_cleanup: true
