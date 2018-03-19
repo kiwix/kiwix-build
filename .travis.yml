@@ -17,6 +17,7 @@ before_cache:
 cache:
   ccache: true
   directories:
+    - $HOME/.cache/pip
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
