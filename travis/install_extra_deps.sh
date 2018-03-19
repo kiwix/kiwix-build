@@ -10,10 +10,8 @@ pip3 install --user --upgrade pip wheel
 pip3 install --user pillow meson==0.43.0
 
 # ninja
-git clone git://github.com/ninja-build/ninja.git
-cd ninja
-git checkout release
-./configure.py --bootstrap
+wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
+unzip ninja-linux.zip ninja
 sudo cp ninja /bin
 
 cd $orig_dir
