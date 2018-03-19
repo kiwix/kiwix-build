@@ -89,6 +89,24 @@ def make_archive(project, platform):
             arch.add(str(base_bin_dir/f), arcname=str(f))
 
 
+def make_deps_archive(target):
+    (BASE_DIR/'.install_packages_ok').unlink()
+
+    archive_name = "deps_{}_{}.tar.gz".format(PLATFORM, target)
+    files_to_archive = [BASE_DIR/'INSTALL']
+    files_to_archive += BASE_DIR.glob('**/android-ndk*')
+    if (BASE_DIR/'meson_cross_file.txt').exists():
+        files_to_archive.append(BASE_DIR/'meson_cross_file.txt')
+
+    manifest_file = BASE_DIR/'manifest.txt'
+    write_manifest(manifest_file, archive_name, target, PLATFORM)
+    files_to_archive.append(manifest_file)
+    with tarfile.open(str(BASE_DIR/archive_name), 'w:gz') as tar:
+        for name in files_to_archive:
+            tar.add(str(name), arcname=str(name.relative_to(BASE_DIR)))
+    return BASE_DIR/archive_name
+
+
 def scp(what, where):
     command = ['scp', '-i', str(SSH_KEY), what, where]
     subprocess.check_call(command)
@@ -138,21 +156,8 @@ for target in TARGETS:
         run_kiwix_build(target,
                         platform=PLATFORM,
                         build_deps_only=True)
-        (BASE_DIR/'.install_packages_ok').unlink()
-
-        archive_name = "deps_{}_{}.tar.gz".format(PLATFORM, target)
-        files_to_archive = [BASE_DIR/'INSTALL']
-        files_to_archive += BASE_DIR.glob('**/android-ndk*')
-        if (BASE_DIR/'meson_cross_file.txt').exists():
-            files_to_archive.append(BASE_DIR/'meson_cross_file.txt')
-
-        manifest_file = BASE_DIR/'manifest.txt'
-        write_manifest(manifest_file, archive_name, target, PLATFORM)
-        files_to_archive.append(manifest_file)
-        with tarfile.open(str(BASE_DIR/archive_name), 'w:gz') as tar:
-            for name in files_to_archive:
-                tar.add(str(name), arcname=str(name.relative_to(BASE_DIR)))
-        scp(str(BASE_DIR/archive_name), 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/')
+        archive = make_deps_archive(target)
+        scp(str(archive), 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/')
 
     run_kiwix_build(target,
                     platform=PLATFORM,
