@@ -84,7 +84,10 @@ def make_archive(project, platform):
         archive_dir = NIGHTLY_ARCHIVES_DIR
     archive_name = "{}_{}-{}".format(project, platform, postfix)
     archive = archive_dir/'{}.tar.gz'.format(archive_name)
-    archive_dir.mkdir(parents=True)
+    try:
+        archive_dir.mkdir(parents=True)
+    except FileExistsError:
+        pass
     base_bin_dir = BASE_DIR/'INSTALL'/'bin'
     with tarfile.open(str(archive), 'w:gz') as arch:
         for f in file_to_archives:
