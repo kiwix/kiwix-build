@@ -96,7 +96,7 @@ def make_archive(project, platform):
         archive_add = lambda a, f : a.write(str(base_bin_dir/f), arcname=str(f))
     else:
         open_archive = lambda a : tarfile.open(str(a), 'w:gz')
-        archive_add = lambda a, f : a.add(str(base_bin_dir/f), arcname=str(f))
+        archive_add = lambda a, f : a.add(str(base_bin_dir/f), arcname="{}/{}".format(archive_name, str(f)))
     with open_archive(archive) as arch:
         for f in file_to_archives:
             archive_add(arch, f)
