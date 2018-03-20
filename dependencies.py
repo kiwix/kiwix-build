@@ -273,7 +273,8 @@ class Libzim(Dependency):
         git_remote = "https://github.com/openzim/libzim.git"
         git_dir = "libzim"
 
-    Builder = MesonBuilder
+    class Builder(MesonBuilder):
+        test_option = "-t 8"
 
 
 class ZimTools(Dependency):

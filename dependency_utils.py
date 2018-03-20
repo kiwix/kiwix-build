@@ -351,6 +351,7 @@ class CMakeBuilder(MakeBuilder):
 
 class MesonBuilder(Builder):
     configure_option = ""
+    test_option = ""
 
     @property
     def library_type(self):
@@ -392,7 +393,7 @@ class MesonBuilder(Builder):
                  and not self.buildEnv.platform_info.static)
            ):
             raise SkipCommand()
-        command = "{} --verbose".format(self.buildEnv.mesontest_command)
+        command = "{} --verbose {}".format(self.buildEnv.mesontest_command, self.test_option)
         self.buildEnv.run_command(command, self.build_path, context)
 
     def _install(self, context):
