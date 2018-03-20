@@ -3,6 +3,7 @@ import os
 import shutil
 
 from utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild
+from dependency_versions import main_project_versions, base_deps_versions
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -20,13 +21,16 @@ class Dependency(metaclass=_MetaDependency):
     all_deps = {}
     dependencies = []
     force_native_build = False
-    version = None
 
     def __init__(self, buildEnv):
         self.buildEnv = buildEnv
         self.source = self.Source(self)
         self.builder = self.Builder(self)
         self.skip = False
+
+    @property
+    def version(self):
+        return base_deps_versions.get(self.name, None)
 
     @property
     def full_name(self):
@@ -94,6 +98,11 @@ class Source:
         return self.target.command(*args, **kwargs)
 
 
+class NoopSource(Source):
+    def prepare(self):
+        pass
+
+
 class ReleaseDownload(Source):
     archive_top_dir = None
 
@@ -124,7 +133,10 @@ class ReleaseDownload(Source):
 
 class GitClone(Source):
     base_git_ref = "master"
-    release_git_ref = "master"
+
+    @property
+    def release_git_ref(self):
+        return main_project_versions.get(self.name, "master")
 
     @property
     def source_dir(self):
@@ -236,6 +248,14 @@ class Builder:
         self.command('make_dist', self._make_dist)
 
 
+class NoopBuilder(Builder):
+    def build(self):
+        pass
+
+    def make_dist(self):
+        pass
+
+
 class MakeBuilder(Builder):
     configure_option = ""
     dynamic_configure_option = "--enable-shared --disable-static"
@@ -331,6 +351,7 @@ class CMakeBuilder(MakeBuilder):
 
 class MesonBuilder(Builder):
     configure_option = ""
+    test_option = ""
 
     @property
     def library_type(self):
@@ -372,7 +393,7 @@ class MesonBuilder(Builder):
                  and not self.buildEnv.platform_info.static)
            ):
             raise SkipCommand()
-        command = "{} --verbose".format(self.buildEnv.mesontest_command)
+        command = "{} --verbose {}".format(self.buildEnv.mesontest_command, self.test_option)
         self.buildEnv.run_command(command, self.build_path, context)
 
     def _install(self, context):

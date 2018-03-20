@@ -17,11 +17,13 @@ before_cache:
 cache:
   ccache: true
   directories:
+    - $HOME/.cache/pip
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
 install: travis/install_extra_deps.sh
-script: travis_wait 30 travis/compile_all.py
+script: travis/compile_all.py
+after_failure: travis/upload_all_log.sh
 deploy:
   - provider: script
     skip_cleanup: true
@@ -74,3 +76,16 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-5
+      - cmake
+      - python3-pip
+      - zlib1g-dev
+      - libjpeg-dev
+      - libmagic-dev
+      - ctpp2-utils
+      - libctpp2-dev
+      - libmicrohttpd-dev
+      - g++-mingw-w64-i686
+      - gcc-mingw-w64-i686
+      - gcc-mingw-w64-base
+      - mingw-w64-tools
+      - default-jdk

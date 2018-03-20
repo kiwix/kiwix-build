@@ -6,10 +6,12 @@ from dependency_utils import (
     ReleaseDownload,
     GitClone,
     SvnClone,
+    NoopSource,
     MakeBuilder,
     CMakeBuilder,
     MesonBuilder,
     GradleBuilder,
+    NoopBuilder,
     Builder as BaseBuilder)
 
 from utils import Remotefile, pj, SkipCommand, copy_tree, add_execution_right
@@ -31,7 +33,6 @@ from utils import Remotefile, pj, SkipCommand, copy_tree, add_execution_right
 
 class zlib(Dependency):
     name = 'zlib'
-    version = '1.2.8'
 
     class Source(ReleaseDownload):
         archive = Remotefile('zlib-1.2.8.tar.gz',
@@ -78,7 +79,6 @@ class zlib(Dependency):
 
 class lzma(Dependency):
     name = 'lzma'
-    version = '5.0.4'
 
     class Source(ReleaseDownload):
         archive = Remotefile('xz-5.0.4.tar.bz2',
@@ -91,7 +91,6 @@ class lzma(Dependency):
 
 class UUID(Dependency):
     name = 'uuid'
-    version = "1.43.4"
 
     class Source(ReleaseDownload):
         archive = Remotefile('e2fsprogs-libs-1.43.4.tar.gz',
@@ -110,7 +109,6 @@ class UUID(Dependency):
 
 class Xapian(Dependency):
     name = "xapian-core"
-    version = "1.4.5"
 
     class Source(ReleaseDownload):
         archive = Remotefile('xapian-core-1.4.5.tar.xz',
@@ -132,7 +130,6 @@ class Xapian(Dependency):
 
 class CTPP2(Dependency):
     name = "ctpp2"
-    version = "2.8.3"
 
     class Source(ReleaseDownload):
         name = "ctpp2"
@@ -175,7 +172,6 @@ class CTPP2C(CTPP2):
 
 class Pugixml(Dependency):
     name = "pugixml"
-    version = "1.2"
 
     class Source(ReleaseDownload):
         archive = Remotefile('pugixml-1.2.tar.gz',
@@ -187,7 +183,6 @@ class Pugixml(Dependency):
 
 class MicroHttpd(Dependency):
     name = "libmicrohttpd"
-    version = "0.9.46"
 
     class Source(ReleaseDownload):
         archive = Remotefile('libmicrohttpd-0.9.46.tar.gz',
@@ -200,7 +195,6 @@ class MicroHttpd(Dependency):
 
 class Gumbo(Dependency):
     name = "gumbo"
-    version = "0.10.1"
 
     class Source(ReleaseDownload):
         archive = Remotefile('gumbo-0.10.1.tar.gz',
@@ -217,7 +211,6 @@ class Gumbo(Dependency):
 
 class Icu(Dependency):
     name = "icu4c"
-    version = "58.2"
 
     class Source(SvnClone):
         name = "icu4c"
@@ -279,9 +272,9 @@ class Libzim(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/openzim/libzim.git"
         git_dir = "libzim"
-        release_git_ref = "3.0.0"
 
-    Builder = MesonBuilder
+    class Builder(MesonBuilder):
+        test_option = "-t 8"
 
 
 class ZimTools(Dependency):
@@ -291,7 +284,6 @@ class ZimTools(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/openzim/zim-tools.git"
         git_dir = "zim-tools"
-        release_git_ref = "0.0.1"
 
     class Builder(MesonBuilder):
         @property
@@ -343,7 +335,6 @@ class Kiwixlib(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-lib.git"
         git_dir = "kiwix-lib"
-        release_git_ref = "1.0.2"
 
     class Builder(MesonBuilder):
         @property
@@ -367,7 +358,6 @@ class KiwixTools(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-tools.git"
         git_dir = "kiwix-tools"
-        release_git_ref = "0.3.0"
 
     class Builder(MesonBuilder):
         @property
@@ -379,7 +369,6 @@ class KiwixTools(Dependency):
 
 class Gradle(Dependency):
     name = "Gradle"
-    version = "3.4"
 
     class Source(ReleaseDownload):
         archive = Remotefile('gradle-4.1-bin.zip',
@@ -398,6 +387,29 @@ class Gradle(Dependency):
             copy_tree(
                 pj(self.source_path, "lib"),
                 pj(self.buildEnv.install_dir, "lib"))
+
+
+class AllBaseDependencies(Dependency):
+    name = "alldependencies"
+
+    @property
+    def dependencies(self):
+        base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd']
+        if self.buildEnv.platform_info.build != 'native':
+            base_deps += ["icu4c_cross-compile"]
+        else:
+            base_deps += ["icu4c"]
+        if ( self.buildEnv.platform_info.build != 'android'
+           and self.buildEnv.distname != 'Darwin'):
+            base_deps += ['ctpp2c', 'ctpp2']
+        if self.buildEnv.platform_info.build == 'android':
+            base_deps += ['Gradle']
+
+        return base_deps
+
+
+    Source = NoopSource
+    Builder = NoopBuilder
 
 
 class KiwixAndroid(Dependency):
