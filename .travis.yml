@@ -23,6 +23,7 @@ cache:
     - $HOME/.android/build-cache
 install: travis/install_extra_deps.sh
 script: travis/compile_all.py
+after_failure: travis/upload_all_log.sh
 deploy:
   - provider: script
     skip_cleanup: true
