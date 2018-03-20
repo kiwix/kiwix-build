@@ -47,17 +47,25 @@ then
   DIST_KIWIX_ARCHIVES=$(find $DIST_KIWIX_ARCHIVES_DIR -type f)
   if [[ "x$DIST_KIWIX_ARCHIVES" != "x" ]]
   then
-    scp -vrp -i ${SSH_KEY} \
-      ${DIST_KIWIX_ARCHIVES} \
-      nightlybot@download.kiwix.org:/var/www/download.kiwix.org/release
+    for archive in $DIST_KIWIX_ARCHIVES
+    do
+      subdir=$(basename $(dirname $archive))
+      scp -vrp -i ${SSH_KEY} \
+        ${archive} \
+        nightlybot@download.kiwix.org:/var/www/download.kiwix.org/release/${subdir}
+    done
   fi
 
   DIST_ZIM_ARCHIVES=$(find $DIST_ZIM_ARCHIVES_DIR -type f)
   if [[ "x$DIST_ZIM_ARCHIVES" != "x" ]]
   then
-    scp -vrp -i ${SSH_KEY} \
-      ${DIST_ZIM_ARCHIVES} \
-      nightlybot@download.openzim.org:/var/www/download.openzim.org/release
+    for archive in $DIST_ZIM_ARCHIVES
+    do
+      subdir=$(basename $(dirname $archive))
+      scp -vrp -i ${SSH_KEY} \
+        ${archive} \
+        nightlybot@download.openzim.org:/var/www/download.openzim.org/release/${subdir}
+    done
   fi
 fi
 
