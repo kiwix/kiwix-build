@@ -111,6 +111,7 @@ class ReleaseDownload(Source):
         return pj(self.buildEnv.source_dir, self.source_dir)
 
     def _download(self, context):
+        context.try_skip(self.buildEnv.archive_dir, self.name)
         self.buildEnv.download(self.archive)
 
     def _extract(self, context):
