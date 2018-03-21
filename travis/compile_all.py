@@ -226,16 +226,22 @@ if make_release and PLATFORM == 'native_dyn':
         else:
             out_dir = DIST_ZIM_ARCHIVES_DIR
 
-        if target in ('kiwix-lib', 'kiwix-tools', 'libzim', 'zim-tools'):
-            shutil.copy(str(BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(
-                            target,
-                            dependency_versions.main_project_versions[target])),
-                        str(out_dir))
-        if target in ('zimwriterfs',):
-            shutil.copy(str(BASE_DIR/target/'{}-{}.tar.gz'.format(
-                            target,
-                            dependency_versions.main_project_versions[target])),
-                        str(out_dir))
+        if target in ('kiwix-lib', 'kiwix-tools', 'libzim', 'zim-tools', 'zimwriterfs'):
+            try:
+                (out_dir/target).mkdir(parents=True)
+            except FileExistsError:
+                pass
+
+            if target == 'zimwriterfs':
+                in_file = BASE_DIR/target/'{}-{}.tar.gz'.format(
+                    target,
+                    dependency_versions.main_project_versions[target])
+            else:
+                in_file = BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(
+                    target,
+                    dependency_versions.main_project_versions[target])
+
+            shutil.copy(str(in_file), str(out_dir/target))
 elif PLATFORM == 'native_static':
     for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
         make_archive(target, 'linux64')
