@@ -5,7 +5,7 @@ import shutil
 from os import environ
 from pathlib import Path
 from datetime import date
-import tarfile
+import tarfile, zipfile
 import subprocess
 import re
 from urllib.request import urlretrieve
@@ -91,9 +91,15 @@ def make_archive(project, platform):
     except FileExistsError:
         pass
     base_bin_dir = BASE_DIR/'INSTALL'/'bin'
-    with tarfile.open(str(archive), 'w:gz') as arch:
+    if platform == "win32":
+        open_archive = lambda a : zipfile.ZipFile(str(a), 'w', compression=zipfile.ZIP_LZMA)
+        archive_add = lambda a, f : a.write(str(base_bin_dir/f), arcname=str(f))
+    else:
+        open_archive = lambda a : tarfile.open(str(a), 'w:gz')
+        archive_add = lambda a, f : a.add(str(base_bin_dir/f), arcname="{}/{}".format(archive_name, str(f)))
+    with open_archive(archive) as arch:
         for f in file_to_archives:
-            arch.add(str(base_bin_dir/f), arcname=str(f))
+            archive_add(arch, f)
 
 
 def make_deps_archive(target, full=False):
