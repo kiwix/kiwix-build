@@ -73,8 +73,8 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
 
 def make_archive(project, platform):
     file_to_archives = BINARIES[project]
-    if platform == "win32":
-        file_to_archives = ['{}.exe'.format(f) for f in file_to_archives]
+    base_bin_dir = BASE_DIR/'INSTALL'/'bin'
+
     if make_release:
         postfix = dependency_versions.main_project_versions[project]
         if project in ('kiwix-lib', 'kiwix-tools'):
@@ -84,19 +84,26 @@ def make_archive(project, platform):
     else:
         postfix = _date
         archive_dir = NIGHTLY_ARCHIVES_DIR
-    archive_name = "{}_{}-{}".format(project, platform, postfix)
-    archive = archive_dir/'{}.tar.gz'.format(archive_name)
+
     try:
         archive_dir.mkdir(parents=True)
     except FileExistsError:
         pass
-    base_bin_dir = BASE_DIR/'INSTALL'/'bin'
+
+    archive_name = "{}_{}-{}".format(project, platform, postfix)
+
     if platform == "win32":
+        file_to_archives = ['{}.exe'.format(f) for f in file_to_archives]
         open_archive = lambda a : zipfile.ZipFile(str(a), 'w', compression=zipfile.ZIP_LZMA)
         archive_add = lambda a, f : a.write(str(base_bin_dir/f), arcname=str(f))
+        archive_ext = ".zip"
     else:
         open_archive = lambda a : tarfile.open(str(a), 'w:gz')
         archive_add = lambda a, f : a.add(str(base_bin_dir/f), arcname="{}/{}".format(archive_name, str(f)))
+        archive_ext = ".tar.gz"
+
+
+    archive = archive_dir/'{}{}'.format(archive_name, archive_ext)
     with open_archive(archive) as arch:
         for f in file_to_archives:
             archive_add(arch, f)
