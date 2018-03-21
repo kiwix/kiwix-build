@@ -111,7 +111,7 @@ def make_deps_archive(target, full=False):
 
     relative_path = BASE_DIR
     if full:
-        files_to_archive += [ARCHIVE_DIR]
+        files_to_archive += ARCHIVE_DIR.glob(".*_ok")
         files_to_archive += BASE_DIR.glob('*/.*_ok')
         files_to_archive += SOURCE_DIR.glob('*/.*_ok')
         files_to_archive += [SOURCE_DIR/'pugixml-{}'.format(

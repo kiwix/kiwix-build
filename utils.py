@@ -137,8 +137,10 @@ class Context:
         self.force_native_build = force_native_build
         self.autoskip_file = None
 
-    def try_skip(self, path):
-        self.autoskip_file = pj(path, ".{}_ok".format(self.command_name))
+    def try_skip(self, path, extra_name=""):
+        if extra_name:
+            extra_name = "_{}".format(extra_name)
+        self.autoskip_file = pj(path, ".{}{}_ok".format(self.command_name, extra_name))
         if os.path.exists(self.autoskip_file):
             raise SkipCommand()
 
