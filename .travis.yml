@@ -89,3 +89,4 @@ addons:
       - gcc-mingw-w64-base
       - mingw-w64-tools
       - default-jdk
+      - autopoint

@@ -193,6 +193,26 @@ class MicroHttpd(Dependency):
         configure_option = "--disable-https --without-libgcrypt --without-libcurl"
 
 
+class Aria2(Dependency):
+    name = "libaria2"
+    dependencies = ['zlib']
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('libaria2-1.33.1.tar.gz',
+                             '0616f11ef3ddd0c74be74ea2536be62ce168b99e3d6a35dea9d166b9cab9fbd1',
+                             'https://github.com/aria2/aria2/archive/release-1.33.1.tar.gz')
+
+        patches = ["libaria2_android.patch"]
+
+        def _post_prepare_script(self, context):
+            context.try_skip(self.extract_path)
+            command = "autoreconf -i"
+            self.buildEnv.run_command(command, self.extract_path, context)
+
+    class Builder(MakeBuilder):
+        configure_option = "--enable-libaria2 --disable-ssl --disable-bittorent --disable-metalink"
+
+
 class Gumbo(Dependency):
     name = "gumbo"
 
@@ -323,7 +343,7 @@ class Kiwixlib(Dependency):
 
     @property
     def dependencies(self):
-        base_dependencies = ["pugixml", "libzim", "zlib", "lzma"]
+        base_dependencies = ["pugixml", "libzim", "zlib", "lzma", "libaria2"]
         if ( self.buildEnv.platform_info.build != 'android'
           and self.buildEnv.distname != 'Darwin'):
             base_dependencies += ['ctpp2c', 'ctpp2']
@@ -394,7 +414,7 @@ class AllBaseDependencies(Dependency):
 
     @property
     def dependencies(self):
-        base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd']
+        base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd', 'libaria2']
         if self.buildEnv.platform_info.build != 'native':
             base_deps += ["icu4c_cross-compile"]
         else:
