@@ -1,0 +1,4 @@
+include kiwixbuild/templates/cmake_cross_file.txt
+include kiwixbuild/templates/meson_cross_file.txt
+include kiwixbuild/templates/cmake_android_cross_file.txt
+recursise-include kiwixbuild/patches *.patch
