@@ -81,8 +81,9 @@ class lzma(Dependency):
     name = 'lzma'
 
     class Source(ReleaseDownload):
-        archive = Remotefile('xz-5.0.4.tar.bz2',
-                             '5cd9b060d3a1ad396b3be52c9b9311046a1c369e6062aea752658c435629ce92')
+        archive = Remotefile('xz-5.2.3.tar.bz2',
+                             'fd9ca16de1052aac899ad3495ad20dfa906c27b4a5070102a2ec35ca3a4740c1',
+                             'https://tukaani.org/xz/xz-5.2.3.tar.bz2')
 
     class Builder(MakeBuilder):
         @property

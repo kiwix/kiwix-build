@@ -15,7 +15,7 @@ base_deps_meta_version = '1'
 
 base_deps_versions = {
   'zlib' : '1.2.8',
-  'lzma' : '5.0.4',
+  'lzma' : '5.2.3',
   'uuid' : '1.43.4',
   'xapian-core' : '1.4.5',
   'ctpp2' : '2.8.3',
