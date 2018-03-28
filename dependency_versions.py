@@ -10,12 +10,12 @@ main_project_versions = {
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = '0'
+base_deps_meta_version = '1'
 
 
 base_deps_versions = {
   'zlib' : '1.2.8',
-  'lzma' : '5.0.4',
+  'lzma' : '5.2.3',
   'uuid' : '1.43.4',
   'xapian-core' : '1.4.5',
   'ctpp2' : '2.8.3',
@@ -24,4 +24,5 @@ base_deps_versions = {
   'gumbo' : '0.10.1',
   'icu4c' : '58.2',
   'Gradle' : '3.4',
+  'libaria2' : '1.33.1'
 }
