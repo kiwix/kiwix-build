@@ -6,6 +6,7 @@ import shutil
 import os, stat, sys
 import urllib
 import ssl
+import subprocess
 from collections import namedtuple, defaultdict
 
 pj = os.path.join
@@ -13,6 +14,12 @@ pj = os.path.join
 g_print_progress = True
 
 REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
+
+
+def which(name):
+    command = "which {}".format(name)
+    output = subprocess.check_output(command, shell=True)
+    return output[:-1].decode()
 
 
 def setup_print_progress(print_progress):
@@ -62,6 +69,7 @@ def print_progress(progress):
 def add_execution_right(file_path):
     current_permissions = stat.S_IMODE(os.lstat(file_path).st_mode)
     os.chmod(file_path, current_permissions | stat.S_IXUSR)
+
 
 def copy_tree(src, dst, post_copy_function=None):
     os.makedirs(dst, exist_ok=True)
@@ -152,6 +160,7 @@ class Context:
 
 def extract_archive(archive_path, dest_dir, topdir=None, name=None):
     is_zip_archive = archive_path.endswith('.zip')
+    archive = None
     try:
         if is_zip_archive:
             archive = zipfile.ZipFile(archive_path)

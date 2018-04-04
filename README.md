@@ -20,58 +20,62 @@ Before anything else you need to install Python3 related tools. On Debian
 based systems:
 
 ```
-sudo apt-get install python3-pip virtualenv
+$ sudo apt-get install python3-pip virtualenv
 ```
 
-Then install Meson:
+Create a virtual environment to install python module in it instead
+of modifying the system.
 ```
-virtualenv -p python3 ./ # Create virtualenv
-source bin/activate      # Activate the virtualenv
-pip3 install meson       # Install Meson
-hash -r                  # Refresh bash paths
+$ virtualenv -p python3 ./ # Create virtualenv
+$ source bin/activate      # Activate the virtualenv
 ```
 
-Finally we need the Ninja tool (available in the $PATH). Here is a
-solution to download, build and install it locally:
+Then, download and install kiwix-build and its dependencies:
+```
+$ git clone git://github.com/kiwix/kiwix-build.git
+$ cd kiwix-build
+$ pip install .
+$ hash -r                  # Refresh bash paths
+```
+
+If your distribution doesn't provide ninja version > 1.6 you can get it
+this way :
 
 ```
-git clone git://github.com/ninja-build/ninja.git
-cd ninja
-git checkout release
-./configure.py --bootstrap
-mkdir ../bin
-cp ninja ../bin
-cd ..
+$ wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
+$ unzip ninja-linux.zip ninja -d $HOME/bin
 ```
 
 # Compilation
 
-The compilation is handled by `kiwix-build.py`. It will compile
+The compilation is handled by the `kiwix-build` command. It will compile
 everything. If you are using a supported platform (Redhat or Debian
 based) it will install missing packages using `sudo`. You can get
-`kiwix-build.py` usage like this:
+`kiwix-build` usage like this:
 
 ```
-./kiwix-build.py -h
+$ kiwix-build --help
 ```
 
 ## Target
 
-By default, `kiwix-build.py` will build `kiwix-tools`. If you want to
-compile another target only (let's said kiwixlib), you can specify it:
+You may want to compile a specific target so you will have to specify it on the
+command line :
 
 ```
-./kiwix-build Kiwixlib
+$ kiwix-build kiwix-lib # will build kiwix-build and its dependencies
+$ kiwix-build zim-tools # will build zim-tools and its dependencies
 ```
+
+By default, `kiwix-build` will build `kiwix-tools` .
 
 ## Target platform
 
-By default, `kiwix-build.py` will build everything for the current (native)
-platform using dynamic linkage (hence the `native_dyn` of the
-BUILD_native_dyn directory).
+By default, `kiwix-build` will build everything for the current (native)
+platform using dynamic linkage (`native_dyn`).
 
 But you can select another target platform using the option
-`target-platform`. For now, there is ten different supported
+`--target-platform`. For now, there is ten different supported
 platforms :
 
 - native_dyn
@@ -85,10 +89,15 @@ platforms :
 - android_x86
 - android_x86_64
 
-So, if you want to compile for win32 using static linkage:
+So, if you want to compile `kiwix-tools` for win32 using static linkage:
 
 ```
-./kiwix-build.py --target-platform win32_dyn
+$ kiwix-build --target-platform win32_dyn
+```
+
+Or, android apk for android_arm :
+```
+$ kiwix-build --target-platform android_arm kiwix-android
 ```
 
 # Outputs
@@ -96,9 +105,9 @@ So, if you want to compile for win32 using static linkage:
 Kiwix-build.py will create several directories:
 - `ARCHIVES`: All the downloaded archives go there.
 - `SOURCES`: All the sources (extracted from archives and patched) go there.
-- `BUILD_native_dyn`: All the build files go there.
-- `BUILD_native_dyn/INSTALL`: The installed files go there.
-- `BUILD_native_dyn/LOGS`: The logs files of the build.
+- `BUILD_<target_platform>`: All the build files go there.
+- `BUILD_<target_platform>/INSTALL`: The installed files go there.
+- `BUILD_<target_platform>/LOGS`: The logs files of the build.
 
 If you want to install all those directories elsewhere, you can pass the
-`--working-dir` option to `kiwix-build.py`:
+`--working-dir` option to `kiwix-build`:

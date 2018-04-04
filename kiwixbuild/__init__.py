@@ -8,9 +8,9 @@ import subprocess
 import platform
 from collections import OrderedDict
 
-from dependencies import Dependency
-from dependency_utils import ReleaseDownload, Builder, GitClone
-from utils import (
+from .toolchains import Toolchain
+from .dependencies import Dependency
+from .utils import (
     pj,
     remove_duplicates,
     add_execution_right,
@@ -47,7 +47,7 @@ PACKAGE_NAME_MAPPERS = {
         'gumbo' : ['gumbo-parser-devel'],
     },
     'fedora_native_static': {
-        'COMMON': _fedora_common + ['glibc-static', 'libstdc++-static'],
+        'COMMON': _fedora_common,
         'zlib': ['zlib-devel', 'zlib-static'],
         'lzma': ['xz-devel', 'xz-static']
         # Either there is no packages, or no static or too old
@@ -116,12 +116,6 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],
     },
 }
-
-
-def which(name):
-    command = "which {}".format(name)
-    output = subprocess.check_output(command, shell=True)
-    return output[:-1].decode()
 
 
 class TargetInfo:
@@ -536,355 +530,6 @@ class BuildEnv:
         with open(autoskip_file, 'w'):
             pass
 
-class _MetaToolchain(type):
-    def __new__(cls, name, bases, dct):
-        _class = type.__new__(cls, name, bases, dct)
-        if name != 'Toolchain':
-            Toolchain.all_toolchains[name] = _class
-        return _class
-
-
-class Toolchain(metaclass=_MetaToolchain):
-    all_toolchains = {}
-    configure_option = ""
-    cmake_option = ""
-    exec_wrapper_def = ""
-    Builder = None
-    Source = None
-
-    def __init__(self, buildEnv):
-        self.buildEnv = buildEnv
-        self.source = self.Source(self) if self.Source else None
-        self.builder = self.Builder(self) if self.Builder else None
-
-    @property
-    def full_name(self):
-        return "{name}-{version}".format(
-            name = self.name,
-            version = self.version)
-
-    @property
-    def source_path(self):
-        return pj(self.buildEnv.source_dir, self.source.source_dir)
-
-    @property
-    def _log_dir(self):
-        return self.buildEnv.log_dir
-
-    def set_env(self, env):
-        pass
-
-    def set_compiler(self, env):
-        pass
-
-    def command(self, name, function, *args):
-        print("  {} {} : ".format(name, self.name), end="", flush=True)
-        log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
-        context = Context(name, log, True)
-        try:
-            ret = function(*args, context=context)
-            context._finalise()
-            print("OK")
-            return ret
-        except SkipCommand:
-            print("SKIP")
-        except subprocess.CalledProcessError:
-            print("ERROR")
-            try:
-                with open(log, 'r') as f:
-                    print(f.read())
-            except:
-                pass
-            raise StopBuild()
-        except:
-            print("ERROR")
-            raise
-
-
-class mingw32_toolchain(Toolchain):
-    name = 'mingw32'
-    arch_full = 'i686-w64-mingw32'
-
-    @property
-    def root_path(self):
-        return self.buildEnv.cross_config['root_path']
-
-    @property
-    def binaries(self):
-        return {k:which('{}-{}'.format(self.arch_full, v))
-                for k, v in (('CC', 'gcc'),
-                             ('CXX', 'g++'),
-                             ('AR', 'ar'),
-                             ('STRIP', 'strip'),
-                             ('WINDRES', 'windres'),
-                             ('RANLIB', 'ranlib'))
-               }
-
-    @property
-    def exec_wrapper_def(self):
-        try:
-            which('wine')
-        except subprocess.CalledProcessError:
-            return ""
-        else:
-            return "exec_wrapper = 'wine'"
-
-
-    @property
-    def configure_option(self):
-        return '--host={}'.format(self.arch_full)
-
-    def get_bin_dir(self):
-        return [pj(self.root_path, 'bin')]
-
-    def set_env(self, env):
-        env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['LIBS'] = " ".join(self.buildEnv.cross_config['extra_libs']) + " " +env['LIBS']
-
-    def set_compiler(self, env):
-        for k, v in self.binaries.items():
-            env[k] = v
-
-
-class android_ndk(Toolchain):
-    name = 'android-ndk'
-    version = 'r13b'
-    gccver = '4.9.x'
-
-    @property
-    def api(self):
-        return '21' if self.arch in ('arm64', 'mips64', 'x86_64') else '14'
-
-    @property
-    def platform(self):
-        return 'android-'+self.api
-
-    @property
-    def arch(self):
-        return self.buildEnv.platform_info.arch
-
-    @property
-    def arch_full(self):
-        return self.buildEnv.platform_info.arch_full
-
-    @property
-    def toolchain(self):
-        return self.arch_full+"-4.9"
-
-    @property
-    def root_path(self):
-        return pj(self.builder.install_path, 'sysroot')
-
-    @property
-    def binaries(self):
-        binaries = ((k,'{}-{}'.format(self.arch_full, v))
-                for k, v in (('CC', 'gcc'),
-                             ('CXX', 'g++'),
-                             ('AR', 'ar'),
-                             ('STRIP', 'strip'),
-                             ('WINDRES', 'windres'),
-                             ('RANLIB', 'ranlib'),
-                             ('LD', 'ld'))
-               )
-        return {k:pj(self.builder.install_path, 'bin', v)
-                for k,v in binaries}
-
-    @property
-    def configure_option(self):
-        return '--host={}'.format(self.arch_full)
-
-    @property
-    def full_name(self):
-        return "{name}-{version}-{arch}-{api}".format(
-            name = self.name,
-            version = self.version,
-            arch = self.arch,
-            api = self.api)
-
-    class Source(ReleaseDownload):
-        archive = Remotefile('android-ndk-r13b-linux-x86_64.zip',
-                             '3524d7f8fca6dc0d8e7073a7ab7f76888780a22841a6641927123146c3ffd29c',
-                             'https://dl.google.com/android/repository/android-ndk-r13b-linux-x86_64.zip')
-
-        @property
-        def source_dir(self):
-            return "{}-{}".format(
-                self.target.name,
-                self.target.version)
-
-
-    class Builder(Builder):
-
-        @property
-        def install_path(self):
-            return self.build_path
-
-        def _build_platform(self, context):
-            context.try_skip(self.build_path)
-            script = pj(self.source_path, 'build/tools/make_standalone_toolchain.py')
-            add_execution_right(script)
-            command = '{script} --arch={arch} --api={api} --install-dir={install_dir} --force'
-            command = command.format(
-                script=script,
-                arch=self.target.arch,
-                api=self.target.api,
-                install_dir=self.install_path
-            )
-            self.buildEnv.run_command(command, self.build_path, context)
-
-        def _fix_permission_right(self, context):
-            context.try_skip(self.build_path)
-            bin_dirs = [pj(self.install_path, 'bin'),
-                        pj(self.install_path, self.target.arch_full, 'bin'),
-                        pj(self.install_path, 'libexec', 'gcc', self.target.arch_full, self.target.gccver)
-                       ]
-            for root, dirs, files in os.walk(self.install_path):
-                if not root in bin_dirs:
-                    continue
-
-                for file_ in files:
-                    file_path = pj(root, file_)
-                    if os.path.islink(file_path):
-                        continue
-                    add_execution_right(file_path)
-
-        def build(self):
-            self.command('build_platform', self._build_platform)
-            self.command('fix_permission_right', self._fix_permission_right)
-
-    def get_bin_dir(self):
-        return [pj(self.builder.install_path, 'bin')]
-
-    def set_env(self, env):
-        env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(self.root_path) + env['CFLAGS']
-        env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(self.root_path) + env['CXXFLAGS']
-        env['LDFLAGS'] = '--sysroot={} '.format(self.root_path) + env['LDFLAGS']
-        #env['CFLAGS'] = ' -fPIC -D_FILE_OFFSET_BITS=64 -O3 '+env['CFLAGS']
-        #env['CXXFLAGS'] = (' -D__OPTIMIZE__ -fno-strict-aliasing '
-        #                   ' -DU_HAVE_NL_LANGINFO_CODESET=0 '
-        #                   '-DU_STATIC_IMPLEMENTATION -O3 '
-        #                   '-DU_HAVE_STD_STRING -DU_TIMEZONE=0 ')+env['CXXFLAGS']
-        env['NDK_DEBUG'] = '0'
-
-    def set_compiler(self, env):
-        env['CC'] = self.binaries['CC']
-        env['CXX'] = self.binaries['CXX']
-
-
-class android_sdk(Toolchain):
-    name = 'android-sdk'
-    version = 'r25.2.3'
-
-    class Source(ReleaseDownload):
-        archive = Remotefile('tools_r25.2.3-linux.zip',
-                             '1b35bcb94e9a686dff6460c8bca903aa0281c6696001067f34ec00093145b560',
-                             'https://dl.google.com/android/repository/tools_r25.2.3-linux.zip')
-
-    class Builder(Builder):
-
-        @property
-        def install_path(self):
-            return pj(self.buildEnv.toolchain_dir, self.target.full_name)
-
-        def _build_platform(self, context):
-            context.try_skip(self.install_path)
-            tools_dir = pj(self.install_path, 'tools')
-            shutil.copytree(self.source_path, tools_dir)
-            script = pj(tools_dir, 'android')
-            command = '{script} --verbose update sdk -a --no-ui --filter {packages}'
-            command = command.format(
-                script=script,
-                packages = ','.join(str(i) for i in [1,2,8,34,162])
-            )
-            # packages correspond to :
-            # - 1 : Android SDK Tools, revision 25.2.5
-            # - 2 : Android SDK Platform-tools, revision 25.0.3
-            # - 8 : Android SDK Build-tools, revision 24.0.1
-            # - 34 : SDK Platform Android 7.0, API 24, revision 2
-            # - 162 : Android Support Repository, revision 44
-            self.buildEnv.run_command(command, self.install_path, context, input="y\n")
-
-        def _fix_licenses(self, context):
-            context.try_skip(self.install_path)
-            os.makedirs(pj(self.install_path, 'licenses'), exist_ok=True)
-            with open(pj(self.install_path, 'licenses', 'android-sdk-license'), 'w') as f:
-                f.write("\n8933bad161af4178b1185d1a37fbf41ea5269c55\nd56f5187479451eabf01fb78af6dfcb131a6481e")
-
-        def build(self):
-            self.command('build_platform', self._build_platform)
-            self.command('fix_licenses', self._fix_licenses)
-
-    def get_bin_dir(self):
-        return []
-
-    def set_env(self, env):
-        env['ANDROID_HOME'] = self.builder.install_path
-
-
-class armhf_toolchain(Toolchain):
-    name = 'armhf'
-    arch_full = 'arm-linux-gnueabihf'
-
-    class Source(GitClone):
-        git_remote = "https://github.com/raspberrypi/tools"
-        git_dir = "raspberrypi-tools"
-
-    @property
-    def root_path(self):
-        return pj(self.source_path, 'arm-bcm2708', 'gcc-linaro-arm-linux-gnueabihf-raspbian-x64')
-
-    @property
-    def binaries(self):
-        binaries = ((k,'{}-{}'.format(self.arch_full, v))
-                for k, v in (('CC', 'gcc'),
-                             ('CXX', 'g++'),
-                             ('AR', 'ar'),
-                             ('STRIP', 'strip'),
-                             ('WINDRES', 'windres'),
-                             ('RANLIB', 'ranlib'),
-                             ('LD', 'ld'))
-               )
-        return {k:pj(self.root_path, 'bin', v)
-                for k,v in binaries}
-
-    @property
-    def exec_wrapper_def(self):
-        try:
-            which('qemu-arm')
-        except subprocess.CalledProcessError:
-            return ""
-        else:
-            return "exec_wrapper = 'qemu-arm'"
-
-    @property
-    def configure_option(self):
-        return '--host={}'.format(self.arch_full)
-
-    def get_bin_dir(self):
-        return [pj(self.root_path, 'bin')]
-
-    def set_env(self, env):
-        env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
-        env['CXXFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
-        env['LIBS'] = " ".join(self.buildEnv.cross_config['extra_libs']) + " " +env['LIBS']
-        env['QEMU_LD_PREFIX'] = pj(self.root_path, "arm-linux-gnueabihf", "libc")
-        env['QEMU_SET_ENV'] = "LD_LIBRARY_PATH={}".format(
-            ':'.join([
-                pj(self.root_path, "arm-linux-gnueabihf", "lib"),
-                pj(self.buildEnv.install_dir, 'lib'),
-                pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
-        ]))
-
-    def set_compiler(self, env):
-        env['CC'] = self.binaries['CC']
-        env['CXX'] = self.binaries['CXX']
-
-
-class iOS_sdk(Toolchain):
-    pass
-
 
 class Builder:
     def __init__(self, options):
@@ -897,7 +542,7 @@ class Builder:
         self.add_targets(targetDef, _targets)
         dependencies = self.order_dependencies(_targets, targetDef)
         dependencies = list(remove_duplicates(dependencies))
-
+        
         for dep in dependencies:
             if self.options.build_deps_only and dep == targetDef:
                 continue
@@ -1021,10 +666,10 @@ def parse_args():
             sys.exit(1)
     return options
 
-
-if __name__ == "__main__":
+def main():
     options = parse_args()
     options.working_dir = os.path.abspath(options.working_dir)
     setup_print_progress(options.show_progress)
     builder = Builder(options)
     builder.run()
+

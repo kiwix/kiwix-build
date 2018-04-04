@@ -1,7 +1,7 @@
 import shutil, os, json
 from urllib.parse import urlparse
 
-from dependency_utils import (
+from kiwixbuild.dependency_utils import (
     Dependency,
     ReleaseDownload,
     GitClone,
@@ -14,7 +14,7 @@ from dependency_utils import (
     NoopBuilder,
     Builder as BaseBuilder)
 
-from utils import Remotefile, pj, SkipCommand, copy_tree, add_execution_right
+from kiwixbuild.utils import Remotefile, pj, SkipCommand, copy_tree, add_execution_right
 
 # *************************************
 # Missing dependencies
@@ -22,7 +22,6 @@ from utils import Remotefile, pj, SkipCommand, copy_tree, add_execution_right
 # exist in your "distri" (linux/mac) ?
 # If not, we need to compile them here
 # *************************************
-# aria2
 # Argtable
 # MSVirtual
 # Android
@@ -415,7 +414,7 @@ class AllBaseDependencies(Dependency):
 
     @property
     def dependencies(self):
-        base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd', 'libaria2']
+        base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd']
         if self.buildEnv.platform_info.build != 'native':
             base_deps += ["icu4c_cross-compile"]
         else:
