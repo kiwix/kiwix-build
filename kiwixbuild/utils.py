@@ -101,22 +101,26 @@ def download_remote(what, where, check_certificate=True):
     batch_size = 1024 * 8
     extra_args = {'context':context} if sys.version_info >= (3, 4, 3) else {}
     progress_chars = "/-\|"
-    with urllib.request.urlopen(file_url, **extra_args) as resource, open(file_path, 'wb') as file:
-        tsize = resource.getheader('Content-Length', None)
-        if tsize is not None:
-            tsize = int(tsize)
-        current = 0
-        while True:
-            batch = resource.read(batch_size)
-            if not batch:
-                break
-            if tsize:
-                current += batch_size
-                print_progress("{:.2%}".format(current/tsize))
-            else:
-                print_progress(progress_chars[current])
-                current = (current+1)%4
-            file.write(batch)
+    try:
+        with urllib.request.urlopen(file_url, **extra_args) as resource, open(file_path, 'wb') as file:
+            tsize = resource.getheader('Content-Length', None)
+            if tsize is not None:
+                tsize = int(tsize)
+            current = 0
+            while True:
+                batch = resource.read(batch_size)
+                if not batch:
+                    break
+                if tsize:
+                    current += batch_size
+                    print_progress("{:.2%}".format(current/tsize))
+                else:
+                   print_progress(progress_chars[current])
+                   current = (current+1)%4
+                file.write(batch)
+    except urllib.error.HTTPError:
+        print("Cannot download url {}".format(file_url))
+        raise StopBuild()
 
     if not what.sha256:
         print('Sha256 for {} not set, do no verify download'.format(what.name))
