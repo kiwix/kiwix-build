@@ -11,8 +11,7 @@ import re
 from urllib.request import urlretrieve
 from urllib.error import URLError
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import dependency_versions
+from kiwixbuild import dependency_versions
 
 PLATFORM = environ['PLATFORM']
 
@@ -56,7 +55,7 @@ Generated at {date}
 
 
 def run_kiwix_build(target, platform, build_deps_only=False, make_release=False, make_dist=False):
-    command = [str(Path(environ['TRAVIS_BUILD_DIR'])/'kiwix-build.py')]
+    command = ['kiwix-build']
     command.append(target)
     command.append('--hide-progress')
     command.extend(['--target-platform', platform])
