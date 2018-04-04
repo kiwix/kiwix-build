@@ -543,10 +543,13 @@ class Builder:
         dependencies = self.order_dependencies(_targets, targetDef)
         dependencies = list(remove_duplicates(dependencies))
         
-        for dep in dependencies:
-            if self.options.build_deps_only and dep == targetDef:
-                continue
-            self.targets[dep] = _targets[dep]
+        if options.build_nodeps:
+            self.targets[targetDef] = _targets[targetDef]
+        else:
+            for dep in dependencies:
+                if self.options.build_deps_only and dep == targetDef:
+                    continue
+                self.targets[dep] = _targets[dep]
 
     def add_targets(self, targetName, targets):
         if targetName in targets:
@@ -633,6 +636,8 @@ def parse_args():
                         help="Skip the source download part")
     parser.add_argument('--build-deps-only', action='store_true',
                         help="Build only the dependencies of the specified targets.")
+    parser.add_argument('--build-nodeps', action='store_true',
+                        help="Build only the target, not its dependencies.")
     parser.add_argument('--make-dist', action='store_true',
                         help="Build distrubution (dist) source archive")
     parser.add_argument('--make-release', action='store_true',
