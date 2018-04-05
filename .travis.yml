@@ -46,6 +46,8 @@ env:
     - PLATFORM="win32_static"
     - PLATFORM="armhf_dyn"
     - PLATFORM="armhf_static"
+    - PLATFORM="i586_dyn"
+    - PLATFORM="i586_static"
     - PLATFORM="android_arm"
     - PLATFORM="android_arm64"
     - PLATFORM="android_mips"
