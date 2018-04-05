@@ -87,7 +87,7 @@ class lzma(Dependency):
     class Builder(MakeBuilder):
         @property
         def configure_option(self):
-            return "--disable-assembler"
+            return "--disable-assembler --disable-xz --disable-xzdec"
 
 class UUID(Dependency):
     name = 'uuid'
