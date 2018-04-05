@@ -52,6 +52,12 @@ PACKAGE_NAME_MAPPERS = {
         'lzma': ['xz-devel', 'xz-static']
         # Either there is no packages, or no static or too old
     },
+    'fedora_i586_dyn': {
+        'COMMON': _fedora_common + ['glibc-devel.i686', 'libstdc++-devel.i686'],
+    },
+    'fedora_i586_static': {
+        'COMMON': _fedora_common + ['glibc-devel.i686'],
+    },
     'fedora_win32_dyn': {
         'COMMON': _fedora_common + ['mingw32-gcc-c++', 'mingw32-bzip2', 'mingw32-win-iconv', 'mingw32-winpthreads', 'wine'],
         'zlib': ['mingw32-zlib'],
@@ -162,6 +168,19 @@ class TargetInfo:
                     'abi': ''
                 }
             }
+        elif self.build == 'i586':
+            return {
+                'extra_libs': ['-m32', '-march=i586'],
+                'extra_cflags': ['-m32', '-march=i586'],
+                'host_machine': {
+                    'system': 'linux',
+                    'lsystem': 'linux',
+                    'cpu_family': 'x86',
+                    'cpu': 'i586',
+                    'endian': 'little',
+                    'abi': ''
+                }
+            }
 
 class AndroidTargetInfo(TargetInfo):
     __arch_infos = {
@@ -208,15 +227,19 @@ class BuildEnv:
         'native_dyn': TargetInfo('native', False, [],
                                  hosts=['fedora', 'debian', 'Darwin']),
         'native_static': TargetInfo('native', True, [],
-                                 hosts=['fedora', 'debian']),
+                                    hosts=['fedora', 'debian']),
+        'i586_dyn': TargetInfo('i586', False, ['linux_i586_toolchain'],
+                               hosts=['fedora', 'debian']),
+        'i586_static': TargetInfo('i586', True, ['linux_i586_toolchain'],
+                                  hosts=['fedora', 'debian']),
         'win32_dyn': TargetInfo('win32', False, ['mingw32_toolchain'],
-                                 hosts=['fedora', 'debian']),
+                                hosts=['fedora', 'debian']),
         'win32_static': TargetInfo('win32', True, ['mingw32_toolchain'],
-                                 hosts=['fedora', 'debian']),
+                                   hosts=['fedora', 'debian']),
         'armhf_dyn': TargetInfo('armhf', False, ['armhf_toolchain'],
-                                 hosts=['fedora', 'debian']),
+                                hosts=['fedora', 'debian']),
         'armhf_static': TargetInfo('armhf', True, ['armhf_toolchain'],
-                                 hosts=['fedora', 'debian']),
+                                   hosts=['fedora', 'debian']),
         'android_arm': AndroidTargetInfo('arm'),
         'android_arm64': AndroidTargetInfo('arm64'),
         'android_mips': AndroidTargetInfo('mips'),
@@ -331,6 +354,10 @@ class BuildEnv:
 
     def setup_iOS(self):
         pass
+
+    def setup_i586(self):
+        self.cmake_crossfile = self._gen_crossfile('cmake_i586_cross_file.txt')
+        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
     def __getattr__(self, name):
         return getattr(self.options, name)
