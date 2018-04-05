@@ -87,7 +87,7 @@ class lzma(Dependency):
     class Builder(MakeBuilder):
         @property
         def configure_option(self):
-            return "--disable-assembler"
+            return "--disable-assembler --disable-xz --disable-xzdec"
 
 class UUID(Dependency):
     name = 'uuid'
@@ -414,7 +414,7 @@ class AllBaseDependencies(Dependency):
 
     @property
     def dependencies(self):
-        base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd']
+        base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd', 'libaria2']
         if self.buildEnv.platform_info.build != 'native':
             base_deps += ["icu4c_cross-compile"]
         else:
