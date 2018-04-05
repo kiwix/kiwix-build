@@ -414,7 +414,7 @@ class AllBaseDependencies(Dependency):
 
     @property
     def dependencies(self):
-        base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd']
+        base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd', 'libaria2']
         if self.buildEnv.platform_info.build != 'native':
             base_deps += ["icu4c_cross-compile"]
         else:
