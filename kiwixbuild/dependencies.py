@@ -147,7 +147,7 @@ class CTPP2(Dependency):
                   ]
 
     class Builder(CMakeBuilder):
-        configure_option = "-DMD5_SUPPORT=OFF"
+        configure_option = "-DMD5_SUPPORT=OFF -DICONV_SUPPORT=OFF"
 
 
 class CTPP2C(CTPP2):
