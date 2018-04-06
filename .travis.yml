@@ -92,3 +92,7 @@ addons:
       - mingw-w64-tools
       - default-jdk
       - autopoint
+      - libc6-dev:i386
+      - libstdc++-6-dev:i386
+      - gcc-5-multilib
+      - g++-5-multilib

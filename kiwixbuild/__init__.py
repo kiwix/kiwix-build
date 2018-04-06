@@ -95,6 +95,12 @@ PACKAGE_NAME_MAPPERS = {
         'ctpp2': ['libctpp2-dev'],
         'ctpp2c': ['ctpp2-utils'],
     },
+    'debian_i586_dyn': {
+        'COMMON': _debian_common + ['libc6-dev:i386', 'libstdc++-6-dev:i386', 'gcc-multilib', 'g++-multilib', 'libxml2-dev:i386', 'libsqlite3-dev:i386'],
+    },
+    'debian_i586_static': {
+        'COMMON': _debian_common + ['libc6-dev:i386', 'libstdc++-6-dev:i386', 'gcc-multilib', 'g++-multilib', 'libxml2-dev:i386', 'libsqlite3-dev:i386'],
+    },
     'debian_win32_dyn': {
         'COMMON': _debian_common + ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools'],
         'ctpp2c': ['ctpp2-utils'],
