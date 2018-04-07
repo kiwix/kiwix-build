@@ -413,7 +413,7 @@ class Google:
 
     def publish_release(self, options, versionCodes):
         return self.make_request('tracks', 'update',
-            track="alpha",
+            track="internal",
             body={'versionCodes': versionCodes})
 
 
