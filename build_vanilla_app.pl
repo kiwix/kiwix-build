@@ -39,22 +39,22 @@ $ENV{ORG_GRADLE_PROJECT_version_name} = $version_name;
 
 # Compile apps
 $ENV{ORG_GRADLE_PROJECT_version_code} = $version_code_base;
-$cmd = "./kiwix-build.py --target-platform android_arm kiwix-android"; system $cmd;
+$cmd = "kiwix-build --target-platform android_arm kiwix-android"; system $cmd;
 
 $ENV{ORG_GRADLE_PROJECT_version_code} = "1" . $version_code_base;
-$cmd = "./kiwix-build.py --target-platform android_arm64 kiwix-android"; system $cmd;
+$cmd = "kiwix-build --target-platform android_arm64 kiwix-android"; system $cmd;
 
 $ENV{ORG_GRADLE_PROJECT_version_code} = "2" . $version_code_base;
-$cmd = "./kiwix-build.py --target-platform android_x86 kiwix-android"; system $cmd;
+$cmd = "kiwix-build --target-platform android_x86 kiwix-android"; system $cmd;
 
 $ENV{ORG_GRADLE_PROJECT_version_code} = "3" . $version_code_base;
-$cmd = "./kiwix-build.py --target-platform android_x86_64 kiwix-android"; system $cmd;
+$cmd = "kiwix-build --target-platform android_x86_64 kiwix-android"; system $cmd;
 
 $ENV{ORG_GRADLE_PROJECT_version_code} = "4" . $version_code_base;
-$cmd = "./kiwix-build.py --target-platform android_mips kiwix-android"; system $cmd;
+$cmd = "kiwix-build --target-platform android_mips kiwix-android"; system $cmd;
 
 $ENV{ORG_GRADLE_PROJECT_version_code} = "5" . $version_code_base;
-$cmd = "./kiwix-build.py --target-platform android_mips64 kiwix-android"; system $cmd;
+$cmd = "kiwix-build --target-platform android_mips64 kiwix-android"; system $cmd;
 
 # Sign apps
 $cmd = "./TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign -ks \"${keystore}\" --ks-pass env:KIWIX_KEY --out signed_apks/app-${version_code_base}-release-signed.apk BUILD_android_arm/kiwix-android/app/build/outputs/apk/kiwix/release/app-kiwix-release-unsigned.apk";
