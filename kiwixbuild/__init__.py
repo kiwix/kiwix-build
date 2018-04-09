@@ -176,8 +176,8 @@ class TargetInfo:
             }
         elif self.build == 'i586':
             return {
-                'extra_libs': ['-m32', '-march=i586'],
-                'extra_cflags': ['-m32', '-march=i586'],
+                'extra_libs': ['-m32', '-march=i586', '-mno-sse'],
+                'extra_cflags': ['-m32', '-march=i586', '-mno-sse'],
                 'host_machine': {
                     'system': 'linux',
                     'lsystem': 'linux',
