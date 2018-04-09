@@ -30,9 +30,9 @@ class linux_i586_toolchain(Toolchain):
         return '--host={}'.format(self.arch_full)
 
     def set_env(self, env):
-        env['CFLAGS'] = "-m32 -march=i586 "+env['CFLAGS']
-        env['CXXFLAGS'] = "-m32 -march=i586 "+env['CXXFLAGS']
-        env['LDFLAGS'] = "-m32 -march=i586 "+env['LDFLAGS']
+        env['CFLAGS'] = "-m32 -march=i586 -mno-sse "+env['CFLAGS']
+        env['CXXFLAGS'] = "-m32 -march=i586 -mno-sse "+env['CXXFLAGS']
+        env['LDFLAGS'] = "-m32 -march=i586 -mno-sse "+env['LDFLAGS']
 
     def get_bin_dir(self):
         return []
