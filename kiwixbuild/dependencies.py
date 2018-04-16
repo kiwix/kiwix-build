@@ -248,7 +248,7 @@ class Icu(Dependency):
 
         @property
         def configure_option(self):
-            options = "--disable-samples --disable-tests --disable-extras --disable-dyload"
+            options = "--disable-samples --disable-tests --disable-extras --disable-dyload --enable-rpath"
             if self.buildEnv.platform_info.build == 'android':
                 options += " --with-data-packaging=archive"
             return options
