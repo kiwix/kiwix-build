@@ -50,8 +50,6 @@ env:
     - PLATFORM="i586_static"
     - PLATFORM="android_arm"
     - PLATFORM="android_arm64"
-    - PLATFORM="android_mips"
-    - PLATFORM="android_mips64"
     - PLATFORM="android_x86"
     - PLATFORM="android_x86_64"
 matrix:
@@ -62,6 +60,11 @@ matrix:
     - env: PLATFORM="android_mips64"
     - env: PLATFORM="android_x86"
     - env: PLATFORM="android_x86_64"
+  include:
+    - env: PLATFORM="android_mips"
+      if: type!=cron AND type!=pull_request
+    - env: PLATFORM="android_mips64"
+      if: type!=cron AND type!=pull_request
 
 notifications:
   irc:
