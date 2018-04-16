@@ -5,6 +5,7 @@ branches:
   only:
   - master
   - /\d+\.\d+\.\d+$/
+if: type != push OR tag IS present
 before_install:
 - eval "${MATRIX_EVAL}"
 - ${CXX} --version
