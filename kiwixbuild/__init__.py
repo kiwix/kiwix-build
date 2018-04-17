@@ -238,8 +238,14 @@ class iOSTargetInfo(TargetInfo):
                          hosts=['Darwin'])
         self.arch = arch
         self.arch_full, self.cpu, self.sdk_name = self.__arch_infos[arch]
-        command = "xcodebuild -version -sdk {} | grep -E '^Path' | sed 's/Path: //'".format(self.sdk_name)
-        self.root_path = subprocess.check_output(command, shell=True)[:-1].decode()
+        self._root_path = None
+
+    @property
+    def root_path(self):
+        if self._root_path is None:
+            command = "xcodebuild -version -sdk {} | grep -E '^Path' | sed 's/Path: //'".format(self.sdk_name)
+            self._root_path = subprocess.check_output(command, shell=True)[:-1].decode()
+        return self._root_path
 
     def __str__(self):
         return "iOS"
