@@ -1,4 +1,5 @@
 language: cpp
+
 dist: trusty
 sudo: required
 branches:
@@ -6,8 +7,11 @@ branches:
   - master
   - /\d+\.\d+\.\d+$/
 if: type != push OR tag IS present
+
 before_install:
-- eval "${MATRIX_EVAL}"
+- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then eval "${MATRIX_EVAL}"; fi
+- PATH=$PATH:${HOME}/bin
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then PATH=$PATH:$(brew --prefix)/opt/gettext/bin; fi
 - ${CXX} --version
 - openssl aes-256-cbc -K $encrypted_eba2f7543984_key -iv $encrypted_eba2f7543984_iv
   -in travis/travisci_builder_id_key.enc -out travis/travisci_builder_id_key -d
@@ -66,6 +70,8 @@ matrix:
       if: type!=cron AND type!=pull_request
     - env: PLATFORM="android_mips64"
       if: type!=cron AND type!=pull_request
+    - env: PLATFORM="native_dyn"
+      os: osx
 
 notifications:
   irc:
