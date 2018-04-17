@@ -196,6 +196,7 @@ class SvnClone(Source):
         self.buildEnv.run_command(command, self.buildEnv.source_dir, context)
 
     def _svn_update(self, context):
+        context.try_skip(self.svn_path)
         context.force_native_build = True
         self.buildEnv.run_command("svn update", self.svn_path, context)
 
