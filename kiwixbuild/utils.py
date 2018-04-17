@@ -118,8 +118,8 @@ def download_remote(what, where, check_certificate=True):
                    print_progress(progress_chars[current])
                    current = (current+1)%4
                 file.write(batch)
-    except urllib.error.HTTPError:
-        print("Cannot download url {}".format(file_url))
+    except urllib.error.URLError as e:
+        print("Cannot download url {}:\n{}".format(file_url, e.reason))
         raise StopBuild()
 
     if not what.sha256:
