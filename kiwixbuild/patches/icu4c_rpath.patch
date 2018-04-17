@@ -1,0 +1,13 @@
+diff -ur icu4c/source/config/mh-linux icu4c.rpath/source/config/mh-linux
+--- icu4c/source/config/mh-linux	2018-04-17 11:31:50.674012676 +0200
++++ icu4c.rpath/source/config/mh-linux	2018-04-17 11:28:57.776134587 +0200
+@@ -19,7 +19,7 @@
+ LIBCPPFLAGS =
+ 
+ ## Compiler switch to embed a runtime search path
+-LD_RPATH= -Wl,-zorigin,-rpath,'$$'ORIGIN 
++LD_RPATH= '-Wl,-zorigin,-rpath,\$ORIGIN' 
+ LD_RPATH_PRE = -Wl,-rpath,
+ 
+ ## These are the library specific LDFLAGS
+Les fichiers binaires icu4c/.svn/wc.db et icu4c.rpath/.svn/wc.db sont différents

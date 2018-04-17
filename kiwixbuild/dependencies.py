@@ -240,7 +240,8 @@ class Icu(Dependency):
         patches = ["icu4c_fix_static_lib_name_mingw.patch",
                    "icu4c_android_elf64_st_info.patch",
                    "icu4c_custom_data.patch",
-                   "icu4c_noxlocale.patch"]
+                   "icu4c_noxlocale.patch",
+                   "icu4c_rpath.patch"]
 
 
     class Builder(MakeBuilder):
