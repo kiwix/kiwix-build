@@ -147,7 +147,14 @@ class CTPP2(Dependency):
                   ]
 
     class Builder(CMakeBuilder):
-        configure_option = "-DMD5_SUPPORT=OFF -DICONV_SUPPORT=OFF"
+        @property
+        def configure_option(self):
+            libprefix = self.buildEnv.libprefix
+            options = "-DMD5_SUPPORT=OFF -DICONV_SUPPORT=OFF"
+            if libprefix.startswith('lib'):
+               libprefix = libprefix[3:]
+               options += " -DLIB_SUFFIX={}".format(libprefix)
+            return options
 
 
 class CTPP2C(CTPP2):
@@ -240,7 +247,8 @@ class Icu(Dependency):
         patches = ["icu4c_fix_static_lib_name_mingw.patch",
                    "icu4c_android_elf64_st_info.patch",
                    "icu4c_custom_data.patch",
-                   "icu4c_noxlocale.patch"]
+                   "icu4c_noxlocale.patch",
+                   "icu4c_rpath.patch"]
 
 
     class Builder(MakeBuilder):
@@ -248,7 +256,7 @@ class Icu(Dependency):
 
         @property
         def configure_option(self):
-            options = "--disable-samples --disable-tests --disable-extras --disable-dyload"
+            options = "--disable-samples --disable-tests --disable-extras --disable-dyload --enable-rpath"
             if self.buildEnv.platform_info.build == 'android':
                 options += " --with-data-packaging=archive"
             return options
@@ -275,7 +283,7 @@ class Icu_cross_compile(Icu):
         @property
         def configure_option(self):
             icu_native_dep = self.buildEnv.targetsDict['icu4c_native']
-            return super().configure_option + " --with-cross-build=" + icu_native_dep.builder.build_path
+            return super().configure_option + " --with-cross-build={} --disable-tools".format(icu_native_dep.builder.build_path)
 
 
 class Libzim(Dependency):

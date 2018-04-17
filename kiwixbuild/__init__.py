@@ -47,7 +47,7 @@ PACKAGE_NAME_MAPPERS = {
         'gumbo' : ['gumbo-parser-devel'],
     },
     'fedora_native_static': {
-        'COMMON': _fedora_common,
+        'COMMON': _fedora_common + ['glibc-static', 'libstdc++-static'],
         'zlib': ['zlib-devel', 'zlib-static'],
         'lzma': ['xz-devel', 'xz-static']
         # Either there is no packages, or no static or too old
@@ -124,11 +124,15 @@ PACKAGE_NAME_MAPPERS = {
     'Darwin_native_dyn': {
         'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],
     },
-    'Darwin_iOS_static': {
+    'Darwin_iOS': {
         'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],
     },
 }
 
+def xrun_find(name):
+    command = "xcrun -find {}".format(name)
+    output = subprocess.check_output(command, shell=True)
+    return output[:-1].decode()
 
 class TargetInfo:
     def __init__(self, build, static, toolchains, hosts=None):
@@ -222,10 +226,43 @@ class AndroidTargetInfo(TargetInfo):
         }
 
 class iOSTargetInfo(TargetInfo):
+    __arch_infos = {
+        'armv7s': ('arm-apple-darwin', 'armv7s', 'iphoneos'),
+        'arm64': ('arm-apple-darwin', 'arm64', 'iphoneos'),
+        'i386': ('', 'i386', 'iphonesimulator'),
+        'x86_64': ('', 'x86_64', 'iphonesimulator'),
+    }
+
     def __init__(self, arch):
         super().__init__('iOS', True, ['iOS_sdk'],
                          hosts=['Darwin'])
         self.arch = arch
+        self.arch_full, self.cpu, self.sdk_name = self.__arch_infos[arch]
+        self._root_path = None
+
+    @property
+    def root_path(self):
+        if self._root_path is None:
+            command = "xcodebuild -version -sdk {} | grep -E '^Path' | sed 's/Path: //'".format(self.sdk_name)
+            self._root_path = subprocess.check_output(command, shell=True)[:-1].decode()
+        return self._root_path
+
+    def __str__(self):
+        return "iOS"
+
+    def get_cross_config(self, host):
+        return {
+            'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
+            'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
+            'host_machine': {
+                'system': 'Darwin',
+                'lsystem': 'darwin',
+                'cpu_family': self.arch,
+                'cpu': self.cpu,
+                'endian': '',
+                'abi': ''
+            },
+        }
 
 
 class BuildEnv:
@@ -252,7 +289,10 @@ class BuildEnv:
         'android_mips64': AndroidTargetInfo('mips64'),
         'android_x86': AndroidTargetInfo('x86'),
         'android_x86_64': AndroidTargetInfo('x86_64'),
+        'iOS_armv7s': iOSTargetInfo('armv7s'),
         'iOS_arm64': iOSTargetInfo('arm64'),
+        'iOS_i386': iOSTargetInfo('i386'),
+        'iOS_x86_64': iOSTargetInfo('x86_64'),
     }
 
     def __init__(self, options, targetsDict):
@@ -359,7 +399,8 @@ class BuildEnv:
         self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
     def setup_iOS(self):
-        pass
+        self.cmake_crossfile = self._gen_crossfile('cmake_ios_cross_file.txt')
+        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
     def setup_i586(self):
         self.cmake_crossfile = self._gen_crossfile('cmake_i586_cross_file.txt')
@@ -562,6 +603,41 @@ class BuildEnv:
 
         with open(autoskip_file, 'w'):
             pass
+
+
+class iOS_sdk(Toolchain):
+    @property
+    def root_path(self):
+        return self.buildEnv.platform_info.root_path
+
+    @property
+    def binaries(self):
+        return {
+            'CC': xrun_find('clang'),
+            'CXX': xrun_find('clang++'),
+            'AR': '/usr/bin/ar',
+            'STRIP': '/usr/bin/strip',
+            'RANLIB': '/usr/bin/ranlib',
+            'LD': '/usr/bin/ld',
+        }
+     
+    @property
+    def configure_option(self):
+        return '--host=arm-apple-darwin'
+
+    def get_bin_dir(self):
+        return [pj(self.root_path, 'bin')]
+
+    def set_env(self, env):
+        arch = self.buildEnv.platform_info.arch
+        env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -arch {arch} -miphoneos-version-min=9.0 ".format(SDKROOT=self.root_path, arch=arch) + env['CFLAGS']
+        env['CXXFLAGS'] = env['CFLAGS'] + " -stdlib=libc++ -std=c++11 "+env['CXXFLAGS']
+        env['LDFLAGS'] = " -arch {arch} -isysroot {SDKROOT} ".format(SDKROOT=self.root_path, arch=arch)
+        env['MACOSX_DEPLOYMENT_TARGET'] = "10.4"
+
+    def set_compiler(self, env):
+        env['CC'] = self.binaries['CC']
+        env['CXX'] = self.binaries['CXX']
 
 
 class Builder:

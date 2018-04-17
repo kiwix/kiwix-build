@@ -14,6 +14,7 @@ from urllib.error import URLError
 from kiwixbuild import dependency_versions
 
 PLATFORM = environ['PLATFORM']
+TRAVIS_OS_NAME = environ['TRAVIS_OS_NAME']
 
 def home():
     return Path(os.path.expanduser('~'))
@@ -111,7 +112,8 @@ def make_archive(project, platform):
 def make_deps_archive(target, full=False):
     (BASE_DIR/'.install_packages_ok').unlink()
 
-    archive_name = "deps_{}_{}.tar.gz".format(PLATFORM, target)
+    archive_name = "deps_{}_{}_{}.tar.gz".format(
+        TRAVIS_OS_NAME, PLATFORM, target)
     files_to_archive = [BASE_DIR/'INSTALL']
     files_to_archive += BASE_DIR.glob('**/android-ndk*')
     if (BASE_DIR/'meson_cross_file.txt').exists():
@@ -159,7 +161,8 @@ make_release = re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", environ.get('TRAVIS_TAG',
 
 # The first thing we need to do is to (potentially) download already compiled base dependencies.
 BASE_DEP_VERSION = dependency_versions.base_deps_meta_version
-base_dep_archive_name = "base_deps_{}_{}.tar.gz".format(PLATFORM, BASE_DEP_VERSION)
+base_dep_archive_name = "base_deps_{}_{}_{}.tar.gz".format(
+    TRAVIS_OS_NAME, PLATFORM, BASE_DEP_VERSION)
 
 print("--- Getting archive {} ---".format(base_dep_archive_name), flush=True)
 try:
@@ -183,7 +186,10 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
     if PLATFORM.startswith('android'):
         TARGETS = ('kiwix-android',)
     elif PLATFORM.startswith('native_'):
-        TARGETS = ('kiwix-tools', 'zim-tools', 'zimwriterfs')
+        if TRAVIS_OS_NAME == "osx":
+            TARGETS = ('kiwix-lib', )
+        else:
+            TARGETS = ('kiwix-tools', 'zim-tools', 'zimwriterfs')
     else:
         TARGETS = ('kiwix-tools', )
 
@@ -201,7 +207,10 @@ if PLATFORM.startswith('android'):
     else:
         TARGETS = ('libzim', 'kiwix-lib', 'kiwix-android')
 elif PLATFORM.startswith('native_'):
-    TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
+    if TRAVIS_OS_NAME == "osx":
+        TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib')
+    else:
+        TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 else:
     TARGETS = ('libzim', 'kiwix-lib', 'kiwix-tools')
 
