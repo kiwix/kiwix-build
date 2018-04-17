@@ -147,7 +147,14 @@ class CTPP2(Dependency):
                   ]
 
     class Builder(CMakeBuilder):
-        configure_option = "-DMD5_SUPPORT=OFF -DICONV_SUPPORT=OFF"
+        @property
+        def configure_option(self):
+            libprefix = self.buildEnv.libprefix
+            options = "-DMD5_SUPPORT=OFF -DICONV_SUPPORT=OFF"
+            if libprefix.startswith('lib'):
+               libprefix = libprefix[3:]
+               options += " -DLIB_SUFFIX={}".format(libprefix)
+            return options
 
 
 class CTPP2C(CTPP2):
