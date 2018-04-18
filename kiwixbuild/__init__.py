@@ -123,9 +123,11 @@ PACKAGE_NAME_MAPPERS = {
     },
     'Darwin_native_dyn': {
         'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],
+        'file': ['libmagic']
     },
     'Darwin_iOS': {
         'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],
+        'file': ['libmagic']
     },
 }
 

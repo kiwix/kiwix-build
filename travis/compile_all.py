@@ -187,7 +187,7 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
         TARGETS = ('kiwix-android',)
     elif PLATFORM.startswith('native_'):
         if TRAVIS_OS_NAME == "osx":
-            TARGETS = ('kiwix-lib', )
+            TARGETS = ('kiwix-lib', 'zim-tools', 'zimwriterfs')
         else:
             TARGETS = ('kiwix-tools', 'zim-tools', 'zimwriterfs')
     else:
