@@ -259,13 +259,13 @@ if make_release and PLATFORM == 'native_dyn':
             shutil.copy(str(in_file), str(out_dir/target))
 elif PLATFORM == 'native_static':
     for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
-        make_archive(target, 'linux64')
+        make_archive(target, 'linux-x86_64')
 elif PLATFORM == 'win32_static':
-    make_archive('kiwix-tools', 'win32')
+    make_archive('kiwix-tools', 'win-i686')
 elif PLATFORM == 'armhf_static':
-    make_archive('kiwix-tools', 'armhf')
+    make_archive('kiwix-tools', 'linux-armhf')
 elif PLATFORM == 'i586_static':
-    make_archive('kiwix-tools', 'i586')
+    make_archive('kiwix-tools', 'linux-i586')
 elif PLATFORM.startswith('android_') and 'kiwix-android' in TARGETS:
     APK_NAME = "kiwix-{}".format(PLATFORM)
     source_debug_dir = BASE_DIR/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'debug'
