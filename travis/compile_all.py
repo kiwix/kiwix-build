@@ -59,6 +59,7 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
     command = ['kiwix-build']
     command.append(target)
     command.append('--hide-progress')
+    command.append('--force-install-packages')
     command.extend(['--target-platform', platform])
     if build_deps_only:
         command.append('--build-deps-only')
@@ -230,7 +231,6 @@ for target in TARGETS:
                         platform=PLATFORM,
                         make_release=True,
                         make_dist=True)
-    (BASE_DIR/'.install_packages_ok').unlink()
 
 
 # We have build everything. Now create archives for public deployement.
