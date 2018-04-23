@@ -23,8 +23,9 @@ BASE_DIR = home()/"BUILD_{}".format(PLATFORM)
 SOURCE_DIR = home()/"SOURCE"
 ARCHIVE_DIR = home()/"ARCHIVE"
 TOOLCHAINS_DIR = home()/"TOOLCHAINS"
-NIGHTLY_ARCHIVES_DIR = home()/'NIGHTLY_ARCHIVES'
+NIGHTLY_KIWIX_ARCHIVES_DIR = home()/'NIGHTLY_KIWIX_ARCHIVES'
 RELEASE_KIWIX_ARCHIVES_DIR = home()/'RELEASE_KIWIX_ARCHIVES'
+NIGHTLY_ZIM_ARCHIVES_DIR = home()/'NIGHTLY_ZIM_ARCHIVES'
 RELEASE_ZIM_ARCHIVES_DIR = home()/'RELEASE_ZIM_ARCHIVES'
 DIST_KIWIX_ARCHIVES_DIR = home()/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = home()/'DIST_ZIM_ARCHIVES'
@@ -84,7 +85,10 @@ def make_archive(project, platform):
             archive_dir = RELEASE_ZIM_ARCHIVES_DIR/project
     else:
         postfix = _date
-        archive_dir = NIGHTLY_ARCHIVES_DIR
+        if project in ('kiwix-lib', 'kiwix-tools'):
+            archive_dir = NIGHTLY_KIWIX_ARCHIVES_DIR
+        else:
+            archive_dir = NIGHTLY_ZIM_ARCHIVES_DIR
 
     try:
         archive_dir.mkdir(parents=True)
@@ -148,7 +152,8 @@ def scp(what, where):
     subprocess.check_call(command)
 
 
-for p in (NIGHTLY_ARCHIVES_DIR,
+for p in (NIGHTLY_KIWIX_ARCHIVES_DIR,
+          NIGHTLY_ZIM_ARCHIVES_DIR,
           RELEASE_KIWIX_ARCHIVES_DIR,
           RELEASE_ZIM_ARCHIVES_DIR,
           DIST_KIWIX_ARCHIVES_DIR,
@@ -259,19 +264,19 @@ if make_release and PLATFORM == 'native_dyn':
             shutil.copy(str(in_file), str(out_dir/target))
 elif PLATFORM == 'native_static':
     for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
-        make_archive(target, 'linux64')
+        make_archive(target, 'linux-x86_64')
 elif PLATFORM == 'win32_static':
-    make_archive('kiwix-tools', 'win32')
+    make_archive('kiwix-tools', 'win-i686')
 elif PLATFORM == 'armhf_static':
-    make_archive('kiwix-tools', 'armhf')
+    make_archive('kiwix-tools', 'linux-armhf')
 elif PLATFORM == 'i586_static':
-    make_archive('kiwix-tools', 'i586')
+    make_archive('kiwix-tools', 'linux-i586')
 elif PLATFORM.startswith('android_') and 'kiwix-android' in TARGETS:
     APK_NAME = "kiwix-{}".format(PLATFORM)
     source_debug_dir = BASE_DIR/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'debug'
     source_release_dir = BASE_DIR/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'release'
     shutil.copy(str(source_debug_dir/'app-kiwix-debug.apk'),
-                str(NIGHTLY_ARCHIVES_DIR/"{}-debug.apk".format(APK_NAME)))
+                str(NIGHTLY_KIWIX_ARCHIVES_DIR/"{}-debug.apk".format(APK_NAME)))
     shutil.copy(str(source_release_dir/'app-kiwix-release-unsigned.apk'),
-                str(NIGHTLY_ARCHIVES_DIR/"{}-release_signed".format(APK_NAME)))
+                str(NIGHTLY_KIWIX_ARCHIVES_DIR/"{}-release_signed".format(APK_NAME)))
 
