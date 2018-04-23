@@ -156,7 +156,7 @@ class TargetInfo:
             }
             return {
                 'root_path': root_paths[host],
-                'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90'],
+                'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90', '-liphlpapi'],
                 'extra_cflags': ['-DWIN32'],
                 'host_machine': {
                     'system': 'Windows',
