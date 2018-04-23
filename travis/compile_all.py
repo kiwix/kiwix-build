@@ -97,7 +97,7 @@ def make_archive(project, platform):
 
     archive_name = "{}_{}-{}".format(project, platform, postfix)
 
-    if platform == "win32":
+    if platform == "win-i686":
         file_to_archives = ['{}.exe'.format(f) for f in file_to_archives]
         open_archive = lambda a : zipfile.ZipFile(str(a), 'w', compression=zipfile.ZIP_LZMA)
         archive_add = lambda a, f : a.write(str(base_bin_dir/f), arcname=str(f))
