@@ -217,7 +217,7 @@ class Aria2(Dependency):
             self.buildEnv.run_command(command, self.extract_path, context)
 
     class Builder(MakeBuilder):
-        configure_option = "--enable-libaria2 --disable-ssl --disable-bittorent --disable-metalink"
+        configure_option = "--enable-libaria2 --disable-ssl --disable-bittorent --disable-metalink --without-sqlite3 --without-libxml2 --without-libexpat"
 
 
 class Gumbo(Dependency):
