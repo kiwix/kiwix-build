@@ -40,6 +40,10 @@ BINARIES = {
 
 _date = date.today().isoformat()
 
+def print_message(message, *args, **kwargs):
+    message = message.format(*args, **kwargs)
+    message = "{0} {1} {0}".format('-'*3, message)
+    print(message, flush=True)
 
 
 def write_manifest(manifest_file, archive_name, target, platform):
@@ -68,8 +72,8 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
         command.append('--make-release')
     if make_dist:
         command.append('--make-dist')
-    print("--- Build {} (deps={}, release={}, dist={}) ---".format(
-        target, build_deps_only, make_release, make_dist), flush=True)
+    print_message("Build {} (deps={}, release={}, dist={})",
+        target, build_deps_only, make_release, make_dist)
     subprocess.check_call(command, cwd=str(home()))
 
 
@@ -97,7 +101,7 @@ def make_archive(project, platform):
 
     archive_name = "{}_{}-{}".format(project, platform, postfix)
 
-    if platform == "win32":
+    if platform == "win-i686":
         file_to_archives = ['{}.exe'.format(f) for f in file_to_archives]
         open_archive = lambda a : zipfile.ZipFile(str(a), 'w', compression=zipfile.ZIP_LZMA)
         archive_add = lambda a, f : a.write(str(base_bin_dir/f), arcname=str(f))
@@ -148,6 +152,7 @@ def make_deps_archive(target, full=False):
 
 
 def scp(what, where):
+    print_message("Copy {} to {}", what, where)
     command = ['scp', '-i', str(SSH_KEY), str(what), str(where)]
     subprocess.check_call(command)
 
@@ -170,14 +175,14 @@ BASE_DEP_VERSION = dependency_versions.base_deps_meta_version
 base_dep_archive_name = "base_deps_{}_{}_{}.tar.gz".format(
     TRAVIS_OS_NAME, PLATFORM, BASE_DEP_VERSION)
 
-print("--- Getting archive {} ---".format(base_dep_archive_name), flush=True)
+print_message("Getting archive {}", base_dep_archive_name)
 try:
     local_filename, headers = urlretrieve(
         'http://tmp.kiwix.org/ci/{}'.format(base_dep_archive_name))
     with tarfile.open(local_filename) as f:
         f.extractall(str(home()))
 except URLError:
-    print("--- Cannot get archive. Build dependencies ---", flush=True)
+    print_message("Cannot get archive. Build dependencies")
     run_kiwix_build('alldependencies', platform=PLATFORM)
     archive = make_deps_archive('alldependencies', full=True)
     destination = 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/{}'
