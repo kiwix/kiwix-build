@@ -635,7 +635,7 @@ class iOS_sdk(Toolchain):
         env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -arch {arch} -miphoneos-version-min=9.0 ".format(SDKROOT=self.root_path, arch=arch) + env['CFLAGS']
         env['CXXFLAGS'] = env['CFLAGS'] + " -stdlib=libc++ -std=c++11 "+env['CXXFLAGS']
         env['LDFLAGS'] = " -arch {arch} -isysroot {SDKROOT} ".format(SDKROOT=self.root_path, arch=arch)
-        env['MACOSX_DEPLOYMENT_TARGET'] = "10.4"
+        env['MACOSX_DEPLOYMENT_TARGET'] = "10.7"
 
     def set_compiler(self, env):
         env['CC'] = self.binaries['CC']

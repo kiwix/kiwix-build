@@ -196,6 +196,8 @@ except URLError:
 if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
     if PLATFORM.startswith('android'):
         TARGETS = ('kiwix-android',)
+    elif PLATFORM.startswith('iOS'):
+        TARGETS = ('kiwix-lib',)
     elif PLATFORM.startswith('native_'):
         if TRAVIS_OS_NAME == "osx":
             TARGETS = ('kiwix-lib', 'zim-tools', 'zimwriterfs')
@@ -217,6 +219,8 @@ if PLATFORM.startswith('android'):
         TARGETS = ('libzim', 'kiwix-lib')
     else:
         TARGETS = ('libzim', 'kiwix-lib', 'kiwix-android')
+elif PLATFORM.startswith('iOS'):
+    TARGETS = ('libzim', 'kiwix-lib')
 elif PLATFORM.startswith('native_'):
     if TRAVIS_OS_NAME == "osx":
         TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib')

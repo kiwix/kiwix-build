@@ -72,6 +72,10 @@ matrix:
       if: type!=cron AND type!=pull_request
     - env: PLATFORM="native_dyn"
       os: osx
+    - env: PLATFORM="iOS_arm64"
+      os: osx
+    - env: PLATFORM="iOS_i386"
+      os: osx
 
 notifications:
   irc:
