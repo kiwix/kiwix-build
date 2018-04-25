@@ -345,9 +345,6 @@ class BuildEnv:
             cont = input('Do you want to continue ? [y/N]')
             if cont.lower() != 'y':
                 sys.exit(0)
-        if _platform == 'Darwin':
-            print('WARNING: kiwix-build has not been tested on MacOS platfrom.\n'
-                  'Tests, bug reports and patches are welcomed.')
         if _platform == 'Linux':
             self.distname, _, _ = platform.linux_distribution()
             self.distname = self.distname.lower()
