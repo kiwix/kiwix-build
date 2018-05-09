@@ -14,7 +14,7 @@ from kiwixbuild.dependency_utils import (
     NoopBuilder,
     Builder as BaseBuilder)
 
-from kiwixbuild.utils import Remotefile, pj, SkipCommand, copy_tree, add_execution_right
+from kiwixbuild.utils import Remotefile, pj, SkipCommand, copy_tree, add_execution_right, Defaultdict
 
 # *************************************
 # Missing dependencies
@@ -323,15 +323,14 @@ class ZimTools(Dependency):
 
 class Zimwriterfs(Dependency):
     name = "zimwriterfs"
-    extra_packages = ['file']
 
     @property
     def dependencies(self):
         base_dependencies = ['libzim', 'zlib', 'lzma', 'xapian-core', 'gumbo']
         if self.buildEnv.platform_info.build != 'native':
-            return base_dependencies + ["icu4c_cross-compile"]
+            return base_dependencies + ["icu4c_cross-compile", "libmagic_cross-compile"]
         else:
-            return base_dependencies + ["icu4c"]
+            return base_dependencies + ["icu4c", "libmagic"]
 
     class Source(GitClone):
         git_remote = "https://github.com/openzim/zimwriterfs.git"
@@ -417,6 +416,51 @@ class Gradle(Dependency):
                 pj(self.buildEnv.install_dir, "lib"))
 
 
+class LibMagicBase(Dependency):
+    name = "libmagic"
+
+    class Source(ReleaseDownload):
+        name = "libmagic"
+        source_dir = "libmagic"
+        archive = Remotefile('file-5.33.tar.gz',
+                             '1c52c8c3d271cd898d5511c36a68059cda94036111ab293f01f83c3525b737c6',
+                             'ftp://ftp.astron.com/pub/file/file-5.33.tar.gz')
+
+    Builder = MakeBuilder
+
+
+class LibMagic_native(LibMagicBase):
+    name = "libmagic_native"
+    force_native_build = True
+
+    class Builder(LibMagicBase.Builder):
+        static_configure_option = dynamic_configure_option = "--disable-shared --enable-static"
+
+        @property
+        def build_path(self):
+            return super().build_path+"_native"
+
+        def _install(self, context):
+            raise SkipCommand()
+
+
+class LibMagic_cross_compile(LibMagicBase):
+    name = "libmagic_cross-compile"
+    dependencies = ['libmagic_native']
+
+    class Builder(LibMagicBase.Builder):
+        def _compile(self, context):
+            context.try_skip(self.build_path)
+            command = "make -j4 {make_target} {make_option}".format(
+                make_target=self.make_target,
+                make_option=self.make_option
+            )
+            libmagic_native_dep = self.buildEnv.targetsDict['libmagic_native']
+            env = Defaultdict(str, os.environ)
+            env['PATH'] = ':'.join([pj(libmagic_native_dep.builder.build_path, 'src'), env['PATH']])
+            self.buildEnv.run_command(command, self.build_path, context, env=env)
+
+
 class AllBaseDependencies(Dependency):
     name = "alldependencies"
 
@@ -425,8 +469,10 @@ class AllBaseDependencies(Dependency):
         base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd', 'libaria2']
         if self.buildEnv.platform_info.build != 'native':
             base_deps += ["icu4c_cross-compile"]
+            if self.buildEnv.platform_info.build != 'win32':
+                base_deps += ["libmagic_cross-compile"]
         else:
-            base_deps += ["icu4c"]
+            base_deps += ["icu4c", "libmagic"]
         if ( self.buildEnv.platform_info.build != 'android'
            and self.buildEnv.distname != 'Darwin'):
             base_deps += ['ctpp2c', 'ctpp2']

@@ -103,7 +103,7 @@ def download_remote(what, where, check_certificate=True):
     progress_chars = "/-\|"
     try:
         with urllib.request.urlopen(file_url, **extra_args) as resource, open(file_path, 'wb') as file:
-            tsize = resource.getheader('Content-Length', None)
+            tsize = resource.info().get('Content-Length', None)
             if tsize is not None:
                 tsize = int(tsize)
             current = 0
