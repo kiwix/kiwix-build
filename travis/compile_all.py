@@ -227,7 +227,7 @@ elif PLATFORM.startswith('native_'):
     else:
         TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 else:
-    TARGETS = ('libzim', 'kiwix-lib', 'kiwix-tools')
+    TARGETS = ('libzim', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 
 for target in TARGETS:
     if environ['TRAVIS_EVENT_TYPE'] == 'cron':
