@@ -15,20 +15,19 @@ from kiwixbuild import dependency_versions
 
 PLATFORM = environ['PLATFORM']
 TRAVIS_OS_NAME = environ['TRAVIS_OS_NAME']
+HOME = Path(os.path.expanduser('~'))
+NIGHTLY_DATE = environ['NIGHTLY_DATE']
 
-def home():
-    return Path(os.path.expanduser('~'))
-
-BASE_DIR = home()/"BUILD_{}".format(PLATFORM)
-SOURCE_DIR = home()/"SOURCE"
-ARCHIVE_DIR = home()/"ARCHIVE"
-TOOLCHAINS_DIR = home()/"TOOLCHAINS"
-NIGHTLY_KIWIX_ARCHIVES_DIR = home()/'NIGHTLY_KIWIX_ARCHIVES'
-RELEASE_KIWIX_ARCHIVES_DIR = home()/'RELEASE_KIWIX_ARCHIVES'
-NIGHTLY_ZIM_ARCHIVES_DIR = home()/'NIGHTLY_ZIM_ARCHIVES'
-RELEASE_ZIM_ARCHIVES_DIR = home()/'RELEASE_ZIM_ARCHIVES'
-DIST_KIWIX_ARCHIVES_DIR = home()/'DIST_KIWIX_ARCHIVES'
-DIST_ZIM_ARCHIVES_DIR = home()/'DIST_ZIM_ARCHIVES'
+BASE_DIR = HOME/"BUILD_{}".format(PLATFORM)
+SOURCE_DIR = HOME/"SOURCE"
+ARCHIVE_DIR = HOME/"ARCHIVE"
+TOOLCHAINS_DIR = HOME/"TOOLCHAINS"
+NIGHTLY_KIWIX_ARCHIVES_DIR = HOME/'NIGHTLY_KIWIX_ARCHIVES'/NIGHTLY_DATE
+RELEASE_KIWIX_ARCHIVES_DIR = HOME/'RELEASE_KIWIX_ARCHIVES'
+NIGHTLY_ZIM_ARCHIVES_DIR = HOME/'NIGHTLY_ZIM_ARCHIVES'/NIGHTLY_DATE
+RELEASE_ZIM_ARCHIVES_DIR = HOME/'RELEASE_ZIM_ARCHIVES'
+DIST_KIWIX_ARCHIVES_DIR = HOME/'DIST_KIWIX_ARCHIVES'
+DIST_ZIM_ARCHIVES_DIR = HOME/'DIST_ZIM_ARCHIVES'
 SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
 
 # We have build everything. Now create archives for public deployement.
@@ -74,7 +73,7 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
         command.append('--make-dist')
     print_message("Build {} (deps={}, release={}, dist={})",
         target, build_deps_only, make_release, make_dist)
-    subprocess.check_call(command, cwd=str(home()))
+    subprocess.check_call(command, cwd=str(HOME))
 
 
 def make_archive(project, platform):
@@ -143,7 +142,7 @@ def make_deps_archive(target, full=False):
             dependency_versions.base_deps_versions['pugixml'])]
         if (TOOLCHAINS_DIR).exists():
             files_to_archive.append(TOOLCHAINS_DIR)
-        relative_path = home()
+        relative_path = HOME
 
     with tarfile.open(str(relative_path/archive_name), 'w:gz') as tar:
         for name in files_to_archive:
@@ -180,7 +179,7 @@ try:
     local_filename, headers = urlretrieve(
         'http://tmp.kiwix.org/ci/{}'.format(base_dep_archive_name))
     with tarfile.open(local_filename) as f:
-        f.extractall(str(home()))
+        f.extractall(str(HOME))
 except URLError:
     print_message("Cannot get archive. Build dependencies")
     run_kiwix_build('alldependencies', platform=PLATFORM)
