@@ -11,7 +11,10 @@ import re
 from urllib.request import urlretrieve
 from urllib.error import URLError
 
-from kiwixbuild import dependency_versions
+from kiwixbuild.versions import (
+    main_project_versions,
+    base_deps_versions,
+    base_deps_meta_version)
 
 PLATFORM = environ['PLATFORM']
 TRAVIS_OS_NAME = environ['TRAVIS_OS_NAME']
@@ -81,7 +84,7 @@ def make_archive(project, platform):
     base_bin_dir = BASE_DIR/'INSTALL'/'bin'
 
     if make_release:
-        postfix = dependency_versions.main_project_versions[project]
+        postfix = main_project_versions[project]
         if project in ('kiwix-lib', 'kiwix-tools'):
             archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/project
         else:
@@ -137,9 +140,9 @@ def make_deps_archive(target, full=False):
         files_to_archive += BASE_DIR.glob('*/.*_ok')
         files_to_archive += SOURCE_DIR.glob('*/.*_ok')
         files_to_archive += [SOURCE_DIR/'pugixml-{}'.format(
-            dependency_versions.base_deps_versions['pugixml'])]
+            base_deps_versions['pugixml'])]
         files_to_archive += [BASE_DIR/'pugixml-{}'.format(
-            dependency_versions.base_deps_versions['pugixml'])]
+            base_deps_versions['pugixml'])]
         if (TOOLCHAINS_DIR).exists():
             files_to_archive.append(TOOLCHAINS_DIR)
         relative_path = HOME
@@ -170,9 +173,8 @@ for p in (NIGHTLY_KIWIX_ARCHIVES_DIR,
 make_release = re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", environ.get('TRAVIS_TAG', '')) is not None
 
 # The first thing we need to do is to (potentially) download already compiled base dependencies.
-BASE_DEP_VERSION = dependency_versions.base_deps_meta_version
 base_dep_archive_name = "base_deps_{}_{}_{}.tar.gz".format(
-    TRAVIS_OS_NAME, PLATFORM, BASE_DEP_VERSION)
+    TRAVIS_OS_NAME, PLATFORM, base_deps_meta_version)
 
 print_message("Getting archive {}", base_dep_archive_name)
 try:
@@ -263,11 +265,11 @@ if make_release and PLATFORM == 'native_dyn':
             if target == 'zimwriterfs':
                 in_file = BASE_DIR/target/'{}-{}.tar.gz'.format(
                     target,
-                    dependency_versions.main_project_versions[target])
+                    main_project_versions[target])
             else:
                 in_file = BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(
                     target,
-                    dependency_versions.main_project_versions[target])
+                    main_project_versions[target])
 
             shutil.copy(str(in_file), str(out_dir/target))
 elif PLATFORM == 'native_static':

@@ -3,7 +3,7 @@ import os
 import shutil
 
 from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild
-from kiwixbuild.dependency_versions import main_project_versions, base_deps_versions
+from kiwixbuild.versions import main_project_versions, base_deps_versions
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
