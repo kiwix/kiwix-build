@@ -44,6 +44,7 @@ deploy:
 env:
   global:
     - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+    - NIGHTLY_DATE=$(date +%Y-%m-%d)
   matrix:
     - PLATFORM="native_dyn"
     - PLATFORM="native_static"
