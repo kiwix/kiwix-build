@@ -5,7 +5,7 @@ import shutil
 from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild
 from kiwixbuild.versions import main_project_versions, base_deps_versions
 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 
 class _MetaDependency(type):

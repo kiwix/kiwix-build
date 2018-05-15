@@ -2,7 +2,7 @@ import os
 import shutil
 
 from .base_toolchain import Toolchain
-from kiwixbuild.dependency_utils import ReleaseDownload, Builder
+from kiwixbuild.dependencies import ReleaseDownload, Builder
 from kiwixbuild.utils import Remotefile
 
 pj = os.path.join

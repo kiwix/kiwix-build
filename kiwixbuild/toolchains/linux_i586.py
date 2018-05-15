@@ -2,7 +2,7 @@ import os
 import subprocess
 
 from .base_toolchain import Toolchain
-from kiwixbuild.dependency_utils import GitClone
+from kiwixbuild.dependencies import GitClone
 from kiwixbuild.utils import Remotefile, which
 pj = os.path.join
 
