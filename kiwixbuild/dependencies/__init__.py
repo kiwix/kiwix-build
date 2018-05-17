@@ -12,6 +12,7 @@ from . import (
     ios_fat_lib,
     kiwix_android,
     kiwix_custom_app,
+    kiwix_desktop,
     kiwix_lib,
     kiwix_tools,
     libaria2,
