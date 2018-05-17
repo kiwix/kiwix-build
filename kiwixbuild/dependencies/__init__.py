@@ -19,6 +19,7 @@ from . import (
     libmicrohttpd,
     libzim,
     lzma,
+    qt,
     pugixml,
     uuid,
     xapian,

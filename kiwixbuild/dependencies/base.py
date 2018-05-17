@@ -369,6 +369,30 @@ class CMakeBuilder(MakeBuilder):
         run_command(command, self.build_path, context, env=env, buildEnv=self.buildEnv, cross_env_only=True)
 
 
+class QMakeBuilder(MakeBuilder):
+    qmake_target = ""
+    def _configure(self, context):
+        context.try_skip(self.build_path)
+        cross_option = ""
+        command = ("qmake {configure_option}"
+                   " {source_path}"
+                   " {cross_option}")
+        command = command.format(
+            configure_option=self.configure_option,
+            source_path=self.source_path,
+            cross_option=cross_option
+        )
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv, cross_env_only=True)
+
+    def _install(self, context):
+        context.try_skip(self.build_path)
+        command = "make {make_install_target} {make_option}".format(
+            make_install_target=self.make_install_target,
+            make_option=self.make_option
+        )
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
+
+
 class MesonBuilder(Builder):
     configure_option = ""
     test_option = ""
