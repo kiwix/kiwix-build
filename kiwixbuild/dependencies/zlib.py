@@ -20,23 +20,12 @@ class zlib(Dependency):
     class Builder(MakeBuilder):
         dynamic_configure_option = "--shared"
         static_configure_option = "--static"
+        configure_option_template = "{dep_options} {static_option} --prefix {install_dir} --libdir {libdir}"
 
         def _pre_build_script(self, context):
             context.try_skip(self.build_path)
             shutil.copytree(self.source_path, self.build_path)
 
-        @property
-        def all_configure_option(self):
-            return '--static' if self.buildEnv.platform_info.static else '--shared'
-
-        @property
-        def configure_option(self):
-            options = "-DINSTALL_PKGCONFIG_DIR={}".format(pj(self.buildEnv.install_dir, self.buildEnv.libprefix, 'pkgconfig'))
-            if self.buildEnv.platform_info.static:
-                options += " -DBUILD_SHARED_LIBS=false"
-            else:
-                options += " -DBUILD_SHARED_LIBS=true"
-            return options
 
         def _configure(self, context):
             if self.buildEnv.platform_info.build == 'win32':

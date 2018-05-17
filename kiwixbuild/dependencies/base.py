@@ -259,6 +259,7 @@ class NoopBuilder(Builder):
 
 
 class MakeBuilder(Builder):
+    configure_option_template = "{dep_options} {static_option} {env_option} --prefix {install_dir} --libdir {libdir}"
     configure_option = ""
     dynamic_configure_option = "--enable-shared --disable-static"
     static_configure_option = "--enable-static --disable-shared"
@@ -271,19 +272,21 @@ class MakeBuilder(Builder):
 
     @property
     def all_configure_option(self):
-        return "{} {} {}".format(
-            self.configure_option,
-            self.static_configure_option if self.buildEnv.platform_info.static else self.dynamic_configure_option,
-            self.buildEnv.configure_option if not self.target.force_native_build else "")
+        option = self.configure_option_template.format(
+            dep_options=self.configure_option,
+            static_option=self.static_configure_option if self.buildEnv.platform_info.static else self.dynamic_configure_option,
+            env_option=self.buildEnv.configure_option if not self.target.force_native_build else "",
+            install_dir=self.buildEnv.install_dir,
+            libdir=pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
+            )
+        return option
 
     def _configure(self, context):
         context.try_skip(self.build_path)
-        command = "{configure_script} {configure_option} --prefix {install_dir} --libdir {libdir}"
+        command = "{configure_script} {configure_option}"
         command = command.format(
             configure_script=pj(self.source_path, self.configure_script),
-            configure_option=self.all_configure_option,
-            install_dir=self.buildEnv.install_dir,
-            libdir=pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
+            configure_option=self.all_configure_option
         )
         env = Defaultdict(str, os.environ)
         if self.buildEnv.platform_info.static:
