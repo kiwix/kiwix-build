@@ -32,7 +32,7 @@ SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
 
 # We have build everything. Now create archives for public deployement.
 BINARIES = {
-    'kiwix-tools': ('kiwix-install', 'kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve'),
+    'kiwix-tools': ('kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve'),
     'zim-tools': ('zimbench', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit'),
     'zimwriterfs': ('zimwriterfs',)
 }
