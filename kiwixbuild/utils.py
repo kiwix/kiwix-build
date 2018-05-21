@@ -21,6 +21,11 @@ def which(name):
     output = subprocess.check_output(command, shell=True)
     return output[:-1].decode()
 
+def xrun_find(name):
+    command = "xcrun -find {}".format(name)
+    output = subprocess.check_output(command, shell=True)
+    return output[:-1].decode()
+
 
 def setup_print_progress(print_progress):
     global g_print_progress
