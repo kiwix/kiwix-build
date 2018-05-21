@@ -229,7 +229,7 @@ class AndroidTargetInfo(TargetInfo):
 
 class iOSTargetInfo(TargetInfo):
     __arch_infos = {
-        'armv7s': ('arm-apple-darwin', 'armv7s', 'iphoneos'),
+        'armv7': ('arm-apple-darwin', 'armv7', 'iphoneos'),
         'arm64': ('arm-apple-darwin', 'arm64', 'iphoneos'),
         'i386': ('', 'i386', 'iphonesimulator'),
         'x86_64': ('', 'x86_64', 'iphonesimulator'),
@@ -291,7 +291,7 @@ class BuildEnv:
         'android_mips64': AndroidTargetInfo('mips64'),
         'android_x86': AndroidTargetInfo('x86'),
         'android_x86_64': AndroidTargetInfo('x86_64'),
-        'iOS_armv7s': iOSTargetInfo('armv7s'),
+        'iOS_armv7': iOSTargetInfo('armv7'),
         'iOS_arm64': iOSTargetInfo('arm64'),
         'iOS_i386': iOSTargetInfo('i386'),
         'iOS_x86_64': iOSTargetInfo('x86_64'),
