@@ -10,6 +10,7 @@ from collections import OrderedDict
 
 from .toolchains import Toolchain
 from .dependencies import Dependency
+from .platforms import PlatformInfo
 from .utils import (
     pj,
     remove_duplicates,
@@ -136,167 +137,7 @@ def xrun_find(name):
     output = subprocess.check_output(command, shell=True)
     return output[:-1].decode()
 
-class TargetInfo:
-    def __init__(self, build, static, toolchains, hosts=None):
-        self.build = build
-        self.static = static
-        self.toolchains = toolchains
-        self.compatible_hosts = hosts
-
-    def __str__(self):
-        return "{}_{}".format(self.build, 'static' if self.static else 'dyn')
-
-    def get_cross_config(self, host):
-        if self.build == 'native':
-            return {}
-        elif self.build == 'win32':
-            root_paths = {
-                'fedora': '/usr/i686-w64-mingw32/sys-root/mingw',
-                'debian': '/usr/i686-w64-mingw32'
-            }
-            return {
-                'root_path': root_paths[host],
-                'extra_libs': ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90', '-liphlpapi'],
-                'extra_cflags': ['-DWIN32'],
-                'host_machine': {
-                    'system': 'Windows',
-                    'lsystem': 'windows',
-                    'cpu_family': 'x86',
-                    'cpu': 'i686',
-                    'endian': 'little',
-                    'abi': ''
-                }
-            }
-        elif self.build == 'armhf':
-            return {
-                'extra_libs': [],
-                'extra_cflags': [],
-                'host_machine': {
-                    'system': 'linux',
-                    'lsystem': 'linux',
-                    'cpu_family': 'arm',
-                    'cpu': 'armhf',
-                    'endian': 'little',
-                    'abi': ''
-                }
-            }
-        elif self.build == 'i586':
-            return {
-                'extra_libs': ['-m32', '-march=i586', '-mno-sse'],
-                'extra_cflags': ['-m32', '-march=i586', '-mno-sse'],
-                'host_machine': {
-                    'system': 'linux',
-                    'lsystem': 'linux',
-                    'cpu_family': 'x86',
-                    'cpu': 'i586',
-                    'endian': 'little',
-                    'abi': ''
-                }
-            }
-
-class AndroidTargetInfo(TargetInfo):
-    __arch_infos = {
-        'arm' : ('arm-linux-androideabi', 'arm', 'armeabi'),
-        'arm64': ('aarch64-linux-android', 'aarch64', 'arm64-v8a'),
-        'mips': ('mipsel-linux-android', 'mipsel', 'mips'),
-        'mips64': ('mips64el-linux-android', 'mips64el', 'mips64'),
-        'x86': ('i686-linux-android', 'i686', 'x86'),
-        'x86_64': ('x86_64-linux-android', 'x86_64', 'x86_64'),
-    }
-
-    def __init__(self, arch):
-        super().__init__('android', True, ['android_ndk', 'android_sdk'],
-                         hosts=['fedora', 'debian'])
-        self.arch = arch
-        self.arch_full, self.cpu, self.abi = self.__arch_infos[arch]
-
-    def __str__(self):
-        return "android"
-
-    def get_cross_config(self, host):
-        return {
-            'extra_libs': [],
-            'extra_cflags': [],
-            'host_machine': {
-                'system': 'Android',
-                'lsystem': 'android',
-                'cpu_family': self.arch,
-                'cpu': self.cpu,
-                'endian': 'little',
-                'abi': self.abi
-            },
-        }
-
-class iOSTargetInfo(TargetInfo):
-    __arch_infos = {
-        'armv7': ('arm-apple-darwin', 'armv7', 'iphoneos'),
-        'arm64': ('arm-apple-darwin', 'arm64', 'iphoneos'),
-        'i386': ('', 'i386', 'iphonesimulator'),
-        'x86_64': ('', 'x86_64', 'iphonesimulator'),
-    }
-
-    def __init__(self, arch):
-        super().__init__('iOS', True, ['iOS_sdk'],
-                         hosts=['Darwin'])
-        self.arch = arch
-        self.arch_full, self.cpu, self.sdk_name = self.__arch_infos[arch]
-        self._root_path = None
-
-    @property
-    def root_path(self):
-        if self._root_path is None:
-            command = "xcodebuild -version -sdk {} | grep -E '^Path' | sed 's/Path: //'".format(self.sdk_name)
-            self._root_path = subprocess.check_output(command, shell=True)[:-1].decode()
-        return self._root_path
-
-    def __str__(self):
-        return "iOS"
-
-    def get_cross_config(self, host):
-        return {
-            'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
-            'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
-            'host_machine': {
-                'system': 'Darwin',
-                'lsystem': 'darwin',
-                'cpu_family': self.arch,
-                'cpu': self.cpu,
-                'endian': '',
-                'abi': ''
-            },
-        }
-
-
 class BuildEnv:
-    target_platforms = {
-        'native_dyn': TargetInfo('native', False, [],
-                                 hosts=['fedora', 'debian', 'Darwin']),
-        'native_static': TargetInfo('native', True, [],
-                                    hosts=['fedora', 'debian']),
-        'i586_dyn': TargetInfo('i586', False, ['linux_i586_toolchain'],
-                               hosts=['fedora', 'debian']),
-        'i586_static': TargetInfo('i586', True, ['linux_i586_toolchain'],
-                                  hosts=['fedora', 'debian']),
-        'win32_dyn': TargetInfo('win32', False, ['mingw32_toolchain'],
-                                hosts=['fedora', 'debian']),
-        'win32_static': TargetInfo('win32', True, ['mingw32_toolchain'],
-                                   hosts=['fedora', 'debian']),
-        'armhf_dyn': TargetInfo('armhf', False, ['armhf_toolchain'],
-                                hosts=['fedora', 'debian']),
-        'armhf_static': TargetInfo('armhf', True, ['armhf_toolchain'],
-                                   hosts=['fedora', 'debian']),
-        'android_arm': AndroidTargetInfo('arm'),
-        'android_arm64': AndroidTargetInfo('arm64'),
-        'android_mips': AndroidTargetInfo('mips'),
-        'android_mips64': AndroidTargetInfo('mips64'),
-        'android_x86': AndroidTargetInfo('x86'),
-        'android_x86_64': AndroidTargetInfo('x86_64'),
-        'iOS_armv7': iOSTargetInfo('armv7'),
-        'iOS_arm64': iOSTargetInfo('arm64'),
-        'iOS_i386': iOSTargetInfo('i386'),
-        'iOS_x86_64': iOSTargetInfo('x86_64'),
-    }
-
     def __init__(self, options, targetsDict):
         self.source_dir = pj(options.working_dir, "SOURCE")
         build_dir = "BUILD_{}".format(options.target_platform)
@@ -352,7 +193,7 @@ class BuildEnv:
                 self.distname = 'debian'
 
     def setup_build(self, target_platform):
-        self.platform_info = self.target_platforms[target_platform]
+        self.platform_info = PlatformInfo.all_platforms[target_platform]
         if self.distname not in self.platform_info.compatible_hosts:
             print(('ERROR: The target {} cannot be build on host {}.\n'
                    'Select another target platform, or change your host system.'
@@ -619,7 +460,7 @@ class iOS_sdk(Toolchain):
             'RANLIB': '/usr/bin/ranlib',
             'LD': '/usr/bin/ld',
         }
-     
+
     @property
     def configure_option(self):
         return '--host=arm-apple-darwin'
@@ -650,7 +491,7 @@ class Builder:
         self.add_targets(targetDef, _targets)
         dependencies = self.order_dependencies(_targets, targetDef)
         dependencies = list(remove_duplicates(dependencies))
-        
+
         if options.build_nodeps:
             self.targets[targetDef] = _targets[targetDef]
         else:
@@ -734,7 +575,7 @@ def parse_args():
                         choices=Dependency.all_deps.keys())
     parser.add_argument('--working-dir', default=".")
     parser.add_argument('--libprefix', default=None)
-    parser.add_argument('--target-platform', default="native_dyn", choices=BuildEnv.target_platforms)
+    parser.add_argument('--target-platform', default="native_dyn", choices=PlatformInfo.all_platforms)
     parser.add_argument('--verbose', '-v', action="store_true",
                         help=("Print all logs on stdout instead of in specific"
                               " log files per commands"))
