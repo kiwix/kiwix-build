@@ -13,3 +13,9 @@ class PlatformInfo:
 
     def __str__(self):
         return "{}_{}".format(self.build, 'static' if self.static else 'dyn')
+
+    def set_env(self, env):
+        pass
+
+    def get_bind_dir(self):
+        return []

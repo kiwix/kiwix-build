@@ -50,8 +50,5 @@ class android_sdk(Toolchain):
             self.command('build_platform', self._build_platform)
             self.command('fix_licenses', self._fix_licenses)
 
-    def get_bin_dir(self):
-        return []
-
     def set_env(self, env):
         env['ANDROID_HOME'] = self.builder.install_path

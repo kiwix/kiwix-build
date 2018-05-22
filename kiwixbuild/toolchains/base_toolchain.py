@@ -14,6 +14,7 @@ class _MetaToolchain(type):
 
 
 class Toolchain(metaclass=_MetaToolchain):
+    neutral = True
     all_toolchains = {}
     configure_option = ""
     cmake_option = ""
@@ -21,8 +22,9 @@ class Toolchain(metaclass=_MetaToolchain):
     Builder = None
     Source = None
 
-    def __init__(self, buildEnv):
-        self.buildEnv = buildEnv
+    def __init__(self, neutralEnv):
+        self.neutralEnv = neutralEnv
+        self.buildEnv = neutralEnv
         self.source = self.Source(self) if self.Source else None
         self.builder = self.Builder(self) if self.Builder else None
 
@@ -34,17 +36,20 @@ class Toolchain(metaclass=_MetaToolchain):
 
     @property
     def source_path(self):
-        return pj(self.buildEnv.source_dir, self.source.source_dir)
+        return pj(self.neutralEnv.source_dir, self.source.source_dir)
 
     @property
     def _log_dir(self):
-        return self.buildEnv.log_dir
+        return self.neutralEnv.log_dir
 
     def set_env(self, env):
         pass
 
     def set_compiler(self, env):
         pass
+
+    def get_bin_dir(self):
+        return []
 
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)

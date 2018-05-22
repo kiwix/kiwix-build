@@ -34,17 +34,9 @@ class mingw32_toolchain(Toolchain):
         else:
             return "exec_wrapper = 'wine'"
 
-
     @property
     def configure_option(self):
         return '--host={}'.format(self.arch_full)
-
-    def get_bin_dir(self):
-        return [pj(self.root_path, 'bin')]
-
-    def set_env(self, env):
-        env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['LIBS'] = " ".join(self.buildEnv.cross_config['extra_libs']) + " " +env['LIBS']
 
     def set_compiler(self, env):
         for k, v in self.binaries.items():

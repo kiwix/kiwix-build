@@ -43,6 +43,15 @@ class iOSPlatformInfo(PlatformInfo):
             },
         }
 
+    def set_env(self, env):
+        env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -arch {arch} -miphoneos-version-min=9.0 ".format(SDKROOT=self.root_path, arch=self.arch) + env['CFLAGS']
+        env['CXXFLAGS'] = env['CFLAGS'] + " -stdlib=libc++ -std=c++11 "+env['CXXFLAGS']
+        env['LDFLAGS'] = " -arch {arch} -isysroot {SDKROOT} ".format(SDKROOT=self.root_path, arch=self.arch)
+        env['MACOSX_DEPLOYMENT_TARGET'] = "10.7"
+
+    def get_bin_dir(self):
+        return [pj(self.root_path, 'bin')]
+
 iOSPlatformInfo('iOS_armv7', 'armv7')
 iOSPlatformInfo('iOS_arm64', 'arm64')
 iOSPlatformInfo('iOS_i386', 'i386')
