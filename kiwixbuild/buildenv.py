@@ -147,7 +147,7 @@ class BuildEnv:
                    'Select another target platform, or change your host system.'
                   ).format(target_platform, self.distname))
             sys.exit(-1)
-        self.cross_config = self.platform_info.get_cross_config(self.distname)
+        self.cross_config = self.platform_info.get_cross_config()
 
     def setup_toolchains(self):
         toolchain_names = self.platform_info.toolchains

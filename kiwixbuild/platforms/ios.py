@@ -29,8 +29,9 @@ class iOSPlatformInfo(PlatformInfo):
     def __str__(self):
         return "iOS"
 
-    def get_cross_config(self, host):
+    def get_cross_config(self):
         return {
+            'root_path': self.root_path,
             'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
             'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
             'host_machine': {

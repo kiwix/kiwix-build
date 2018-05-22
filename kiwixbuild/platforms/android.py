@@ -20,7 +20,7 @@ class AndroidPlatformInfo(PlatformInfo):
     def __str__(self):
         return "android"
 
-    def get_cross_config(self, host):
+    def get_cross_config(self):
         return {
             'extra_libs': [],
             'extra_cflags': [],

@@ -5,7 +5,7 @@ class ArmhfPlatformInfo(PlatformInfo):
     def __init__(self, name, static):
         super().__init__(name, 'armhf', static, ['armhf_toolchain'], ['fedora', 'debian'])
 
-    def get_cross_config(self, host):
+    def get_cross_config(self):
         return {
             'extra_libs': [],
             'extra_cflags': [],

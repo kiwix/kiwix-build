@@ -5,7 +5,7 @@ class NativePlatformInfo(PlatformInfo):
     def __init__(self, name, static, hosts):
         super().__init__(name, 'native', static, [], hosts)
 
-    def get_cross_config(self, host):
+    def get_cross_config(self):
         return {}
 
 
