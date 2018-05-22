@@ -4,7 +4,8 @@ import tarfile, zipfile
 import tempfile
 import shutil
 import os, stat, sys
-import urllib
+import urllib.request
+import urllib.error
 import ssl
 import subprocess
 from collections import namedtuple, defaultdict
