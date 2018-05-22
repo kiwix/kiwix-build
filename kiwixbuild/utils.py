@@ -4,7 +4,8 @@ import tarfile, zipfile
 import tempfile
 import shutil
 import os, stat, sys
-import urllib
+import urllib.request
+import urllib.error
 import ssl
 import subprocess
 from collections import namedtuple, defaultdict
@@ -18,6 +19,11 @@ REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 
 def which(name):
     command = "which {}".format(name)
+    output = subprocess.check_output(command, shell=True)
+    return output[:-1].decode()
+
+def xrun_find(name):
+    command = "xcrun -find {}".format(name)
     output = subprocess.check_output(command, shell=True)
     return output[:-1].decode()
 

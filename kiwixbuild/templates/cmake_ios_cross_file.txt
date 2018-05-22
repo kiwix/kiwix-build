@@ -3,5 +3,5 @@ SET(CMAKE_SYSTEM_NAME {host_machine[system]})
 SET(CMAKE_C_COMPILER "{toolchain.binaries[CC]}")
 SET(CMAKE_CXX_COMPILER "{toolchain.binaries[CXX]}")
 
-SET(CMAKE_FIND_ROOT_PATH {toolchain.root_path})
+SET(CMAKE_FIND_ROOT_PATH {root_path})
 

@@ -2,8 +2,8 @@ import os
 import subprocess
 
 from .base_toolchain import Toolchain
-from kiwixbuild.dependency_utils import GitClone
-from kiwixbuild.utils import Remotefile, which
+from kiwixbuild.dependencies import GitClone
+from kiwixbuild.utils import which
 pj = os.path.join
 
 class armhf_toolchain(Toolchain):
@@ -52,13 +52,11 @@ class armhf_toolchain(Toolchain):
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
         env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
         env['CXXFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
-        env['LIBS'] = " ".join(self.buildEnv.cross_config['extra_libs']) + " " +env['LIBS']
         env['QEMU_LD_PREFIX'] = pj(self.root_path, "arm-linux-gnueabihf", "libc")
         env['QEMU_SET_ENV'] = "LD_LIBRARY_PATH={}".format(
             ':'.join([
                 pj(self.root_path, "arm-linux-gnueabihf", "lib"),
-                pj(self.buildEnv.install_dir, 'lib'),
-                pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
+                env['LD_LIBRARY_PATH']
         ]))
 
     def set_compiler(self, env):

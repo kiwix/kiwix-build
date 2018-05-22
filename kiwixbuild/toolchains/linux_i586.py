@@ -1,9 +1,8 @@
 import os
-import subprocess
 
 from .base_toolchain import Toolchain
-from kiwixbuild.dependency_utils import GitClone
-from kiwixbuild.utils import Remotefile, which
+from kiwixbuild.dependencies import GitClone
+from kiwixbuild.utils import which
 pj = os.path.join
 
 class linux_i586_toolchain(Toolchain):

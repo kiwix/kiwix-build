@@ -2,7 +2,7 @@ import os
 import shutil
 
 from .base_toolchain import Toolchain
-from kiwixbuild.dependency_utils import ReleaseDownload, Builder
+from kiwixbuild.dependencies import ReleaseDownload, Builder
 from kiwixbuild.utils import Remotefile
 
 pj = os.path.join
@@ -49,9 +49,6 @@ class android_sdk(Toolchain):
         def build(self):
             self.command('build_platform', self._build_platform)
             self.command('fix_licenses', self._fix_licenses)
-
-    def get_bin_dir(self):
-        return []
 
     def set_env(self, env):
         env['ANDROID_HOME'] = self.builder.install_path
