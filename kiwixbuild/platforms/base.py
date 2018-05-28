@@ -27,7 +27,18 @@ class PlatformInfo(metaclass=_MetaPlatform):
     toolchain_names = []
     configure_option = ""
 
+    @classmethod
+    def get_platform(cls, name):
+        if name not in cls.all_running_platforms:
+            cls.all_running_platforms[name] = cls.all_platforms[name]()
+        return cls.all_running_platforms[name]
+
     def __init__(self):
+        if neutralEnv('distname') not in self.compatible_hosts:
+            print(('ERROR: The target platform {} cannot be build on host {}.\n'
+                   'Select another target platform, or change your host system.'
+                  ).format(self.name, neutralEnv('distname')))
+            sys.exit(-1)
         self.all_running_platforms[self.name] = self
         self.buildEnv = BuildEnv(self)
         self.setup_toolchains()
