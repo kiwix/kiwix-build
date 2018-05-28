@@ -32,12 +32,12 @@ class Builder:
         targetClass = Dependency.all_deps[targetName]
         target = targetClass(self.buildEnv)
         targets[targetName] = target
-        for dep in target.dependencies:
+        for dep in target.builder.get_dependencies(self.platform):
             self.add_targets(dep, targets)
 
     def order_dependencies(self, _targets, targetName):
         target = _targets[targetName]
-        for depName in target.dependencies:
+        for depName in target.builder.dependencies(self.platform):
             yield from self.order_dependencies(_targets, depName)
         yield targetName
 

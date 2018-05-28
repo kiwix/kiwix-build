@@ -48,9 +48,10 @@ class Icu_native(Icu):
 
 class Icu_cross_compile(Icu):
     name = "icu4c_cross-compile"
-    dependencies = ['icu4c_native']
 
     class Builder(Icu.Builder):
+        dependencies = ['icu4c_native']
+
         @property
         def configure_option(self):
             icu_native_dep = self.buildEnv.targetsDict['icu4c_native']

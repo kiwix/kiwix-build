@@ -5,13 +5,14 @@ from .base import (
 
 class KiwixTools(Dependency):
     name = "kiwix-tools"
-    dependencies = ["kiwix-lib", "libmicrohttpd", "zlib"]
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-tools.git"
         git_dir = "kiwix-tools"
 
     class Builder(MesonBuilder):
+        dependencies = ["kiwix-lib", "libmicrohttpd", "zlib"]
+
         @property
         def configure_option(self):
             if self.buildEnv.platform_info.static:

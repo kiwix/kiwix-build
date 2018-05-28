@@ -20,10 +20,10 @@ class Xapian(Dependency):
         configure_env = {'_format_LDFLAGS': "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
                          '_format_CXXFLAGS': "-I{buildEnv.install_dir}/include"}
 
-    @property
-    def dependencies(self):
-        deps = ['zlib', 'lzma']
-        if (self.buildEnv.platform_info.build == 'win32'
-         or neutralEnv('distname') == 'Darwin'):
-            return deps
-        return deps + ['uuid']
+        @classmethod
+        def get_dependencies(cls, platformInfo):
+            deps = ['zlib', 'lzma']
+            if (platformInfo.build == 'win32'
+             or neutralEnv('distname') == 'Darwin'):
+                return deps
+            return deps + ['uuid']

@@ -9,13 +9,14 @@ from kiwixbuild.utils import pj
 
 class KiwixAndroid(Dependency):
     name = "kiwix-android"
-    dependencies = ["Gradle", "kiwix-lib"]
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-android"
         git_dir = "kiwix-android"
 
     class Builder(GradleBuilder):
+        dependencies = ["Gradle", "kiwix-lib"]
+
         def build(self):
             if self.buildEnv.options.targets == 'kiwix-android-custom':
                 print("SKIP")

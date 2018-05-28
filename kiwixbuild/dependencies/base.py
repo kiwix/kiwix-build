@@ -20,7 +20,6 @@ class _MetaDependency(type):
 
 class Dependency(metaclass=_MetaDependency):
     all_deps = {}
-    dependencies = []
     force_native_build = False
 
     def __init__(self, buildEnv):
@@ -205,10 +204,15 @@ class SvnClone(Source):
 
 class Builder:
     subsource_dir = None
+    dependencies = []
 
     def __init__(self, target):
         self.target = target
         self.buildEnv = target.buildEnv
+
+    @classmethod
+    def get_dependencies(cls, platformInfo):
+        return cls.dependencies
 
     @property
     def name(self):

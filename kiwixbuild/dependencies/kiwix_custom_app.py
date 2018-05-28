@@ -10,7 +10,6 @@ from kiwixbuild.utils import Remotefile, pj, SkipCommand
 
 class KiwixCustomApp(Dependency):
     name = "kiwix-android-custom"
-    dependencies = ["kiwix-android", "kiwix-lib"]
 
     def __init__(self, buildEnv):
         super().__init__(buildEnv)
@@ -21,6 +20,8 @@ class KiwixCustomApp(Dependency):
         git_dir = "kiwix-android-custom"
 
     class Builder(GradleBuilder):
+        dependencies = ["kiwix-android", "kiwix-lib"]
+
         @property
         def gradle_target(self):
             return "assemble{}".format(self.target.custom_name)

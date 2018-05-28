@@ -38,9 +38,10 @@ class LibMagic_native(LibMagicBase):
 
 class LibMagic_cross_compile(LibMagicBase):
     name = "libmagic_cross-compile"
-    dependencies = ['libmagic_native']
 
     class Builder(LibMagicBase.Builder):
+        dependencies = ['libmagic_native']
+
         def _compile(self, context):
             context.try_skip(self.build_path)
             command = "make -j4 {make_target} {make_option}".format(
