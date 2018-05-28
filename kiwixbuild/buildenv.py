@@ -20,7 +20,6 @@ class PlatformNeutralEnv:
                   self.toolchain_dir,
                   self.log_dir):
             os.makedirs(d, exist_ok=True)
-        self.toolchains = {}
         self.detect_platform()
         self.ninja_command = self._detect_ninja()
         if not self.ninja_command:
@@ -114,16 +113,6 @@ class BuildEnv:
         if os.path.isdir('/usr/lib64') and not os.path.islink('/usr/lib64'):
             return 'lib64'
         return 'lib'
-
-    @property
-    def configure_option(self):
-        configure_options = [tlc.configure_option for tlc in self.toolchains]
-        return " ".join(configure_options)
-
-    @property
-    def cmake_option(self):
-        cmake_options = [tlc.cmake_option for tlc in self.toolchains]
-        return " ".join(cmake_options)
 
     def _set_env(self, env, cross_compile_env, cross_compile_compiler, cross_compile_path):
         if env is None:

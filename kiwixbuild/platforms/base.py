@@ -47,10 +47,8 @@ class PlatformInfo(metaclass=_MetaPlatform):
         return "{}_{}".format(self.build, 'static' if self.static else 'dyn')
 
     def setup_toolchains(self):
-        self.toolchains = {}
         for tlc_name in self.toolchain_names:
             ToolchainClass = Toolchain.all_toolchains[tlc_name]
-            self.toolchains[tlc_name] = ToolchainClass()
             if ToolchainClass.Source is not None:
                 add_plt_step(('source', tlc_name), ToolchainClass.Source)
             if ToolchainClass.Builder is not None:
@@ -82,8 +80,6 @@ class PlatformInfo(metaclass=_MetaPlatform):
         return crossfile
 
     def finalize_setup(self):
-        self.buildEnv.toolchains = [
-            self.toolchains[tlc_name] for tlc_name in self.toolchain_names]
         self.buildEnv.cross_config = self.get_cross_config()
         self.buildEnv.meson_crossfile = None
         self.buildEnv.cmake_crossfile = None
