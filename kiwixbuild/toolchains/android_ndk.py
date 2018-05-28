@@ -113,22 +113,3 @@ class android_ndk(Toolchain):
             self.command('build_platform', self._build_platform)
             self.command('fix_permission_right', self._fix_permission_right)
 
-    def get_bin_dir(self):
-        return [pj(self.builder.install_path, 'bin')]
-
-    def set_env(self, env):
-        env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(self.root_path) + env['CFLAGS']
-        env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(self.root_path) + env['CXXFLAGS']
-        env['LDFLAGS'] = '--sysroot={} '.format(self.root_path) + env['LDFLAGS']
-        #env['CFLAGS'] = ' -fPIC -D_FILE_OFFSET_BITS=64 -O3 '+env['CFLAGS']
-        #env['CXXFLAGS'] = (' -D__OPTIMIZE__ -fno-strict-aliasing '
-        #                   ' -DU_HAVE_NL_LANGINFO_CODESET=0 '
-        #                   '-DU_STATIC_IMPLEMENTATION -O3 '
-        #                   '-DU_HAVE_STD_STRING -DU_TIMEZONE=0 ')+env['CXXFLAGS']
-        env['NDK_DEBUG'] = '0'
-
-    def set_compiler(self, env):
-        env['CC'] = self.binaries['CC']
-        env['CXX'] = self.binaries['CXX']
-

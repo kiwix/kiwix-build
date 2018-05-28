@@ -23,6 +23,6 @@ class Zimwriterfs(Dependency):
         @property
         def configure_option(self):
             base_option = "-Dmagic-install-prefix={buildEnv.install_dir}"
-            if self.buildEnv.platform_info.static:
+            if self.buildEnv.platformInfo.static:
                 base_option += " -Dstatic-linkage=true"
             return base_option

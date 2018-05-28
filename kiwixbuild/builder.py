@@ -9,8 +9,14 @@ from .dependencies import Dependency
 class Builder:
     def __init__(self, options):
         self.options = options
+        platformClass = PlatformInfo.all_platforms[options.target_platform]
+        if neutralEnv('distname') not in platformClass.compatible_hosts:
+            print(('ERROR: The target platform {} cannot be build on host {}.\n'
+                   'Select another target platform, or change your host system.'
+                  ).format(options.target_platform, self.distname))
+            sys.exit(-1)
         self.targets = OrderedDict()
-        self.buildEnv = BuildEnv(options, self.targets)
+        self.platform = platform = platformClass(self.targets)
 
         _targets = {}
         targetDef = options.targets
@@ -30,7 +36,7 @@ class Builder:
         if targetName in targets:
             return
         targetClass = Dependency.all_deps[targetName]
-        target = targetClass(self.buildEnv)
+        target = targetClass(self.platform.buildEnv)
         targets[targetName] = target
         for dep in target.builder.get_dependencies(self.platform):
             self.add_targets(dep, targets)
@@ -46,7 +52,7 @@ class Builder:
             print("SKIP")
             return
 
-        toolchain_sources = (tlc.source for tlc in self.buildEnv.toolchains if tlc.source)
+        toolchain_sources = (tlc.source for tlc in self.platform.buildEnv.toolchains if tlc.source)
         for toolchain_source in toolchain_sources:
             print("prepare sources for toolchain {} :".format(toolchain_source.name))
             toolchain_source.prepare()
@@ -58,7 +64,7 @@ class Builder:
             source.prepare()
 
     def build(self):
-        toolchain_builders = (tlc.builder for tlc in self.buildEnv.toolchains if tlc.builder)
+        toolchain_builders = (tlc.builder for tlc in self.platform.buildEnv.toolchains if tlc.builder)
         for toolchain_builder in toolchain_builders:
             print("build toolchain {} :".format(toolchain_builder.name))
             toolchain_builder.build()
@@ -79,16 +85,16 @@ class Builder:
     def run(self):
         try:
             print("[INSTALL PACKAGES]")
-            self.buildEnv.install_packages()
-            self.buildEnv.finalize_setup()
+            self.platform.install_packages()
+            self.platform.finalize_setup()
             print("[PREPARE]")
             self.prepare_sources()
             print("[BUILD]")
             self.build()
             # No error, clean intermediate file at end of build if needed.
             print("[CLEAN]")
-            if self.buildEnv.options.clean_at_end:
-                self.buildEnv.clean_intermediate_directories()
+            if self.options.clean_at_end:
+                self.platform.clean_intermediate_directories()
             else:
                 print("SKIP")
         except StopBuild:

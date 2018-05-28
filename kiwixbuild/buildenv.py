@@ -3,13 +3,9 @@ import os, sys, shutil
 import subprocess
 import platform
 
-from .platforms import PlatformInfo
 from .toolchains import Toolchain
-from .packages import PACKAGE_NAME_MAPPERS
 from .utils import pj, download_remote, Defaultdict
-from . import _global
-
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+from ._global import neutralEnv
 
 
 class PlatformNeutralEnv:
@@ -64,12 +60,6 @@ class PlatformNeutralEnv:
             if retcode == 0:
                 return n
 
-    def add_toolchain(self, toolchain_name):
-        if toolchain_name not in self.toolchains:
-            ToolchainClass = Toolchain.all_toolchains[toolchain_name]
-            self.toolchains[toolchain_name] = ToolchainClass(self)
-        return self.toolchains[toolchain_name]
-
     def _detect_meson(self):
         for n in ['meson.py', 'meson']:
             try:
@@ -86,18 +76,16 @@ class PlatformNeutralEnv:
 
 
 class BuildEnv:
-    def __init__(self, options, targetsDict):
-        build_dir = "BUILD_{}".format(options.target_platform)
-        self.build_dir = pj(options.working_dir, build_dir)
+    def __init__(self, platformInfo, targetsDict):
+        build_dir = "BUILD_{}".format(platformInfo.name)
+        self.platformInfo = platformInfo
+        self.build_dir = pj(neutralEnv('working_dir'), build_dir)
         self.install_dir = pj(self.build_dir, "INSTALL")
         for d in (self.build_dir,
                   self.install_dir):
             os.makedirs(d, exist_ok=True)
 
-        self.setup_build(options.target_platform)
-        self.setup_toolchains()
-        self.options = options
-        self.libprefix = options.libprefix or self._detect_libdir()
+        self.libprefix = neutralEnv('libprefix') or self._detect_libdir()
         self.targetsDict = targetsDict
 
     def clean_intermediate_directories(self):
@@ -109,67 +97,6 @@ class BuildEnv:
                 shutil.rmtree(subpath)
             else:
                 os.remove(subpath)
-
-    def setup_build(self, target_platform):
-        self.platform_info = PlatformInfo.all_platforms[target_platform]
-        if self.distname not in self.platform_info.compatible_hosts:
-            print(('ERROR: The target {} cannot be build on host {}.\n'
-                   'Select another target platform, or change your host system.'
-                  ).format(target_platform, self.distname))
-            sys.exit(-1)
-        self.cross_config = self.platform_info.get_cross_config()
-
-    def setup_toolchains(self):
-        toolchain_names = self.platform_info.toolchains
-        self.toolchains = []
-        for toolchain_name in toolchain_names:
-            ToolchainClass = Toolchain.all_toolchains[toolchain_name]
-            if ToolchainClass.neutral:
-                self.toolchains.append(
-                    _global._neutralEnv.add_toolchain(toolchain_name)
-                )
-            else:
-                self.toolchains.append(ToolchainClass(self))
-
-    def finalize_setup(self):
-        getattr(self, 'setup_{}'.format(self.platform_info.build))()
-
-    def setup_native(self):
-        self.cmake_crossfile = None
-        self.meson_crossfile = None
-
-    def _gen_crossfile(self, name):
-        crossfile = pj(self.build_dir, name)
-        template_file = pj(SCRIPT_DIR, 'templates', name)
-        with open(template_file, 'r') as f:
-            template = f.read()
-        content = template.format(
-            toolchain=self.toolchains[0],
-            **self.cross_config
-        )
-        with open(crossfile, 'w') as outfile:
-            outfile.write(content)
-        return crossfile
-
-    def setup_win32(self):
-        self.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
-        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
-
-    def setup_android(self):
-        self.cmake_crossfile = self._gen_crossfile('cmake_android_cross_file.txt')
-        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
-
-    def setup_armhf(self):
-        self.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
-        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
-
-    def setup_iOS(self):
-        self.cmake_crossfile = self._gen_crossfile('cmake_ios_cross_file.txt')
-        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
-
-    def setup_i586(self):
-        self.cmake_crossfile = self._gen_crossfile('cmake_i586_cross_file.txt')
-        self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
     def __getattr__(self, name):
         return _global.neutralEnv(name)
@@ -237,75 +164,10 @@ class BuildEnv:
                     v = v.format(**self.cross_config)
                     k = k[8:]
                 env[k] = v
-            for toolchain in self.toolchains:
-                toolchain.set_env(env)
-            self.platform_info.set_env(env)
+            self.platformInfo.set_env(env)
         if cross_compile_compiler:
-            for toolchain in self.toolchains:
-                toolchain.set_compiler(env)
+            self.platformInfo.set_compiler(env)
         if cross_compile_path:
-            bin_dirs = []
-            for tlc in self.toolchains:
-                bin_dirs += tlc.get_bin_dir()
-            bin_dirs += self.platform_info.get_bind_dir()
+            bin_dirs = self.platformInfo.get_bind_dir()
             env['PATH'] = ':'.join(bin_dirs + [env['PATH']])
         return env
-
-    def install_packages(self):
-        autoskip_file = pj(self.build_dir, ".install_packages_ok")
-        if self.distname in ('fedora', 'redhat', 'centos'):
-            package_installer = 'sudo dnf install {}'
-            package_checker = 'rpm -q --quiet {}'
-        elif self.distname in ('debian', 'Ubuntu'):
-            package_installer = 'sudo apt-get install {}'
-            package_checker = 'LANG=C dpkg -s {} 2>&1 | grep Status | grep "ok installed" 1>/dev/null 2>&1'
-        elif self.distname == 'Darwin':
-            package_installer = 'brew install {}'
-            package_checker = 'brew list -1 | grep -q {}'
-        mapper_name = "{host}_{target}".format(
-            host=self.distname,
-            target=self.platform_info)
-        try:
-            package_name_mapper = PACKAGE_NAME_MAPPERS[mapper_name]
-        except KeyError:
-            print("SKIP : We don't know which packages we must install to compile"
-                  " a {target} {build_type} version on a {host} host.".format(
-                      target=self.platform_info,
-                      host=self.distname))
-            return
-
-        packages_list = package_name_mapper.get('COMMON', [])
-        for dep in self.targetsDict.values():
-            packages = package_name_mapper.get(dep.name)
-            if packages:
-                packages_list += packages
-                dep.skip = True
-        for dep in self.targetsDict.values():
-            packages = getattr(dep, 'extra_packages', [])
-            for package in packages:
-                packages_list += package_name_mapper.get(package, [])
-        if not self.options.force_install_packages and os.path.exists(autoskip_file):
-            print("SKIP")
-            return
-
-        packages_to_install = []
-        for package in packages_list:
-            print(" - {} : ".format(package), end="")
-            command = package_checker.format(package)
-            try:
-                subprocess.check_call(command, shell=True)
-            except subprocess.CalledProcessError:
-                print("NEEDED")
-                packages_to_install.append(package)
-            else:
-                print("SKIP")
-
-        if packages_to_install:
-            command = package_installer.format(" ".join(packages_to_install))
-            print(command)
-            subprocess.check_call(command, shell=True)
-        else:
-            print("SKIP, No package to install.")
-
-        with open(autoskip_file, 'w'):
-            pass

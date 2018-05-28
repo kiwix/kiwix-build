@@ -41,15 +41,6 @@ class Toolchain(metaclass=_MetaToolchain):
     def _log_dir(self):
         return neutralEnv('log_dir')
 
-    def set_env(self, env):
-        pass
-
-    def set_compiler(self, env):
-        pass
-
-    def get_bin_dir(self):
-        return []
-
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
         log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))

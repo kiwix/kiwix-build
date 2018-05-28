@@ -20,8 +20,34 @@ class AndroidPlatformInfo(PlatformInfo):
     def __str__(self):
         return "android"
 
+    def binaries(self, install_path):
+        binaries = ((k,'{}-{}'.format(self.arch_full, v))
+                for k, v in (('CC', 'gcc'),
+                             ('CXX', 'g++'),
+                             ('AR', 'ar'),
+                             ('STRIP', 'strip'),
+                             ('WINDRES', 'windres'),
+                             ('RANLIB', 'ranlib'),
+                             ('LD', 'ld'))
+               )
+        return {k:pj(install_path, 'bin', v)
+                for k,v in binaries}
+
+    @property
+    def ndk_builder(self):
+        return self.toolchains[0].builder
+
+    @property
+    def sdk_builder(self):
+        return self.toolchains[1].builder
+
     def get_cross_config(self):
+        install_path = self.ndk_builder.install_path
         return {
+            'exec_wrapper_def': '',
+            'install_path': install_path,
+            'binaries': self.binaries(install_path),
+            'root_path': pj(install_path, 'sysroot'),
             'extra_libs': [],
             'extra_cflags': [],
             'host_machine': {
@@ -34,7 +60,22 @@ class AndroidPlatformInfo(PlatformInfo):
             },
         }
 
+    def get_bin_dir(self):
+        return [pj(self.ndk_builder.install_path, 'bin')]
 
+    def set_env(self, env):
+        root_path = pj(self.ndk_builder.install_path, 'sysroot')
+        env['PKG_CONFIG_LIBDIR'] = pj(root_path, 'lib', 'pkgconfig')
+        env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CFLAGS']
+        env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CXXFLAGS']
+        env['LDFLAGS'] = '--sysroot={} '.format(root_path) + env['LDFLAGS']
+        #env['CFLAGS'] = ' -fPIC -D_FILE_OFFSET_BITS=64 -O3 '+env['CFLAGS']
+        #env['CXXFLAGS'] = (' -D__OPTIMIZE__ -fno-strict-aliasing '
+        #                   ' -DU_HAVE_NL_LANGINFO_CODESET=0 '
+        #                   '-DU_STATIC_IMPLEMENTATION -O3 '
+        #                   '-DU_HAVE_STD_STRING -DU_TIMEZONE=0 ')+env['CXXFLAGS']
+        env['NDK_DEBUG'] = '0'
+        env['ANDROID_HOME'] = self.sdk_builder.install_path
 
 AndroidPlatformInfo('android_arm', 'arm')
 AndroidPlatformInfo('android_arm64', 'arm64')

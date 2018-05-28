@@ -2,11 +2,11 @@ SET(CMAKE_SYSTEM_NAME {host_machine[system]})
 SET(CMAKE_SYSTEM_PROCESSOR {host_machine[cpu_family]})
 
 # specify the cross compiler
-SET(CMAKE_C_COMPILER "{toolchain.binaries[CC]}")
-SET(CMAKE_CXX_COMPILER "{toolchain.binaries[CXX]}")
-SET(CMAKE_RC_COMPILER {toolchain.binaries[WINDRES]})
-SET(CMAKE_AR:FILEPATH {toolchain.binaries[AR]})
-SET(CMAKE_RANLIB:FILEPATH {toolchain.binaries[RANLIB]})
+SET(CMAKE_C_COMPILER "{binaries[CC]}")
+SET(CMAKE_CXX_COMPILER "{binaries[CXX]}")
+SET(CMAKE_RC_COMPILER {binaries[WINDRES]})
+SET(CMAKE_AR:FILEPATH {binaries[AR]})
+SET(CMAKE_RANLIB:FILEPATH {binaries[RANLIB]})
 
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
@@ -15,7 +15,7 @@ if(CCACHE_FOUND)
 endif(CCACHE_FOUND)
 
 # where is the target environment
-SET(CMAKE_FIND_ROOT_PATH {toolchain.root_path})
+SET(CMAKE_FIND_ROOT_PATH {root_path})
 
 # search for programs in the build host directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
