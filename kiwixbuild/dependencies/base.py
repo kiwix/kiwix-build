@@ -4,7 +4,7 @@ import shutil
 
 from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild, run_command
 from kiwixbuild.versions import main_project_versions, base_deps_versions
-from kiwixbuild._global import neutralEnv
+from kiwixbuild._global import neutralEnv, option
 
 SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
@@ -130,7 +130,7 @@ class GitClone(Source):
 
     @property
     def source_dir(self):
-        if neutralEnv('make_release'):
+        if option('make_release'):
             return "{}_release".format(self.git_dir)
         else:
             return self.git_dir
@@ -141,7 +141,7 @@ class GitClone(Source):
 
     @property
     def git_ref(self):
-        if neutralEnv('make_release'):
+        if option('make_release'):
             return self.release_git_ref
         else:
             return self.base_git_ref

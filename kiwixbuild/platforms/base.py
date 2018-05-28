@@ -2,11 +2,12 @@
 import os
 import subprocess
 
+from kiwixbuild.dependencies import Dependency
 from kiwixbuild.toolchains import Toolchain
 from kiwixbuild.packages import PACKAGE_NAME_MAPPERS
 from kiwixbuild.utils import pj, remove_duplicates
 from kiwixbuild.buildenv import BuildEnv
-from kiwixbuild._global import neutralEnv, add_plt_step, target_steps
+from kiwixbuild._global import neutralEnv, option, add_plt_step, target_steps
 
 _SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 TEMPLATES_DIR = pj(os.path.dirname(_SCRIPT_DIR), 'templates')
@@ -117,7 +118,7 @@ class PlatformInfo(metaclass=_MetaPlatform):
         packages_to_have = self.get_packages()
         packages_to_have = remove_duplicates(packages_to_have)
 
-        if not neutralEnv('force_install_packages') and os.path.exists(autoskip_file):
+        if not option('force_install_packages') and os.path.exists(autoskip_file):
             print("SKIP")
             return
 

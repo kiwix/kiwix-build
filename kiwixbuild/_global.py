@@ -1,6 +1,7 @@
 from collections import OrderedDict as _OrderedDict
 
 _neutralEnv = None
+_options = None
 _target_steps = _OrderedDict()
 _plt_steps = _OrderedDict()
 
@@ -10,6 +11,13 @@ def set_neutralEnv(env):
 
 def neutralEnv(what):
     return getattr(_neutralEnv, what)
+
+def set_options(options):
+    global _options
+    _options = options
+
+def option(what):
+    return getattr(_options, what)
 
 def add_target_step(key, what):
     _target_steps[key] = what

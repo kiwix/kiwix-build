@@ -6,6 +6,7 @@ from .base import (
     GradleBuilder)
 
 from kiwixbuild.utils import pj
+from kiwixbuild._global import option
 
 class KiwixAndroid(Dependency):
     name = "kiwix-android"
@@ -18,7 +19,7 @@ class KiwixAndroid(Dependency):
         dependencies = ["Gradle", "kiwix-lib"]
 
         def build(self):
-            if self.buildEnv.options.targets == 'kiwix-android-custom':
+            if option('targets') == 'kiwix-android-custom':
                 print("SKIP")
             else:
                 super().build()

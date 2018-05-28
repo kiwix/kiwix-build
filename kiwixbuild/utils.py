@@ -10,11 +10,10 @@ import ssl
 import subprocess
 from collections import namedtuple, defaultdict
 
-from kiwixbuild._global import neutralEnv
+from kiwixbuild._global import neutralEnv, option
 
 pj = os.path.join
 
-g_print_progress = True
 
 REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 
@@ -28,11 +27,6 @@ def xrun_find(name):
     command = "xcrun -find {}".format(name)
     output = subprocess.check_output(command, shell=True)
     return output[:-1].decode()
-
-
-def setup_print_progress(print_progress):
-    global g_print_progress
-    g_print_progress = print_progress
 
 
 class Defaultdict(defaultdict):
@@ -69,7 +63,7 @@ def get_sha256(path):
 
 
 def print_progress(progress):
-    if g_print_progress:
+    if option('show_progress'):
         text = "{}\033[{}D".format(progress, len(progress))
         print(text, end="")
 
@@ -92,7 +86,7 @@ def copy_tree(src, dst, post_copy_function=None):
                 post_copy_function(dstfile)
 
 
-def download_remote(what, where, check_certificate=True):
+def download_remote(what, where):
     file_path = pj(where, what.name)
     file_url = what.url or (REMOTE_PREFIX + what.name)
     if os.path.exists(file_path):
@@ -100,7 +94,7 @@ def download_remote(what, where, check_certificate=True):
             raise SkipCommand()
         os.remove(file_path)
 
-    if not check_certificate:
+    if option('no_cert_check'):
         context = ssl.create_default_context()
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
@@ -241,7 +235,7 @@ def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cros
         env = buildEnv._set_env(env, cross_compile_env, cross_compile_compiler, cross_compile_path)
     log = None
     try:
-        if not neutralEnv('verbose'):
+        if not option('verbose'):
             log = open(context.log_file, 'w')
         print("run command '{}'".format(command), file=log)
         print("current directory is '{}'".format(cwd), file=log)

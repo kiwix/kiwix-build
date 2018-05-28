@@ -7,14 +7,14 @@ from .base import (
     GradleBuilder)
 
 from kiwixbuild.utils import Remotefile, pj, SkipCommand
-from kiwixbuild._global import get_target_step
+from kiwixbuild._global import option, get_target_step
 
 class KiwixCustomApp(Dependency):
     name = "kiwix-android-custom"
 
     def __init__(self, buildEnv):
         super().__init__(buildEnv)
-        self.custom_name = buildEnv.options.android_custom_app
+        self.custom_name = option('android_custom_app')
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-android-custom"
@@ -51,7 +51,7 @@ class KiwixCustomApp(Dependency):
 
         def _get_zim_size(self):
             try:
-                zim_size = self.buildEnv.options.zim_file_size
+                zim_size = option('zim_file_size')
             except AttributeError:
                 with open(pj(self.source_path, self.target.custom_name, 'info.json')) as f:
                     app_info = json.load(f)
@@ -64,7 +64,7 @@ class KiwixCustomApp(Dependency):
             self.command('compile', self._compile)
 
         def _download_zim(self, context):
-            zim_url = self.buildEnv.options.zim_file_url
+            zim_url = option('zim_file_url')
             if zim_url is None:
                 raise SkipCommand()
             with open(pj(self.source_path, self.target.custom_name, 'info.json')) as f:

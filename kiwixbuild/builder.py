@@ -7,33 +7,32 @@ from .platforms import PlatformInfo
 from .utils import remove_duplicates, StopBuild
 from .dependencies import Dependency
 from ._global import (
-    neutralEnv,
+    neutralEnv, option,
     add_target_step, get_target_step, target_steps,
     add_plt_step, get_plt_step, plt_steps)
 from . import _global
 
 class Builder:
-    def __init__(self, options):
-        self.options = options
-        platformClass = PlatformInfo.all_platforms[options.target_platform]
+    def __init__(self):
+        platformClass = PlatformInfo.all_platforms[option('target_platform')]
         if neutralEnv('distname') not in platformClass.compatible_hosts:
             print(('ERROR: The target platform {} cannot be build on host {}.\n'
                    'Select another target platform, or change your host system.'
-                  ).format(options.target_platform, self.distname))
+                  ).format(option('target_platform'), self.distname))
             sys.exit(-1)
         self.platform = platform = platformClass()
 
         _targets = {}
-        targetDef = (options.target_platform, options.targets)
+        targetDef = (option('target_platform'), option('targets'))
         self.add_targets(targetDef, _targets)
         dependencies = self.order_dependencies(_targets, targetDef)
         dependencies = list(remove_duplicates(dependencies))
 
-        if options.build_nodeps:
+        if option('build_nodeps'):
             add_target_step(targetDef, _targets[targetDef])
         else:
             for dep in dependencies:
-                if self.options.build_deps_only and dep == targetDef:
+                if option('build_deps_only') and dep == targetDef:
                     continue
                 add_target_step(dep, _targets[dep])
 
@@ -79,7 +78,7 @@ class Builder:
             source.prepare()
 
     def prepare_sources(self):
-        if self.options.skip_source_prepare:
+        if option('skip_source_prepare'):
             print("SKIP")
             return
 
@@ -113,7 +112,7 @@ class Builder:
             source = get_target_step(builderDef[1], 'source')
             env = PlatformInfo.all_running_platforms[builderDef[0]].buildEnv
             builder = get_target_step(builderDef)(depClass, source, env)
-            if self.options.make_dist and builderDef[1] == self.options.targets:
+            if option('make_dist') and builderDef[1] == option('targets'):
                 print("make dist {}:".format(builder.name))
                 builder.make_dist()
                 continue
@@ -136,7 +135,7 @@ class Builder:
             self.build()
             # No error, clean intermediate file at end of build if needed.
             print("[CLEAN]")
-            if self.options.clean_at_end:
+            if option('clean_at_end'):
                 self.platform.clean_intermediate_directories()
             else:
                 print("SKIP")

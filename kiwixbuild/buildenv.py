@@ -5,15 +5,15 @@ import platform
 
 from .toolchains import Toolchain
 from .utils import pj, download_remote, Defaultdict
-from ._global import neutralEnv
+from ._global import neutralEnv, option
 
 
 class PlatformNeutralEnv:
-    def __init__(self, options):
-        self.options = options
-        self.source_dir = pj(options.working_dir, "SOURCE")
-        self.archive_dir = pj(options.working_dir, "ARCHIVE")
-        self.toolchain_dir = pj(options.working_dir, "TOOLCHAINS")
+    def __init__(self):
+        self.working_dir = option('working_dir')
+        self.source_dir = pj(self.working_dir, "SOURCE")
+        self.archive_dir = pj(self.working_dir, "ARCHIVE")
+        self.toolchain_dir = pj(self.working_dir, "TOOLCHAINS")
         self.log_dir = pj(self.working_dir, 'LOGS')
         for d in (self.source_dir,
                   self.archive_dir,
@@ -47,7 +47,7 @@ class PlatformNeutralEnv:
 
     def download(self, what, where=None):
         where = where or self.archive_dir
-        download_remote(what, where, not self.options.no_cert_check)
+        download_remote(what, where)
 
     def _detect_ninja(self):
         for n in ['ninja', 'ninja-build']:
@@ -71,15 +71,12 @@ class PlatformNeutralEnv:
             if retcode == 0:
                 return n
 
-    def __getattr__(self, name):
-        return getattr(self.options, name)
-
 
 class BuildEnv:
     def __init__(self, platformInfo):
         build_dir = "BUILD_{}".format(platformInfo.name)
         self.platformInfo = platformInfo
-        self.build_dir = pj(neutralEnv('working_dir'), build_dir)
+        self.build_dir = pj(option('working_dir'), build_dir)
         self.install_dir = pj(self.build_dir, "INSTALL")
         self.log_dir = pj(self.build_dir, 'LOGS')
         for d in (self.build_dir,
@@ -87,7 +84,7 @@ class BuildEnv:
                   self.log_dir):
             os.makedirs(d, exist_ok=True)
 
-        self.libprefix = neutralEnv('libprefix') or self._detect_libdir()
+        self.libprefix = option('libprefix') or self._detect_libdir()
 
     def clean_intermediate_directories(self):
         for subdir in os.listdir(self.build_dir):
@@ -98,9 +95,6 @@ class BuildEnv:
                 shutil.rmtree(subpath)
             else:
                 os.remove(subpath)
-
-    def __getattr__(self, name):
-        return _global.neutralEnv(name)
 
     def _is_debianlike(self):
         return os.path.isfile('/etc/debian_version')
