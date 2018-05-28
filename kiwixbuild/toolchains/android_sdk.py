@@ -3,7 +3,7 @@ import shutil
 
 from .base_toolchain import Toolchain
 from kiwixbuild.dependencies import ReleaseDownload, Builder
-from kiwixbuild.utils import Remotefile
+from kiwixbuild.utils import Remotefile, run_command
 
 pj = os.path.join
 
@@ -38,7 +38,7 @@ class android_sdk(Toolchain):
             # - 8 : Android SDK Build-tools, revision 24.0.1
             # - 34 : SDK Platform Android 7.0, API 24, revision 2
             # - 162 : Android Support Repository, revision 44
-            self.buildEnv.run_command(command, self.install_path, context, input="y\n")
+            run_command(command, self.install_path, context, input="y\n")
 
         def _fix_licenses(self, context):
             context.try_skip(self.install_path)

@@ -34,33 +34,6 @@ class PlatformNeutralEnv:
             sys.exit("ERROR: meson command not fount")
         self.mesontest_command = "{} test".format(self.meson_command)
 
-    def run_command(self, command, cwd, context, env=None, input=None):
-        os.makedirs(cwd, exist_ok=True)
-        if env is None:
-            env = Defaultdict(str, os.environ)
-        log = None
-        try:
-            if not self.options.verbose:
-                log = open(context.log_file, 'w')
-            print("run command '{}'".format(command), file=log)
-            print("current directory is '{}'".format(cwd), file=log)
-            print("env is :", file=log)
-            for k, v in env.items():
-                print("  {} : {!r}".format(k, v), file=log)
-
-            kwargs = dict()
-            if input:
-                kwargs['stdin'] = subprocess.PIPE
-            process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
-            if input:
-                process.communicate(input.encode())
-            retcode = process.wait()
-            if retcode:
-                raise subprocess.CalledProcessError(retcode, command)
-        finally:
-            if log:
-                log.close()
-
     def detect_platform(self):
         _platform = platform.system()
         self.distname = _platform
@@ -277,41 +250,6 @@ class BuildEnv:
             bin_dirs += self.platform_info.get_bind_dir()
             env['PATH'] = ':'.join(bin_dirs + [env['PATH']])
         return env
-
-    def run_command(self, command, cwd, context, env=None, input=None, cross_env_only=False):
-        os.makedirs(cwd, exist_ok=True)
-        cross_compile_env = True
-        cross_compile_compiler = True
-        cross_compile_path = True
-        if context.force_native_build:
-            cross_compile_env = False
-            cross_compile_compiler = False
-            cross_compile_path = False
-        if cross_env_only:
-            cross_compile_compiler = False
-        env = self._set_env(env, cross_compile_env, cross_compile_compiler, cross_compile_path)
-        log = None
-        try:
-            if not self.options.verbose:
-                log = open(context.log_file, 'w')
-            print("run command '{}'".format(command), file=log)
-            print("current directory is '{}'".format(cwd), file=log)
-            print("env is :", file=log)
-            for k, v in env.items():
-                print("  {} : {!r}".format(k, v), file=log)
-
-            kwargs = dict()
-            if input:
-                kwargs['stdin'] = subprocess.PIPE
-            process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
-            if input:
-                process.communicate(input.encode())
-            retcode = process.wait()
-            if retcode:
-                raise subprocess.CalledProcessError(retcode, command)
-        finally:
-            if log:
-                log.close()
 
     def install_packages(self):
         autoskip_file = pj(self.build_dir, ".install_packages_ok")

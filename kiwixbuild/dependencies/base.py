@@ -2,7 +2,7 @@ import subprocess
 import os
 import shutil
 
-from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild
+from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild, run_command
 from kiwixbuild.versions import main_project_versions, base_deps_versions
 from kiwixbuild._global import neutralEnv
 
@@ -162,13 +162,13 @@ class GitClone(Source):
             raise SkipCommand()
         command = "git clone --depth=1 --branch {} {} {}".format(
             self.git_ref, self.git_remote, self.source_dir)
-        neutralEnv('run_command')(command, neutralEnv('source_dir'), context)
+        run_command(command, neutralEnv('source_dir'), context)
 
     def _git_update(self, context):
         command = "git fetch origin {}".format(
             self.git_ref)
-        neutralEnv('run_command')(command, self.git_path, context)
-        neutralEnv('run_command')("git checkout "+self.git_ref, self.git_path, context)
+        run_command(command, self.git_path, context)
+        run_command("git checkout "+self.git_ref, self.git_path, context)
 
     def prepare(self):
         self.command('gitclone', self._git_clone)
@@ -190,11 +190,11 @@ class SvnClone(Source):
         if os.path.exists(self.svn_path):
             raise SkipCommand()
         command = "svn checkout {} {}".format(self.svn_remote, self.svn_dir)
-        neutralEnv('run_command')(command, neutralEnv('source_dir'), context)
+        run_command(command, neutralEnv('source_dir'), context)
 
     def _svn_update(self, context):
         context.try_skip(self.svn_path)
-        neutralEnv('run_command')("svn update", self.svn_path, context)
+        run_command("svn update", self.svn_path, context)
 
     def prepare(self):
         self.command('svncheckout', self._svn_checkout)
@@ -294,7 +294,7 @@ class MakeBuilder(Builder):
                     v = v.format(buildEnv=self.buildEnv, env=env)
                     self.configure_env[k[8:]] = v
             env.update(self.configure_env)
-        self.buildEnv.run_command(command, self.build_path, context, env=env)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv, env=env)
 
     def _compile(self, context):
         context.try_skip(self.build_path)
@@ -302,7 +302,7 @@ class MakeBuilder(Builder):
             make_target=self.make_target,
             make_option=self.make_option
         )
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _install(self, context):
         context.try_skip(self.build_path)
@@ -310,12 +310,12 @@ class MakeBuilder(Builder):
             make_install_target=self.make_install_target,
             make_option=self.make_option
         )
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _make_dist(self, context):
         context.try_skip(self.build_path)
         command = "make dist"
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
 
 class CMakeBuilder(MakeBuilder):
@@ -347,7 +347,7 @@ class CMakeBuilder(MakeBuilder):
                     v = v.format(buildEnv=self.buildEnv, env=env)
                     self.configure_env[k[8:]] = v
             env.update(self.configure_env)
-        self.buildEnv.run_command(command, self.build_path, context, env=env, cross_env_only=True)
+        run_command(command, self.build_path, context, env=env, buildEnv=self.buildEnv, cross_env_only=True)
 
 
 class MesonBuilder(Builder):
@@ -382,11 +382,11 @@ class MesonBuilder(Builder):
             buildEnv=self.buildEnv,
             cross_option=cross_option
         )
-        self.buildEnv.run_command(command, self.source_path, context, cross_env_only=True)
+        run_command(command, self.source_path, context, buildEnv=self.buildEnv, cross_env_only=True)
 
     def _compile(self, context):
         command = "{} -v".format(neutralEnv('ninja_command'))
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _test(self, context):
         if ( self.buildEnv.platform_info.build == 'android'
@@ -395,15 +395,15 @@ class MesonBuilder(Builder):
            ):
             raise SkipCommand()
         command = "{} --verbose {}".format(neutralEnv('mesontest_command'), self.test_option)
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _install(self, context):
         command = "{} -v install".format(neutralEnv('ninja_command'))
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _make_dist(self, context):
         command = "{} -v dist".format(neutralEnv('ninja_command'))
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
 
 class GradleBuilder(Builder):
@@ -428,4 +428,4 @@ class GradleBuilder(Builder):
         command = command.format(
             gradle_target=self.gradle_target,
             gradle_option=self.gradle_option)
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)

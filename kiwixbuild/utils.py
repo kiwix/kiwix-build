@@ -10,6 +10,8 @@ import ssl
 import subprocess
 from collections import namedtuple, defaultdict
 
+from kiwixbuild._global import neutralEnv
+
 pj = os.path.join
 
 g_print_progress = True
@@ -221,3 +223,41 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
         if archive is not None:
             archive.close()
 
+
+def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cross_env_only=False):
+    os.makedirs(cwd, exist_ok=True)
+    if env is None:
+        env = Defaultdict(str, os.environ)
+    if buildEnv is not None:
+        cross_compile_env = True
+        cross_compile_compiler = True
+        cross_compile_path = True
+        if context.force_native_build:
+            cross_compile_env = False
+            cross_compile_compiler = False
+            cross_compile_path = False
+        if cross_env_only:
+            cross_compile_compiler = False
+        env = buildEnv._set_env(env, cross_compile_env, cross_compile_compiler, cross_compile_path)
+    log = None
+    try:
+        if not neutralEnv('verbose'):
+            log = open(context.log_file, 'w')
+        print("run command '{}'".format(command), file=log)
+        print("current directory is '{}'".format(cwd), file=log)
+        print("env is :", file=log)
+        for k, v in env.items():
+            print("  {} : {!r}".format(k, v), file=log)
+
+        kwargs = dict()
+        if input:
+            kwargs['stdin'] = subprocess.PIPE
+        process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+        if input:
+            process.communicate(input.encode())
+        retcode = process.wait()
+        if retcode:
+            raise subprocess.CalledProcessError(retcode, command)
+    finally:
+        if log:
+            log.close()

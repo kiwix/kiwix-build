@@ -2,7 +2,7 @@ import os
 
 from .base_toolchain import Toolchain
 from kiwixbuild.dependencies import ReleaseDownload, Builder
-from kiwixbuild.utils import Remotefile, add_execution_right
+from kiwixbuild.utils import Remotefile, add_execution_right, run_command
 
 pj = os.path.join
 
@@ -91,7 +91,7 @@ class android_ndk(Toolchain):
                 api=self.target.api,
                 install_dir=self.install_path
             )
-            self.buildEnv.run_command(command, self.build_path, context)
+            run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
         def _fix_permission_right(self, context):
             context.try_skip(self.build_path)

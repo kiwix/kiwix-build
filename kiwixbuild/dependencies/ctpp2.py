@@ -3,7 +3,7 @@ from .base import (
     ReleaseDownload,
     CMakeBuilder)
 
-from kiwixbuild.utils import Remotefile, pj
+from kiwixbuild.utils import Remotefile, pj, run_command
 
 class CTPP2(Dependency):
     name = "ctpp2"
@@ -51,4 +51,4 @@ class CTPP2C(CTPP2):
                 ctpp2c=pj(self.build_path, 'ctpp2c'),
                 install_dir=pj(self.buildEnv.install_dir, 'bin')
             )
-            self.buildEnv.run_command(command, self.build_path, context)
+            run_command(command, self.build_path, context, buildEnv=self.buildEnv)
