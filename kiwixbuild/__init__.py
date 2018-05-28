@@ -7,6 +7,7 @@ from .dependencies import Dependency
 from .platforms import PlatformInfo
 from .builder import Builder
 from .utils import setup_print_progress
+from . import _global
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -65,6 +66,8 @@ def main():
     options = parse_args()
     options.working_dir = os.path.abspath(options.working_dir)
     setup_print_progress(options.show_progress)
+    neutralEnv = buildenv.PlatformNeutralEnv(options)
+    _global.set_neutralEnv(neutralEnv)
     builder = Builder(options)
     builder.run()
 

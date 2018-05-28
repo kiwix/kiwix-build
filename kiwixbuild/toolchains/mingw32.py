@@ -3,6 +3,7 @@ import subprocess
 
 from .base_toolchain import Toolchain
 from kiwixbuild.utils import which
+from kiwixbuild._global import neutralEnv
 
 pj = os.path.join
 
@@ -17,7 +18,7 @@ class mingw32_toolchain(Toolchain):
             'fedora': '/usr/i686-w64-mingw32/sys-root/mingw',
             'debian': '/usr/i686-w64-mingw32'
         }
-        return root_paths[self.neutralEnv.distname]
+        return root_paths[neutralEnv('distname')]
 
     @property
     def binaries(self):

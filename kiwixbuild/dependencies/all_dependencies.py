@@ -3,6 +3,8 @@ from .base import (
     NoopSource,
     NoopBuilder)
 
+from kiwixbuild._global import neutralEnv
+
 class AllBaseDependencies(Dependency):
     name = "alldependencies"
 
@@ -16,7 +18,7 @@ class AllBaseDependencies(Dependency):
         else:
             base_deps += ["icu4c", "libmagic"]
         if ( self.buildEnv.platform_info.build != 'android'
-           and self.buildEnv.distname != 'Darwin'):
+           and neutralEnv('distname') != 'Darwin'):
             base_deps += ['ctpp2c', 'ctpp2']
         if self.buildEnv.platform_info.build == 'android':
             base_deps += ['Gradle']

@@ -5,6 +5,7 @@ from .base import (
 )
 
 from kiwixbuild.utils import Remotefile
+from kiwixbuild._global import neutralEnv
 
 
 class Xapian(Dependency):
@@ -23,6 +24,6 @@ class Xapian(Dependency):
     def dependencies(self):
         deps = ['zlib', 'lzma']
         if (self.buildEnv.platform_info.build == 'win32'
-         or self.buildEnv.distname == 'Darwin'):
+         or neutralEnv('distname') == 'Darwin'):
             return deps
         return deps + ['uuid']

@@ -4,6 +4,7 @@ import shutil
 
 from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild
 from kiwixbuild.versions import main_project_versions, base_deps_versions
+from kiwixbuild._global import neutralEnv
 
 SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
@@ -22,8 +23,7 @@ class Dependency(metaclass=_MetaDependency):
     dependencies = []
     force_native_build = False
 
-    def __init__(self, neutralEnv, buildEnv):
-        self.neutralEnv = neutralEnv
+    def __init__(self, buildEnv):
         self.buildEnv = buildEnv
         self.source = self.Source(self)
         self.builder = self.Builder(self)
@@ -41,7 +41,7 @@ class Dependency(metaclass=_MetaDependency):
 
     @property
     def source_path(self):
-        return pj(self.neutralEnv.source_dir, self.source.source_dir)
+        return pj(neutralEnv('source_dir'), self.source.source_dir)
 
     @property
     def _log_dir(self):
@@ -77,7 +77,6 @@ class Source:
        inside the neutralEnv.source_dir."""
     def __init__(self, target):
         self.target = target
-        self.neutralEnv = target.neutralEnv
 
     @property
     def name(self):
@@ -88,12 +87,12 @@ class Source:
         return self.target.full_name
 
     def _patch(self, context):
-        source_path = pj(self.neutralEnv.source_dir, self.source_dir)
+        source_path = pj(neutralEnv('source_dir'), self.source_dir)
         context.try_skip(source_path)
         context.force_native_build = True
         for p in self.patches:
             with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                self.neutralEnv.run_command("patch -p1", source_path, context, input=patch_input.read())
+                neutralEnv('run_command')("patch -p1", source_path, context, input=patch_input.read())
 
     def command(self, *args, **kwargs):
         return self.target.command(*args, **kwargs)
@@ -109,18 +108,18 @@ class ReleaseDownload(Source):
 
     @property
     def extract_path(self):
-        return pj(self.neutralEnv.source_dir, self.source_dir)
+        return pj(neutralEnv('source_dir'), self.source_dir)
 
     def _download(self, context):
-        context.try_skip(self.neutralEnv.archive_dir, self.name)
-        self.neutralEnv.download(self.archive)
+        context.try_skip(neutralEnv('archive_dir'), self.name)
+        neutralEnv('download')(self.archive)
 
     def _extract(self, context):
         context.try_skip(self.extract_path)
         if os.path.exists(self.extract_path):
             shutil.rmtree(self.extract_path)
-        extract_archive(pj(self.neutralEnv.archive_dir, self.archive.name),
-                        self.neutralEnv.source_dir,
+        extract_archive(pj(neutralEnv('archive_dir'), self.archive.name),
+                        neutralEnv('source_dir'),
                         topdir=self.archive_top_dir,
                         name=self.source_dir)
 
@@ -142,18 +141,18 @@ class GitClone(Source):
 
     @property
     def source_dir(self):
-        if self.neutralEnv.make_release:
+        if neutralEnv('make_release'):
             return "{}_release".format(self.git_dir)
         else:
             return self.git_dir
 
     @property
     def git_path(self):
-        return pj(self.neutralEnv.source_dir, self.source_dir)
+        return pj(neutralEnv('source_dir'), self.source_dir)
 
     @property
     def git_ref(self):
-        if self.neutralEnv.make_release:
+        if neutralEnv('make_release'):
             return self.release_git_ref
         else:
             return self.base_git_ref
@@ -163,13 +162,13 @@ class GitClone(Source):
             raise SkipCommand()
         command = "git clone --depth=1 --branch {} {} {}".format(
             self.git_ref, self.git_remote, self.source_dir)
-        self.neutralEnv.run_command(command, self.neutralEnv.source_dir, context)
+        neutralEnv('run_command')(command, neutralEnv('source_dir'), context)
 
     def _git_update(self, context):
         command = "git fetch origin {}".format(
             self.git_ref)
-        self.neutralEnv.run_command(command, self.git_path, context)
-        self.neutralEnv.run_command("git checkout "+self.git_ref, self.git_path, context)
+        neutralEnv('run_command')(command, self.git_path, context)
+        neutralEnv('run_command')("git checkout "+self.git_ref, self.git_path, context)
 
     def prepare(self):
         self.command('gitclone', self._git_clone)
@@ -185,17 +184,17 @@ class SvnClone(Source):
 
     @property
     def svn_path(self):
-        return pj(self.neutralEnv.source_dir, self.svn_dir)
+        return pj(neutralEnv('source_dir'), self.svn_dir)
 
     def _svn_checkout(self, context):
         if os.path.exists(self.svn_path):
             raise SkipCommand()
         command = "svn checkout {} {}".format(self.svn_remote, self.svn_dir)
-        self.neutralEnv.run_command(command, self.neutralEnv.source_dir, context)
+        neutralEnv('run_command')(command, neutralEnv('source_dir'), context)
 
     def _svn_update(self, context):
         context.try_skip(self.svn_path)
-        self.neutralEnv.run_command("svn update", self.svn_path, context)
+        neutralEnv('run_command')("svn update", self.svn_path, context)
 
     def prepare(self):
         self.command('svncheckout', self._svn_checkout)
@@ -355,12 +354,6 @@ class MesonBuilder(Builder):
     configure_option = ""
     test_option = ""
 
-    def __init__(self, target):
-        super().__init__(target)
-        self.meson_command = self.buildEnv.neutralEnv.meson_command
-        self.mesontest_command = self.buildEnv.neutralEnv.mesontest_command
-        self.ninja_command = self.buildEnv.neutralEnv.ninja_command
-
     @property
     def library_type(self):
         return 'static' if self.buildEnv.platform_info.static else 'shared'
@@ -382,7 +375,7 @@ class MesonBuilder(Builder):
                    " --libdir={buildEnv.libprefix}"
                    " {cross_option}")
         command = command.format(
-            command=self.meson_command,
+            command=neutralEnv('meson_command'),
             library_type=self.library_type,
             configure_option=configure_option,
             build_path=self.build_path,
@@ -392,7 +385,7 @@ class MesonBuilder(Builder):
         self.buildEnv.run_command(command, self.source_path, context, cross_env_only=True)
 
     def _compile(self, context):
-        command = "{} -v".format(self.ninja_command)
+        command = "{} -v".format(neutralEnv('ninja_command'))
         self.buildEnv.run_command(command, self.build_path, context)
 
     def _test(self, context):
@@ -401,15 +394,15 @@ class MesonBuilder(Builder):
                  and not self.buildEnv.platform_info.static)
            ):
             raise SkipCommand()
-        command = "{} --verbose {}".format(self.mesontest_command, self.test_option)
+        command = "{} --verbose {}".format(neutralEnv('mesontest_command'), self.test_option)
         self.buildEnv.run_command(command, self.build_path, context)
 
     def _install(self, context):
-        command = "{} -v install".format(self.ninja_command)
+        command = "{} -v install".format(neutralEnv('ninja_command'))
         self.buildEnv.run_command(command, self.build_path, context)
 
     def _make_dist(self, context):
-        command = "{} -v dist".format(self.ninja_command)
+        command = "{} -v dist".format(neutralEnv('ninja_command'))
         self.buildEnv.run_command(command, self.build_path, context)
 
 

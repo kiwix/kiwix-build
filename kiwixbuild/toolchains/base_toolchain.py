@@ -4,6 +4,7 @@ import subprocess
 pj = os.path.join
 
 from kiwixbuild.utils import Context, SkipCommand, StopBuild
+from kiwixbuild._global import neutralEnv
 
 class _MetaToolchain(type):
     def __new__(cls, name, bases, dct):
@@ -22,9 +23,7 @@ class Toolchain(metaclass=_MetaToolchain):
     Builder = None
     Source = None
 
-    def __init__(self, neutralEnv):
-        self.neutralEnv = neutralEnv
-        self.buildEnv = neutralEnv
+    def __init__(self):
         self.source = self.Source(self) if self.Source else None
         self.builder = self.Builder(self) if self.Builder else None
 
@@ -36,11 +35,11 @@ class Toolchain(metaclass=_MetaToolchain):
 
     @property
     def source_path(self):
-        return pj(self.neutralEnv.source_dir, self.source.source_dir)
+        return pj(neutralEnv('source_dir'), self.source.source_dir)
 
     @property
     def _log_dir(self):
-        return self.neutralEnv.log_dir
+        return neutralEnv('log_dir')
 
     def set_env(self, env):
         pass

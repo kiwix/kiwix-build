@@ -2,6 +2,7 @@ from .base import (
     Dependency,
     GitClone,
     MesonBuilder)
+from kiwixbuild._global import neutralEnv
 
 class Kiwixlib(Dependency):
     name = "kiwix-lib"
@@ -10,7 +11,7 @@ class Kiwixlib(Dependency):
     def dependencies(self):
         base_dependencies = ["pugixml", "libzim", "zlib", "lzma", "libaria2"]
         if ( self.buildEnv.platform_info.build != 'android'
-          and self.buildEnv.distname != 'Darwin'):
+          and neutralEnv('distname') != 'Darwin'):
             base_dependencies += ['ctpp2c', 'ctpp2']
         if self.buildEnv.platform_info.build != 'native':
             return base_dependencies + ["icu4c_cross-compile"]

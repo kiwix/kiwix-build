@@ -6,10 +6,8 @@ import platform
 from .platforms import PlatformInfo
 from .toolchains import Toolchain
 from .packages import PACKAGE_NAME_MAPPERS
-from .utils import (
-    pj,
-    download_remote,
-    Defaultdict)
+from .utils import pj, download_remote, Defaultdict
+from . import _global
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -115,9 +113,8 @@ class PlatformNeutralEnv:
 
 
 class BuildEnv:
-    def __init__(self, options, neutralEnv, targetsDict):
+    def __init__(self, options, targetsDict):
         build_dir = "BUILD_{}".format(options.target_platform)
-        self.neutralEnv = neutralEnv
         self.build_dir = pj(options.working_dir, build_dir)
         self.install_dir = pj(self.build_dir, "INSTALL")
         for d in (self.build_dir,
@@ -156,7 +153,7 @@ class BuildEnv:
             ToolchainClass = Toolchain.all_toolchains[toolchain_name]
             if ToolchainClass.neutral:
                 self.toolchains.append(
-                    self.neutralEnv.add_toolchain(toolchain_name)
+                    _global._neutralEnv.add_toolchain(toolchain_name)
                 )
             else:
                 self.toolchains.append(ToolchainClass(self))
@@ -202,7 +199,7 @@ class BuildEnv:
         self.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
     def __getattr__(self, name):
-        return getattr(self.neutralEnv, name)
+        return _global.neutralEnv(name)
 
     def _is_debianlike(self):
         return os.path.isfile('/etc/debian_version')

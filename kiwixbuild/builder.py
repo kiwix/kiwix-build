@@ -10,8 +10,7 @@ class Builder:
     def __init__(self, options):
         self.options = options
         self.targets = OrderedDict()
-        self.neutralEnv = PlatformNeutralEnv(options)
-        self.buildEnv = BuildEnv(options, self.neutralEnv, self.targets)
+        self.buildEnv = BuildEnv(options, self.targets)
 
         _targets = {}
         targetDef = options.targets
@@ -31,7 +30,7 @@ class Builder:
         if targetName in targets:
             return
         targetClass = Dependency.all_deps[targetName]
-        target = targetClass(self.neutralEnv, self.buildEnv)
+        target = targetClass(self.buildEnv)
         targets[targetName] = target
         for dep in target.dependencies:
             self.add_targets(dep, targets)
