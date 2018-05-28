@@ -51,14 +51,6 @@ class android_ndk(Toolchain):
         def arch_full(self):
             return self.buildEnv.platformInfo.arch_full
 
-        @property
-        def toolchain(self):
-            return self.arch_full+"-4.9"
-
-        @property
-        def configure_option(self):
-            return '--host={}'.format(self.arch_full)
-
         def _build_platform(self, context):
             context.try_skip(self.build_path)
             script = pj(self.source_path, 'build/tools/make_standalone_toolchain.py')
