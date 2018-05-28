@@ -20,7 +20,7 @@ class android_sdk(Toolchain):
 
         @property
         def install_path(self):
-            return pj(self.buildEnv.toolchain_dir, self.target.full_name)
+            return pj(self.buildEnv.toolchain_dir, self.target.full_name())
 
         def _build_platform(self, context):
             context.try_skip(self.install_path)

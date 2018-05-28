@@ -7,6 +7,7 @@ from .base import (
 )
 
 from kiwixbuild.utils import Remotefile, pj, Defaultdict, SkipCommand
+from kiwixbuild._global import get_target_step
 
 class LibMagicBase(Dependency):
     name = "libmagic"
@@ -48,7 +49,7 @@ class LibMagic_cross_compile(LibMagicBase):
                 make_target=self.make_target,
                 make_option=self.make_option
             )
-            libmagic_native_dep = self.buildEnv.targetsDict['libmagic_native']
+            libmagic_native_builder = get_target_step('libmagic_native', self.buildEnv.platformInfo.name)
             env = Defaultdict(str, os.environ)
-            env['PATH'] = ':'.join([pj(libmagic_native_dep.builder.build_path, 'src'), env['PATH']])
+            env['PATH'] = ':'.join([pj(libmagic_native_builder.build_path, 'src'), env['PATH']])
             self.buildEnv.run_command(command, self.build_path, context, env=env)

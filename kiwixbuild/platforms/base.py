@@ -6,20 +6,28 @@ from kiwixbuild.toolchains import Toolchain
 from kiwixbuild.packages import PACKAGE_NAME_MAPPERS
 from kiwixbuild.utils import pj, remove_duplicates
 from kiwixbuild.buildenv import BuildEnv
-from kiwixbuild._global import neutralEnv
+from kiwixbuild._global import neutralEnv, add_plt_step, target_steps
 
 _SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 TEMPLATES_DIR = pj(os.path.dirname(_SCRIPT_DIR), 'templates')
 
-class PlatformInfo:
-    all_platforms = {}
+class _MetaPlatform(type):
+    def __new__(cls, name, bases, dct):
+        _class = type.__new__(cls, name, bases, dct)
+        if name not in ('PlatformInfo', 'MetaPlatformInfo') and 'name' in dct:
+            dep_name = dct['name']
+            PlatformInfo.all_platforms[dep_name] = _class
+        return _class
 
-    def __init__(self, name, build, static, toolchains, hosts=None):
-        self.all_platforms[name] = self
-        self.build = build
-        self.static = static
-        self.toolchains = toolchains
-        self.compatible_hosts = hosts
+
+class PlatformInfo(metaclass=_MetaPlatform):
+    all_platforms = {}
+    all_running_platforms = {}
+    toolchain_names = []
+    configure_option = ""
+
+    def __init__(self):
+        self.all_running_platforms[self.name] = self
         self.buildEnv = BuildEnv(self)
         self.setup_toolchains()
 
@@ -28,9 +36,14 @@ class PlatformInfo:
 
     def setup_toolchains(self):
         self.toolchains = {}
-        for tlc_name in self.toolchains:
+        for tlc_name in self.toolchain_names:
             ToolchainClass = Toolchain.all_toolchains[tlc_name]
             self.toolchains[tlc_name] = ToolchainClass()
+            if ToolchainClass.Source is not None:
+                add_plt_step(('source', tlc_name), ToolchainClass.Source)
+            if ToolchainClass.Builder is not None:
+                plt_name = 'neutral' if ToolchainClass.neutral else self.name
+                add_plt_step((plt_name, tlc_name), ToolchainClass.Builder)
 
     def get_cross_config(self):
         return {}

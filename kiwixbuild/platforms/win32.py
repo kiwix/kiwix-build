@@ -7,9 +7,9 @@ from kiwixbuild._global import neutralEnv
 
 class Win32PlatformInfo(PlatformInfo):
     extra_libs = ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90', '-liphlpapi']
+    build = 'win32'
+    compatible_hosts = ['fedora', 'debian']
     arch_full = 'i686-w64-mingw32'
-    def __init__(self, name, static):
-        super().__init__(name, 'win32', static, [], ['fedora', 'debian'])
 
     def get_cross_config(self):
         return {
@@ -76,5 +76,10 @@ class Win32PlatformInfo(PlatformInfo):
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
         env['LIBS'] = " ".join(self.extra_libs) + " " +env['LIBS']
 
-Win32PlatformInfo('win32_dyn', False)
-Win32PlatformInfo('win32_static', True)
+class Win32Dyn(Win32PlatformInfo):
+    name = 'win32_dyn'
+    static = False
+
+class Win32Static(Win32PlatformInfo):
+    name = 'win32_static'
+    static = True

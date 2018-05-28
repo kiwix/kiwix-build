@@ -1,11 +1,13 @@
+import os
 
 from .base import PlatformInfo
+from kiwixbuild.utils import which
 
 
 class I586PlatformInfo(PlatformInfo):
+    build = 'i586'
     arch_full = 'i586-linux-gnu'
-    def __init__(self, name, static):
-        super().__init__(name, 'i586', static, [], ['fedora', 'debian'])
+    compatible_hosts = ['fedora', 'debian']
 
     def get_cross_config(self):
         return {
@@ -52,5 +54,10 @@ class I586PlatformInfo(PlatformInfo):
         self.buildEnv.cmake_crossfile = self._gen_crossfile('cmake_i586_cross_file.txt')
         self.buildEnv.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
-I586PlatformInfo('i586_dyn', False)
-I586PlatformInfo('i586_static', True)
+class I586Dyn(I586PlatformInfo):
+    name = 'i586_dyn'
+    static = False
+
+class I586Static(I586PlatformInfo):
+    name = 'i586_static'
+    static = True

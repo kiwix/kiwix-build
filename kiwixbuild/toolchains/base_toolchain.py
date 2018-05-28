@@ -10,11 +10,12 @@ class _MetaToolchain(type):
     def __new__(cls, name, bases, dct):
         _class = type.__new__(cls, name, bases, dct)
         if name != 'Toolchain':
-            Toolchain.all_toolchains[name] = _class
+            Toolchain.all_toolchains[dct['name']] = _class
         return _class
 
 
 class Toolchain(metaclass=_MetaToolchain):
+    force_native_build = False
     neutral = True
     all_toolchains = {}
     configure_option = ""
@@ -23,15 +24,12 @@ class Toolchain(metaclass=_MetaToolchain):
     Builder = None
     Source = None
 
-    def __init__(self):
-        self.source = self.Source(self) if self.Source else None
-        self.builder = self.Builder(self) if self.Builder else None
 
-    @property
-    def full_name(self):
+    @classmethod
+    def full_name(cls):
         return "{name}-{version}".format(
-            name = self.name,
-            version = self.version)
+            name = cls.name,
+            version = cls.version)
 
     @property
     def source_path(self):

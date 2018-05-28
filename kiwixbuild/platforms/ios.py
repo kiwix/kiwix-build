@@ -6,18 +6,12 @@ from kiwixbuild.utils import pj, xrun_find
 
 
 class iOSPlatformInfo(PlatformInfo):
-    __arch_infos = {
-        'armv7': ('arm-apple-darwin', 'armv7', 'iphoneos'),
-        'arm64': ('arm-apple-darwin', 'arm64', 'iphoneos'),
-        'i386': ('', 'i386', 'iphonesimulator'),
-        'x86_64': ('', 'x86_64', 'iphonesimulator'),
-    }
+    build = 'iOS'
+    static = True
+    compatible_hosts = ['Darwin']
 
-    def __init__(self, name, arch):
-        super().__init__(name, 'iOS', True, [],
-                         hosts=['Darwin'])
-        self.arch = arch
-        self.arch_full, self.cpu, self.sdk_name = self.__arch_infos[arch]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._root_path = None
 
     @property
@@ -81,7 +75,26 @@ class iOSPlatformInfo(PlatformInfo):
         env['CXX'] = self.binaries['CXX']
 
 
-iOSPlatformInfo('iOS_armv7', 'armv7')
-iOSPlatformInfo('iOS_arm64', 'arm64')
-iOSPlatformInfo('iOS_i386', 'i386')
-iOSPlatformInfo('iOS_x86_64', 'x86_64')
+class iOSArmv7(iOSPlatformInfo):
+    name = 'iOS_armv7'
+    arch = cpu = 'armv7'
+    arch_full =  'arm-apple-darwin'
+    sdk_name = 'iphoneos'
+
+class iOSArm64(iOSPlatformInfo):
+    name = 'iOS_arm64'
+    arch = cpu = 'arm64'
+    arch_full =  'arm-apple-darwin'
+    sdk_name = 'iphoneos'
+
+class iOSi386(iOSPlatformInfo):
+    name = 'iOS_i386'
+    arch = cpu = 'i386'
+    arch_full =  ''
+    sdk_name = 'iphonesimulator'
+
+class iOSx64(iOSPlatformInfo):
+    name = 'iOS_x86_64'
+    arch = cpu = 'x86_64'
+    arch_full =  ''
+    sdk_name = 'iphonesimulator'

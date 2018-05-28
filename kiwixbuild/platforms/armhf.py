@@ -1,10 +1,14 @@
 from .base import PlatformInfo
 
+from kiwixbuild.utils import pj
+from kiwixbuild._global import get_plt_step
+
 
 class ArmhfPlatformInfo(PlatformInfo):
+    build = 'armhf'
     arch_full = 'arm-linux-gnueabihf'
-    def __init__(self, name, static):
-        super().__init__(name, 'armhf', static, ['armhf_toolchain'], ['fedora', 'debian'])
+    toolchain_names = ['armhf']
+    compatible_hosts = ['fedora', 'debian']
 
     def get_cross_config(self):
         return {
@@ -25,7 +29,7 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     @property
     def tlc_source(self):
-        return self.toolchains[0].source
+        return get_plt_step('armhf', 'source')
 
     @property
     def root_path(self):
@@ -83,5 +87,10 @@ class ArmhfPlatformInfo(PlatformInfo):
         self.buildEnv.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
         self.buildEnv.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
-ArmhfPlatformInfo('armhf_dyn', False)
-ArmhfPlatformInfo('armhf_static', True)
+class ArmhfDyn(ArmhfPlatformInfo):
+    name = 'armhf_dyn'
+    static = False
+
+class ArmhfStatic(ArmhfPlatformInfo):
+    name = 'armhf_static'
+    static = True

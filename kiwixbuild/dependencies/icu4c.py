@@ -5,7 +5,7 @@ from .base import (
 )
 
 from kiwixbuild.utils import SkipCommand
-
+from kiwixbuild._global import get_target_step
 
 class Icu(Dependency):
     name = "icu4c"
@@ -54,5 +54,7 @@ class Icu_cross_compile(Icu):
 
         @property
         def configure_option(self):
-            icu_native_dep = self.buildEnv.targetsDict['icu4c_native']
-            return super().configure_option + " --with-cross-build={} --disable-tools".format(icu_native_dep.builder.build_path)
+            icu_native_builder = get_target_step('icu4c_native', self.buildEnv.platformInfo.name)
+            return (super().configure_option
+                  + " --with-cross-build={} --disable-tools"
+                  ).format(icu_native_builder.build_path)

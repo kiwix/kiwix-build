@@ -7,6 +7,7 @@ from .base import (
     GradleBuilder)
 
 from kiwixbuild.utils import Remotefile, pj, SkipCommand
+from kiwixbuild._global import get_target_step
 
 class KiwixCustomApp(Dependency):
     name = "kiwix-android-custom"
@@ -78,9 +79,9 @@ class KiwixCustomApp(Dependency):
 
         def _configure(self, context):
             # Copy kiwix-android in build dir.
-            kiwix_android_dep = self.buildEnv.targetsDict['kiwix-android']
+            kiwix_android_source = get_target_step('kiwix-android', 'source')
             if not os.path.exists(self.build_path):
-                shutil.copytree(kiwix_android_dep.source_path, self.build_path)
+                shutil.copytree(kiwix_android_source.source_path, self.build_path)
 
             # Copy kiwix-lib application in build dir
             try:

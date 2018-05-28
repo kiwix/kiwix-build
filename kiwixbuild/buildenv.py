@@ -76,17 +76,18 @@ class PlatformNeutralEnv:
 
 
 class BuildEnv:
-    def __init__(self, platformInfo, targetsDict):
+    def __init__(self, platformInfo):
         build_dir = "BUILD_{}".format(platformInfo.name)
         self.platformInfo = platformInfo
         self.build_dir = pj(neutralEnv('working_dir'), build_dir)
         self.install_dir = pj(self.build_dir, "INSTALL")
+        self.log_dir = pj(self.build_dir, 'LOGS')
         for d in (self.build_dir,
-                  self.install_dir):
+                  self.install_dir,
+                  self.log_dir):
             os.makedirs(d, exist_ok=True)
 
         self.libprefix = neutralEnv('libprefix') or self._detect_libdir()
-        self.targetsDict = targetsDict
 
     def clean_intermediate_directories(self):
         for subdir in os.listdir(self.build_dir):

@@ -12,55 +12,11 @@ class android_ndk(Toolchain):
     version = 'r13b'
     gccver = '4.9.x'
 
-    @property
-    def api(self):
-        return '21' if self.arch in ('arm64', 'mips64', 'x86_64') else '14'
-
-    @property
-    def platform(self):
-        return 'android-'+self.api
-
-    @property
-    def arch(self):
-        return self.buildEnv.platform_info.arch
-
-    @property
-    def arch_full(self):
-        return self.buildEnv.platform_info.arch_full
-
-    @property
-    def toolchain(self):
-        return self.arch_full+"-4.9"
-
-    @property
-    def root_path(self):
-        return pj(self.builder.install_path, 'sysroot')
-
-    @property
-    def binaries(self):
-        binaries = ((k,'{}-{}'.format(self.arch_full, v))
-                for k, v in (('CC', 'gcc'),
-                             ('CXX', 'g++'),
-                             ('AR', 'ar'),
-                             ('STRIP', 'strip'),
-                             ('WINDRES', 'windres'),
-                             ('RANLIB', 'ranlib'),
-                             ('LD', 'ld'))
-               )
-        return {k:pj(self.builder.install_path, 'bin', v)
-                for k,v in binaries}
-
-    @property
-    def configure_option(self):
-        return '--host={}'.format(self.arch_full)
-
-    @property
-    def full_name(self):
-        return "{name}-{version}-{arch}-{api}".format(
-            name = self.name,
-            version = self.version,
-            arch = self.arch,
-            api = self.api)
+    @classmethod
+    def full_name(cls):
+        return "{name}-{version}".format(
+            name = cls.name,
+            version = cls.version)
 
     class Source(ReleaseDownload):
         archive = Remotefile('android-ndk-r13b-linux-x86_64.zip',
@@ -75,10 +31,33 @@ class android_ndk(Toolchain):
 
 
     class Builder(Builder):
-
         @property
         def install_path(self):
             return self.build_path
+
+        @property
+        def api(self):
+            return '21' if self.arch in ('arm64', 'mips64', 'x86_64') else '14'
+
+        @property
+        def platform(self):
+            return 'android-'+self.api
+
+        @property
+        def arch(self):
+            return self.buildEnv.platformInfo.arch
+
+        @property
+        def arch_full(self):
+            return self.buildEnv.platformInfo.arch_full
+
+        @property
+        def toolchain(self):
+            return self.arch_full+"-4.9"
+
+        @property
+        def configure_option(self):
+            return '--host={}'.format(self.arch_full)
 
         def _build_platform(self, context):
             context.try_skip(self.build_path)
@@ -87,17 +66,18 @@ class android_ndk(Toolchain):
             command = '{script} --arch={arch} --api={api} --install-dir={install_dir} --force'
             command = command.format(
                 script=script,
-                arch=self.target.arch,
-                api=self.target.api,
+                arch=self.arch,
+                api=self.api,
                 install_dir=self.install_path
             )
+            context.force_native_build = True
             run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
         def _fix_permission_right(self, context):
             context.try_skip(self.build_path)
             bin_dirs = [pj(self.install_path, 'bin'),
-                        pj(self.install_path, self.target.arch_full, 'bin'),
-                        pj(self.install_path, 'libexec', 'gcc', self.target.arch_full, self.target.gccver)
+                        pj(self.install_path, self.arch_full, 'bin'),
+                        pj(self.install_path, 'libexec', 'gcc', self.arch_full, self.target.gccver)
                        ]
             for root, dirs, files in os.walk(self.install_path):
                 if not root in bin_dirs:

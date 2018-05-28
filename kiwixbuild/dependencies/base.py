@@ -22,34 +22,51 @@ class Dependency(metaclass=_MetaDependency):
     all_deps = {}
     force_native_build = False
 
-    def __init__(self, buildEnv):
-        self.buildEnv = buildEnv
-        self.source = self.Source(self)
-        self.builder = self.Builder(self)
-        self.skip = False
+    @classmethod
+    def version(cls):
+        return base_deps_versions.get(cls.name, None)
+
+    @classmethod
+    def full_name(cls):
+        if cls.version():
+            return "{}-{}".format(cls.name, cls.version())
+        return cls.name
+
+
+class Source:
+    """Base Class to the real preparator
+       A source preparator must install source in the self.source_dir attribute
+       inside the neutralEnv.source_dir."""
+    def __init__(self, target):
+        self.target = target
 
     @property
-    def version(self):
-        return base_deps_versions.get(self.name, None)
+    def name(self):
+        return self.target.name
 
     @property
-    def full_name(self):
-        if self.version:
-            return "{}-{}".format(self.name, self.version)
-        return self.name
+    def source_dir(self):
+        return self.target.full_name()
 
     @property
     def source_path(self):
-        return pj(neutralEnv('source_dir'), self.source.source_dir)
+        return pj(neutralEnv('source_dir'), self.source_dir)
 
     @property
     def _log_dir(self):
-        return self.buildEnv.log_dir
+        return neutralEnv('log_dir')
+
+    def _patch(self, context):
+        context.try_skip(self.source_path)
+        context.force_native_build = True
+        for p in self.patches:
+            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
+                run_command("patch -p1", self.source_path, context, input=patch_input.read())
 
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
         log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
-        context = Context(name, log, self.force_native_build)
+        context = Context(name, log, True)
         try:
             ret = function(*args, context=context)
             context._finalise()
@@ -68,33 +85,6 @@ class Dependency(metaclass=_MetaDependency):
         except:
             print("ERROR")
             raise
-
-
-class Source:
-    """Base Class to the real preparator
-       A source preparator must install source in the self.source_dir attribute
-       inside the neutralEnv.source_dir."""
-    def __init__(self, target):
-        self.target = target
-
-    @property
-    def name(self):
-        return self.target.name
-
-    @property
-    def source_dir(self):
-        return self.target.full_name
-
-    def _patch(self, context):
-        source_path = pj(neutralEnv('source_dir'), self.source_dir)
-        context.try_skip(source_path)
-        context.force_native_build = True
-        for p in self.patches:
-            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                neutralEnv('run_command')("patch -p1", source_path, context, input=patch_input.read())
-
-    def command(self, *args, **kwargs):
-        return self.target.command(*args, **kwargs)
 
 
 class NoopSource(Source):
@@ -206,9 +196,10 @@ class Builder:
     subsource_dir = None
     dependencies = []
 
-    def __init__(self, target):
+    def __init__(self, target, source, buildEnv):
         self.target = target
-        self.buildEnv = target.buildEnv
+        self.source = source
+        self.buildEnv = buildEnv
 
     @classmethod
     def get_dependencies(cls, platformInfo):
@@ -220,17 +211,41 @@ class Builder:
 
     @property
     def source_path(self):
-        base_source_path = self.target.source_path
+        base_source_path = self.source.source_path
         if self.subsource_dir:
             return pj(base_source_path, self.subsource_dir)
         return base_source_path
 
     @property
     def build_path(self):
-        return pj(self.buildEnv.build_dir, self.target.full_name)
+        return pj(self.buildEnv.build_dir, self.target.full_name())
 
-    def command(self, *args, **kwargs):
-        return self.target.command(*args, **kwargs)
+    @property
+    def _log_dir(self):
+        return self.buildEnv.log_dir
+
+    def command(self, name, function, *args):
+        print("  {} {} : ".format(name, self.name), end="", flush=True)
+        log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
+        context = Context(name, log, self.target.force_native_build)
+        try:
+            ret = function(*args, context=context)
+            context._finalise()
+            print("OK")
+            return ret
+        except SkipCommand:
+            print("SKIP")
+        except subprocess.CalledProcessError:
+            print("ERROR")
+            try:
+                with open(log, 'r') as f:
+                    print(f.read())
+            except:
+                pass
+            raise StopBuild()
+        except:
+            print("ERROR")
+            raise
 
     def build(self):
         if hasattr(self, '_pre_build_script'):
@@ -274,8 +289,8 @@ class MakeBuilder(Builder):
     def all_configure_option(self):
         option = self.configure_option_template.format(
             dep_options=self.configure_option,
-            static_option=self.static_configure_option if self.buildEnv.platform_info.static else self.dynamic_configure_option,
-            env_option=self.buildEnv.configure_option if not self.target.force_native_build else "",
+            static_option=self.static_configure_option if self.buildEnv.platformInfo.static else self.dynamic_configure_option,
+            env_option=self.buildEnv.platformInfo.configure_option if not self.target.force_native_build else "",
             install_dir=self.buildEnv.install_dir,
             libdir=pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
             )
@@ -289,7 +304,7 @@ class MakeBuilder(Builder):
             configure_option=self.all_configure_option
         )
         env = Defaultdict(str, os.environ)
-        if self.buildEnv.platform_info.static:
+        if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
         if self.configure_env:
             for k in self.configure_env:
@@ -342,7 +357,7 @@ class CMakeBuilder(MakeBuilder):
             cross_option=cross_option
         )
         env = Defaultdict(str, os.environ)
-        if self.buildEnv.platform_info.static:
+        if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
         if self.configure_env:
             for k in self.configure_env:
@@ -360,7 +375,7 @@ class MesonBuilder(Builder):
 
     @property
     def library_type(self):
-        return 'static' if self.buildEnv.platform_info.static else 'shared'
+        return 'static' if self.buildEnv.platformInfo.static else 'shared'
 
     def _configure(self, context):
         context.try_skip(self.build_path)
@@ -393,9 +408,9 @@ class MesonBuilder(Builder):
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _test(self, context):
-        if ( self.buildEnv.platform_info.build == 'android'
-             or (self.buildEnv.platform_info.build != 'native'
-                 and not self.buildEnv.platform_info.static)
+        if ( self.buildEnv.platformInfo.build == 'android'
+             or (self.buildEnv.platformInfo.build != 'native'
+                 and not self.buildEnv.platformInfo.static)
            ):
             raise SkipCommand()
         command = "{} --verbose {}".format(neutralEnv('mesontest_command'), self.test_option)
