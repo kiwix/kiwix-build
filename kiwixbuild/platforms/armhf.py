@@ -1,7 +1,7 @@
 from .base import PlatformInfo
 
 from kiwixbuild.utils import pj
-from kiwixbuild._global import get_plt_step
+from kiwixbuild._global import get_target_step
 
 
 class ArmhfPlatformInfo(PlatformInfo):
@@ -29,7 +29,7 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     @property
     def tlc_source(self):
-        return get_plt_step('armhf', 'source')
+        return get_target_step('armhf', 'source')
 
     @property
     def root_path(self):

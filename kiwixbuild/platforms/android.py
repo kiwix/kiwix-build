@@ -1,6 +1,6 @@
 from .base import PlatformInfo
 from kiwixbuild.utils import pj
-from kiwixbuild._global import get_plt_step
+from kiwixbuild._global import get_target_step
 
 
 class AndroidPlatformInfo(PlatformInfo):
@@ -27,11 +27,11 @@ class AndroidPlatformInfo(PlatformInfo):
 
     @property
     def ndk_builder(self):
-        return get_plt_step('android_ndk', self.name)
+        return get_target_step('android-ndk', self.name)
 
     @property
     def sdk_builder(self):
-        return get_plt_step('android_sdk', 'neutral')
+        return get_target_step('android-sdk', 'neutral')
 
     def get_cross_config(self):
         install_path = self.ndk_builder.install_path

@@ -1,13 +1,12 @@
 
-import os
+import os, sys
 import subprocess
 
 from kiwixbuild.dependencies import Dependency
-from kiwixbuild.toolchains import Toolchain
 from kiwixbuild.packages import PACKAGE_NAME_MAPPERS
 from kiwixbuild.utils import pj, remove_duplicates
 from kiwixbuild.buildenv import BuildEnv
-from kiwixbuild._global import neutralEnv, option, add_plt_step, target_steps
+from kiwixbuild._global import neutralEnv, option, target_steps
 
 _SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 TEMPLATES_DIR = pj(os.path.dirname(_SCRIPT_DIR), 'templates')
@@ -28,12 +27,17 @@ class PlatformInfo(metaclass=_MetaPlatform):
     configure_option = ""
 
     @classmethod
-    def get_platform(cls, name):
+    def get_platform(cls, name, targets=None):
         if name not in cls.all_running_platforms:
-            cls.all_running_platforms[name] = cls.all_platforms[name]()
+            if targets is None:
+                print("Should not got there.")
+                print(cls.all_running_platforms)
+                raise KeyError(name)
+                sys.exit(-1)
+            cls.all_running_platforms[name] = cls.all_platforms[name](targets)
         return cls.all_running_platforms[name]
 
-    def __init__(self):
+    def __init__(self, targets):
         if neutralEnv('distname') not in self.compatible_hosts:
             print(('ERROR: The target platform {} cannot be build on host {}.\n'
                    'Select another target platform, or change your host system.'
@@ -41,19 +45,17 @@ class PlatformInfo(metaclass=_MetaPlatform):
             sys.exit(-1)
         self.all_running_platforms[self.name] = self
         self.buildEnv = BuildEnv(self)
-        self.setup_toolchains()
+        self.setup_toolchains(targets)
 
     def __str__(self):
         return "{}_{}".format(self.build, 'static' if self.static else 'dyn')
 
-    def setup_toolchains(self):
+    def setup_toolchains(self, targets):
         for tlc_name in self.toolchain_names:
-            ToolchainClass = Toolchain.all_toolchains[tlc_name]
-            if ToolchainClass.Source is not None:
-                add_plt_step(('source', tlc_name), ToolchainClass.Source)
-            if ToolchainClass.Builder is not None:
-                plt_name = 'neutral' if ToolchainClass.neutral else self.name
-                add_plt_step((plt_name, tlc_name), ToolchainClass.Builder)
+            ToolchainClass = Dependency.all_deps[tlc_name]
+            targets[('source', tlc_name)] = ToolchainClass.Source
+            plt_name = 'neutral' if ToolchainClass.neutral else self.name
+            targets[(plt_name, tlc_name)] = ToolchainClass.Builder
 
     def get_cross_config(self):
         return {}
@@ -93,9 +95,10 @@ class PlatformInfo(metaclass=_MetaPlatform):
         except KeyError:
             print("SKIP : We don't know which packages we must install to compile"
                   " a {target} {build_type} version on a {host} host.".format(
-                      target=self.platform_info,
+                      target=self,
+                      build_type=self.static,
                       host=neutralEnv('distname')))
-            return
+            return []
 
         packages_list = package_name_mapper.get('COMMON', [])
         to_drop = []

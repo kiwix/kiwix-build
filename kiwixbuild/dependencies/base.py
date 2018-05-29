@@ -350,7 +350,7 @@ class CMakeBuilder(MakeBuilder):
                    " {source_path}"
                    " {cross_option}")
         command = command.format(
-            configure_option="{} {}".format(self.buildEnv.cmake_option, self.configure_option),
+            configure_option=self.configure_option,
             install_dir=self.buildEnv.install_dir,
             libdir=self.buildEnv.libprefix,
             source_path=self.source_path,

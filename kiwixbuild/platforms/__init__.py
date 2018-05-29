@@ -7,5 +7,6 @@ from . import (
     i586,
     ios,
     native,
+    neutral,
     win32
 )

@@ -3,7 +3,6 @@ from collections import OrderedDict as _OrderedDict
 _neutralEnv = None
 _options = None
 _target_steps = _OrderedDict()
-_plt_steps = _OrderedDict()
 
 def set_neutralEnv(env):
     global _neutralEnv
@@ -31,16 +30,3 @@ def get_target_step(key, default_context=None):
 
 def target_steps():
     return _target_steps
-
-def add_plt_step(key, what):
-    _plt_steps[key] = what
-
-def get_plt_step(key, default_context=None):
-    try:
-        context, target = key
-    except ValueError:
-        context, target = default_context, key
-    return _plt_steps[(context, target)]
-
-def plt_steps():
-    return _plt_steps

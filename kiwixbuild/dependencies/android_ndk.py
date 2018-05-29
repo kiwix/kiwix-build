@@ -1,22 +1,14 @@
 import os
 
-from .base_toolchain import Toolchain
-from kiwixbuild.dependencies import ReleaseDownload, Builder
+from .base import Dependency, ReleaseDownload, Builder
 from kiwixbuild.utils import Remotefile, add_execution_right, run_command
 
 pj = os.path.join
 
-class android_ndk(Toolchain):
+class android_ndk(Dependency):
     neutral = False
     name = 'android-ndk'
-    version = 'r13b'
     gccver = '4.9.x'
-
-    @classmethod
-    def full_name(cls):
-        return "{name}-{version}".format(
-            name = cls.name,
-            version = cls.version)
 
     class Source(ReleaseDownload):
         archive = Remotefile('android-ndk-r13b-linux-x86_64.zip',
@@ -25,9 +17,7 @@ class android_ndk(Toolchain):
 
         @property
         def source_dir(self):
-            return "{}-{}".format(
-                self.target.name,
-                self.target.version)
+            return self.target.full_name()
 
 
     class Builder(Builder):

@@ -2,6 +2,9 @@
 from .base import *
 from . import (
     all_dependencies,
+    android_ndk,
+    android_sdk,
+    armhf,
     ctpp2,
     gradle,
     gumbo,

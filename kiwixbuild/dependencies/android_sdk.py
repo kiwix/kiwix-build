@@ -1,15 +1,14 @@
 import os
 import shutil
 
-from .base_toolchain import Toolchain
-from kiwixbuild.dependencies import ReleaseDownload, Builder
+from .base import Dependency, ReleaseDownload, Builder
 from kiwixbuild.utils import Remotefile, run_command
 
 pj = os.path.join
 
-class android_sdk(Toolchain):
+class android_sdk(Dependency):
+    neutral = True
     name = 'android-sdk'
-    version = 'r25.2.3'
 
     class Source(ReleaseDownload):
         archive = Remotefile('tools_r25.2.3-linux.zip',

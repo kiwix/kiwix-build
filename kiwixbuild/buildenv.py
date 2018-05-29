@@ -3,7 +3,6 @@ import os, sys, shutil
 import subprocess
 import platform
 
-from .toolchains import Toolchain
 from .utils import pj, download_remote, Defaultdict
 from ._global import neutralEnv, option
 
@@ -77,9 +76,11 @@ class BuildEnv:
         self.platformInfo = platformInfo
         self.build_dir = pj(option('working_dir'), build_dir)
         self.install_dir = pj(self.build_dir, "INSTALL")
+        self.toolchain_dir = pj(self.build_dir, "TOOLCHAINS")
         self.log_dir = pj(self.build_dir, 'LOGS')
         for d in (self.build_dir,
                   self.install_dir,
+                  self.toolchain_dir,
                   self.log_dir):
             os.makedirs(d, exist_ok=True)
 
