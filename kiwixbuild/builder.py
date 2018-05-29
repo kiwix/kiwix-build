@@ -6,6 +6,7 @@ from .buildenv import *
 from .platforms import PlatformInfo
 from .utils import remove_duplicates, StopBuild
 from .dependencies import Dependency
+from .packages import PACKAGE_NAME_MAPPERS
 from ._global import (
     neutralEnv, option,
     add_target_step, get_target_step, target_steps)
@@ -13,20 +14,23 @@ from . import _global
 
 class Builder:
     def __init__(self):
-        _targets = {}
-        targetDef = (option('target_platform'), option('targets'))
-        self.add_targets(targetDef, _targets)
-        dependencies = self.order_dependencies(_targets, targetDef)
+        self._targets = {}
+        PlatformInfo.get_platform('neutral', self._targets)
+
+        self.targetDef = (option('target_platform'), option('targets'))
+        self.add_targets(self.targetDef, self._targets)
+
+    def finalize_target_steps(self):
+        dependencies = self.order_dependencies(self.targetDef)
         dependencies = list(remove_duplicates(dependencies))
 
-        PlatformInfo.get_platform('neutral', _targets)
         if option('build_nodeps'):
-            add_target_step(targetDef, _targets[targetDef])
+            add_target_step(self.targetDef, self._targets[self.targetDef])
         else:
             for dep in dependencies:
-                if option('build_deps_only') and dep == targetDef:
+                if option('build_deps_only') and dep == self.targetDef:
                     continue
-                add_target_step(dep, _targets[dep])
+                add_target_step(dep, self._targets[dep])
         self.instanciate_steps()
 
     def add_targets(self, targetDef, targets):
@@ -44,7 +48,7 @@ class Builder:
                 depPlatform, depName = targetPlatformName, dep
             self.add_targets((depPlatform, depName), targets)
 
-    def order_dependencies(self, _targets, targetDef):
+    def order_dependencies(self, targetDef):
         for pltName in PlatformInfo.all_running_platforms:
             plt = PlatformInfo.all_platforms[pltName]
             for tlcName in plt.toolchain_names:
@@ -56,15 +60,16 @@ class Builder:
             # Do not try to order sources, they will be added as dep by the
             # build step two lines later.
             return
-        target = _targets[targetDef]
+        target = self._targets[targetDef]
         targetPlatform = PlatformInfo.get_platform(targetPlatformName)
-        yield ('source', targetName)
         for dep in target.get_dependencies(targetPlatform):
             try:
                 depPlatform, depName = dep
             except ValueError:
                 depPlatform, depName = targetPlatformName, dep
-            yield from self.order_dependencies(_targets, (depPlatform, depName))
+            if (depPlatform, depName) in self._targets:
+                yield from self.order_dependencies((depPlatform, depName))
+        yield ('source', targetName)
         yield targetDef
 
     def instanciate_steps(self):
@@ -103,15 +108,75 @@ class Builder:
             add_target_step(builderDef, builder)
             builder.build()
 
+    def _get_packages(self):
+        packages_list = []
+        for platform in PlatformInfo.all_running_platforms.values():
+            mapper_name = "{host}_{target}".format(
+                host=neutralEnv('distname'),
+                target=platform)
+            package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
+            packages_list += package_name_mapper.get('COMMON', [])
+
+        to_drop = []
+        for builderDef in self._targets:
+            platformName, builderName = builderDef
+            mapper_name = "{host}_{target}".format(
+                host=neutralEnv('distname'),
+                target=platformName)
+            package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
+            packages = package_name_mapper.get(builderName)
+            if packages:
+                packages_list += packages
+                to_drop.append(builderDef)
+        for dep in to_drop:
+            del self._targets[dep]
+        return packages_list
+
+    def install_packages(self):
+        packages_to_have = self._get_packages()
+        packages_to_have = remove_duplicates(packages_to_have)
+
+        distname = neutralEnv('distname')
+        if distname in ('fedora', 'redhat', 'centos'):
+            package_installer = 'sudo dnf install {}'
+            package_checker = 'rpm -q --quiet {}'
+        elif distname in ('debian', 'Ubuntu'):
+            package_installer = 'sudo apt-get install {}'
+            package_checker = 'LANG=C dpkg -s {} 2>&1 | grep Status | grep "ok installed" 1>/dev/null 2>&1'
+        elif distname == 'Darwin':
+            package_installer = 'brew install {}'
+            package_checker = 'brew list -1 | grep -q {}'
+
+        packages_to_install = []
+        for package in packages_to_have:
+            print(" - {} : ".format(package), end="")
+            command = package_checker.format(package)
+            try:
+                subprocess.check_call(command, shell=True)
+            except subprocess.CalledProcessError:
+                print("NEEDED")
+                packages_to_install.append(package)
+            else:
+                print("SKIP")
+
+        if packages_to_install:
+            command = package_installer.format(" ".join(packages_to_install))
+            print(command)
+            subprocess.check_call(command, shell=True)
+        else:
+            print("SKIP, No package to install.")
 
     def run(self):
         try:
+            print("[INSTALL PACKAGES]")
+            if option('dont_install_packages'):
+                print("SKIP")
+            else:
+                self.install_packages()
+            self.finalize_target_steps()
             print("[SETUP PLATFORMS]")
             for platform in PlatformInfo.all_running_platforms.values():
                 platform.finalize_setup()
-            print("[INSTALL PACKAGES]")
-            for platform in PlatformInfo.all_running_platforms.values():
-                platform.install_packages()
             print("[PREPARE]")
             self.prepare_sources()
             print("[BUILD]")

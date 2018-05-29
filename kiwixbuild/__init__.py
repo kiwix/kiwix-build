@@ -35,8 +35,8 @@ def parse_args():
                           help="Skip SSL certificate verification during download")
     subgroup.add_argument('--clean-at-end', action='store_true',
                           help="Clean all intermediate files after the (successfull) build")
-    subgroup.add_argument('--force-install-packages', action='store_true',
-                          help="Allways check for needed packages before compiling")
+    subgroup.add_argument('--dont-install-packages', action='store_true',
+                          help="Do not try to install packages before compiling")
     subgroup = parser.add_argument_group('custom app',
                                          description="Android custom app specific options")
     subgroup.add_argument('--android-custom-app',
