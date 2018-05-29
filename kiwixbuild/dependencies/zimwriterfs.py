@@ -12,13 +12,7 @@ class Zimwriterfs(Dependency):
         release_git_ref = "1.1"
 
     class Builder(MesonBuilder):
-        @classmethod
-        def get_dependencies(cls, platformInfo):
-            base_dependencies = ['libzim', 'zlib', 'xapian-core', 'gumbo']
-            if platformInfo.build != 'native':
-                return base_dependencies + ["icu4c_cross-compile", "libmagic_cross-compile"]
-            else:
-                return base_dependencies + ["icu4c", "libmagic"]
+        dependencies = ['libzim', 'zlib', 'xapian-core', 'gumbo', 'icu4c', 'libmagic']
 
         @property
         def configure_option(self):

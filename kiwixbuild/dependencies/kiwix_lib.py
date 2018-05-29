@@ -14,14 +14,11 @@ class Kiwixlib(Dependency):
     class Builder(MesonBuilder):
         @classmethod
         def get_dependencies(cls, platformInfo):
-            base_dependencies = ["pugixml", "libzim", "zlib", "lzma", "libaria2"]
+            base_dependencies = ["pugixml", "libzim", "zlib", "lzma", "libaria2", "icu4c"]
             if (platformInfo.build != 'android' and
                 neutralEnv('distname') != 'Darwin'):
                 base_dependencies += ['ctpp2c', 'ctpp2']
-            if platformInfo.build != 'native':
-                return base_dependencies + ["icu4c_cross-compile"]
-            else:
-                return base_dependencies + ["icu4c"]
+            return base_dependencies
 
 
         @property

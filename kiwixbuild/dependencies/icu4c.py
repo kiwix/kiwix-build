@@ -25,36 +25,21 @@ class Icu(Dependency):
     class Builder(MakeBuilder):
         subsource_dir = "source"
 
+        @classmethod
+        def get_dependencies(cls, platformInfo):
+            plt = 'native_static' if platformInfo.static else 'native_dyn'
+            return [(plt, 'icu4c')]
+
         @property
         def configure_option(self):
             options = "--disable-samples --disable-tests --disable-extras --disable-dyload --enable-rpath"
-            if self.buildEnv.platformInfo.build == 'android':
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build != 'native':
+                icu_native_builder = get_target_step(
+                    'icu4c',
+                    'native_static' if platformInfo.static else 'native_dyn')
+                options += " --with-cross-build={} --disable-tools".format(
+                    icu_native_builder.build_path)
+            if platformInfo.build == 'android':
                 options += " --with-data-packaging=archive"
             return options
-
-
-class Icu_native(Icu):
-    name = "icu4c_native"
-    force_native_build = True
-
-    class Builder(Icu.Builder):
-        @property
-        def build_path(self):
-            return super().build_path+"_native"
-
-        def _install(self, context):
-            raise SkipCommand()
-
-
-class Icu_cross_compile(Icu):
-    name = "icu4c_cross-compile"
-
-    class Builder(Icu.Builder):
-        dependencies = ['icu4c_native']
-
-        @property
-        def configure_option(self):
-            icu_native_builder = get_target_step('icu4c_native', self.buildEnv.platformInfo.name)
-            return (super().configure_option
-                  + " --with-cross-build={} --disable-tools"
-                  ).format(icu_native_builder.build_path)

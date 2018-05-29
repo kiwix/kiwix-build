@@ -12,11 +12,4 @@ class Libzim(Dependency):
 
     class Builder(MesonBuilder):
         test_option = "-t 8"
-
-        @classmethod
-        def get_dependencies(cls, platformInfo):
-            base_dependencies = ['zlib', 'lzma', 'xapian-core']
-            if platformInfo.build != 'native':
-                return base_dependencies + ["icu4c_cross-compile"]
-            else:
-                return base_dependencies + ["icu4c"]
+        dependencies = ['zlib', 'lzma', 'xapian-core', 'icu4c']
