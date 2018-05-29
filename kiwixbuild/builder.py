@@ -21,7 +21,7 @@ class Builder:
         self.add_targets(self.targetDef, self._targets)
 
     def finalize_target_steps(self):
-        dependencies = self.order_dependencies(self.targetDef)
+        dependencies = self.order_steps(self.targetDef)
         dependencies = list(remove_duplicates(dependencies))
 
         if option('build_nodeps'):
@@ -48,27 +48,35 @@ class Builder:
                 depPlatform, depName = targetPlatformName, dep
             self.add_targets((depPlatform, depName), targets)
 
-    def order_dependencies(self, targetDef):
+    def order_steps(self, targetDef):
         for pltName in PlatformInfo.all_running_platforms:
             plt = PlatformInfo.all_platforms[pltName]
             for tlcName in plt.toolchain_names:
                 tlc = Dependency.all_deps[tlcName]
                 yield('source', tlcName)
                 yield('neutral' if tlc.neutral else pltName, tlcName)
+        _targets =dict(self._targets)
+        yield from self.order_dependencies(targetDef, _targets)
+
+    def order_dependencies(self, targetDef, targets):
         targetPlatformName, targetName = targetDef
         if targetPlatformName == 'source':
             # Do not try to order sources, they will be added as dep by the
             # build step two lines later.
             return
-        target = self._targets[targetDef]
+        try:
+            target = targets.pop(targetDef)
+        except KeyError:
+            return
+
         targetPlatform = PlatformInfo.get_platform(targetPlatformName)
         for dep in target.get_dependencies(targetPlatform):
             try:
                 depPlatform, depName = dep
             except ValueError:
                 depPlatform, depName = targetPlatformName, dep
-            if (depPlatform, depName) in self._targets:
-                yield from self.order_dependencies((depPlatform, depName))
+            if (depPlatform, depName) in targets:
+                yield from self.order_dependencies((depPlatform, depName), targets)
         yield ('source', targetName)
         yield targetDef
 
