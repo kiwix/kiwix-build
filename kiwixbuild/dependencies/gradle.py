@@ -6,7 +6,8 @@ from .base import (
 from kiwixbuild.utils import Remotefile, pj, copy_tree, add_execution_right
 
 class Gradle(Dependency):
-    name = "Gradle"
+    neutral = True
+    name = "gradle"
 
     class Source(ReleaseDownload):
         archive = Remotefile('gradle-4.6-bin.zip',
@@ -14,14 +15,18 @@ class Gradle(Dependency):
                              'https://services.gradle.org/distributions/gradle-4.6-bin.zip')
 
     class Builder(BaseBuilder):
+        @property
+        def install_path(self):
+            return self.buildEnv.install_dir
+
         def build(self):
             self.command('install', self._install)
 
         def _install(self, context):
             copy_tree(
                 pj(self.source_path, "bin"),
-                pj(self.buildEnv.install_dir, "bin"),
+                pj(self.install_path, "bin"),
                 post_copy_function = add_execution_right)
             copy_tree(
                 pj(self.source_path, "lib"),
-                pj(self.buildEnv.install_dir, "lib"))
+                pj(self.install_path, "lib"))

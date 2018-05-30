@@ -117,7 +117,7 @@ class AndroidArm(AndroidPlatformInfo):
 
 class Android(MetaPlatformInfo):
     name = "android"
-    toolchain_names = ['android-sdk']
+    toolchain_names = ['android-sdk', 'gradle']
     subPlatformNames = ['android_arm', 'android_arm64', 'android_mips', 'android_mips64', 'android_x86', 'android_x86_64']
     compatible_hosts = ['fedora', 'debian']
 
@@ -128,5 +128,10 @@ class Android(MetaPlatformInfo):
     def sdk_builder(self):
         return get_target_step('android-sdk', 'neutral')
 
+    @property
+    def gradle_builder(self):
+        return get_target_step('gradle', 'neutral')
+
     def set_env(self, env):
         env['ANDROID_HOME'] = self.sdk_builder.install_path
+        env['PATH'] = ':'.join([pj(self.gradle_builder.install_path, 'bin'), env['PATH']])

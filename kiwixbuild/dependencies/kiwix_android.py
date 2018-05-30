@@ -16,7 +16,7 @@ class KiwixAndroid(Dependency):
         git_dir = "kiwix-android"
 
     class Builder(GradleBuilder):
-        dependencies = ["Gradle", "kiwix-lib"]
+        dependencies = ["kiwix-lib"]
 
         def build(self):
             if option('targets') == 'kiwix-android-custom':

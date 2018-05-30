@@ -18,7 +18,5 @@ class AllBaseDependencies(Dependency):
             if (platformInfo.build != 'android' and
                 neutralEnv('distname') != 'Darwin'):
                 base_deps += ['ctpp2c', 'ctpp2']
-            if platformInfo.build == 'android':
-                base_deps += ['Gradle']
 
             return base_deps

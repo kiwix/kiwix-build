@@ -23,7 +23,7 @@ base_deps_versions = {
   'libmicrohttpd' : '0.9.46',
   'gumbo' : '0.10.1',
   'icu4c' : '58.2',
-  'Gradle' : '4.6',
+  'gradle' : '4.6',
   'libaria2' : '1.33.1',
   'libmagic' : '5.33',
   'android-sdk' : 'r25.2.3',
