@@ -62,7 +62,7 @@ class PlatformInfo(metaclass=_MetaPlatform):
         targetClass = Dependency.all_deps[targetName]
         targets[('source', targetName)] = targetClass.Source
         targets[(self.name, targetName)] = targetClass.Builder
-        for dep in targetClass.Builder.get_dependencies(self):
+        for dep in targetClass.Builder.get_dependencies(self, False):
             try:
                 depPlatformName, depName = dep
             except ValueError:

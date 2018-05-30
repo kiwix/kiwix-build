@@ -21,7 +21,7 @@ class Xapian(Dependency):
                          '_format_CXXFLAGS': "-I{buildEnv.install_dir}/include"}
 
         @classmethod
-        def get_dependencies(cls, platformInfo):
+        def get_dependencies(cls, platformInfo, allDeps):
             deps = ['zlib', 'lzma']
             if (platformInfo.build == 'win32'
              or neutralEnv('distname') == 'Darwin'):

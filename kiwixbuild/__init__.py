@@ -37,6 +37,10 @@ def parse_args():
                           help="Clean all intermediate files after the (successfull) build")
     subgroup.add_argument('--dont-install-packages', action='store_true',
                           help="Do not try to install packages before compiling")
+    subgroup.add_argument('--android-arch', action='append',
+                          help=("Specify the architecture to build for android application/libraries.\n"
+                                "Can be specified several times to build for several architectures.\n"
+                                "If not specified, all architectures will be build."))
     subgroup = parser.add_argument_group('custom app',
                                          description="Android custom app specific options")
     subgroup.add_argument('--android-custom-app',
@@ -59,6 +63,8 @@ def parse_args():
             err = True
         if err:
             sys.exit(1)
+    if not options.android_arch:
+        options.android_arch = ['arm', 'arm64', 'mips', 'mips64', 'x86', 'x86_64']
     return options
 
 def main():

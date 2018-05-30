@@ -22,7 +22,7 @@ class LibMagic(Dependency):
     class Builder(MakeBuilder):
 
         @classmethod
-        def get_dependencies(cls, platformInfo):
+        def get_dependencies(cls, platformInfo, allDeps):
             if platformInfo.build != 'native':
                 return [('native_static', 'libmagic')]
             return []

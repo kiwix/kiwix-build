@@ -26,7 +26,7 @@ class Icu(Dependency):
         subsource_dir = "source"
 
         @classmethod
-        def get_dependencies(cls, platformInfo):
+        def get_dependencies(cls, platformInfo, allDeps):
             plt = 'native_static' if platformInfo.static else 'native_dyn'
             return [(plt, 'icu4c')]
 

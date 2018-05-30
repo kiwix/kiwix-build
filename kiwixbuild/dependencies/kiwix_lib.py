@@ -13,7 +13,7 @@ class Kiwixlib(Dependency):
 
     class Builder(MesonBuilder):
         @classmethod
-        def get_dependencies(cls, platformInfo):
+        def get_dependencies(cls, platformInfo, allDeps):
             base_dependencies = ["pugixml", "libzim", "zlib", "lzma", "libaria2", "icu4c"]
             if (platformInfo.build != 'android' and
                 neutralEnv('distname') != 'Darwin'):

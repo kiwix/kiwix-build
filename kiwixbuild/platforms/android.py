@@ -1,6 +1,6 @@
 from .base import PlatformInfo, MetaPlatformInfo
 from kiwixbuild.utils import pj
-from kiwixbuild._global import get_target_step
+from kiwixbuild._global import get_target_step, option
 
 
 class AndroidPlatformInfo(PlatformInfo):
@@ -118,8 +118,17 @@ class AndroidArm(AndroidPlatformInfo):
 class Android(MetaPlatformInfo):
     name = "android"
     toolchain_names = ['android-sdk', 'gradle']
-    subPlatformNames = ['android_arm', 'android_arm64', 'android_mips', 'android_mips64', 'android_x86', 'android_x86_64']
     compatible_hosts = ['fedora', 'debian']
+
+    @property
+    def subPlatformNames(self):
+        return ['android_{}'.format(arch) for arch in option('android_arch')]
+
+    def add_targets(self, targetName, targets):
+        if targetName != 'kiwix-android':
+            return super().add_targets(targetName, targets)
+        else:
+            return AndroidPlatformInfo.add_targets(self, targetName, targets)
 
     def __str__(self):
         return self.name

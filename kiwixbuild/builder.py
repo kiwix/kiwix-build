@@ -57,7 +57,7 @@ class Builder:
             return
 
         targetPlatform = PlatformInfo.get_platform(targetPlatformName)
-        for dep in target.get_dependencies(targetPlatform):
+        for dep in target.get_dependencies(targetPlatform, True):
             try:
                 depPlatform, depName = dep
             except ValueError:

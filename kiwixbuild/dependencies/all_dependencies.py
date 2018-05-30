@@ -11,7 +11,7 @@ class AllBaseDependencies(Dependency):
     Source = NoopSource
     class Builder(NoopBuilder):
         @classmethod
-        def get_dependencies(cls, platformInfo):
+        def get_dependencies(cls, platformInfo, allDeps):
             base_deps = ['zlib', 'lzma', 'xapian-core', 'gumbo', 'pugixml', 'libmicrohttpd', 'libaria2', 'icu4c']
             if platformInfo.build != 'win32':
                 base_deps += ["libmagic"]

@@ -202,7 +202,7 @@ class Builder:
         self.buildEnv = buildEnv
 
     @classmethod
-    def get_dependencies(cls, platformInfo):
+    def get_dependencies(cls, platformInfo, allDeps):
         return cls.dependencies
 
     @property

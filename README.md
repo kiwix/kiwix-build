@@ -82,6 +82,7 @@ platforms :
 - native_static
 - win32_dyn
 - win32_static
+- android
 - android_arm
 - android_arm64
 - android_mips
@@ -95,9 +96,35 @@ So, if you want to compile `kiwix-tools` for win32 using static linkage:
 $ kiwix-build --target-platform win32_dyn
 ```
 
-Or, android apk for android_arm :
+## Android
+
+Android apk (kiwix-android) is a bit a special case.
+`kiwix-android` itself is architecture independent (it is written in
+java) but it use `kiwix-lib` who is architecture dependent.
+
+When building `kiwix-lib`, you should directly use the
+target-platform `android_<arch>`:
+
 ```
-$ kiwix-build --target-platform android_arm kiwix-android
+$ kiwix-build kiwix-android --target-platform android_arm
+```
+
+But, `kiwix-android` apk can also be multi arch (ie, it includes
+`kiwix-lib` for several architectures). To do so, you must ask to build
+`kiwix-android` using the `android` platform:
+
+```
+$ kiwix-build --target-platform android kiwix-android
+$ kiwix-build kiwix-android # because `android` platform is the default `kiwix-android`
+```
+
+By default, when using platform `android`, `kiwix-lib` will be build for
+all architectures. This can be change by using the option `--android-arch` :
+
+```
+$ kiwix-build kiwix-android # apk for all architectures
+$ kiwix-build kiwix-android --android-arch arm # apk for arm architectures (equivalent to `kiwix-android --target-platform android_arm`)
+$ kiwix-build kiwix-anrdoid --android-arch arm --android-arch arm64 # apk for arm and arm64 architectures
 ```
 
 # Outputs
