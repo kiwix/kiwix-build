@@ -56,6 +56,20 @@ class PlatformInfo(metaclass=_MetaPlatform):
             plt_name = 'neutral' if ToolchainClass.neutral else self.name
             targets[(plt_name, tlc_name)] = ToolchainClass.Builder
 
+    def add_targets(self, targetName, targets):
+        if (self.name, targetName) in targets:
+            return
+        targetClass = Dependency.all_deps[targetName]
+        targets[('source', targetName)] = targetClass.Source
+        targets[(self.name, targetName)] = targetClass.Builder
+        for dep in targetClass.Builder.get_dependencies(self):
+            try:
+                depPlatformName, depName = dep
+            except ValueError:
+                depPlatformName, depName = self.name, dep
+            depPlatform = self.get_platform(depPlatformName, targets)
+            depPlatform.add_targets(depName, targets)
+
     def get_cross_config(self):
         return {}
 

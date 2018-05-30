@@ -17,36 +17,22 @@ class Builder:
         self._targets = {}
         PlatformInfo.get_platform('neutral', self._targets)
 
-        self.targetDef = (option('target_platform'), option('targets'))
-        self.add_targets(self.targetDef, self._targets)
+        platform = PlatformInfo.get_platform(option('target_platform'), self._targets)
+        platform.add_targets(option('targets'), self._targets)
 
     def finalize_target_steps(self):
-        dependencies = self.order_steps(self.targetDef)
+        targetDef = (option('target_platform'), option('targets'))
+        dependencies = self.order_steps(targetDef)
         dependencies = list(remove_duplicates(dependencies))
 
         if option('build_nodeps'):
-            add_target_step(self.targetDef, self._targets[self.targetDef])
+            add_target_step(targetDef, self._targets[targetDef])
         else:
             for dep in dependencies:
-                if option('build_deps_only') and dep == self.targetDef:
+                if option('build_deps_only') and dep == targetDef:
                     continue
                 add_target_step(dep, self._targets[dep])
         self.instanciate_steps()
-
-    def add_targets(self, targetDef, targets):
-        if targetDef in targets:
-            return
-        targetPlatformName, targetName = targetDef
-        targetPlatform = PlatformInfo.get_platform(targetPlatformName, targets)
-        targetClass = Dependency.all_deps[targetName]
-        targets[('source', targetName)] = targetClass.Source
-        targets[targetDef] = targetClass.Builder
-        for dep in targetClass.Builder.get_dependencies(targetPlatform):
-            try:
-                depPlatform, depName = dep
-            except ValueError:
-                depPlatform, depName = targetPlatformName, dep
-            self.add_targets((depPlatform, depName), targets)
 
     def order_steps(self, targetDef):
         for pltName in PlatformInfo.all_running_platforms:
