@@ -18,17 +18,18 @@ class Builder:
         PlatformInfo.get_platform('neutral', self._targets)
 
         platform = PlatformInfo.get_platform(option('target_platform'), self._targets)
-        platform.add_targets(option('targets'), self._targets)
+        self.targetDefs = platform.add_targets(option('targets'), self._targets)
 
     def finalize_target_steps(self):
-        targetDef = (option('target_platform'), option('targets'))
-        dependencies = self.order_steps(targetDef)
-        dependencies = list(remove_duplicates(dependencies))
+        steps = []
+        for targetDef in self.targetDefs:
+            steps += self.order_steps(targetDef)
+        steps = list(remove_duplicates(steps))
 
         if option('build_nodeps'):
             add_target_step(targetDef, self._targets[targetDef])
         else:
-            for dep in dependencies:
+            for dep in steps:
                 if option('build_deps_only') and dep == targetDef:
                     continue
                 add_target_step(dep, self._targets[dep])

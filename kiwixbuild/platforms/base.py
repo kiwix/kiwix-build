@@ -58,7 +58,7 @@ class PlatformInfo(metaclass=_MetaPlatform):
 
     def add_targets(self, targetName, targets):
         if (self.name, targetName) in targets:
-            return
+            return []
         targetClass = Dependency.all_deps[targetName]
         targets[('source', targetName)] = targetClass.Source
         targets[(self.name, targetName)] = targetClass.Builder
@@ -69,6 +69,7 @@ class PlatformInfo(metaclass=_MetaPlatform):
                 depPlatformName, depName = self.name, dep
             depPlatform = self.get_platform(depPlatformName, targets)
             depPlatform.add_targets(depName, targets)
+        return [(self.name, targetName)]
 
     def get_cross_config(self):
         return {}
@@ -102,3 +103,15 @@ class PlatformInfo(metaclass=_MetaPlatform):
     def clean_intermediate_directories(self):
         self.buildEnv.clean_intermediate_directories()
 
+
+
+class MetaPlatformInfo(PlatformInfo):
+    subPlatformNames = []
+
+    def add_targets(self, targetName, targets):
+        targetDefs = []
+        for platformName in self.subPlatformNames:
+            print("radd {}".format(platformName))
+            platform = self.get_platform(platformName, targets)
+            targetDefs += platform.add_targets(targetName, targets)
+        return targetDefs
