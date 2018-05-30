@@ -1,4 +1,4 @@
-from .base import PlatformInfo
+from .base import PlatformInfo, MetaPlatformInfo
 from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
 
@@ -6,7 +6,7 @@ from kiwixbuild._global import get_target_step
 class AndroidPlatformInfo(PlatformInfo):
     build = 'android'
     static = True
-    toolchain_names = ['android-ndk', 'android-sdk']
+    toolchain_names = ['android-ndk']
     compatible_hosts = ['fedora', 'debian']
 
     def __str__(self):
@@ -28,10 +28,6 @@ class AndroidPlatformInfo(PlatformInfo):
     @property
     def ndk_builder(self):
         return get_target_step('android-ndk', self.name)
-
-    @property
-    def sdk_builder(self):
-        return get_target_step('android-sdk', 'neutral')
 
     def get_cross_config(self):
         install_path = self.ndk_builder.install_path
@@ -67,7 +63,6 @@ class AndroidPlatformInfo(PlatformInfo):
         #                   '-DU_STATIC_IMPLEMENTATION -O3 '
         #                   '-DU_HAVE_STD_STRING -DU_TIMEZONE=0 ')+env['CXXFLAGS']
         env['NDK_DEBUG'] = '0'
-        env['ANDROID_HOME'] = self.sdk_builder.install_path
 
     def set_compiler(self, env):
         binaries = self.binaries(self.ndk_builder.install_path)
@@ -119,3 +114,19 @@ class AndroidArm(AndroidPlatformInfo):
     name = 'android_x86_64'
     arch = cpu = abi = 'x86_64'
     arch_full = 'x86_64-linux-android'
+
+class Android(MetaPlatformInfo):
+    name = "android"
+    toolchain_names = ['android-sdk']
+    subPlatformNames = ['android_arm', 'android_arm64', 'android_mips', 'android_mips64', 'android_x86', 'android_x86_64']
+    compatible_hosts = ['fedora', 'debian']
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def sdk_builder(self):
+        return get_target_step('android-sdk', 'neutral')
+
+    def set_env(self, env):
+        env['ANDROID_HOME'] = self.sdk_builder.install_path
