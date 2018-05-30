@@ -17,7 +17,13 @@ class Builder:
         self._targets = {}
         PlatformInfo.get_platform('neutral', self._targets)
 
-        platform = PlatformInfo.get_platform(option('target_platform'), self._targets)
+        target_platform = option('target_platform')
+        if not target_platform:
+            if option('target') == 'kiwix-android':
+                target_platform = 'android'
+            else:
+                target_platform = 'native_dyn'
+        platform = PlatformInfo.get_platform(target_platform, self._targets)
         self.targetDefs = platform.add_targets(option('target'), self._targets)
 
     def finalize_target_steps(self):

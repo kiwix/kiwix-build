@@ -14,7 +14,7 @@ def parse_args():
                         choices=Dependency.all_deps.keys())
     parser.add_argument('--working-dir', default=".")
     parser.add_argument('--libprefix', default=None)
-    parser.add_argument('--target-platform', default="native_dyn", choices=PlatformInfo.all_platforms)
+    parser.add_argument('--target-platform', choices=PlatformInfo.all_platforms)
     parser.add_argument('--verbose', '-v', action="store_true",
                         help=("Print all logs on stdout instead of in specific"
                               " log files per commands"))

@@ -71,8 +71,10 @@ By default, `kiwix-build` will build `kiwix-tools` .
 
 ## Target platform
 
-By default, `kiwix-build` will build everything for the current (native)
-platform using dynamic linkage (`native_dyn`).
+If no target platform is specified, a default one will be infered from
+the specified target :
+- `kiwix-android` will be build using the platform `android`
+- Other targets will be build using the platform `native_dyn`
 
 But you can select another target platform using the option
 `--target-platform`. For now, there is ten different supported
