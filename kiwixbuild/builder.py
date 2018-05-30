@@ -18,7 +18,7 @@ class Builder:
         PlatformInfo.get_platform('neutral', self._targets)
 
         platform = PlatformInfo.get_platform(option('target_platform'), self._targets)
-        self.targetDefs = platform.add_targets(option('targets'), self._targets)
+        self.targetDefs = platform.add_targets(option('target'), self._targets)
 
     def finalize_target_steps(self):
         steps = []
@@ -95,7 +95,7 @@ class Builder:
         builderDefs = (tDef for tDef in target_steps() if tDef[0] != 'source')
         for builderDef in builderDefs:
             builder = get_target_step(builderDef)
-            if option('make_dist') and builderName == option('targets'):
+            if option('make_dist') and builderName == option('target'):
                 print("make dist {} ({}):".format(builder.name, builderDef[0]))
                 builder.make_dist()
                 continue

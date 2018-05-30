@@ -28,7 +28,7 @@ class KiwixAndroid(Dependency):
                 return deps
 
         def build(self):
-            if option('targets') == 'kiwix-android-custom':
+            if option('target') == 'kiwix-android-custom':
                 print("SKIP")
             else:
                 super().build()

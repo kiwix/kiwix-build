@@ -10,7 +10,7 @@ from . import _global
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('targets', default='kiwix-tools', nargs='?', metavar='TARGET',
+    parser.add_argument('target', default='kiwix-tools', nargs='?', metavar='TARGET',
                         choices=Dependency.all_deps.keys())
     parser.add_argument('--working-dir', default=".")
     parser.add_argument('--libprefix', default=None)
@@ -23,7 +23,7 @@ def parse_args():
     parser.add_argument('--skip-source-prepare', action='store_true',
                         help="Skip the source download part")
     parser.add_argument('--build-deps-only', action='store_true',
-                        help="Build only the dependencies of the specified targets.")
+                        help="Build only the dependencies of the specified target.")
     parser.add_argument('--build-nodeps', action='store_true',
                         help="Build only the target, not its dependencies.")
     parser.add_argument('--make-dist', action='store_true',
@@ -51,7 +51,7 @@ def parse_args():
                           help="The size of the zim file.")
     options = parser.parse_args()
 
-    if options.targets == 'kiwix-android-custom':
+    if options.target == 'kiwix-android-custom':
         err = False
         if not options.android_custom_app:
             print("You need to specify ANDROID_CUSTOM_APP if you "
