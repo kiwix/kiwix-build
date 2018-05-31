@@ -9,6 +9,7 @@ from . import (
     gradle,
     gumbo,
     icu4c,
+    ios_fat_lib,
     kiwix_android,
     kiwix_custom_app,
     kiwix_lib,

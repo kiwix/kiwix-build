@@ -24,6 +24,10 @@ class Builder:
             else:
                 target_platform = 'native_dyn'
         platform = PlatformInfo.get_platform(target_platform, self._targets)
+        if neutralEnv('distname') not in platform.compatible_hosts:
+            print(('ERROR: The target platform {} cannot be build on host {}.\n'
+                   'Select another target platform or change your host system.'
+                  ).format(platform.name, neutralEnv('distname')))
         self.targetDefs = platform.add_targets(option('target'), self._targets)
 
     def finalize_target_steps(self):

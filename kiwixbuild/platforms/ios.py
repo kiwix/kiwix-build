@@ -1,9 +1,9 @@
 
 import subprocess
 
-from .base import PlatformInfo
+from .base import PlatformInfo, MetaPlatformInfo
 from kiwixbuild.utils import pj, xrun_find
-
+from kiwixbuild._global import option
 
 class iOSPlatformInfo(PlatformInfo):
     build = 'iOS'
@@ -84,17 +84,32 @@ class iOSArmv7(iOSPlatformInfo):
 class iOSArm64(iOSPlatformInfo):
     name = 'iOS_arm64'
     arch = cpu = 'arm64'
-    arch_full =  'arm-apple-darwin'
+    arch_full =  'aarch64-apple-darwin'
     sdk_name = 'iphoneos'
 
 class iOSi386(iOSPlatformInfo):
     name = 'iOS_i386'
     arch = cpu = 'i386'
-    arch_full =  ''
+    arch_full =  'i386-apple-darwin'
     sdk_name = 'iphonesimulator'
 
 class iOSx64(iOSPlatformInfo):
     name = 'iOS_x86_64'
     arch = cpu = 'x86_64'
-    arch_full =  ''
+    arch_full =  'x86_64-apple-darwin'
     sdk_name = 'iphonesimulator'
+
+class IOS(MetaPlatformInfo):
+    name = "iOS_multi"
+    compatible_hosts = ['Darwin']
+
+    @property
+    def subPlatformNames(self):
+        return ['iOS_{}'.format(arch) for arch in option('ios_arch')]
+
+    def add_targets(self, targetName, targets):
+        super().add_targets(targetName, targets)
+        return PlatformInfo.add_targets(self, '_ios_fat_lib', targets)
+
+    def __str__(self):
+        return self.name

@@ -32,16 +32,10 @@ class PlatformInfo(metaclass=_MetaPlatform):
                 print("Should not got there.")
                 print(cls.all_running_platforms)
                 raise KeyError(name)
-                sys.exit(-1)
             cls.all_running_platforms[name] = cls.all_platforms[name](targets)
         return cls.all_running_platforms[name]
 
     def __init__(self, targets):
-        if neutralEnv('distname') not in self.compatible_hosts:
-            print(('ERROR: The target platform {} cannot be build on host {}.\n'
-                   'Select another target platform, or change your host system.'
-                  ).format(self.name, neutralEnv('distname')))
-            sys.exit(-1)
         self.all_running_platforms[self.name] = self
         self.buildEnv = BuildEnv(self)
         self.setup_toolchains(targets)

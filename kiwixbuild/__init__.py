@@ -41,6 +41,10 @@ def parse_args():
                           help=("Specify the architecture to build for android application/libraries.\n"
                                 "Can be specified several times to build for several architectures.\n"
                                 "If not specified, all architectures will be build."))
+    subgroup.add_argument('--ios-arch', action='append',
+                          help=("Specify the architecture to build for ios application/libraries.\n"
+                                "Can be specified several times to build for several architectures.\n"
+                                "If not specified, all architectures will be build."))
     subgroup = parser.add_argument_group('custom app',
                                          description="Android custom app specific options")
     subgroup.add_argument('--android-custom-app',
@@ -65,6 +69,9 @@ def parse_args():
             sys.exit(1)
     if not options.android_arch:
         options.android_arch = ['arm', 'arm64', 'mips', 'mips64', 'x86', 'x86_64']
+    if not options.ios_arch:
+        options.ios_arch = ['armv7', 'arm64', 'i386', 'x86_64']
+
     return options
 
 def main():

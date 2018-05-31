@@ -129,6 +129,27 @@ $ kiwix-build kiwix-android --android-arch arm # apk for arm architectures (equi
 $ kiwix-build kiwix-anrdoid --android-arch arm --android-arch arm64 # apk for arm and arm64 architectures
 ```
 
+## IOS
+
+When building for ios, we may want to compile a "fat library", a library
+for several architectures.
+
+To do so, you should directly use the target-platfrom `ios_multi`.
+As for `android`, `kiwix-build` will build the library several times
+(once for each platform) and then create the fat library.
+
+```
+$ kiwix-build --target-platform iOS_multi kiwix-lib
+```
+
+You can specify the supported architectures with the option `--ios-arch`:
+
+```
+$ kiwix-build --target-platform iOS_multi kiwix-lib # all architetures
+$ kiwix-build --target-platform iOS_multi --ios-arch arm --ios-arch arm64 # arm and arm64 arch only
+```
+
+
 # Outputs
 
 Kiwix-build.py will create several directories:
