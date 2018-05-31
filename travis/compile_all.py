@@ -66,8 +66,14 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
     command = ['kiwix-build']
     command.append(target)
     command.append('--hide-progress')
-    command.append('--force-install-packages')
-    command.extend(['--target-platform', platform])
+    if target == 'kiwix-android' and platform.startswith('android_'):
+        command.extend(['--target-platform', 'android', '--android-arch', platform[8:]])
+    elif platform == 'android':
+        command.extend(['--target-platform', 'android'])
+        for arch in ('arm', 'arm64', 'x86', 'x86_64'):
+            command.extend(['--android-arch', arch])
+    else:
+        command.extend(['--target-platform', platform])
     if build_deps_only:
         command.append('--build-deps-only')
     if make_release:
@@ -121,12 +127,11 @@ def make_archive(project, platform):
 
 
 def make_deps_archive(target, full=False):
-    (BASE_DIR/'.install_packages_ok').unlink()
-
     archive_name = "deps_{}_{}_{}.tar.gz".format(
         TRAVIS_OS_NAME, PLATFORM, target)
     files_to_archive = [BASE_DIR/'INSTALL']
-    files_to_archive += BASE_DIR.glob('**/android-ndk*')
+    files_to_archive += HOME.glob('BUILD_*/android-ndk*')
+    files_to_archive += HOME.glob('BUILD_*/android-sdk*')
     if (BASE_DIR/'meson_cross_file.txt').exists():
         files_to_archive.append(BASE_DIR/'meson_cross_file.txt')
 
@@ -138,17 +143,19 @@ def make_deps_archive(target, full=False):
     if full:
         files_to_archive += ARCHIVE_DIR.glob(".*_ok")
         files_to_archive += BASE_DIR.glob('*/.*_ok')
+        files_to_archive += (HOME/"BUILD_native_dyn").glob('*/.*_ok')
+        files_to_archive += (HOME/"BUILD_native_static").glob('*/.*_ok')
+        files_to_archive += HOME.glob('BUILD_android*/.*_ok')
         files_to_archive += SOURCE_DIR.glob('*/.*_ok')
         files_to_archive += [SOURCE_DIR/'pugixml-{}'.format(
             base_deps_versions['pugixml'])]
-        files_to_archive += [BASE_DIR/'pugixml-{}'.format(
-            base_deps_versions['pugixml'])]
-        if (TOOLCHAINS_DIR).exists():
-            files_to_archive.append(TOOLCHAINS_DIR)
+        files_to_archive += HOME.glob('BUILD_*/pugixml-{}'.format(
+            base_deps_versions['pugixml']))
+        files_to_archive += HOME.glob('**/TOOLCHAINS')
         relative_path = HOME
 
     with tarfile.open(str(relative_path/archive_name), 'w:gz') as tar:
-        for name in files_to_archive:
+        for name in set(files_to_archive):
             tar.add(str(name), arcname=str(name.relative_to(relative_path)))
     return relative_path/archive_name
 
@@ -281,10 +288,10 @@ elif PLATFORM == 'armhf_static':
     make_archive('kiwix-tools', 'linux-armhf')
 elif PLATFORM == 'i586_static':
     make_archive('kiwix-tools', 'linux-i586')
-elif PLATFORM.startswith('android_') and 'kiwix-android' in TARGETS:
+elif PLATFORM.startswith('android') and 'kiwix-android' in TARGETS:
     APK_NAME = "kiwix-{}".format(PLATFORM)
-    source_debug_dir = BASE_DIR/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'debug'
-    source_release_dir = BASE_DIR/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'release'
+    source_debug_dir = HOME/'BUILD_android'/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'debug'
+    source_release_dir = HOME/'BUILD_android'/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'release'
     shutil.copy(str(source_debug_dir/'app-kiwix-debug.apk'),
                 str(NIGHTLY_KIWIX_ARCHIVES_DIR/"{}-debug.apk".format(APK_NAME)))
     shutil.copy(str(source_release_dir/'app-kiwix-release-unsigned.apk'),
