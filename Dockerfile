@@ -40,6 +40,11 @@ RUN \
     ctpp2-utils \
     libctpp2-dev \
     libmicrohttpd-dev \
+# Qt packages
+    libqt5gui5 \
+    qtbase5-dev \
+    qtwebengine5-dev \
+    qt5-default \
 # Some helper tools
     vim \
     less \

@@ -211,6 +211,8 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
     elif PLATFORM.startswith('native_'):
         if TRAVIS_OS_NAME == "osx":
             TARGETS = ('kiwix-lib', 'zim-tools', 'zimwriterfs')
+        elif PLATFORM == 'native_dyn':
+            TARGETS = ('kiwix-tools', 'kiwix-desktop', 'zim-tools', 'zimwriterfs')
         else:
             TARGETS = ('kiwix-tools', 'zim-tools', 'zimwriterfs')
     else:
@@ -235,7 +237,10 @@ elif PLATFORM.startswith('native_'):
     if TRAVIS_OS_NAME == "osx":
         TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib')
     else:
-        TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
+        if make_release:
+            TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
+        else:
+            TARGETS = ('libzim', 'kiwix-lib', 'kiwix-desktop', 'zimwriterfs', 'zim-tools', 'kiwix-tools')
 else:
     TARGETS = ('libzim', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 
