@@ -8,14 +8,14 @@ RELEASE_KIWIX_ARCHIVES_DIR=${HOME}/RELEASE_KIWIX_ARCHIVES
 RELEASE_ZIM_ARCHIVES_DIR=${HOME}/RELEASE_ZIM_ARCHIVES
 DIST_KIWIX_ARCHIVES_DIR=${HOME}/DIST_KIWIX_ARCHIVES
 DIST_ZIM_ARCHIVES_DIR=${HOME}/DIST_ZIM_ARCHIVES
-SSH_KEY=travis/travisci_builder_id_key
+SSH_KEY=${TRAVISCI_SSH_KEY:-travis/travisci_builder_id_key}
 
 if [[ "$TRAVIS_EVENT_TYPE" = "cron" ]]
 then
-  scp -vrp -i ${SSH_KEY} \
+  scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
     ${NIGHTLY_KIWIX_ARCHIVES_DIR} \
     nightlybot@download.kiwix.org:/var/www/download.kiwix.org/nightly
-  scp -vrp -i ${SSH_KEY} \
+  scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
     ${NIGHTLY_ZIM_ARCHIVES_DIR} \
     nightlybot@download.kiwix.org:/var/www/download.openzim.org/nightly
 
@@ -27,7 +27,7 @@ then
     for archive in $RELEASE_ARCHIVES
     do
       subdir=$(basename $(dirname $archive))
-      scp -vrp -i ${SSH_KEY} \
+      scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
         nightlybot@download.kiwix.org:/var/www/download.kiwix.org/release/${subdir}
     done
@@ -39,7 +39,7 @@ then
     for archive in $RELEASE_ARCHIVES
     do
       subdir=$(basename $(dirname $archive))
-      scp -vrp -i ${SSH_KEY} \
+      scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
         nightlybot@download.openzim.org:/var/www/download.openzim.org/release/${subdir}
     done
@@ -51,7 +51,7 @@ then
     for archive in $DIST_KIWIX_ARCHIVES
     do
       subdir=$(basename $(dirname $archive))
-      scp -vrp -i ${SSH_KEY} \
+      scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
         nightlybot@download.kiwix.org:/var/www/download.kiwix.org/release/${subdir}
     done
@@ -63,7 +63,7 @@ then
     for archive in $DIST_ZIM_ARCHIVES
     do
       subdir=$(basename $(dirname $archive))
-      scp -vrp -i ${SSH_KEY} \
+      scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
         nightlybot@download.openzim.org:/var/www/download.openzim.org/release/${subdir}
     done
