@@ -427,7 +427,7 @@ class MesonBuilder(Builder):
 
 class GradleBuilder(Builder):
     gradle_target = "build"
-    gradle_option = "-i"
+    gradle_option = "-i --no-daemon --build-cache"
 
     def build(self):
         self.command('configure', self._configure)
