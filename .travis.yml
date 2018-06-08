@@ -54,6 +54,7 @@ env:
     - PLATFORM="armhf_static"
     - PLATFORM="i586_dyn"
     - PLATFORM="i586_static"
+    - PLATFORM="android"
     - PLATFORM="android_arm"
     - PLATFORM="android_arm64"
     - PLATFORM="android_x86"
@@ -66,6 +67,7 @@ matrix:
     - env: PLATFORM="android_mips64"
     - env: PLATFORM="android_x86"
     - env: PLATFORM="android_x86_64"
+    - env: PLATFORM="android"
   include:
     - env: PLATFORM="android_mips"
       if: type!=cron AND type!=pull_request

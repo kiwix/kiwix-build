@@ -2,8 +2,9 @@ import subprocess
 import os
 import shutil
 
-from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild
+from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild, run_command
 from kiwixbuild.versions import main_project_versions, base_deps_versions
+from kiwixbuild._global import neutralEnv, option
 
 SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
@@ -19,38 +20,53 @@ class _MetaDependency(type):
 
 class Dependency(metaclass=_MetaDependency):
     all_deps = {}
-    dependencies = []
     force_native_build = False
 
-    def __init__(self, neutralEnv, buildEnv):
-        self.neutralEnv = neutralEnv
-        self.buildEnv = buildEnv
-        self.source = self.Source(self)
-        self.builder = self.Builder(self)
-        self.skip = False
+    @classmethod
+    def version(cls):
+        return base_deps_versions.get(cls.name, None)
+
+    @classmethod
+    def full_name(cls):
+        if cls.version():
+            return "{}-{}".format(cls.name, cls.version())
+        return cls.name
+
+
+class Source:
+    """Base Class to the real preparator
+       A source preparator must install source in the self.source_dir attribute
+       inside the neutralEnv.source_dir."""
+    def __init__(self, target):
+        self.target = target
 
     @property
-    def version(self):
-        return base_deps_versions.get(self.name, None)
+    def name(self):
+        return self.target.name
 
     @property
-    def full_name(self):
-        if self.version:
-            return "{}-{}".format(self.name, self.version)
-        return self.name
+    def source_dir(self):
+        return self.target.full_name()
 
     @property
     def source_path(self):
-        return pj(self.neutralEnv.source_dir, self.source.source_dir)
+        return pj(neutralEnv('source_dir'), self.source_dir)
 
     @property
     def _log_dir(self):
-        return self.buildEnv.log_dir
+        return neutralEnv('log_dir')
+
+    def _patch(self, context):
+        context.try_skip(self.source_path)
+        context.force_native_build = True
+        for p in self.patches:
+            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
+                run_command("patch -p1", self.source_path, context, input=patch_input.read())
 
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
         log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
-        context = Context(name, log, self.force_native_build)
+        context = Context(name, log, True)
         try:
             ret = function(*args, context=context)
             context._finalise()
@@ -71,34 +87,6 @@ class Dependency(metaclass=_MetaDependency):
             raise
 
 
-class Source:
-    """Base Class to the real preparator
-       A source preparator must install source in the self.source_dir attribute
-       inside the neutralEnv.source_dir."""
-    def __init__(self, target):
-        self.target = target
-        self.neutralEnv = target.neutralEnv
-
-    @property
-    def name(self):
-        return self.target.name
-
-    @property
-    def source_dir(self):
-        return self.target.full_name
-
-    def _patch(self, context):
-        source_path = pj(self.neutralEnv.source_dir, self.source_dir)
-        context.try_skip(source_path)
-        context.force_native_build = True
-        for p in self.patches:
-            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                self.neutralEnv.run_command("patch -p1", source_path, context, input=patch_input.read())
-
-    def command(self, *args, **kwargs):
-        return self.target.command(*args, **kwargs)
-
-
 class NoopSource(Source):
     def prepare(self):
         pass
@@ -109,18 +97,18 @@ class ReleaseDownload(Source):
 
     @property
     def extract_path(self):
-        return pj(self.neutralEnv.source_dir, self.source_dir)
+        return pj(neutralEnv('source_dir'), self.source_dir)
 
     def _download(self, context):
-        context.try_skip(self.neutralEnv.archive_dir, self.name)
-        self.neutralEnv.download(self.archive)
+        context.try_skip(neutralEnv('archive_dir'), self.name)
+        neutralEnv('download')(self.archive)
 
     def _extract(self, context):
         context.try_skip(self.extract_path)
         if os.path.exists(self.extract_path):
             shutil.rmtree(self.extract_path)
-        extract_archive(pj(self.neutralEnv.archive_dir, self.archive.name),
-                        self.neutralEnv.source_dir,
+        extract_archive(pj(neutralEnv('archive_dir'), self.archive.name),
+                        neutralEnv('source_dir'),
                         topdir=self.archive_top_dir,
                         name=self.source_dir)
 
@@ -142,18 +130,18 @@ class GitClone(Source):
 
     @property
     def source_dir(self):
-        if self.neutralEnv.make_release:
+        if option('make_release'):
             return "{}_release".format(self.git_dir)
         else:
             return self.git_dir
 
     @property
     def git_path(self):
-        return pj(self.neutralEnv.source_dir, self.source_dir)
+        return pj(neutralEnv('source_dir'), self.source_dir)
 
     @property
     def git_ref(self):
-        if self.neutralEnv.make_release:
+        if option('make_release'):
             return self.release_git_ref
         else:
             return self.base_git_ref
@@ -163,13 +151,13 @@ class GitClone(Source):
             raise SkipCommand()
         command = "git clone --depth=1 --branch {} {} {}".format(
             self.git_ref, self.git_remote, self.source_dir)
-        self.neutralEnv.run_command(command, self.neutralEnv.source_dir, context)
+        run_command(command, neutralEnv('source_dir'), context)
 
     def _git_update(self, context):
         command = "git fetch origin {}".format(
             self.git_ref)
-        self.neutralEnv.run_command(command, self.git_path, context)
-        self.neutralEnv.run_command("git checkout "+self.git_ref, self.git_path, context)
+        run_command(command, self.git_path, context)
+        run_command("git checkout "+self.git_ref, self.git_path, context)
 
     def prepare(self):
         self.command('gitclone', self._git_clone)
@@ -185,17 +173,17 @@ class SvnClone(Source):
 
     @property
     def svn_path(self):
-        return pj(self.neutralEnv.source_dir, self.svn_dir)
+        return pj(neutralEnv('source_dir'), self.svn_dir)
 
     def _svn_checkout(self, context):
         if os.path.exists(self.svn_path):
             raise SkipCommand()
         command = "svn checkout {} {}".format(self.svn_remote, self.svn_dir)
-        self.neutralEnv.run_command(command, self.neutralEnv.source_dir, context)
+        run_command(command, neutralEnv('source_dir'), context)
 
     def _svn_update(self, context):
         context.try_skip(self.svn_path)
-        self.neutralEnv.run_command("svn update", self.svn_path, context)
+        run_command("svn update", self.svn_path, context)
 
     def prepare(self):
         self.command('svncheckout', self._svn_checkout)
@@ -206,10 +194,16 @@ class SvnClone(Source):
 
 class Builder:
     subsource_dir = None
+    dependencies = []
 
-    def __init__(self, target):
+    def __init__(self, target, source, buildEnv):
         self.target = target
-        self.buildEnv = target.buildEnv
+        self.source = source
+        self.buildEnv = buildEnv
+
+    @classmethod
+    def get_dependencies(cls, platformInfo, allDeps):
+        return cls.dependencies
 
     @property
     def name(self):
@@ -217,17 +211,41 @@ class Builder:
 
     @property
     def source_path(self):
-        base_source_path = self.target.source_path
+        base_source_path = self.source.source_path
         if self.subsource_dir:
             return pj(base_source_path, self.subsource_dir)
         return base_source_path
 
     @property
     def build_path(self):
-        return pj(self.buildEnv.build_dir, self.target.full_name)
+        return pj(self.buildEnv.build_dir, self.target.full_name())
 
-    def command(self, *args, **kwargs):
-        return self.target.command(*args, **kwargs)
+    @property
+    def _log_dir(self):
+        return self.buildEnv.log_dir
+
+    def command(self, name, function, *args):
+        print("  {} {} : ".format(name, self.name), end="", flush=True)
+        log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
+        context = Context(name, log, self.target.force_native_build)
+        try:
+            ret = function(*args, context=context)
+            context._finalise()
+            print("OK")
+            return ret
+        except SkipCommand:
+            print("SKIP")
+        except subprocess.CalledProcessError:
+            print("ERROR")
+            try:
+                with open(log, 'r') as f:
+                    print(f.read())
+            except:
+                pass
+            raise StopBuild()
+        except:
+            print("ERROR")
+            raise
 
     def build(self):
         if hasattr(self, '_pre_build_script'):
@@ -271,8 +289,8 @@ class MakeBuilder(Builder):
     def all_configure_option(self):
         option = self.configure_option_template.format(
             dep_options=self.configure_option,
-            static_option=self.static_configure_option if self.buildEnv.platform_info.static else self.dynamic_configure_option,
-            env_option=self.buildEnv.configure_option if not self.target.force_native_build else "",
+            static_option=self.static_configure_option if self.buildEnv.platformInfo.static else self.dynamic_configure_option,
+            env_option=self.buildEnv.platformInfo.configure_option if not self.target.force_native_build else "",
             install_dir=self.buildEnv.install_dir,
             libdir=pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
             )
@@ -286,7 +304,7 @@ class MakeBuilder(Builder):
             configure_option=self.all_configure_option
         )
         env = Defaultdict(str, os.environ)
-        if self.buildEnv.platform_info.static:
+        if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
         if self.configure_env:
             for k in self.configure_env:
@@ -295,7 +313,7 @@ class MakeBuilder(Builder):
                     v = v.format(buildEnv=self.buildEnv, env=env)
                     self.configure_env[k[8:]] = v
             env.update(self.configure_env)
-        self.buildEnv.run_command(command, self.build_path, context, env=env)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv, env=env)
 
     def _compile(self, context):
         context.try_skip(self.build_path)
@@ -303,7 +321,7 @@ class MakeBuilder(Builder):
             make_target=self.make_target,
             make_option=self.make_option
         )
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _install(self, context):
         context.try_skip(self.build_path)
@@ -311,12 +329,12 @@ class MakeBuilder(Builder):
             make_install_target=self.make_install_target,
             make_option=self.make_option
         )
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _make_dist(self, context):
         context.try_skip(self.build_path)
         command = "make dist"
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
 
 class CMakeBuilder(MakeBuilder):
@@ -332,14 +350,14 @@ class CMakeBuilder(MakeBuilder):
                    " {source_path}"
                    " {cross_option}")
         command = command.format(
-            configure_option="{} {}".format(self.buildEnv.cmake_option, self.configure_option),
+            configure_option=self.configure_option,
             install_dir=self.buildEnv.install_dir,
             libdir=self.buildEnv.libprefix,
             source_path=self.source_path,
             cross_option=cross_option
         )
         env = Defaultdict(str, os.environ)
-        if self.buildEnv.platform_info.static:
+        if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
         if self.configure_env:
             for k in self.configure_env:
@@ -348,22 +366,16 @@ class CMakeBuilder(MakeBuilder):
                     v = v.format(buildEnv=self.buildEnv, env=env)
                     self.configure_env[k[8:]] = v
             env.update(self.configure_env)
-        self.buildEnv.run_command(command, self.build_path, context, env=env, cross_env_only=True)
+        run_command(command, self.build_path, context, env=env, buildEnv=self.buildEnv, cross_env_only=True)
 
 
 class MesonBuilder(Builder):
     configure_option = ""
     test_option = ""
 
-    def __init__(self, target):
-        super().__init__(target)
-        self.meson_command = self.buildEnv.neutralEnv.meson_command
-        self.mesontest_command = self.buildEnv.neutralEnv.mesontest_command
-        self.ninja_command = self.buildEnv.neutralEnv.ninja_command
-
     @property
     def library_type(self):
-        return 'static' if self.buildEnv.platform_info.static else 'shared'
+        return 'static' if self.buildEnv.platformInfo.static else 'shared'
 
     def _configure(self, context):
         context.try_skip(self.build_path)
@@ -382,40 +394,40 @@ class MesonBuilder(Builder):
                    " --libdir={buildEnv.libprefix}"
                    " {cross_option}")
         command = command.format(
-            command=self.meson_command,
+            command=neutralEnv('meson_command'),
             library_type=self.library_type,
             configure_option=configure_option,
             build_path=self.build_path,
             buildEnv=self.buildEnv,
             cross_option=cross_option
         )
-        self.buildEnv.run_command(command, self.source_path, context, cross_env_only=True)
+        run_command(command, self.source_path, context, buildEnv=self.buildEnv, cross_env_only=True)
 
     def _compile(self, context):
-        command = "{} -v".format(self.ninja_command)
-        self.buildEnv.run_command(command, self.build_path, context)
+        command = "{} -v".format(neutralEnv('ninja_command'))
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _test(self, context):
-        if ( self.buildEnv.platform_info.build == 'android'
-             or (self.buildEnv.platform_info.build != 'native'
-                 and not self.buildEnv.platform_info.static)
+        if ( self.buildEnv.platformInfo.build == 'android'
+             or (self.buildEnv.platformInfo.build != 'native'
+                 and not self.buildEnv.platformInfo.static)
            ):
             raise SkipCommand()
-        command = "{} --verbose {}".format(self.mesontest_command, self.test_option)
-        self.buildEnv.run_command(command, self.build_path, context)
+        command = "{} --verbose {}".format(neutralEnv('mesontest_command'), self.test_option)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _install(self, context):
-        command = "{} -v install".format(self.ninja_command)
-        self.buildEnv.run_command(command, self.build_path, context)
+        command = "{} -v install".format(neutralEnv('ninja_command'))
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _make_dist(self, context):
-        command = "{} -v dist".format(self.ninja_command)
-        self.buildEnv.run_command(command, self.build_path, context)
+        command = "{} -v dist".format(neutralEnv('ninja_command'))
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
 
 class GradleBuilder(Builder):
     gradle_target = "build"
-    gradle_option = "-i"
+    gradle_option = "-i --no-daemon --build-cache"
 
     def build(self):
         self.command('configure', self._configure)
@@ -435,4 +447,4 @@ class GradleBuilder(Builder):
         command = command.format(
             gradle_target=self.gradle_target,
             gradle_option=self.gradle_option)
-        self.buildEnv.run_command(command, self.build_path, context)
+        run_command(command, self.build_path, context, buildEnv=self.buildEnv)

@@ -2,12 +2,15 @@ from .base import PlatformInfo
 
 
 class NativePlatformInfo(PlatformInfo):
-    def __init__(self, name, static, hosts):
-        super().__init__(name, 'native', static, [], hosts)
-
-    def get_cross_config(self):
-        return {}
+    build = 'native'
 
 
-NativePlatformInfo('native_dyn', False, ['fedora', 'debian', 'Darwin'])
-NativePlatformInfo('native_static', True, ['fedora', 'debian'])
+class NativeDyn(NativePlatformInfo):
+    name = 'native_dyn'
+    static = False
+    compatible_hosts = ['fedora', 'debian', 'Darwin']
+
+class NativeStatic(NativePlatformInfo):
+    name = 'native_static'
+    static = True
+    compatible_hosts = ['fedora', 'debian']

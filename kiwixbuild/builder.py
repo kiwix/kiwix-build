@@ -3,93 +3,194 @@ import sys
 from collections import OrderedDict
 from .buildenv import *
 
+from .platforms import PlatformInfo
 from .utils import remove_duplicates, StopBuild
 from .dependencies import Dependency
+from .packages import PACKAGE_NAME_MAPPERS
+from ._global import (
+    neutralEnv, option,
+    add_target_step, get_target_step, target_steps)
+from . import _global
 
 class Builder:
-    def __init__(self, options):
-        self.options = options
-        self.targets = OrderedDict()
-        self.neutralEnv = PlatformNeutralEnv(options)
-        self.buildEnv = BuildEnv(options, self.neutralEnv, self.targets)
+    def __init__(self):
+        self._targets = {}
+        PlatformInfo.get_platform('neutral', self._targets)
 
-        _targets = {}
-        targetDef = options.targets
-        self.add_targets(targetDef, _targets)
-        dependencies = self.order_dependencies(_targets, targetDef)
-        dependencies = list(remove_duplicates(dependencies))
+        target_platform = option('target_platform')
+        if not target_platform:
+            if option('target') == 'kiwix-android':
+                target_platform = 'android'
+            else:
+                target_platform = 'native_dyn'
+        platform = PlatformInfo.get_platform(target_platform, self._targets)
+        if neutralEnv('distname') not in platform.compatible_hosts:
+            print(('ERROR: The target platform {} cannot be build on host {}.\n'
+                   'Select another target platform or change your host system.'
+                  ).format(platform.name, neutralEnv('distname')))
+        self.targetDefs = platform.add_targets(option('target'), self._targets)
 
-        if options.build_nodeps:
-            self.targets[targetDef] = _targets[targetDef]
+    def finalize_target_steps(self):
+        steps = []
+        for targetDef in self.targetDefs:
+            steps += self.order_steps(targetDef)
+        steps = list(remove_duplicates(steps))
+
+        if option('build_nodeps'):
+            add_target_step(targetDef, self._targets[targetDef])
         else:
-            for dep in dependencies:
-                if self.options.build_deps_only and dep == targetDef:
+            for dep in steps:
+                if option('build_deps_only') and dep == targetDef:
                     continue
-                self.targets[dep] = _targets[dep]
+                add_target_step(dep, self._targets[dep])
+        self.instanciate_steps()
 
-    def add_targets(self, targetName, targets):
-        if targetName in targets:
+    def order_steps(self, targetDef):
+        for pltName in PlatformInfo.all_running_platforms:
+            plt = PlatformInfo.all_platforms[pltName]
+            for tlcName in plt.toolchain_names:
+                tlc = Dependency.all_deps[tlcName]
+                yield('source', tlcName)
+                yield('neutral' if tlc.neutral else pltName, tlcName)
+        _targets =dict(self._targets)
+        yield from self.order_dependencies(targetDef, _targets)
+
+    def order_dependencies(self, targetDef, targets):
+        targetPlatformName, targetName = targetDef
+        if targetPlatformName == 'source':
+            # Do not try to order sources, they will be added as dep by the
+            # build step two lines later.
             return
-        targetClass = Dependency.all_deps[targetName]
-        target = targetClass(self.neutralEnv, self.buildEnv)
-        targets[targetName] = target
-        for dep in target.dependencies:
-            self.add_targets(dep, targets)
+        try:
+            target = targets.pop(targetDef)
+        except KeyError:
+            return
 
-    def order_dependencies(self, _targets, targetName):
-        target = _targets[targetName]
-        for depName in target.dependencies:
-            yield from self.order_dependencies(_targets, depName)
-        yield targetName
+        targetPlatform = PlatformInfo.get_platform(targetPlatformName)
+        for dep in target.get_dependencies(targetPlatform, True):
+            try:
+                depPlatform, depName = dep
+            except ValueError:
+                depPlatform, depName = targetPlatformName, dep
+            if (depPlatform, depName) in targets:
+                yield from self.order_dependencies((depPlatform, depName), targets)
+        yield ('source', targetName)
+        yield targetDef
+
+    def instanciate_steps(self):
+        for stepDef in list(target_steps()):
+            stepPlatform, stepName = stepDef
+            stepClass = Dependency.all_deps[stepName]
+            if stepPlatform == 'source':
+                source = get_target_step(stepDef)(stepClass)
+                add_target_step(stepDef, source)
+            else:
+                source = get_target_step(stepName, 'source')
+                env = PlatformInfo.get_platform(stepPlatform).buildEnv
+                builder = get_target_step(stepDef)(stepClass, source, env)
+                add_target_step(stepDef, builder)
 
     def prepare_sources(self):
-        if self.options.skip_source_prepare:
+        if option('skip_source_prepare'):
             print("SKIP")
             return
 
-        toolchain_sources = (tlc.source for tlc in self.buildEnv.toolchains if tlc.source)
-        for toolchain_source in toolchain_sources:
-            print("prepare sources for toolchain {} :".format(toolchain_source.name))
-            toolchain_source.prepare()
-
-        sources = (dep.source for dep in self.targets.values() if not dep.skip)
-        sources = remove_duplicates(sources, lambda s: s.__class__)
-        for source in sources:
-            print("prepare sources {} :".format(source.name))
+        sourceDefs = remove_duplicates(tDef for tDef in target_steps() if tDef[0]=='source')
+        for sourceDef in sourceDefs:
+            print("prepare sources {} :".format(sourceDef[1]))
+            source = get_target_step(sourceDef)
             source.prepare()
 
     def build(self):
-        toolchain_builders = (tlc.builder for tlc in self.buildEnv.toolchains if tlc.builder)
-        for toolchain_builder in toolchain_builders:
-            print("build toolchain {} :".format(toolchain_builder.name))
-            toolchain_builder.build()
-
-        builders = (dep.builder for dep in self.targets.values() if (dep.builder and not dep.skip))
-        for builder in builders:
-            if self.options.make_dist and builder.name == self.options.targets:
+        builderDefs = (tDef for tDef in target_steps() if tDef[0] != 'source')
+        for builderDef in builderDefs:
+            builder = get_target_step(builderDef)
+            if option('make_dist') and builderName == option('target'):
+                print("make dist {} ({}):".format(builder.name, builderDef[0]))
+                builder.make_dist()
                 continue
-            print("build {} :".format(builder.name))
+            print("build {} ({}):".format(builder.name, builderDef[0]))
+            add_target_step(builderDef, builder)
             builder.build()
 
-        if self.options.make_dist:
-            dep = self.targets[self.options.targets]
-            builder = dep.builder
-            print("make dist {}:".format(builder.name))
-            builder.make_dist()
+    def _get_packages(self):
+        packages_list = []
+        for platform in PlatformInfo.all_running_platforms.values():
+            mapper_name = "{host}_{target}".format(
+                host=neutralEnv('distname'),
+                target=platform)
+            package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
+            packages_list += package_name_mapper.get('COMMON', [])
+
+        to_drop = []
+        for builderDef in self._targets:
+            platformName, builderName = builderDef
+            mapper_name = "{host}_{target}".format(
+                host=neutralEnv('distname'),
+                target=platformName)
+            package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
+            packages = package_name_mapper.get(builderName)
+            if packages:
+                packages_list += packages
+                to_drop.append(builderDef)
+        for dep in to_drop:
+            del self._targets[dep]
+        return packages_list
+
+    def install_packages(self):
+        packages_to_have = self._get_packages()
+        packages_to_have = remove_duplicates(packages_to_have)
+
+        distname = neutralEnv('distname')
+        if distname in ('fedora', 'redhat', 'centos'):
+            package_installer = 'sudo dnf install {}'
+            package_checker = 'rpm -q --quiet {}'
+        elif distname in ('debian', 'Ubuntu'):
+            package_installer = 'sudo apt-get install {}'
+            package_checker = 'LANG=C dpkg -s {} 2>&1 | grep Status | grep "ok installed" 1>/dev/null 2>&1'
+        elif distname == 'Darwin':
+            package_installer = 'brew install {}'
+            package_checker = 'brew list -1 | grep -q {}'
+
+        packages_to_install = []
+        for package in packages_to_have:
+            print(" - {} : ".format(package), end="")
+            command = package_checker.format(package)
+            try:
+                subprocess.check_call(command, shell=True)
+            except subprocess.CalledProcessError:
+                print("NEEDED")
+                packages_to_install.append(package)
+            else:
+                print("SKIP")
+
+        if packages_to_install:
+            command = package_installer.format(" ".join(packages_to_install))
+            print(command)
+            subprocess.check_call(command, shell=True)
+        else:
+            print("SKIP, No package to install.")
 
     def run(self):
         try:
             print("[INSTALL PACKAGES]")
-            self.buildEnv.install_packages()
-            self.buildEnv.finalize_setup()
+            if option('dont_install_packages'):
+                print("SKIP")
+            else:
+                self.install_packages()
+            self.finalize_target_steps()
+            print("[SETUP PLATFORMS]")
+            for platform in PlatformInfo.all_running_platforms.values():
+                platform.finalize_setup()
             print("[PREPARE]")
             self.prepare_sources()
             print("[BUILD]")
             self.build()
             # No error, clean intermediate file at end of build if needed.
             print("[CLEAN]")
-            if self.buildEnv.options.clean_at_end:
-                self.buildEnv.clean_intermediate_directories()
+            if option('clean_at_end'):
+                for platform in PlatformInfo.all_running_platforms.values():
+                    platform.clean_intermediate_directories()
             else:
                 print("SKIP")
         except StopBuild:

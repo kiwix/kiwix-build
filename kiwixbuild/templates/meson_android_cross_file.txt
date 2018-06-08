@@ -1,9 +1,9 @@
 [binaries]
 pkgconfig = 'pkg-config'
-c = '{toolchain.binaries[CC]}'
-ar = '{toolchain.binaries[AR]}'
-cpp = '{toolchain.binaries[CXX]}'
-strip = '{toolchain.binaries[STRIP]}'
+c = '{binaries[CC]}'
+ar = '{binaries[AR]}'
+cpp = '{binaries[CXX]}'
+strip = '{binaries[STRIP]}'
 
 [properties]
 c_link_args = {extra_libs!r}

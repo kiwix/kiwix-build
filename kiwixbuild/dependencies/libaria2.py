@@ -4,11 +4,10 @@ from .base import (
     MakeBuilder
 )
 
-from kiwixbuild.utils import Remotefile
+from kiwixbuild.utils import Remotefile, run_command
 
 class Aria2(Dependency):
     name = "libaria2"
-    dependencies = ['zlib']
 
     class Source(ReleaseDownload):
         archive = Remotefile('libaria2-1.33.1.tar.gz',
@@ -20,7 +19,8 @@ class Aria2(Dependency):
         def _post_prepare_script(self, context):
             context.try_skip(self.extract_path)
             command = "autoreconf -i"
-            self.neutralEnv.run_command(command, self.extract_path, context)
+            run_command(command, self.extract_path, context)
 
     class Builder(MakeBuilder):
+        dependencies = ['zlib']
         configure_option = "--enable-libaria2 --disable-ssl --disable-bittorent --disable-metalink --without-sqlite3 --without-libxml2 --without-libexpat"

@@ -28,16 +28,16 @@ class zlib(Dependency):
 
 
         def _configure(self, context):
-            if self.buildEnv.platform_info.build == 'win32':
+            if self.buildEnv.platformInfo.build == 'win32':
                 raise SkipCommand()
             return super()._configure(context)
 
         @property
         def make_option(self):
-            if self.buildEnv.platform_info.build == 'win32':
+            if self.buildEnv.platformInfo.build == 'win32':
                 return "--makefile win32/Makefile.gcc PREFIX={host}- SHARED_MODE={static} INCLUDE_PATH={include_path} LIBRARY_PATH={library_path} BINARY_PATH={binary_path}".format(
                     host='i686-w64-mingw32',
-                    static="0" if self.buildEnv.platform_info.static else "1",
+                    static="0" if self.buildEnv.platformInfo.static else "1",
                     include_path=pj(self.buildEnv.install_dir, 'include'),
                     library_path=pj(self.buildEnv.install_dir, self.buildEnv.libprefix),
                     binary_path=pj(self.buildEnv.install_dir, 'bin'),

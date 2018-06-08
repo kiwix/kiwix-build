@@ -2,10 +2,14 @@
 from .base import *
 from . import (
     all_dependencies,
+    android_ndk,
+    android_sdk,
+    armhf,
     ctpp2,
     gradle,
     gumbo,
     icu4c,
+    ios_fat_lib,
     kiwix_android,
     kiwix_custom_app,
     kiwix_lib,

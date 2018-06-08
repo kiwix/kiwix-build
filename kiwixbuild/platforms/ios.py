@@ -1,22 +1,17 @@
 
-from .base import PlatformInfo
 import subprocess
 
-
+from .base import PlatformInfo, MetaPlatformInfo
+from kiwixbuild.utils import pj, xrun_find
+from kiwixbuild._global import option
 
 class iOSPlatformInfo(PlatformInfo):
-    __arch_infos = {
-        'armv7': ('arm-apple-darwin', 'armv7', 'iphoneos'),
-        'arm64': ('arm-apple-darwin', 'arm64', 'iphoneos'),
-        'i386': ('', 'i386', 'iphonesimulator'),
-        'x86_64': ('', 'x86_64', 'iphonesimulator'),
-    }
+    build = 'iOS'
+    static = True
+    compatible_hosts = ['Darwin']
 
-    def __init__(self, name, arch):
-        super().__init__(name, 'iOS', True, ['iOS_sdk'],
-                         hosts=['Darwin'])
-        self.arch = arch
-        self.arch_full, self.cpu, self.sdk_name = self.__arch_infos[arch]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._root_path = None
 
     @property
@@ -29,9 +24,16 @@ class iOSPlatformInfo(PlatformInfo):
     def __str__(self):
         return "iOS"
 
+    def finalize_setup(self):
+        super().finalize_setup()
+        self.buildEnv.cmake_crossfile = self._gen_crossfile('cmake_ios_cross_file.txt')
+        self.buildEnv.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
+
     def get_cross_config(self):
         return {
             'root_path': self.root_path,
+            'binaries': self.binaries,
+            'exec_wrapper_def': '',
             'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
             'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
             'host_machine': {
@@ -53,7 +55,61 @@ class iOSPlatformInfo(PlatformInfo):
     def get_bin_dir(self):
         return [pj(self.root_path, 'bin')]
 
-iOSPlatformInfo('iOS_armv7', 'armv7')
-iOSPlatformInfo('iOS_arm64', 'arm64')
-iOSPlatformInfo('iOS_i386', 'i386')
-iOSPlatformInfo('iOS_x86_64', 'x86_64')
+    @property
+    def binaries(self):
+        return {
+            'CC': xrun_find('clang'),
+            'CXX': xrun_find('clang++'),
+            'AR': '/usr/bin/ar',
+            'STRIP': '/usr/bin/strip',
+            'RANLIB': '/usr/bin/ranlib',
+            'LD': '/usr/bin/ld',
+        }
+
+    @property
+    def configure_option(self):
+        return '--host={}'.format(self.arch_full)
+
+    def set_compiler(self, env):
+        env['CC'] = self.binaries['CC']
+        env['CXX'] = self.binaries['CXX']
+
+
+class iOSArmv7(iOSPlatformInfo):
+    name = 'iOS_armv7'
+    arch = cpu = 'armv7'
+    arch_full =  'arm-apple-darwin'
+    sdk_name = 'iphoneos'
+
+class iOSArm64(iOSPlatformInfo):
+    name = 'iOS_arm64'
+    arch = cpu = 'arm64'
+    arch_full =  'aarch64-apple-darwin'
+    sdk_name = 'iphoneos'
+
+class iOSi386(iOSPlatformInfo):
+    name = 'iOS_i386'
+    arch = cpu = 'i386'
+    arch_full =  'i386-apple-darwin'
+    sdk_name = 'iphonesimulator'
+
+class iOSx64(iOSPlatformInfo):
+    name = 'iOS_x86_64'
+    arch = cpu = 'x86_64'
+    arch_full =  'x86_64-apple-darwin'
+    sdk_name = 'iphonesimulator'
+
+class IOS(MetaPlatformInfo):
+    name = "iOS_multi"
+    compatible_hosts = ['Darwin']
+
+    @property
+    def subPlatformNames(self):
+        return ['iOS_{}'.format(arch) for arch in option('ios_arch')]
+
+    def add_targets(self, targetName, targets):
+        super().add_targets(targetName, targets)
+        return PlatformInfo.add_targets(self, '_ios_fat_lib', targets)
+
+    def __str__(self):
+        return self.name

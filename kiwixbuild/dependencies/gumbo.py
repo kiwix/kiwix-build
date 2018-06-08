@@ -4,7 +4,7 @@ from .base import (
     MakeBuilder
 )
 
-from kiwixbuild.utils import Remotefile
+from kiwixbuild.utils import Remotefile, run_command
 
 
 class Gumbo(Dependency):
@@ -18,6 +18,6 @@ class Gumbo(Dependency):
         def _post_prepare_script(self, context):
             context.try_skip(self.extract_path)
             command = "./autogen.sh"
-            self.buildEnv.run_command(command, self.extract_path, context)
+            run_command(command, self.extract_path, context)
 
     Builder = MakeBuilder

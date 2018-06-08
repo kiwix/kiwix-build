@@ -10,9 +10,10 @@ import ssl
 import subprocess
 from collections import namedtuple, defaultdict
 
+from kiwixbuild._global import neutralEnv, option
+
 pj = os.path.join
 
-g_print_progress = True
 
 REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 
@@ -26,11 +27,6 @@ def xrun_find(name):
     command = "xcrun -find {}".format(name)
     output = subprocess.check_output(command, shell=True)
     return output[:-1].decode()
-
-
-def setup_print_progress(print_progress):
-    global g_print_progress
-    g_print_progress = print_progress
 
 
 class Defaultdict(defaultdict):
@@ -67,7 +63,7 @@ def get_sha256(path):
 
 
 def print_progress(progress):
-    if g_print_progress:
+    if option('show_progress'):
         text = "{}\033[{}D".format(progress, len(progress))
         print(text, end="")
 
@@ -90,7 +86,7 @@ def copy_tree(src, dst, post_copy_function=None):
                 post_copy_function(dstfile)
 
 
-def download_remote(what, where, check_certificate=True):
+def download_remote(what, where):
     file_path = pj(where, what.name)
     file_url = what.url or (REMOTE_PREFIX + what.name)
     if os.path.exists(file_path):
@@ -98,7 +94,7 @@ def download_remote(what, where, check_certificate=True):
             raise SkipCommand()
         os.remove(file_path)
 
-    if not check_certificate:
+    if option('no_cert_check'):
         context = ssl.create_default_context()
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
@@ -221,3 +217,41 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
         if archive is not None:
             archive.close()
 
+
+def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cross_env_only=False):
+    os.makedirs(cwd, exist_ok=True)
+    if env is None:
+        env = Defaultdict(str, os.environ)
+    if buildEnv is not None:
+        cross_compile_env = True
+        cross_compile_compiler = True
+        cross_compile_path = True
+        if context.force_native_build:
+            cross_compile_env = False
+            cross_compile_compiler = False
+            cross_compile_path = False
+        if cross_env_only:
+            cross_compile_compiler = False
+        env = buildEnv._set_env(env, cross_compile_env, cross_compile_compiler, cross_compile_path)
+    log = None
+    try:
+        if not option('verbose'):
+            log = open(context.log_file, 'w')
+        print("run command '{}'".format(command), file=log)
+        print("current directory is '{}'".format(cwd), file=log)
+        print("env is :", file=log)
+        for k, v in env.items():
+            print("  {} : {!r}".format(k, v), file=log)
+
+        kwargs = dict()
+        if input:
+            kwargs['stdin'] = subprocess.PIPE
+        process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+        if input:
+            process.communicate(input.encode())
+        retcode = process.wait()
+        if retcode:
+            raise subprocess.CalledProcessError(retcode, command)
+    finally:
+        if log:
+            log.close()

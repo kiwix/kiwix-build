@@ -71,8 +71,10 @@ By default, `kiwix-build` will build `kiwix-tools` .
 
 ## Target platform
 
-By default, `kiwix-build` will build everything for the current (native)
-platform using dynamic linkage (`native_dyn`).
+If no target platform is specified, a default one will be infered from
+the specified target :
+- `kiwix-android` will be build using the platform `android`
+- Other targets will be build using the platform `native_dyn`
 
 But you can select another target platform using the option
 `--target-platform`. For now, there is ten different supported
@@ -82,6 +84,7 @@ platforms :
 - native_static
 - win32_dyn
 - win32_static
+- android
 - android_arm
 - android_arm64
 - android_mips
@@ -95,10 +98,57 @@ So, if you want to compile `kiwix-tools` for win32 using static linkage:
 $ kiwix-build --target-platform win32_dyn
 ```
 
-Or, android apk for android_arm :
+## Android
+
+Android apk (kiwix-android) is a bit a special case.
+`kiwix-android` itself is architecture independent (it is written in
+java) but it use `kiwix-lib` who is architecture dependent.
+
+When building `kiwix-lib`, you should directly use the
+target-platform `android_<arch>`:
+
 ```
-$ kiwix-build --target-platform android_arm kiwix-android
+$ kiwix-build kiwix-android --target-platform android_arm
 ```
+
+But, `kiwix-android` apk can also be multi arch (ie, it includes
+`kiwix-lib` for several architectures). To do so, you must ask to build
+`kiwix-android` using the `android` platform:
+
+```
+$ kiwix-build --target-platform android kiwix-android
+$ kiwix-build kiwix-android # because `android` platform is the default `kiwix-android`
+```
+
+By default, when using platform `android`, `kiwix-lib` will be build for
+all architectures. This can be change by using the option `--android-arch` :
+
+```
+$ kiwix-build kiwix-android # apk for all architectures
+$ kiwix-build kiwix-android --android-arch arm # apk for arm architectures (equivalent to `kiwix-android --target-platform android_arm`)
+$ kiwix-build kiwix-anrdoid --android-arch arm --android-arch arm64 # apk for arm and arm64 architectures
+```
+
+## IOS
+
+When building for ios, we may want to compile a "fat library", a library
+for several architectures.
+
+To do so, you should directly use the target-platfrom `ios_multi`.
+As for `android`, `kiwix-build` will build the library several times
+(once for each platform) and then create the fat library.
+
+```
+$ kiwix-build --target-platform iOS_multi kiwix-lib
+```
+
+You can specify the supported architectures with the option `--ios-arch`:
+
+```
+$ kiwix-build --target-platform iOS_multi kiwix-lib # all architetures
+$ kiwix-build --target-platform iOS_multi --ios-arch arm --ios-arch arm64 # arm and arm64 arch only
+```
+
 
 # Outputs
 

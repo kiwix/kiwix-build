@@ -1,15 +1,14 @@
 import os
 import shutil
 
-from .base_toolchain import Toolchain
-from kiwixbuild.dependencies import ReleaseDownload, Builder
-from kiwixbuild.utils import Remotefile
+from .base import Dependency, ReleaseDownload, Builder
+from kiwixbuild.utils import Remotefile, run_command
 
 pj = os.path.join
 
-class android_sdk(Toolchain):
+class android_sdk(Dependency):
+    neutral = True
     name = 'android-sdk'
-    version = 'r25.2.3'
 
     class Source(ReleaseDownload):
         archive = Remotefile('tools_r25.2.3-linux.zip',
@@ -20,7 +19,7 @@ class android_sdk(Toolchain):
 
         @property
         def install_path(self):
-            return pj(self.buildEnv.toolchain_dir, self.target.full_name)
+            return pj(self.buildEnv.toolchain_dir, self.target.full_name())
 
         def _build_platform(self, context):
             context.try_skip(self.install_path)
@@ -38,7 +37,7 @@ class android_sdk(Toolchain):
             # - 8 : Android SDK Build-tools, revision 24.0.1
             # - 34 : SDK Platform Android 7.0, API 24, revision 2
             # - 162 : Android Support Repository, revision 44
-            self.buildEnv.run_command(command, self.install_path, context, input="y\n")
+            run_command(command, self.install_path, context, input="y\n")
 
         def _fix_licenses(self, context):
             context.try_skip(self.install_path)
@@ -49,6 +48,3 @@ class android_sdk(Toolchain):
         def build(self):
             self.command('build_platform', self._build_platform)
             self.command('fix_licenses', self._fix_licenses)
-
-    def set_env(self, env):
-        env['ANDROID_HOME'] = self.builder.install_path
