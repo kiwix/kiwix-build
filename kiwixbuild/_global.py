@@ -22,9 +22,9 @@ def add_target_step(key, what):
     _target_steps[key] = what
 
 def get_target_step(key, default_context=None):
-    try:
+    if isinstance(key, tuple):
         context, target = key
-    except ValueError:
+    else:
         context, target = default_context, key
     return _target_steps[(context, target)]
 

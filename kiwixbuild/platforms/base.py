@@ -57,9 +57,9 @@ class PlatformInfo(metaclass=_MetaPlatform):
         targets[('source', targetName)] = targetClass.Source
         targets[(self.name, targetName)] = targetClass.Builder
         for dep in targetClass.Builder.get_dependencies(self, False):
-            try:
+            if isinstance(dep, tuple):
                 depPlatformName, depName = dep
-            except ValueError:
+            else:
                 depPlatformName, depName = self.name, dep
             depPlatform = self.get_platform(depPlatformName, targets)
             depPlatform.add_targets(depName, targets)
