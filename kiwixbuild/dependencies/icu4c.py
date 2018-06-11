@@ -19,7 +19,8 @@ class Icu(Dependency):
                    "icu4c_android_elf64_st_info.patch",
                    "icu4c_custom_data.patch",
                    "icu4c_noxlocale.patch",
-                   "icu4c_rpath.patch"]
+                   "icu4c_rpath.patch",
+                   "icu4c_build_config.patch"]
 
 
     class Builder(MakeBuilder):
@@ -32,7 +33,9 @@ class Icu(Dependency):
 
         @property
         def configure_option(self):
-            options = "--disable-samples --disable-tests --disable-extras --disable-dyload --enable-rpath"
+            options = ("--disable-samples --disable-tests --disable-extras "
+                       "--disable-dyload --enable-rpath "
+                       "--disable-icuio --disable-layoutex")
             platformInfo = self.buildEnv.platformInfo
             if platformInfo.build != 'native':
                 icu_native_builder = get_target_step(

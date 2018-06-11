@@ -1,0 +1,36 @@
+diff -ur icu4c/source/common/unicode/platform.h icu4c.patched/source/common/unicode/platform.h
+--- icu4c/source/common/unicode/platform.h	2018-04-17 17:20:31.048946098 +0200
++++ icu4c.patched/source/common/unicode/platform.h	2018-06-11 11:22:40.692327158 +0200
+@@ -644,7 +644,7 @@
+ #elif U_PLATFORM == U_PF_ANDROID || U_PLATFORM_IS_DARWIN_BASED
+ #   define U_CHARSET_IS_UTF8 1
+ #else
+-#   define U_CHARSET_IS_UTF8 0
++#   define U_CHARSET_IS_UTF8 1
+ #endif
+ 
+ /** @} */
+diff -ur icu4c/source/common/unicode/uconfig.h icu4c.patched/source/common/unicode/uconfig.h
+--- icu4c/source/common/unicode/uconfig.h	2018-04-17 17:20:31.072946266 +0200
++++ icu4c.patched/source/common/unicode/uconfig.h	2018-06-11 11:26:24.512936322 +0200
+@@ -107,7 +107,7 @@
+       defined(U_TOOLUTIL_IMPLEMENTATION)
+ #   define U_NO_DEFAULT_INCLUDE_UTF_HEADERS 1
+ #else
+-#   define U_NO_DEFAULT_INCLUDE_UTF_HEADERS 0
++#   define U_NO_DEFAULT_INCLUDE_UTF_HEADERS 1
+ #endif
+ 
+ /**
+diff -ur icu4c/source/common/unicode/uversion.h icu4c.patched/source/common/unicode/uversion.h
+--- icu4c/source/common/unicode/uversion.h	2018-04-17 17:20:31.086946363 +0200
++++ icu4c.patched/source/common/unicode/uversion.h	2018-06-11 11:20:27.093375709 +0200
+@@ -122,7 +122,7 @@
+ #   define U_NAMESPACE_QUALIFIER U_ICU_NAMESPACE::
+ 
+ #   ifndef U_USING_ICU_NAMESPACE
+-#       define U_USING_ICU_NAMESPACE 1
++#       define U_USING_ICU_NAMESPACE 0
+ #   endif
+ #   if U_USING_ICU_NAMESPACE
+         U_NAMESPACE_USE
