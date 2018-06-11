@@ -2,6 +2,8 @@ language: cpp
 
 dist: trusty
 sudo: required
+services:
+- docker
 branches:
   only:
   - master
@@ -27,7 +29,9 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
 install: travis/install_extra_deps.sh
-script: travis/compile_all.py
+script: 
+- if [ $TRAVIS_OS_NAME == "osx" ] || [ $PLATFORM != "native_dyn" ]; then travis/compile_all.py; fi
+- if [ $TRAVIS_OS_NAME == "linux" ] && [ $PLATFORM == "native_dyn" ]; then docker build -t kiwix/build . && docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e TRAVIS_BUILD_DIR kiwix/build; fi
 after_failure: travis/upload_all_log.sh
 deploy:
   - provider: script

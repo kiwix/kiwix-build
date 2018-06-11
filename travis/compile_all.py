@@ -31,7 +31,7 @@ NIGHTLY_ZIM_ARCHIVES_DIR = HOME/'NIGHTLY_ZIM_ARCHIVES'/NIGHTLY_DATE
 RELEASE_ZIM_ARCHIVES_DIR = HOME/'RELEASE_ZIM_ARCHIVES'
 DIST_KIWIX_ARCHIVES_DIR = HOME/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = HOME/'DIST_ZIM_ARCHIVES'
-SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
+SSH_KEY = environ.get('TRAVISCI_SSH_KEY', Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key')
 
 # We have build everything. Now create archives for public deployement.
 BINARIES = {
@@ -162,7 +162,9 @@ def make_deps_archive(target, full=False):
 
 def scp(what, where):
     print_message("Copy {} to {}", what, where)
-    command = ['scp', '-i', str(SSH_KEY), str(what), str(where)]
+    command = ['scp', '-o', 'StrictHostKeyChecking=no',
+                      '-i', str(SSH_KEY),
+                      str(what), str(where)]
     subprocess.check_call(command)
 
 
