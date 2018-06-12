@@ -85,6 +85,28 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
     subprocess.check_call(command, cwd=str(HOME))
 
 
+def create_app_image():
+    command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
+               str(BASE_DIR/'INSTALL'), str(HOME/'AppDir')]
+    print_message("Build AppImage of kiwix-desktop")
+    subprocess.check_call(command, cwd=str(HOME))
+    if make_release:
+        postfix = main_project_versions['kiwix-desktop']
+        archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/'kiwix-desktop'
+    else:
+        postfix = _date
+        archive_dir = NIGHTLY_KIWIX_ARCHIVES_DIR
+
+    try:
+        archive_dir.mkdir(parents=True)
+    except FileExistsError:
+        pass
+
+    app_name = "kiwix-desktop_x86_64_{}".format(postfix)
+    print_message("Copy AppImage to {}".format(archive_dir/app_name))
+    shutil.copy(str(HOME/'Kiwix-x86_64.AppImage'), str(archive_dir/app_name))
+
+
 def make_archive(project, platform):
     file_to_archives = BINARIES[project]
     base_bin_dir = BASE_DIR/'INSTALL'/'bin'
@@ -255,6 +277,8 @@ for target in TARGETS:
     run_kiwix_build(target,
                     platform=PLATFORM,
                     make_release=make_release)
+    if target == 'kiwix-desktop':
+        create_app_image()
     if make_release and PLATFORM == 'native_dyn':
         run_kiwix_build(target,
                         platform=PLATFORM,
