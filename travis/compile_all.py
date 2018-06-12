@@ -85,6 +85,28 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
     subprocess.check_call(command, cwd=str(HOME))
 
 
+def create_app_image():
+    command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
+               str(BASE_DIR/'INSTALL'), str(HOME/'AppDir')]
+    print_message("Build AppImage of kiwix-desktop")
+    subprocess.check_call(command, cwd=str(HOME))
+    if make_release:
+        postfix = main_project_versions['kiwix-desktop']
+        archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/'kiwix-desktop'
+    else:
+        postfix = _date
+        archive_dir = NIGHTLY_KIWIX_ARCHIVES_DIR
+
+    try:
+        archive_dir.mkdir(parents=True)
+    except FileExistsError:
+        pass
+
+    app_name = "kiwix-desktop_x86_64_{}".format(postfix)
+    print_message("Copy AppImage to {}".format(archive_dir/app_name))
+    shutil.copy(str(HOME/'Kiwix-x86_64.AppImage'), str(archive_dir/app_name))
+
+
 def make_archive(project, platform):
     file_to_archives = BINARIES[project]
     base_bin_dir = BASE_DIR/'INSTALL'/'bin'
@@ -211,6 +233,8 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
     elif PLATFORM.startswith('native_'):
         if TRAVIS_OS_NAME == "osx":
             TARGETS = ('kiwix-lib', 'zim-tools', 'zimwriterfs')
+        elif PLATFORM == 'native_dyn':
+            TARGETS = ('kiwix-tools', 'kiwix-desktop', 'zim-tools', 'zimwriterfs')
         else:
             TARGETS = ('kiwix-tools', 'zim-tools', 'zimwriterfs')
     else:
@@ -235,7 +259,10 @@ elif PLATFORM.startswith('native_'):
     if TRAVIS_OS_NAME == "osx":
         TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib')
     else:
-        TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
+        if make_release:
+            TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
+        else:
+            TARGETS = ('libzim', 'kiwix-lib', 'kiwix-desktop', 'zimwriterfs', 'zim-tools', 'kiwix-tools')
 else:
     TARGETS = ('libzim', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 
@@ -250,6 +277,8 @@ for target in TARGETS:
     run_kiwix_build(target,
                     platform=PLATFORM,
                     make_release=make_release)
+    if target == 'kiwix-desktop':
+        create_app_image()
     if make_release and PLATFORM == 'native_dyn':
         run_kiwix_build(target,
                         platform=PLATFORM,

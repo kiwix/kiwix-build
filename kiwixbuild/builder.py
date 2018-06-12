@@ -68,9 +68,9 @@ class Builder:
 
         targetPlatform = PlatformInfo.get_platform(targetPlatformName)
         for dep in target.get_dependencies(targetPlatform, True):
-            try:
+            if isinstance(dep, tuple):
                 depPlatform, depName = dep
-            except ValueError:
+            else:
                 depPlatform, depName = targetPlatformName, dep
             if (depPlatform, depName) in targets:
                 yield from self.order_dependencies((depPlatform, depName), targets)

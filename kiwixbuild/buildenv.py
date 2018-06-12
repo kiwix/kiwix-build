@@ -138,7 +138,11 @@ class BuildEnv:
                                           pj(self.install_dir, self.libprefix)
                                           ])
 
+        env['QMAKE_CXXFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['QMAKE_CXXFLAGS']])
         env['CPPFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['CPPFLAGS']])
+        env['QMAKE_LFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'),
+                                   '-L'+pj(self.install_dir, self.libprefix),
+                                   env['QMAKE_LFLAGS']])
         env['LDFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'),
                                    '-L'+pj(self.install_dir, self.libprefix),
                                    env['LDFLAGS']])

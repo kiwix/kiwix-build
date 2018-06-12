@@ -40,6 +40,15 @@ RUN \
     ctpp2-utils \
     libctpp2-dev \
     libmicrohttpd-dev \
+# Qt packages
+    libqt5gui5 \
+    qtbase5-dev \
+    qtwebengine5-dev \
+    qt5-default \
+# To create the appimage of kiwix-desktop
+    libfuse2 \
+    fuse \
+    patchelf \
 # Some helper tools
     vim \
     less \
