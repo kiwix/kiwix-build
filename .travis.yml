@@ -39,12 +39,13 @@ deploy:
     script: travis/deploy.sh
     on:
       tags: true
+      condition: $TRAVIS_OS_NAME = osx || $PLATFORM != native_dyn
   - provider: script
     skip_cleanup: true
     script: travis/deploy.sh
     on:
       branch: master
-      condition: $TRAVIS_EVENT_TYPE = cron
+      condition: $TRAVIS_EVENT_TYPE = cron && ($TRAVIS_OS_NAME = osx || $PLATFORM != native_dyn)
 env:
   global:
     - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
