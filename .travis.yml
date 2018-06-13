@@ -11,10 +11,8 @@ branches:
 if: type != push OR tag IS present
 
 before_install:
-- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then eval "${MATRIX_EVAL}"; fi
 - PATH=$PATH:${HOME}/bin
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then PATH=$PATH:$(brew --prefix)/opt/gettext/bin; fi
-- ${CXX} --version
 - openssl aes-256-cbc -K $encrypted_eba2f7543984_key -iv $encrypted_eba2f7543984_iv
   -in travis/travisci_builder_id_key.enc -out travis/travisci_builder_id_key -d
 - chmod 600 travis/travisci_builder_id_key
@@ -48,22 +46,22 @@ deploy:
       condition: $TRAVIS_EVENT_TYPE = cron && ($TRAVIS_OS_NAME = osx || $PLATFORM != native_dyn)
 env:
   global:
-    - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
     - NIGHTLY_DATE=$(date +%Y-%m-%d)
   matrix:
     - PLATFORM="native_dyn"
-    - PLATFORM="native_static"
-    - PLATFORM="win32_dyn"
-    - PLATFORM="win32_static"
     - PLATFORM="armhf_dyn"
     - PLATFORM="armhf_static"
-    - PLATFORM="i586_dyn"
-    - PLATFORM="i586_static"
-    - PLATFORM="android"
-    - PLATFORM="android_arm"
-    - PLATFORM="android_arm64"
-    - PLATFORM="android_x86"
-    - PLATFORM="android_x86_64"
+addons:
+  ssh_known_hosts:
+  - download.kiwix.org
+  - download.openzim.org
+  apt:
+    packages: &common
+      - cmake
+      - autopoint
+      - python3-pip
+      - ctpp2-utils
+      - libmagic-dev
 matrix:
   allow_failures:
     - env: PLATFORM="android_arm"
@@ -74,10 +72,59 @@ matrix:
     - env: PLATFORM="android_x86_64"
     - env: PLATFORM="android"
   include:
+    - env: PLATFORM="native_static"
+      addons:
+        apt:
+          packages:
+            - *common
+            - libbz2-dev
+            - zlib1g-dev
+            - uuid-dev
+            - libctpp2-dev
+    - env: PLATFORM="win32_dyn"
+      addons: &win32_addons
+        apt:
+          packages:
+            - *common
+            - g++-mingw-w64-i686
+            - gcc-mingw-w64-i686
+            - gcc-mingw-w64-base
+            - mingw-w64-tools
+    - env: PLATFORM="win32_static"
+      addons: *win32_addons
+    - env: PLATFORM="i586_dyn"
+      addons: &i586_addons
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *common
+            - gcc-multilib
+            - g++-multilib
+            - libc6-dev:i386
+            - libstdc++-6-dev:i386
+    - env: PLATFORM="i586_static"
+      addons: *i586_addons
+    - env: PLATFORM="android"
+      addons: &android_addons
+        apt:
+          packages:
+            - *common
+            - default-jdk
+    - env: PLATFORM="android_arm"
+      addons: *android_addons
+    - env: PLATFORM="android_arm64"
+      addons: *android_addons
+    - env: PLATFORM="android_x86"
+      addons: *android_addons
+    - env: PLATFORM="android_x86_64"
+      addons: *android_addons
     - env: PLATFORM="android_mips"
       if: type!=cron AND type!=pull_request
+      addons: *android_addons
     - env: PLATFORM="android_mips64"
       if: type!=cron AND type!=pull_request
+      addons: *android_addons
     - env: PLATFORM="native_dyn"
       os: osx
     - env: PLATFORM="iOS_arm64"
@@ -91,30 +138,3 @@ notifications:
      - "chat.freenode.net#kiwix"
     on_success: change
     on_failure: always
-addons:
-  ssh_known_hosts:
-  - download.kiwix.org
-  - download.openzim.org
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - g++-5
-      - cmake
-      - python3-pip
-      - zlib1g-dev
-      - libjpeg-dev
-      - libmagic-dev
-      - ctpp2-utils
-      - libctpp2-dev
-      - libmicrohttpd-dev
-      - g++-mingw-w64-i686
-      - gcc-mingw-w64-i686
-      - gcc-mingw-w64-base
-      - mingw-w64-tools
-      - default-jdk
-      - autopoint
-      - libc6-dev:i386
-      - libstdc++-6-dev:i386
-      - gcc-5-multilib
-      - g++-5-multilib
