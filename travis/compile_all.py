@@ -259,7 +259,7 @@ elif PLATFORM.startswith('native_'):
     if TRAVIS_OS_NAME == "osx":
         TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib')
     else:
-        if make_release:
+        if make_release or PLATFORM == 'native_static':
             TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
         else:
             TARGETS = ('libzim', 'kiwix-lib', 'kiwix-desktop', 'zimwriterfs', 'zim-tools', 'kiwix-tools')
