@@ -5,13 +5,13 @@ from .base import (
 
 class KiwixDesktop(Dependency):
     name = "kiwix-desktop"
-    dependencies = ["qt", "qtwebengine", "kiwix-lib"]
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-desktop.git"
         git_dir = "kiwix-desktop"
 
     class Builder(QMakeBuilder):
+        dependencies = ["qt", "qtwebengine", "kiwix-lib"]
         @property
         def configure_option(self):
             options = ["PREFIX={}".format(self.buildEnv.install_dir)]
