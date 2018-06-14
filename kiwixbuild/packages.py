@@ -55,8 +55,8 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON': _debian_common + ['libbz2-dev', 'libmagic-dev'],
         'zlib': ['zlib1g-dev'],
         'uuid': ['uuid-dev'],
-        'ctpp2': ['libctpp2-dev'],
-        'ctpp2c': ['ctpp2-utils'],
+        #'ctpp2': ['libctpp2-dev'],
+        #'ctpp2c': ['ctpp2-utils'],
         'libmicrohttpd': ['libmicrohttpd-dev', 'ccache'],
         'qt' : ['libqt5gui5', 'qtbase5-dev', 'qt5-default'],
         'qtwebengine' : ['qtwebengine5-dev']

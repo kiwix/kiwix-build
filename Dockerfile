@@ -9,8 +9,8 @@ RUN \
   apt install -q -y --no-install-recommends \
 # Base build tools
     build-essential \
-#    gcc-5 \
-#    g++-5 \
+    gcc-4.8 \
+    g++-4.8 \
     automake \
     libtool \
     cmake \
@@ -37,8 +37,8 @@ RUN \
     libmagic-dev \
     zlib1g-dev \
     uuid-dev \
-    ctpp2-utils \
-    libctpp2-dev \
+#    ctpp2-utils \
+#    libctpp2-dev \
     libmicrohttpd-dev \
 # Qt packages
     libqt5gui5 \
@@ -73,6 +73,7 @@ RUN \
   mv ninja /home/travis/.local/bin ;\
   rm ninja-linux.zip
 ENV PATH="/home/travis/.local/bin:${PATH}"
+ENV CC=gcc-4.8 CXX=g++-4.8 QMAKE_CC=gcc-4.8 QMAKE_CXX=g++-4.8
 
 COPY . kiwix-build/
 RUN sudo chown -R travis:travis /home/travis/kiwix-build

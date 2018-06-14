@@ -37,10 +37,12 @@ class Builder:
         steps = list(remove_duplicates(steps))
 
         if option('build_nodeps'):
+            src_targetDef = ('source', targetDef[1])
+            add_target_step(src_targetDef, self._targets[src_targetDef])
             add_target_step(targetDef, self._targets[targetDef])
         else:
             for dep in steps:
-                if option('build_deps_only') and dep == targetDef:
+                if option('build_deps_only') and dep[1] == targetDef[1]:
                     continue
                 add_target_step(dep, self._targets[dep])
         self.instanciate_steps()
