@@ -37,8 +37,8 @@ RUN \
     libmagic-dev \
     zlib1g-dev \
     uuid-dev \
-    ctpp2-utils \
-    libctpp2-dev \
+#    ctpp2-utils \
+#    libctpp2-dev \
     libmicrohttpd-dev \
 # Qt packages
     libqt5gui5 \
