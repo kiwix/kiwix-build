@@ -62,7 +62,11 @@ Generated at {date}
     date=date.today().isoformat()))
 
 
-def run_kiwix_build(target, platform, build_deps_only=False, make_release=False, make_dist=False):
+def run_kiwix_build(target, platform,
+                    build_deps_only=False,
+                    target_only=False,
+                    make_release=False,
+                    make_dist=False):
     command = ['kiwix-build']
     command.append(target)
     command.append('--hide-progress')
@@ -76,6 +80,8 @@ def run_kiwix_build(target, platform, build_deps_only=False, make_release=False,
         command.extend(['--target-platform', platform])
     if build_deps_only:
         command.append('--build-deps-only')
+    if target_only:
+        command.append('--build-nodeps')
     if make_release:
         command.append('--make-release')
     if make_dist:
@@ -276,7 +282,8 @@ for target in TARGETS:
 
     run_kiwix_build(target,
                     platform=PLATFORM,
-                    make_release=make_release)
+                    make_release=make_release,
+                    target_only=True)
     if target == 'kiwix-desktop':
         create_app_image()
     if make_release and PLATFORM == 'native_dyn':
