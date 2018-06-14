@@ -371,14 +371,26 @@ class CMakeBuilder(MakeBuilder):
 
 class QMakeBuilder(MakeBuilder):
     qmake_target = ""
+
+    @property
+    def env_option(self):
+        options = ""
+        if 'QMAKE_CC' in os.environ:
+            options += 'QMAKE_CC={} '.format(os.environ['QMAKE_CC'])
+        if 'QMAKE_CXX' in os.environ:
+            options += 'QMAKE_CXX={} '.format(os.environ['QMAKE_CXX'])
+        return options
+
     def _configure(self, context):
         context.try_skip(self.build_path)
         cross_option = ""
         command = ("qmake {configure_option}"
+                   " {env_option}"
                    " {source_path}"
                    " {cross_option}")
         command = command.format(
             configure_option=self.configure_option,
+            env_option=self.env_option,
             source_path=self.source_path,
             cross_option=cross_option
         )
