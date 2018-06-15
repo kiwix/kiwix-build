@@ -20,6 +20,7 @@ PLATFORM = environ['PLATFORM']
 TRAVIS_OS_NAME = environ['TRAVIS_OS_NAME']
 HOME = Path(os.path.expanduser('~'))
 NIGHTLY_DATE = environ['NIGHTLY_DATE']
+KIWIX_DESKTOP_ONLY = environ.get('DESKTOP_ONLY') == '1'
 
 BASE_DIR = HOME/"BUILD_{}".format(PLATFORM)
 SOURCE_DIR = HOME/"SOURCE"
@@ -210,8 +211,10 @@ for p in (NIGHTLY_KIWIX_ARCHIVES_DIR,
 make_release = re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", environ.get('TRAVIS_TAG', '')) is not None
 
 # The first thing we need to do is to (potentially) download already compiled base dependencies.
-base_dep_archive_name = "base_deps_{}_{}_{}.tar.gz".format(
-    TRAVIS_OS_NAME, PLATFORM, base_deps_meta_version)
+base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.gz".format(
+    os=TRAVIS_OS_NAME,
+    platform=PLATFORM,
+    version=base_deps_meta_version)
 
 print_message("Getting archive {}", base_dep_archive_name)
 try:
@@ -239,8 +242,8 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
     elif PLATFORM.startswith('native_'):
         if TRAVIS_OS_NAME == "osx":
             TARGETS = ('kiwix-lib', 'zim-tools', 'zimwriterfs')
-        elif PLATFORM == 'native_dyn':
-            TARGETS = ('kiwix-tools', 'kiwix-desktop', 'zim-tools', 'zimwriterfs')
+        elif PLATFORM == 'native_dyn' and KIWIX_DESKTOP_ONLY:
+            TARGETS = ('kiwix-desktop', )
         else:
             TARGETS = ('kiwix-tools', 'zim-tools', 'zimwriterfs')
     else:
@@ -252,6 +255,8 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
 
     sys.exit(0)
 
+
+TARGETS = tuple()
 if PLATFORM.startswith('android'):
     if make_release:
         # (For now ?) kiwix-android follow it own release process.
@@ -265,8 +270,9 @@ elif PLATFORM.startswith('native_'):
     if TRAVIS_OS_NAME == "osx":
         TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib')
     else:
-        if make_release or PLATFORM == 'native_static':
-            TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
+        if PLATFORM == 'native_dyn' and KIWIX_DESKTOP_ONLY:
+            if not make_release:
+                TARGETS = ('kiwix-desktop', )
         else:
             TARGETS = ('libzim', 'kiwix-lib', 'kiwix-desktop', 'zimwriterfs', 'zim-tools', 'kiwix-tools')
 else:

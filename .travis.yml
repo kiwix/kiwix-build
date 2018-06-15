@@ -26,10 +26,16 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
-install: travis/install_extra_deps.sh
-script: 
-- if [ $TRAVIS_OS_NAME == "osx" ] || [ $PLATFORM != "native_dyn" ]; then travis/compile_all.py; fi
-- if [ $TRAVIS_OS_NAME == "linux" ] && [ $PLATFORM == "native_dyn" ]; then docker build -t kiwix/build . && docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e TRAVIS_BUILD_DIR --device /dev/fuse --cap-add SYS_ADMIN kiwix/build; fi
+install: if [[ $TRAVIS_OS_NAME != "linux" || $DESKTOP_ONLY != 1 ]]; then travis/install_extra_deps.sh; fi
+script:
+- |
+  if [[ $TRAVIS_OS_NAME = "linux" && $DESKTOP_ONLY == 1 ]]
+  then
+    docker build -t kiwix/build -f travis/Dockerfile .
+    docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e TRAVIS_BUILD_DIR -e DESKTOP_ONLY --device /dev/fuse --cap-add SYS_ADMIN kiwix/build
+  else
+    travis/compile_all.py
+  fi
 after_failure: travis/upload_all_log.sh
 deploy:
   - provider: script
@@ -72,6 +78,10 @@ matrix:
     - env: PLATFORM="android_x86_64"
     - env: PLATFORM="android"
   include:
+    - env: PLATFORM="native_dyn" DESKTOP_ONLY=1
+      addons:
+        apt:
+          packages: []
     - env: PLATFORM="native_static"
       addons:
         apt:
