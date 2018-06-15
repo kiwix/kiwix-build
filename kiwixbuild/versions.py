@@ -1,10 +1,10 @@
 
 main_project_versions = {
-    'kiwix-lib': '2.0.0',
-    'kiwix-tools': '0.5.0',
-    'libzim': '3.3.0',
-    'zim-tools': '0.0.1',
-    'zimwriterfs': '1.1',
+    'kiwix-lib': '2.0.1',
+    'kiwix-tools': '0.6.0',
+    'libzim': '4.0.0',
+    'zim-tools': '1.0.0',
+    'zimwriterfs': '1.2',
 }
 
 
