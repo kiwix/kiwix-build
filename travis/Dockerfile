@@ -9,8 +9,6 @@ RUN \
   apt install -q -y --no-install-recommends \
 # Base build tools
     build-essential \
-    gcc-4.8 \
-    g++-4.8 \
     automake \
     libtool \
     cmake \
@@ -27,18 +25,13 @@ RUN \
     wget \
     unzip \
     sudo \
-# Win32 cross-compilation
-    g++-mingw-w64-i686 \
-    gcc-mingw-w64-i686 \
-    gcc-mingw-w64-base \
-    mingw-w64-tools \
 # Some dependencies already packaged
     libbz2-dev \
     libmagic-dev \
     zlib1g-dev \
     uuid-dev \
-#    ctpp2-utils \
-#    libctpp2-dev \
+    ctpp2-utils \
+    libctpp2-dev \
     libmicrohttpd-dev \
 # Qt packages
     libqt5gui5 \
@@ -73,13 +66,12 @@ RUN \
   mv ninja /home/travis/.local/bin ;\
   rm ninja-linux.zip
 ENV PATH="/home/travis/.local/bin:${PATH}"
-ENV CC=gcc-4.8 CXX=g++-4.8 QMAKE_CC=gcc-4.8 QMAKE_CXX=g++-4.8
 
 COPY . kiwix-build/
 RUN sudo chown -R travis:travis /home/travis/kiwix-build
 RUN pip3 install --user -e kiwix-build
 
 ENV TRAVISCI_SSH_KEY /home/travis/kiwix-build/travis/travisci_builder_id_key
-ENV TRAVIS_OS_NAME linux
+ENV TRAVIS_OS_NAME linux_artful
 
 CMD kiwix-build/travis/compile_all.py && kiwix-build/travis/deploy.sh
