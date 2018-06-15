@@ -274,7 +274,7 @@ elif PLATFORM.startswith('native_'):
             if not make_release:
                 TARGETS = ('kiwix-desktop', )
         else:
-            TARGETS = ('libzim', 'kiwix-lib', 'kiwix-desktop', 'zimwriterfs', 'zim-tools', 'kiwix-tools')
+            TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 else:
     TARGETS = ('libzim', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 
