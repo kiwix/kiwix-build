@@ -28,6 +28,7 @@ Type=Application
 Terminal=false
 StartupNotify=true
 NoDisplay=false
+Categories=Education;
 EOF
 
 # Get linuxdeployqt
