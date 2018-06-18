@@ -9,7 +9,6 @@ class Zimwriterfs(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/openzim/zimwriterfs.git"
         git_dir = "zimwriterfs"
-        release_git_ref = "1.1"
 
     class Builder(MesonBuilder):
         dependencies = ['libzim', 'zlib', 'xapian-core', 'gumbo', 'icu4c', 'libmagic']
