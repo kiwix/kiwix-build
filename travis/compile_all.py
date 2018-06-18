@@ -289,7 +289,7 @@ for target in TARGETS:
     run_kiwix_build(target,
                     platform=PLATFORM,
                     make_release=make_release,
-                    target_only=True)
+                    target_only=environ['TRAVIS_EVENT_TYPE'] == 'cron')
     if target == 'kiwix-desktop':
         create_app_image()
     if make_release and PLATFORM == 'native_dyn':
