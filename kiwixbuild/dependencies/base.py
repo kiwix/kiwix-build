@@ -3,7 +3,7 @@ import os
 import shutil
 import time
 
-from kiwixbuild.utils import pj, Context, SkipCommand, WarningMessage, extract_archive, Defaultdict, StopBuild, run_command, colorize, copy_tree
+from kiwixbuild.utils import pj, Context, SkipCommand, WarningMessage, extract_archive, StopBuild, run_command, colorize, copy_tree
 from kiwixbuild.versions import main_project_versions, base_deps_versions
 from kiwixbuild._global import neutralEnv, option, get_target_step
 

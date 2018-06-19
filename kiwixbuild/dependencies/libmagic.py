@@ -6,7 +6,7 @@ from .base import (
     MakeBuilder,
 )
 
-from kiwixbuild.utils import Remotefile, pj, Defaultdict, SkipCommand, run_command
+from kiwixbuild.utils import Remotefile, pj, SkipCommand, run_command
 from kiwixbuild._global import get_target_step
 
 class LibMagic(Dependency):
