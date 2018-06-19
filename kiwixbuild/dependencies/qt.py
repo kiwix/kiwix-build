@@ -21,12 +21,23 @@ class Qt(Dependency):
 
     class Builder(MakeBuilder):
         dependencies = ['icu4c', 'zlib']
-        configure_option_template = "{dep_options} {static_option} {env_option} -prefix {install_dir} -libdir {libdir}"
-        dynamic_configure_option = "-shared"
-        static_configure_option = "-static"
+        dynamic_configure_options = ["-shared"]
+        static_configure_options = ["-static"]
 
         @property
-        def configure_option(self):
+        def all_configure_option(self):
+            yield from self.configure_options
+            if self.buildEnv.platformInfo.static:
+                yield from self.static_configure_options
+            else:
+                yield from self.dynamic_configure_options
+            if not self.target.force_native_build:
+                yield from self.buildEnv.platformInfo.configure_options
+            yield from ('-prefix', self.buildEnv.install_dir)
+            yield from ('-libdir', pj(self.buildEnv.install_dir, self.buildEnv.libprefix))
+
+        @property
+        def configure_options(self):
             skip_modules = [
                 'qt3d',
                 'qtcanvas3d',
@@ -55,10 +66,15 @@ class Qt(Dependency):
                 'qtwebglplugin',
                 'qtwebsockets',
 #                'qtwebview',
-]
-            skip_modules = " ".join("-skip {}".format(m) for m in skip_modules)
-            options = "-recheck -opensource -confirm-license -ccache -make libs {}".format(skip_modules)
-            return options
+            ]
+            yield '-recheck'
+            yield '-opensource'
+            yield '-confirm-license'
+            yield '-ccache'
+            yield from ('-make', 'libs')
+            for module in skip_modules:
+               yield from ('-skip', module)
+
 
 class QtWebEngine(Dependency):
     name = "qtwebengine"

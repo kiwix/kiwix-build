@@ -26,7 +26,7 @@ class PlatformNeutralEnv:
         self.meson_command = self._detect_meson()
         if not self.meson_command:
             sys.exit("ERROR: meson command not fount")
-        self.mesontest_command = "{} test".format(self.meson_command)
+        self.mesontest_command = [*self.meson_command, "test"]
 
     def detect_platform(self):
         _platform = platform.system()
@@ -56,7 +56,7 @@ class PlatformNeutralEnv:
                 # Doesn't exist in PATH or isn't executable
                 continue
             if retcode == 0:
-                return n
+                return [n]
 
     def _detect_meson(self):
         for n in ['meson.py', 'meson']:
@@ -67,7 +67,7 @@ class PlatformNeutralEnv:
                 # Doesn't exist in PATH or isn't executable
                 continue
             if retcode == 0:
-                return n
+                return [n]
 
 
 class BuildEnv:

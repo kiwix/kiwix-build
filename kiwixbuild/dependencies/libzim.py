@@ -11,5 +11,5 @@ class Libzim(Dependency):
         git_dir = "libzim"
 
     class Builder(MesonBuilder):
-        test_option = "-t 8"
+        test_options = ["-t", "8"]
         dependencies = ['zlib', 'lzma', 'xapian-core', 'icu4c']

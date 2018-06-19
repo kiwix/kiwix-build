@@ -61,7 +61,7 @@ class Source:
         context.force_native_build = True
         for p in self.patches:
             with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                run_command("patch -p1", self.source_path, context, input=patch_input.read())
+                run_command(["patch", "-p1"], self.source_path, context, input=patch_input.read())
 
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
@@ -149,15 +149,18 @@ class GitClone(Source):
     def _git_clone(self, context):
         if os.path.exists(self.git_path):
             raise SkipCommand()
-        command = "git clone --depth=1 --branch {} {} {}".format(
-            self.git_ref, self.git_remote, self.source_dir)
+        command = [
+            "git", "clone", "--depth=1",
+            "--branch", self.git_ref,
+            self.git_remote, self.source_dir
+        ]
         run_command(command, neutralEnv('source_dir'), context)
 
     def _git_update(self, context):
-        command = "git fetch origin {}".format(
-            self.git_ref)
+        command = ["git", "fetch", "origin", self.git_ref]
         run_command(command, self.git_path, context)
-        run_command("git checkout "+self.git_ref, self.git_path, context)
+        command = ["git", "checkout", self.git_ref]
+        run_command(command, self.git_path, context)
 
     def prepare(self):
         self.command('gitclone', self._git_clone)
@@ -178,7 +181,10 @@ class SvnClone(Source):
     def _svn_export(self, context):
         if os.path.exists(self.svn_path):
             raise SkipCommand()
-        command = "svn export {} {}".format(self.svn_remote, self.svn_dir)
+        command = [
+            "svn", "export",
+            self.svn_remote, self.svn_dir
+        ]
         run_command(command, neutralEnv('source_dir'), context)
 
     def prepare(self):
@@ -269,35 +275,34 @@ class NoopBuilder(Builder):
 
 
 class MakeBuilder(Builder):
-    configure_option_template = "{dep_options} {static_option} {env_option} --prefix {install_dir} --libdir {libdir}"
-    configure_option = ""
-    dynamic_configure_option = "--enable-shared --disable-static"
-    static_configure_option = "--enable-static --disable-shared"
-    make_option = ""
-    install_option = ""
+    configure_options = []
+    dynamic_configure_options = ["--enable-shared", "--disable-static"]
+    static_configure_options = ["--enable-static", "--disable-shared"]
+    make_options = []
+    install_options = []
     configure_script = "configure"
     configure_env = None
-    make_target = ""
-    make_install_target = "install"
+    make_targets = []
+    make_install_targets = ["install"]
 
     @property
-    def all_configure_option(self):
-        option = self.configure_option_template.format(
-            dep_options=self.configure_option,
-            static_option=self.static_configure_option if self.buildEnv.platformInfo.static else self.dynamic_configure_option,
-            env_option=self.buildEnv.platformInfo.configure_option if not self.target.force_native_build else "",
-            install_dir=self.buildEnv.install_dir,
-            libdir=pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
-            )
-        return option
+    def all_configure_options(self):
+        yield from self.configure_options
+        if self.buildEnv.platformInfo.static:
+            yield from self.static_configure_options
+        else:
+            yield from self.dynamic_configure_options
+        if not self.target.force_native_build:
+            yield from self.buildEnv.platformInfo.configure_options
+        yield from ('--prefix', self.buildEnv.install_dir)
+        yield from ('--libdir', pj(self.buildEnv.install_dir, self.buildEnv.libprefix))
 
     def _configure(self, context):
         context.try_skip(self.build_path)
-        command = "{configure_script} {configure_option}"
-        command = command.format(
-            configure_script=pj(self.source_path, self.configure_script),
-            configure_option=self.all_configure_option
-        )
+        command = [
+             pj(self.source_path, self.configure_script),
+             *self.all_configure_options
+        ]
         env = DefaultEnv()
         if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
@@ -312,45 +317,43 @@ class MakeBuilder(Builder):
 
     def _compile(self, context):
         context.try_skip(self.build_path)
-        command = "make -j4 {make_target} {make_option}".format(
-            make_target=self.make_target,
-            make_option=self.make_option
-        )
+        command = [
+            "make", "-j4",
+            *self.make_targets,
+            *self.make_options
+        ]
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _install(self, context):
         context.try_skip(self.build_path)
-        command = "make {make_install_target} {make_option}".format(
-            make_install_target=self.make_install_target,
-            make_option=self.make_option
-        )
+        command = [
+            "make",
+            *self.make_install_targets,
+            *self.install_options
+        ]
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _make_dist(self, context):
         context.try_skip(self.build_path)
-        command = "make dist"
+        command = ["make", "dist"]
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
 
 class CMakeBuilder(MakeBuilder):
     def _configure(self, context):
         context.try_skip(self.build_path)
-        cross_option = ""
+        cross_options = []
         if not self.target.force_native_build and self.buildEnv.cmake_crossfile:
-            cross_option = "-DCMAKE_TOOLCHAIN_FILE={}".format(self.buildEnv.cmake_crossfile)
-        command = ("cmake {configure_option}"
-                   " -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
-                   " -DCMAKE_INSTALL_PREFIX={install_dir}"
-                   " -DCMAKE_INSTALL_LIBDIR={libdir}"
-                   " {source_path}"
-                   " {cross_option}")
-        command = command.format(
-            configure_option=self.configure_option,
-            install_dir=self.buildEnv.install_dir,
-            libdir=self.buildEnv.libprefix,
-            source_path=self.source_path,
-            cross_option=cross_option
-        )
+            cross_options += ["-DCMAKE_TOOLCHAIN_FILE={}".format(self.buildEnv.cmake_crossfile)]
+        command = [
+            "cmake",
+            *self.configure_options,
+            "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
+            "-DCMAKE_INSTALL_PREFIX={}".format(self.buildEnv.install_dir),
+            "-DCMAKE_INSTALL_LIBDIR={}".format(self.buildEnv.libprefix),
+            self.source_path,
+            *cross_options
+        ]
         env = DefaultEnv()
         if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
@@ -365,44 +368,36 @@ class CMakeBuilder(MakeBuilder):
 
 
 class QMakeBuilder(MakeBuilder):
-    qmake_target = ""
-
     @property
-    def env_option(self):
-        options = ""
+    def env_options(self):
         if 'QMAKE_CC' in os.environ:
-            options += 'QMAKE_CC={} '.format(os.environ['QMAKE_CC'])
+            yield 'QMAKE_CC={} '.format(os.environ['QMAKE_CC'])
         if 'QMAKE_CXX' in os.environ:
-            options += 'QMAKE_CXX={} '.format(os.environ['QMAKE_CXX'])
-        return options
+            yield 'QMAKE_CXX={} '.format(os.environ['QMAKE_CXX'])
 
     def _configure(self, context):
         context.try_skip(self.build_path)
-        cross_option = ""
-        command = ("qmake {configure_option}"
-                   " {env_option}"
-                   " {source_path}"
-                   " {cross_option}")
-        command = command.format(
-            configure_option=self.configure_option,
-            env_option=self.env_option,
-            source_path=self.source_path,
-            cross_option=cross_option
-        )
+        command = [
+            "qmake",
+             *self.configure_options,
+             *self.env_options,
+             self.source_path
+        ]
         run_command(command, self.build_path, context, buildEnv=self.buildEnv, cross_env_only=True)
 
     def _install(self, context):
         context.try_skip(self.build_path)
-        command = "make {make_install_target} {make_option}".format(
-            make_install_target=self.make_install_target,
-            make_option=self.make_option
-        )
+        command = [
+            "make",
+            *self.make_install_targets,
+            *self.install_options
+        ]
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
 
 class MesonBuilder(Builder):
-    configure_option = ""
-    test_option = ""
+    configure_options = []
+    test_options = []
 
     @property
     def library_type(self):
@@ -413,29 +408,22 @@ class MesonBuilder(Builder):
         if os.path.exists(self.build_path):
             shutil.rmtree(self.build_path)
         os.makedirs(self.build_path)
-        configure_option = self.configure_option.format(buildEnv=self.buildEnv)
-        cross_option = ""
+        cross_options = []
         if not self.target.force_native_build and self.buildEnv.meson_crossfile:
-            cross_option = "--cross-file {}".format(
-                self.buildEnv.meson_crossfile)
-        command = ("{command} . {build_path}"
-                   " --default-library={library_type}"
-                   " {configure_option}"
-                   " --prefix={buildEnv.install_dir}"
-                   " --libdir={buildEnv.libprefix}"
-                   " {cross_option}")
-        command = command.format(
-            command=neutralEnv('meson_command'),
-            library_type=self.library_type,
-            configure_option=configure_option,
-            build_path=self.build_path,
-            buildEnv=self.buildEnv,
-            cross_option=cross_option
-        )
+            cross_options += ["--cross-file", self.buildEnv.meson_crossfile]
+        command = [
+            *neutralEnv('meson_command'),
+            '.', self.build_path,
+            '--default-library={}'.format(self.library_type),
+            *self.configure_options,
+            '--prefix={}'.format(self.buildEnv.install_dir),
+            '--libdir={}'.format(self.buildEnv.libprefix),
+            *cross_options
+        ]
         run_command(command, self.source_path, context, buildEnv=self.buildEnv, cross_env_only=True)
 
     def _compile(self, context):
-        command = "{} -v".format(neutralEnv('ninja_command'))
+        command = [*neutralEnv('ninja_command'), '-v']
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _test(self, context):
@@ -444,21 +432,25 @@ class MesonBuilder(Builder):
                  and not self.buildEnv.platformInfo.static)
            ):
             raise SkipCommand()
-        command = "{} --verbose {}".format(neutralEnv('mesontest_command'), self.test_option)
+        command = [
+            *neutralEnv('mesontest_command'),
+            '--verbose',
+            *self.test_options
+        ]
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _install(self, context):
-        command = "{} -v install".format(neutralEnv('ninja_command'))
+        command = [*neutralEnv('ninja_command'), '-v', 'install']
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
     def _make_dist(self, context):
-        command = "{} -v dist".format(neutralEnv('ninja_command'))
+        command = [*neutralEnv('ninja_command'), '-v', 'dist']
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
 
 class GradleBuilder(Builder):
-    gradle_target = "build"
-    gradle_option = "-i --no-daemon --build-cache"
+    gradle_targets = ["build"]
+    gradle_options = ["-i", "--no-daemon", "--build-cache"]
 
     def build(self):
         self.command('configure', self._configure)
@@ -474,8 +466,9 @@ class GradleBuilder(Builder):
         shutil.copytree(self.source_path, self.build_path)
 
     def _compile(self, context):
-        command = "gradle {gradle_target} {gradle_option}"
-        command = command.format(
-            gradle_target=self.gradle_target,
-            gradle_option=self.gradle_option)
+        command = [
+            'gradle',
+            *self.gradle_targets,
+            *self.gradle_options
+        ]
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)

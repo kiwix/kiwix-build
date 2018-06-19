@@ -18,9 +18,9 @@ class Aria2(Dependency):
 
         def _post_prepare_script(self, context):
             context.try_skip(self.extract_path)
-            command = "autoreconf -i"
+            command = ["autoreconf", "-i"]
             run_command(command, self.extract_path, context)
 
     class Builder(MakeBuilder):
         dependencies = ['zlib']
-        configure_option = "--enable-libaria2 --disable-ssl --disable-bittorent --disable-metalink --without-sqlite3 --without-libxml2 --without-libexpat"
+        configure_options = ["--enable-libaria2", "--disable-ssl", "--disable-bittorent", "--disable-metalink", "--without-sqlite3", "--without-libxml2", "--without-libexpat"]

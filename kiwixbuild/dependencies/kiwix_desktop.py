@@ -13,8 +13,7 @@ class KiwixDesktop(Dependency):
     class Builder(QMakeBuilder):
         dependencies = ["qt", "qtwebengine", "kiwix-lib"]
         @property
-        def configure_option(self):
-            options = ["PREFIX={}".format(self.buildEnv.install_dir)]
+        def configure_options(self):
+            yield "PREFIX={}".format(self.buildEnv.install_dir)
             if self.buildEnv.platformInfo.static:
-                options.append('"CONFIG+=static"')
-            return " ".join(options)
+                yield 'CONFIG+=static'

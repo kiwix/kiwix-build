@@ -263,7 +263,7 @@ def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cros
         kwargs = dict()
         if input:
             kwargs['stdin'] = subprocess.PIPE
-        process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+        process = subprocess.Popen(command, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
         if input:
             input = input.encode()
         while True:

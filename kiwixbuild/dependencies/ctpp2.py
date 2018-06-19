@@ -4,6 +4,7 @@ from .base import (
     CMakeBuilder)
 
 from kiwixbuild.utils import Remotefile, pj, run_command
+from glob import glob
 
 class CTPP2(Dependency):
     name = "ctpp2"
@@ -25,13 +26,13 @@ class CTPP2(Dependency):
 
     class Builder(CMakeBuilder):
         @property
-        def configure_option(self):
+        def configure_options(self):
+            yield "-DMD5_SUPPORT=OFF"
+            yield "-DICONV_SUPPORT=OFF"
             libprefix = self.buildEnv.libprefix
-            options = "-DMD5_SUPPORT=OFF -DICONV_SUPPORT=OFF"
             if libprefix.startswith('lib'):
                libprefix = libprefix[3:]
-               options += " -DLIB_SUFFIX={}".format(libprefix)
-            return options
+               yield "-DLIB_SUFFIX={}".format(libprefix)
 
 
 class CTPP2C(CTPP2):
@@ -39,7 +40,7 @@ class CTPP2C(CTPP2):
     force_native_build = True
 
     class Builder(CTPP2.Builder):
-        make_target = "ctpp2c"
+        make_targets = ["ctpp2c"]
 
         @property
         def build_path(self):
@@ -47,8 +48,9 @@ class CTPP2C(CTPP2):
 
         def _install(self, context):
             context.try_skip(self.build_path)
-            command = "cp {ctpp2c}* {install_dir}".format(
-                ctpp2c=pj(self.build_path, 'ctpp2c'),
-                install_dir=pj(self.buildEnv.install_dir, 'bin')
+            command = (
+                'cp',
+                *glob(pj(self.build_path, 'ctpp2c*')),
+                pj(self.buildEnv.install_dir, 'bin')
             )
             run_command(command, self.build_path, context, buildEnv=self.buildEnv)

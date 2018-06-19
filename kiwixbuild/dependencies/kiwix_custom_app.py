@@ -6,7 +6,7 @@ from .base import (
     GitClone,
     GradleBuilder)
 
-from kiwixbuild.utils import Remotefile, pj, SkipCommand
+from kiwixbuild.utils import Remotefile, pj, SkipCommand, run_command
 from kiwixbuild._global import option, get_target_step
 
 class KiwixCustomApp(Dependency):
@@ -24,22 +24,22 @@ class KiwixCustomApp(Dependency):
         dependencies = ["kiwix-android", "kiwix-lib"]
 
         @property
-        def gradle_target(self):
-            return "assemble{}".format(self.target.custom_name)
+        def gradle_targets(self):
+            yield "assemble{}".format(self.target.custom_name)
 
         @property
-        def gradle_option(self):
-            template = ("-i -P customDir={customDir}"
-                        " -P zim_file_size={zim_size}"
-                        " -P version_code={version_code}"
-                        " -P version_name={version_name}"
-                        " -P content_version_code={content_version_code}")
-            return template.format(
-                customDir=pj(self.build_path, 'custom'),
-                zim_size=self._get_zim_size(),
-                version_code=os.environ['VERSION_CODE'],
-                version_name=os.environ['VERSION_NAME'],
-                content_version_code=os.environ['CONTENT_VERSION_CODE'])
+        def gradle_options(self):
+            yield "-i"
+            yield "-P"
+            yield "customDir={}".format(pj(self.build_path, 'custom'))
+            yield "-P"
+            yield "zim_file_size={}".format(zim_size)
+            yield "-P"
+            yield "version_code={}".format(os.environ['VERSION_CODE'])
+            yield "-P"
+            yield "version_name={}".format(os.environ['VERSION_NAME'])
+            yield "-P"
+            yield "content_version_code={}".format(os.environ['CONTENT_VERSION_CODE'])
 
         @property
         def build_path(self):
@@ -104,9 +104,10 @@ class KiwixCustomApp(Dependency):
             except FileNotFoundError:
                 pass
             os.makedirs(pj(self.build_path, 'custom'))
-            command = "./gen-custom-android-directory.py {custom_name} --output-dir {custom_dir}"
-            command = command.format(
-                custom_name=self.target.custom_name,
-                custom_dir=pj(self.build_path, 'custom', self.target.custom_name)
-            )
-            self.buildEnv.run_command(command, self.source_path, context)
+            command = [
+                "./gen-custom-android-directory.py",
+                self.target.custom_name,
+                "--output-dir",
+                pj(self.build_path, 'custom', self.target.custom_name)
+            ]
+            run_command(command, self.source_path, context, buildEnv=self.buildEnv)

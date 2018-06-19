@@ -14,6 +14,4 @@ class lzma(Dependency):
                              'https://tukaani.org/xz/xz-5.2.3.tar.bz2')
 
     class Builder(MakeBuilder):
-        @property
-        def configure_option(self):
-            return "--disable-assembler --disable-xz --disable-xzdec"
+        configure_options = ["--disable-assembler", "--disable-xz", "--disable-xzdec"]

@@ -32,10 +32,12 @@ class LibMagic(Dependency):
             if platformInfo.build == 'native':
                 return super()._compile(context)
             context.try_skip(self.build_path)
-            command = "make -j4 {make_target} {make_option}".format(
-                make_target=self.make_target,
-                make_option=self.make_option
-            )
+            command = [
+                "make",
+                "-j4",
+                *self.make_targets,
+                *self.make_options
+            ]
             libmagic_native_builder = get_target_step('libmagic', 'native_static')
             env = DefaultEnv()
             env['PATH'] = ':'.join([pj(libmagic_native_builder.build_path, 'src'), env['PATH']])

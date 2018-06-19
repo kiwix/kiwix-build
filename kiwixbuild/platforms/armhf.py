@@ -61,8 +61,8 @@ class ArmhfPlatformInfo(PlatformInfo):
             return "exec_wrapper = 'qemu-arm'"
 
     @property
-    def configure_option(self):
-        return '--host={}'.format(self.arch_full)
+    def configure_options(self):
+        yield '--host={}'.format(self.arch_full)
 
     def get_bin_dir(self):
         return [pj(self.root_path, 'bin')]

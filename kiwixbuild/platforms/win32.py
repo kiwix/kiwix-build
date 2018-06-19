@@ -62,8 +62,8 @@ class Win32PlatformInfo(PlatformInfo):
             return "exec_wrapper = 'wine'"
 
     @property
-    def configure_option(self):
-        return '--host={}'.format(self.arch_full)
+    def configure_options(self):
+        yield '--host={}'.format(self.arch_full)
 
     def set_compiler(self, env):
         for k, v in self.binaries.items():
