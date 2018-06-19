@@ -4,7 +4,7 @@ import subprocess
 import platform
 import distro
 
-from .utils import pj, download_remote, Defaultdict
+from .utils import pj, download_remote, escape_path
 from ._global import neutralEnv, option
 
 
@@ -125,21 +125,34 @@ class BuildEnv:
         pkgconfig_path = pj(self.install_dir, self.libprefix, 'pkgconfig')
         env['PKG_CONFIG_PATH'] = ':'.join([env['PKG_CONFIG_PATH'], pkgconfig_path])
 
-        env['PATH'] = ':'.join([pj(self.install_dir, 'bin'), env['PATH']])
+        env['PATH'] = ':'.join([
+            escape_path(pj(self.install_dir, 'bin')),
+            env['PATH']
+        ])
 
         env['LD_LIBRARY_PATH'] = ':'.join([env['LD_LIBRARY_PATH'],
                                           pj(self.install_dir, 'lib'),
                                           pj(self.install_dir, self.libprefix)
                                           ])
 
-        env['QMAKE_CXXFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['QMAKE_CXXFLAGS']])
-        env['CPPFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['CPPFLAGS']])
-        env['QMAKE_LFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'),
-                                   '-L'+pj(self.install_dir, self.libprefix),
-                                   env['QMAKE_LFLAGS']])
-        env['LDFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'),
-                                   '-L'+pj(self.install_dir, self.libprefix),
-                                   env['LDFLAGS']])
+        env['QMAKE_CXXFLAGS'] = " ".join([
+            escape_path('-I'+pj(self.install_dir, 'include')),
+            env['QMAKE_CXXFLAGS']
+        ])
+        env['CPPFLAGS'] = " ".join([
+            escape_path('-I'+pj(self.install_dir, 'include')),
+            env['CPPFLAGS']
+        ])
+        env['QMAKE_LFLAGS'] = " ".join([
+            escape_path('-L'+pj(self.install_dir, 'lib')),
+            escape_path('-L'+pj(self.install_dir, self.libprefix)),
+            env['QMAKE_LFLAGS']
+        ])
+        env['LDFLAGS'] = " ".join([
+            escape_path('-L'+pj(self.install_dir, 'lib')),
+            escape_path('-L'+pj(self.install_dir, self.libprefix)),
+            env['LDFLAGS']
+        ])
 
         if cross_comp_flags:
             self.platformInfo.set_comp_flags(env)
