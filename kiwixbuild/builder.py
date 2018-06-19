@@ -117,7 +117,7 @@ class Builder:
         builderDefs = (tDef for tDef in target_steps() if tDef[0] != 'source')
         for builderDef in builderDefs:
             builder = get_target_step(builderDef)
-            if option('make_dist') and builderDef == option('target'):
+            if option('make_dist') and builderDef[1] == option('target'):
                 print("make dist {} ({}):".format(builder.name, builderDef[0]))
                 builder.make_dist()
                 continue

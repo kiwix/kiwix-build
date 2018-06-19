@@ -313,15 +313,9 @@ if make_release and PLATFORM == 'native_dyn':
             except FileExistsError:
                 pass
 
-            if target == 'zimwriterfs':
-                in_file = BASE_DIR/target/'{}-{}.tar.gz'.format(
-                    target,
-                    main_project_versions[target])
-            else:
-                in_file = BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(
-                    target,
-                    main_project_versions[target])
-
+            in_file = BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(
+                target,
+                main_project_versions[target])
             shutil.copy(str(in_file), str(out_dir/target))
 elif PLATFORM == 'native_static':
     for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
