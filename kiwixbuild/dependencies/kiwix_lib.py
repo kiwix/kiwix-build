@@ -22,11 +22,10 @@ class Kiwixlib(Dependency):
 
 
         @property
-        def configure_option(self):
-            base_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
+        def configure_options(self):
+            yield "-Dctpp2-install-prefix={}".format(self.buildEnv.install_dir)
             if self.buildEnv.platformInfo.build == 'android':
-                base_option += ' -Dandroid=true'
-            return base_option
+                yield '-Dandroid=true'
 
         @property
         def library_type(self):

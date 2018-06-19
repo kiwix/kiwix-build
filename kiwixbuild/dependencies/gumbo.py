@@ -17,7 +17,7 @@ class Gumbo(Dependency):
 
         def _post_prepare_script(self, context):
             context.try_skip(self.extract_path)
-            command = "./autogen.sh"
+            command = ["./autogen.sh"]
             run_command(command, self.extract_path, context)
 
     Builder = MakeBuilder

@@ -85,8 +85,8 @@ class AndroidPlatformInfo(PlatformInfo):
         env['CXX'] = binaries['CXX']
 
     @property
-    def configure_option(self):
-        return '--host={}'.format(self.arch_full)
+    def configure_options(self):
+        yield '--host={}'.format(self.arch_full)
 
     def finalize_setup(self):
         super().finalize_setup()

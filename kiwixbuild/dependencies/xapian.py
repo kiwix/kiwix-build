@@ -17,7 +17,7 @@ class Xapian(Dependency):
         patches = ['xapian_sys_types.patch']
 
     class Builder(MakeBuilder):
-        configure_option = "--disable-sse --disable-backend-inmemory --disable-documentation"
+        configure_options = ["--disable-sse", "--disable-backend-inmemory", "--disable-documentation"]
         configure_env = {'_format_LDFLAGS': "-L{buildEnv.install_dir}/{buildEnv.libprefix}",
                          '_format_CXXFLAGS': "-I{buildEnv.install_dir}/include"}
 

@@ -14,4 +14,4 @@ class MicroHttpd(Dependency):
                              'http://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.46.tar.gz')
 
     class Builder(MakeBuilder):
-        configure_option = "--disable-https --without-libgcrypt --without-libcurl"
+        configure_options = ["--disable-https", "--without-libgcrypt", "--without-libcurl"]

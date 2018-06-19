@@ -14,7 +14,6 @@ class ZimTools(Dependency):
         dependencies = ['libzim']
 
         @property
-        def configure_option(self):
+        def configure_options(self):
             if self.buildEnv.platformInfo.static:
-                return "-Dstatic-linkage=true"
-            return ""
+                yield "-Dstatic-linkage=true"

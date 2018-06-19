@@ -26,11 +26,11 @@ class android_sdk(Dependency):
             tools_dir = pj(self.install_path, 'tools')
             shutil.copytree(self.source_path, tools_dir)
             script = pj(tools_dir, 'android')
-            command = '{script} --verbose update sdk -a --no-ui --filter {packages}'
-            command = command.format(
-                script=script,
-                packages = ','.join(str(i) for i in [1,2,8,34,162])
-            )
+            command = [
+                script,
+                '--verbose', 'update', 'sdk', '-a', '--no-ui',
+                '--filter', ','.join(str(i) for i in [1,2,8,34,162])
+            ]
             # packages correspond to :
             # - 1 : Android SDK Tools, revision 25.2.5
             # - 2 : Android SDK Platform-tools, revision 25.0.3

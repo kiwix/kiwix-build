@@ -26,8 +26,8 @@ class I586PlatformInfo(PlatformInfo):
         }
 
     @property
-    def configure_option(self):
-        return '--host={}'.format(self.arch_full)
+    def configure_options(self):
+        yield '--host={}'.format(self.arch_full)
 
     @property
     def binaries(self):

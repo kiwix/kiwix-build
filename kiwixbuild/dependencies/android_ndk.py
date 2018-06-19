@@ -45,13 +45,13 @@ class android_ndk(Dependency):
             context.try_skip(self.build_path)
             script = pj(self.source_path, 'build/tools/make_standalone_toolchain.py')
             add_execution_right(script)
-            command = '{script} --arch={arch} --api={api} --install-dir={install_dir} --force'
-            command = command.format(
-                script=script,
-                arch=self.arch,
-                api=self.api,
-                install_dir=self.install_path
-            )
+            command = [
+                script,
+                '--arch={}'.format(self.arch),
+                '--api={}'.format(api),
+                '--install-dir', self.install_path,
+                '--force'
+            ]
             context.force_native_build = True
             run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
