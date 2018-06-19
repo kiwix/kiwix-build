@@ -6,6 +6,7 @@ from . import (
     armhf,
     i586,
     ios,
+    mips32r2,
     native,
     neutral,
     win32

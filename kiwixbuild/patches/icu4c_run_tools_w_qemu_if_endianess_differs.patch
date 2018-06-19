@@ -1,0 +1,42 @@
+diff -ur icu4c/source/data/Makefile.in icu4c.patched/source/data/Makefile.in
+--- icu4c/source/data/Makefile.in	2018-06-17 03:28:46.646446362 +0200
++++ icu4c.patched/source/data/Makefile.in	2018-06-17 03:30:44.072860064 +0200
+@@ -577,9 +577,9 @@
+ #          There must be a nicer way to do this.
+ 
+ $(CFU_FILES): $(ALL_CFU_SOURCE) $(TOOLBINDIR)/gencfu$(TOOLEXEEXT) $(DAT_FILES)
+-	$(INVOKE) echo ALL_CFU_SOURCE: $(ALL_CFU_SOURCE)
+-	$(INVOKE) echo CFU_FILES: $(CFU_FILES)
+-	$(INVOKE) echo CFU_FILES_SHORT: $(CFU_FILES_SHORT)
++	echo ALL_CFU_SOURCE: $(ALL_CFU_SOURCE)
++	echo CFU_FILES: $(CFU_FILES)
++	echo CFU_FILES_SHORT: $(CFU_FILES_SHORT)
+ 	$(INVOKE) $(TOOLBINDIR)/gencfu -c -i $(BUILDDIR) -r $(word 1,$(ALL_CFU_SOURCE)) -w $(word 2,$(ALL_CFU_SOURCE)) -o $@
+ 
+ 
+diff -ur icu4c/source/Makefile.in icu4c.patched/source/Makefile.in
+--- icu4c/source/Makefile.in	2018-06-17 03:28:45.222465606 +0200
++++ icu4c.patched/source/Makefile.in	2018-06-17 03:29:33.757809798 +0200
+@@ -243,9 +243,20 @@
+ 	@(echo "CROSS_ICU_VERSION=$(VERSION)" ;\
+ 	  echo "TOOLEXEEXT=$(EXEEXT)" \
+ 	   ) > $@
+-	@(echo 'TOOLBINDIR=$$(cross_buildroot)/bin' ;\
++	@(echo '' ;\
++	  echo 'ifneq ($$(ICUDATA_PLATFORM_NAME),$(ICUDATA_PLATFORM_NAME))' ;\
++	  echo 'cross_buildroot=$$(top_builddir)' ;\
++	  echo 'endif' ;\
++	  echo '' ;\
++	  echo 'TOOLBINDIR=$$(cross_buildroot)/bin' ;\
+ 	  echo 'TOOLLIBDIR=$$(cross_buildroot)/lib' ;\
+ 	  echo "INVOKE=$(LDLIBRARYPATH_ENVVAR)=$(LIBRARY_PATH_PREFIX)"'$$(TOOLLIBDIR):$$(cross_buildroot)/stubdata:$$(cross_buildroot)/tools/ctestfw:$$$$'"$(LDLIBRARYPATH_ENVVAR)" ;\
+ 	  echo "PKGDATA_INVOKE=$(LDLIBRARYPATH_ENVVAR)=$(LIBRARY_PATH_PREFIX)"'$$(cross_buildroot)/stubdata:$$(cross_buildroot)/tools/ctestfw:$$(TOOLLIBDIR):$$$$'"$(LDLIBRARYPATH_ENVVAR) " ;\
++	  echo '' ;\
++	  echo 'ifneq ($$(ICUDATA_PLATFORM_NAME),$(ICUDATA_PLATFORM_NAME))' ;\
++	  echo 'export QEMU_SET_ENV:=$$(strip $$(subst $$$$'"$(LDLIBRARYPATH_ENVVAR)"',,$$(INVOKE)))$$(strip $$(subst LD_LIBRARY_PATH=,,$$(QEMU_SET_ENV)))' ;\
++	  echo '$$(eval $$(shell grep host_cpu $$(top_builddir)/config/Makefile.inc))' ;\
++	  echo 'INVOKE=qemu-$$(host_cpu)-static' ;\
++	  echo 'endif' ;\
+ 	  echo ) >> $@
+ 
+ config/icucross.inc: $(top_builddir)/icudefs.mk  $(top_builddir)/Makefile @platform_make_fragment@
