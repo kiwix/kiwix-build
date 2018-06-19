@@ -30,7 +30,7 @@ class PlatformNeutralEnv:
         self.qmake_command = self._detect_qmake()
         if not self.qmake_command:
             print("WARNING: qmake command not found.", file=sys.stderr)
-        self.mesontest_command = "{} test".format(self.meson_command)
+        self.mesontest_command = [*self.meson_command, "test"]
 
     def detect_platform(self):
         _platform = platform.system()
@@ -59,7 +59,7 @@ class PlatformNeutralEnv:
                 # Doesn't exist in PATH or isn't executable
                 continue
             if retcode == 0:
-                return n
+                return [n]
 
 
     def _detect_ninja(self):
@@ -165,17 +165,14 @@ class BuildEnv:
 
     @property
     def configure_wrapper(self):
-        wrapper = getattr(self.platformInfo, "configure_wrapper", "")
-        if wrapper:
-            return "{} ".format(wrapper)
-        else:
-            return ""
+        try:
+            yield self.platformInfo.configure_wrapper
+        except AttributeError:
+            pass
 
     @property
     def make_wrapper(self):
-        wrapper = getattr(self.platformInfo, "make_wrapper", "")
-        if wrapper:
-            return "{} ".format(wrapper)
-        else:
-            return ""
-
+        try:
+            yield self.platformInfo.make_wrapper
+        except AttributeError:
+            pass

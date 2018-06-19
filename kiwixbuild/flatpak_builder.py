@@ -223,8 +223,12 @@ class FlatpakBuilder:
     def build(self):
         log = pj(self.platform.buildEnv.log_dir, 'cmd_build_flatpak.log')
         context = Context('build', log, False)
-        command = "flatpak-builder --user --ccache --force-clean --keep-build-dirs --disable-rofiles-fuse --repo=repo builddir {id}.json"
-        command = command.format(id = MANIFEST['app-id'])
+        command = [
+            "flatpak-builder",
+            "--user", "--ccache", "--force-clean", "--keep-build-dirs",
+            "--disable-rofiles-fuse", "--repo=repo", "builddir",
+            f"{MANIFEST['app-id']}.json"
+        ]
         try:
             run_command(command, self.platform.buildEnv.build_dir, context, env=self.platform.get_env())
             context._finalise()
@@ -236,8 +240,12 @@ class FlatpakBuilder:
     def bundle(self):
         log = pj(self.platform.buildEnv.log_dir, 'cmd_bundle_flatpak.log')
         context = Context('bundle', log, False)
-        command = "flatpak build-bundle repo {id}.flatpak {id}"
-        command = command.format(id = MANIFEST['app-id'])
+        app_id = MANIFEST['app-id']
+        command = [
+            "flatpak", "build-bundle", "repo",
+            f"{app_id}.flatpak",
+            app_id
+        ]
         try:
             run_command(command, self.platform.buildEnv.build_dir, context, env=self.platform.get_env())
             context._finalise()

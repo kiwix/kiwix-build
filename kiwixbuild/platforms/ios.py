@@ -118,8 +118,8 @@ class ApplePlatformInfo(PlatformInfo):
         }
 
     @property
-    def configure_option(self):
-        return '--host={}'.format(self.host)
+    def configure_options(self):
+        yield f'--host={self.host}'
 
 
 class iOSArm64(ApplePlatformInfo):

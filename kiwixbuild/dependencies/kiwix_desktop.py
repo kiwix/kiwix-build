@@ -13,7 +13,7 @@ class KiwixDesktop(Dependency):
 
     class Builder(QMakeBuilder):
         dependencies = ["qt", "qtwebengine", "libkiwix", "aria2"]
-        make_install_target = 'install'
+        make_install_targets = ['install']
         configure_env = None
 
         flatpack_build_options = {
@@ -23,15 +23,12 @@ class KiwixDesktop(Dependency):
         }
 
         @property
-        def configure_option(self):
+        def configure_options(self):
             if self.buildEnv.platformInfo.name == 'flatpak':
-                options = [
-                    'QMAKE_INCDIR+=/app/include/QtWebEngine',
-                    'QMAKE_INCDIR+=/app/include/QtWebEngineCore',
-                    'QMAKE_INCDIR+=/app/include/QtWebEngineWidgets'
-                ]
+                yield 'QMAKE_INCDIR+=/app/include/QtWebEngine'
+                yield 'QMAKE_INCDIR+=/app/include/QtWebEngineCore'
+                yield 'QMAKE_INCDIR+=/app/include/QtWebEngineWidgets'
             else:
-                options = ["PREFIX={}".format(self.buildEnv.install_dir)]
-                if self.buildEnv.platformInfo.static:
-                    options.append('"CONFIG+=static"')
-            return " ".join(options)
+                yield f"PREFIX={self.buildEnv.install_dir}"
+            if self.buildEnv.platformInfo.static:
+                yield 'CONFIG+=static'

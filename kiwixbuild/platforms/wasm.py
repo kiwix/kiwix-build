@@ -59,9 +59,9 @@ class WasmPlatformInfo(PlatformInfo):
         return binaries
 
     @property
-    def configure_option(self):
+    def configure_options(self):
         #return ""
-        return '--host={}'.format(self.arch_full)
+        return [f'--host={self.arch_full}']
 
     @property
     def configure_wrapper(self):

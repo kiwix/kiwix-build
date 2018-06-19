@@ -31,12 +31,12 @@ class emsdk(Dependency):
 
         def _install(self, context):
             context.try_skip(self.build_path)
-            command = "./emsdk install 3.1.24"
+            command = ["./emsdk", "install", "3.1.24"]
             run_command(command, self.install_path, context)
 
         def _activate(self, context):
             context.try_skip(self.build_path)
-            command = "./emsdk activate 3.1.24"
+            command = ["./emsdk", "activate", "3.1.24"]
             run_command(command, self.install_path, context)
 
 

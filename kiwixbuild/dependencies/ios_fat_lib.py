@@ -40,11 +40,12 @@ class IOSFatLib(Dependency):
                 if f.endswith('.a') or f.endswith('.dylib'):
                     libs.append(f)
             os.makedirs(pj(self.buildEnv.install_dir, 'lib'), exist_ok=True)
-            command_tmp = "lipo -create {input} -output {output}"
             for l in libs:
-                command = command_tmp.format(
-                    input=" ".join(pj(d, l) for d in lib_dirs),
-                    output=pj(self.buildEnv.install_dir, 'lib', l))
+                command = [
+                    'lipo',
+                    '-create', *[pj(d, l) for d in lib_dirs],
+                    '-output', pj(self.buildEnv.install_dir, 'lib', l)
+                ]
                 run_command(command, self.buildEnv.install_dir, context)
 
         def build(self):

@@ -15,7 +15,6 @@ class KiwixTools(Dependency):
         dependencies = ["libkiwix"]
 
         @property
-        def configure_option(self):
+        def configure_options(self):
             if self.buildEnv.platformInfo.static:
-                return "-Dstatic-linkage=true"
-            return ""
+                yield "-Dstatic-linkage=true"
