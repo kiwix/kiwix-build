@@ -16,4 +16,4 @@ class Pugixml(Dependency):
 
     class Builder(MesonBuilder):
         build_type = 'release'
-        strip_option = ''
+        strip_options = []

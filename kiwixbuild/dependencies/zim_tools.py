@@ -20,11 +20,9 @@ class ZimTools(Dependency):
             return base_deps
 
         @property
-        def configure_option(self):
-            base_option  = ""
+        def configure_options(self):
             # We don't build zimwriterfs on win32, and so we don't have magic
             if self.buildEnv.platformInfo.build != 'win32':
-                base_option += " -Dmagic-install-prefix={buildEnv.install_dir}"
+                yield f"-Dmagic-install-prefix={self.buildEnv.install_dir}"
             if self.buildEnv.platformInfo.static:
-                base_option += " -Dstatic-linkage=true"
-            return base_option
+                yield "-Dstatic-linkage=true"

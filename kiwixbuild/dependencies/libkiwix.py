@@ -17,7 +17,7 @@ class Libkiwix(Dependency):
 
     class Builder(MesonBuilder):
         dependencies = ["pugixml", "libzim", "zlib", "lzma", "libcurl", "libmicrohttpd", "icu4c", "mustache", "xapian-core"]
-        strip_option = ''
+        strip_options = []
 
         @property
         def build_type(self):
@@ -26,15 +26,17 @@ class Libkiwix(Dependency):
             return super().build_type
 
         @property
-        def configure_option(self):
+        def configure_options(self):
             platformInfo = self.buildEnv.platformInfo
             if platformInfo.build == 'android':
-                return '-Dstatic-linkage=true -Dwerror=false'
+                yield '-Dstatic-linkage=true'
+                yield '-Dwerror=false'
+            if platformInfo.build == 'iOS':
+                yield '-Db_bitcode=true'
             if platformInfo.name == 'flatpak':
-                return '--wrap-mode=nodownload'
+                yield '--wrap-mode=nodownload'
             if platformInfo.mixed and option('target') == 'libkiwix':
-                return "-Dstatic-linkage=true"
-            return ''
+                yield "-Dstatic-linkage=true"
 
         @property
         def library_type(self):

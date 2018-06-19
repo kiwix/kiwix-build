@@ -16,13 +16,13 @@ class lzma(Dependency):
 
     class Builder(MakeBuilder):
         @property
-        def configure_option(self):
-            return ("--disable-xz "
-                    "--disable-xzdec "
-                    "--disable-lzmadec "
-                    "--disable-lzmainfo "
-                    "--disable-lzma-links "
-                    "--disable-scripts "
-                    "--disable-doc "
-#                    "--disable-symbol-versions "
-                  )
+        def configure_options(self):
+            return ["--disable-xz",
+                    "--disable-xzdec",
+                    "--disable-lzmadec",
+                    "--disable-lzmainfo",
+                    "--disable-lzma-links",
+                    "--disable-scripts",
+                    "--disable-doc",
+#                    "--disable-symbol-versions"
+                  ]

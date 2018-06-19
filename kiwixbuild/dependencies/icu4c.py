@@ -53,7 +53,7 @@ class Icu(Dependency):
 
     class Builder(MakeBuilder):
         subsource_dir = "source"
-        make_install_target = "install"
+        make_install_targets = ["install"]
 
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
@@ -61,20 +61,23 @@ class Icu(Dependency):
             return [(plt, 'icu4c')]
 
         @property
-        def configure_option(self):
-            options = ("--disable-samples --disable-tests --disable-extras "
-                       "--disable-dyload --enable-rpath "
-                       "--disable-icuio --disable-layoutex")
+        def configure_options(self):
+            yield "--disable-samples"
+            yield "--disable-tests"
+            yield "--disable-extras"
+            yield "--disable-dyload"
+            yield "--enable-rpath"
+            yield "--disable-icuio"
+            yield "--disable-layoutex"
             platformInfo = self.buildEnv.platformInfo
             if platformInfo.build != 'native':
                 icu_native_builder = get_target_step(
                     'icu4c',
                     'native_static' if platformInfo.static else 'native_dyn')
-                options += " --with-cross-build={} --disable-tools".format(
-                    icu_native_builder.build_path)
+                yield f"--with-cross-build={icu_native_builder.build_path}"
+                yield "--disable-tools"
             if platformInfo.build in ('android', 'wasm'):
-                options += " --with-data-packaging=archive"
-            return options
+                yield "--with-data-packaging=archive"
 
         def set_env(self, env):
             env['ICU_DATA_FILTER_FILE'] = pj(os.path.dirname(os.path.realpath(__file__)), "icu4c_data_filter.json")
