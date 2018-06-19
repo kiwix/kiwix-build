@@ -6,7 +6,7 @@ from .base import (
     MakeBuilder,
 )
 
-from kiwixbuild.utils import Remotefile, pj, Defaultdict, SkipCommand, run_command
+from kiwixbuild.utils import Remotefile, pj, DefaultEnv, SkipCommand, run_command
 from kiwixbuild._global import get_target_step
 
 class LibMagic(Dependency):
@@ -37,6 +37,6 @@ class LibMagic(Dependency):
                 make_option=self.make_option
             )
             libmagic_native_builder = get_target_step('libmagic', 'native_static')
-            env = Defaultdict(str, os.environ)
+            env = DefaultEnv()
             env['PATH'] = ':'.join([pj(libmagic_native_builder.build_path, 'src'), env['PATH']])
             run_command(command, self.build_path, context, buildEnv=self.buildEnv, env=env)

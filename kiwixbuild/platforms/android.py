@@ -1,5 +1,5 @@
 from .base import PlatformInfo, MetaPlatformInfo
-from kiwixbuild.utils import pj
+from kiwixbuild.utils import pj, escape_path
 from kiwixbuild._global import get_target_step, option
 
 
@@ -54,9 +54,24 @@ class AndroidPlatformInfo(PlatformInfo):
     def set_env(self, env):
         root_path = pj(self.ndk_builder.install_path, 'sysroot')
         env['PKG_CONFIG_LIBDIR'] = pj(root_path, 'lib', 'pkgconfig')
-        env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CFLAGS']
-        env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CXXFLAGS']
-        env['LDFLAGS'] = '--sysroot={} '.format(root_path) + env['LDFLAGS']
+        env['CFLAGS'] = ' '.join([
+            '-fPIC',
+            '-D_LARGEFILE64_SOURCE=1',
+            '-D_FILE_OFFSET_BITS=64',
+            escape_path('--sysroot={}'.format(root_path)),
+            env['CFLAGS']
+        ])
+        env['CXXFLAGS'] = ' '.join([
+            '-fPIC',
+            '-D_LARGEFILE64_SOURCE=1',
+            '-D_FILE_OFFSET_BITS=64',
+            escape_path('--sysroot={}'.format(root_path)),
+            env['CXXFLAGS']
+        ])
+        env['LDFLAGS'] = ' '.join([
+            escape_path('--sysroot={}'.format(root_path)),
+            env['LDFLAGS']
+        ])
         #env['CFLAGS'] = ' -fPIC -D_FILE_OFFSET_BITS=64 -O3 '+env['CFLAGS']
         #env['CXXFLAGS'] = (' -D__OPTIMIZE__ -fno-strict-aliasing '
         #                   ' -DU_HAVE_NL_LANGINFO_CODESET=0 '

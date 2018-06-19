@@ -2,7 +2,7 @@
 import subprocess
 
 from .base import PlatformInfo, MetaPlatformInfo
-from kiwixbuild.utils import pj, xrun_find
+from kiwixbuild.utils import pj, xrun_find, escape_path
 from kiwixbuild._global import option
 
 class iOSPlatformInfo(PlatformInfo):
@@ -47,9 +47,18 @@ class iOSPlatformInfo(PlatformInfo):
         }
 
     def set_env(self, env):
-        env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -arch {arch} -miphoneos-version-min=9.0 ".format(SDKROOT=self.root_path, arch=self.arch) + env['CFLAGS']
+        env['CFLAGS'] = " ".join([
+            '-fembed-bitcode',
+            '-isysroot', escape_path(self.root_path),
+            '-arch', self.arch,
+            '-miphoneos-version-min=9.0',
+            env['CFLAGS']
+        ])
         env['CXXFLAGS'] = env['CFLAGS'] + " -stdlib=libc++ -std=c++11 "+env['CXXFLAGS']
-        env['LDFLAGS'] = " -arch {arch} -isysroot {SDKROOT} ".format(SDKROOT=self.root_path, arch=self.arch)
+        env['LDFLAGS'] = " ".join([
+            '-arch', self.arch,
+            '-isysroot', escape_path(self.root_path)
+        ])
         env['MACOSX_DEPLOYMENT_TARGET'] = "10.7"
 
     def get_bin_dir(self):

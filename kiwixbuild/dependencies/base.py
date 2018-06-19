@@ -2,7 +2,7 @@ import subprocess
 import os
 import shutil
 
-from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild, run_command
+from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, DefaultEnv, StopBuild, run_command
 from kiwixbuild.versions import main_project_versions, base_deps_versions
 from kiwixbuild._global import neutralEnv, option
 
@@ -303,7 +303,7 @@ class MakeBuilder(Builder):
             configure_script=pj(self.source_path, self.configure_script),
             configure_option=self.all_configure_option
         )
-        env = Defaultdict(str, os.environ)
+        env = DefaultEnv()
         if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
         if self.configure_env:
@@ -356,7 +356,7 @@ class CMakeBuilder(MakeBuilder):
             source_path=self.source_path,
             cross_option=cross_option
         )
-        env = Defaultdict(str, os.environ)
+        env = DefaultEnv()
         if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
         if self.configure_env:
