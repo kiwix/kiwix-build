@@ -43,12 +43,13 @@ deploy:
     script: travis/deploy.sh
     on:
       tags: true
+      condition: $TRAVIS_OS_NAME != "linux" || $DESKTOP_ONLY != 1
   - provider: script
     skip_cleanup: true
     script: travis/deploy.sh
     on:
       branch: master
-      condition: $TRAVIS_EVENT_TYPE = cron
+      condition: $TRAVIS_EVENT_TYPE = cron && ( $TRAVIS_OS_NAME != "linux" || $DESKTOP_ONLY != 1 )
 env:
   global:
     - NIGHTLY_DATE=$(date +%Y-%m-%d)
