@@ -5,7 +5,7 @@ from kiwixbuild._global import get_target_step
 
 
 class MIPS32R2PlatformInfo(PlatformInfo):
-    build = 'mips'
+    build = 'mips32r2'
     arch_full = 'mips-linux-gnu'
     compatible_hosts = ['fedora', 'debian']
 
@@ -92,4 +92,93 @@ class MIPS32R2Dyn(MIPS32R2PlatformInfo):
 
 class MIPS32R2Static(MIPS32R2PlatformInfo):
     name = 'mips32r2_static'
+    static = True
+
+
+
+
+class MIPS32R2_UCLIBCPlatformInfo(PlatformInfo):
+    build = 'mips32r2_uclibc'
+    arch_full = 'mips-linux-uclibc'
+    compatible_hosts = ['fedora', 'debian']
+
+    def get_cross_config(self):
+        return {
+            'binaries': self.binaries,
+            'exec_wrapper_def': '',
+            'root_path': self.root_path,
+            'extra_libs': [ '-lm' ],
+            'extra_cflags': [],
+            'host_machine': {
+                'system': 'linux',
+                'lsystem': 'linux',
+                'cpu_family': 'mips32r2',
+                'cpu': '24kc',
+                'endian': 'big',
+                'abi': ''
+            }
+        }
+
+    @property
+    def root_path(self):
+        return '/dev/shm/freetz/toolchain/build/mips_gcc-5.5.0_uClibc-0.9.33.2-nptl/mips-linux-uclibc'
+
+    @property
+    def binaries(self):
+        binaries = ((k,'{}-{}'.format(self.arch_full, v))
+                for k, v in (('CC', 'gcc'),
+                             ('CXX', 'g++-uc'),
+                             ('AR', 'ar'),
+                             ('STRIP', 'strip'),
+                             ('WINDRES', 'windres'),
+                             ('RANLIB', 'ranlib'),
+                             ('LD', 'ld'))
+               )
+        return {k:pj(self.root_path, 'usr', 'bin', v)
+                for k,v in binaries}
+
+    @property
+    def exec_wrapper_def(self):
+        try:
+            which('qemu-mips-static')
+        except subprocess.CalledProcessError:
+            return ""
+        else:
+            return "exec_wrapper = 'qemu-mips-static'"
+
+    @property
+    def configure_option(self):
+        return '--host={}'.format(self.arch_full)
+
+    def get_bin_dir(self):
+        return [pj(self.root_path, 'bin')]
+
+    def set_env(self, env):
+        # altering PATH for mips-linux-uclibc-g++-uc wrapper to find real binary
+        env['PATH'] = ':'.join([pj(self.root_path, 'usr', 'bin'), env['PATH']])
+        env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
+        env['CFLAGS'] = " -march=mips32r2 -mtune=24kc -msoft-float -Os -pipe -Wa,--trap "+env['CFLAGS']
+        env['CXXFLAGS'] = " -march=mips32r2 -mtune=24kc -msoft-float -Os -pipe -Wa,--trap "+env['CXXFLAGS']
+        env['QEMU_LD_PREFIX'] = pj(self.root_path)
+        env['QEMU_SET_ENV'] = "LD_LIBRARY_PATH={}".format(
+            ':'.join([
+                pj(self.root_path, "lib"),
+                env['LD_LIBRARY_PATH']
+        ]))
+
+    def set_compiler(self, env):
+        env['CC'] = self.binaries['CC']
+        env['CXX'] = self.binaries['CXX']
+
+    def finalize_setup(self):
+        super().finalize_setup()
+        self.buildEnv.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
+        self.buildEnv.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
+
+class MIPS32R2_UCLIBCDyn(MIPS32R2_UCLIBCPlatformInfo):
+    name = 'mips32r2_uclibc_dyn'
+    static = False
+
+class MIPS32R2_UCLIBCStatic(MIPS32R2_UCLIBCPlatformInfo):
+    name = 'mips32r2_uclibc_static'
     static = True
