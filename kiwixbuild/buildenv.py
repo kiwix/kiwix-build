@@ -20,13 +20,20 @@ class PlatformNeutralEnv:
                   self.log_dir):
             os.makedirs(d, exist_ok=True)
         self.detect_platform()
-        self.ninja_command = self._detect_ninja()
-        if not self.ninja_command:
-            sys.exit("ERROR: ninja command not found")
-        self.meson_command = self._detect_meson()
-        if not self.meson_command:
-            sys.exit("ERROR: meson command not fount")
+        self.ninja_command = self._detect_command(
+            'ninja',
+            default=[['ninja'], ['ninja-build']])
+        self.meson_command = self._detect_command(
+            'meson',
+            default=[['meson.py'], ['meson']])
         self.mesontest_command = [*self.meson_command, "test"]
+        self.patch_command = self._detect_command('patch')
+        self.git_command = self._detect_command('git')
+        self.svn_command = self._detect_command('svn')
+        self.make_command = self._detect_command('make')
+        self.cmake_command = self._detect_command('cmake')
+        self.qmake_command = self._detect_command('qmake', required=False)
+
 
     def detect_platform(self):
         _platform = platform.system()
@@ -47,16 +54,28 @@ class PlatformNeutralEnv:
         where = where or self.archive_dir
         download_remote(what, where)
 
-    def _detect_ninja(self):
-        for n in ['ninja', 'ninja-build']:
+
+    def _detect_command(self, name, default=None, options=['--version'], required=True):
+        if default is None:
+            default = [[name]]
+        env_key = 'KBUILD_{}_COMMAND'.format(name.upper())
+        if env_key in os.environ:
+            default = [os.environ[env_key].split()] + default
+        for command in default:
             try:
-                retcode = subprocess.check_call([n, '--version'],
+                retcode = subprocess.check_call(command + options,
                                                 stdout=subprocess.DEVNULL)
-            except (FileNotFoundError, PermissionError):
+            except (FileNotFoundError, PermissionError, OSError):
                 # Doesn't exist in PATH or isn't executable
                 continue
             if retcode == 0:
-                return [n]
+                return command
+        else:
+            if required:
+                sys.exit("ERROR: {} command not found".format(name))
+            else:
+                print("WARNING: {} command not found".format(name))
+                return ["{}_NOT_FOUND".format(name.upper())]
 
     def _detect_meson(self):
         for n in ['meson.py', 'meson']:

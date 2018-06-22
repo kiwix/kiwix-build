@@ -61,7 +61,7 @@ class Source:
         context.force_native_build = True
         for p in self.patches:
             with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                run_command(["patch", "-p1"], self.source_path, context, input=patch_input.read())
+                run_command([*neutralEnv('patch_command'), "-p1"], self.source_path, context, input=patch_input.read())
 
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
@@ -150,16 +150,16 @@ class GitClone(Source):
         if os.path.exists(self.git_path):
             raise SkipCommand()
         command = [
-            "git", "clone", "--depth=1",
+            *neutralEnv('git_command'), "clone", "--depth=1",
             "--branch", self.git_ref,
             self.git_remote, self.source_dir
         ]
         run_command(command, neutralEnv('source_dir'), context)
 
     def _git_update(self, context):
-        command = ["git", "fetch", "origin", self.git_ref]
+        command = [*neutralEnv('git_command'), "fetch", "origin", self.git_ref]
         run_command(command, self.git_path, context)
-        command = ["git", "checkout", self.git_ref]
+        command = [*neutralEnv('git_command'), "checkout", self.git_ref]
         run_command(command, self.git_path, context)
 
     def prepare(self):
@@ -182,7 +182,7 @@ class SvnClone(Source):
         if os.path.exists(self.svn_path):
             raise SkipCommand()
         command = [
-            "svn", "export",
+            *neutralEnv('svn_command'), "export",
             self.svn_remote, self.svn_dir
         ]
         run_command(command, neutralEnv('source_dir'), context)
@@ -318,7 +318,7 @@ class MakeBuilder(Builder):
     def _compile(self, context):
         context.try_skip(self.build_path)
         command = [
-            "make", "-j4",
+            *neutralEnv('make_command'), "-j4",
             *self.make_targets,
             *self.make_options
         ]
@@ -327,7 +327,7 @@ class MakeBuilder(Builder):
     def _install(self, context):
         context.try_skip(self.build_path)
         command = [
-            "make",
+            *neutralEnv('make_command'),
             *self.make_install_targets,
             *self.install_options
         ]
@@ -335,7 +335,7 @@ class MakeBuilder(Builder):
 
     def _make_dist(self, context):
         context.try_skip(self.build_path)
-        command = ["make", "dist"]
+        command = [*neutralEnv('make_command'), "dist"]
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
 
@@ -346,7 +346,7 @@ class CMakeBuilder(MakeBuilder):
         if not self.target.force_native_build and self.buildEnv.cmake_crossfile:
             cross_options += ["-DCMAKE_TOOLCHAIN_FILE={}".format(self.buildEnv.cmake_crossfile)]
         command = [
-            "cmake",
+            *neutralEnv('cmake_command'),
             *self.configure_options,
             "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
             "-DCMAKE_INSTALL_PREFIX={}".format(self.buildEnv.install_dir),
@@ -378,7 +378,7 @@ class QMakeBuilder(MakeBuilder):
     def _configure(self, context):
         context.try_skip(self.build_path)
         command = [
-            "qmake",
+             *neutralEnv('qmake_command'),
              *self.configure_options,
              *self.env_options,
              self.source_path
@@ -388,7 +388,7 @@ class QMakeBuilder(MakeBuilder):
     def _install(self, context):
         context.try_skip(self.build_path)
         command = [
-            "make",
+            *neutralEnv('make_command'),
             *self.make_install_targets,
             *self.install_options
         ]
