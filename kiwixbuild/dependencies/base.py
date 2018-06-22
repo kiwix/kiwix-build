@@ -71,7 +71,7 @@ class Source:
         context.try_skip(self.source_path)
         for p in self.patches:
             patch_file_path = pj(SCRIPT_DIR, 'patches', p)
-            patch_command = ["patch", "-p1", "-i", patch_file_path]
+            patch_command = [*neutralEnv('patch_command'), "-p1", "-i", patch_file_path]
             run_command(patch_command, self.source_path, context)
 
     def command(self, name, function, *args):
@@ -170,19 +170,19 @@ class GitClone(Source):
 
     def _git_init(self, context):
         if option('fast_clone') and self.force_full_clone == False:
-            command = ["git", "clone" , "--depth=1", "--branch", self.git_ref, self.git_remote, self.source_dir]
+            command = [*neutralEnv('git_command'), "clone" , "--depth=1", "--branch", self.git_ref, self.git_remote, self.source_dir]
             run_command(command, neutralEnv('source_dir'), context)
         else:
-            command = ["git", "clone", self.git_remote, self.source_dir]
+            command = [*neutralEnv('git_command'), "clone", self.git_remote, self.source_dir]
             run_command(command, neutralEnv('source_dir'), context)
-            command = ["git", "checkout", self.git_ref]
+            command = [*neutralEnv('git_command'), "checkout", self.git_ref]
             run_command(command, self.git_path, context)
 
     def _git_update(self, context):
-        command = ["git", "fetch", "origin", self.git_ref]
+        command = [*neutralEnv('git_command'), "fetch", "origin", self.git_ref]
         run_command(command, self.git_path, context)
         try:
-            command = ["git", "merge", "--ff-only", f"origin/{self.git_ref}"]
+            command = [*neutralEnv('git_command'), "merge", "--ff-only", f"origin/{self.git_ref}"]
             run_command(command, self.git_path, context)
         except subprocess.CalledProcessError:
             raise WarningMessage("Cannot update, please check log for information")
@@ -209,7 +209,7 @@ class SvnClone(Source):
         if os.path.exists(self.svn_path):
             raise SkipCommand()
         command = [
-            "svn", "export",
+            *neutralEnv('svn_command'), "export",
             self.svn_remote, self.svn_dir
         ]
         run_command(command, neutralEnv('source_dir'), context)
@@ -415,7 +415,8 @@ class MakeBuilder(Builder):
         context.try_skip(self.build_path)
         command = [
             *self.buildEnv.make_wrapper,
-            "make", "-j4",
+            *neutralEnv('make_command'),
+            "-j4",
             *self.make_targets,
             *self.make_options
         ]
@@ -426,7 +427,7 @@ class MakeBuilder(Builder):
         context.try_skip(self.build_path)
         command = [
             *self.buildEnv.make_wrapper,
-            "make",
+            *neutralEnv('make_command'),
             *self.make_install_targets,
             *self.make_options
         ]
@@ -437,7 +438,8 @@ class MakeBuilder(Builder):
         context.try_skip(self.build_path)
         command = [
             *self.buildEnv.make_wrapper,
-            "make", "dist"
+            *neutralEnv('make_command'),
+            "dist"
         ]
         env = self.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
         run_command(command, self.build_path, context, env=env)
@@ -452,7 +454,7 @@ class CMakeBuilder(MakeBuilder):
         if not self.target.force_native_build and self.buildEnv.cmake_crossfile:
             cross_options += [f"-DCMAKE_TOOLCHAIN_FILE={self.buildEnv.cmake_crossfile}"]
         command = [
-            "cmake",
+            *neutralEnv('cmake_command'),
             *self.configure_options,
             "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
             f"-DCMAKE_INSTALL_PREFIX={self.buildEnv.install_dir}",
@@ -483,10 +485,10 @@ class QMakeBuilder(MakeBuilder):
     def _configure(self, context):
         context.try_skip(self.build_path)
         command = [
-            *neutralEnv('qmake_command'),
-            *self.configure_options,
-            *self.env_options,
-            self.source_path,
+            "qmake",
+             *self.configure_options,
+             *self.env_options,
+             self.source_path
         ]
         env = self.get_env(cross_comp_flags=True, cross_compilers=False, cross_path=True)
         self.set_configure_env(env)
@@ -494,7 +496,7 @@ class QMakeBuilder(MakeBuilder):
 
     def _make_dist(self, context):
         command = [
-            "git", "archive",
+            *neutralEnv('git_command'), "archive",
             "-o", f"{self.build_path}/{self.target_full_name()}.tar.gz",
             f"--prefix={self.target_full_name()}/",
             "HEAD"
