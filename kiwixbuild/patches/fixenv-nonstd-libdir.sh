@@ -25,7 +25,7 @@ SCRIPTPATH=`dirname $SCRIPT`
 
 if test x"$BASENAME" != xrun-nonroot
 then
-  for fullarch in "" mips-linux-gnu
+  for fullarch in "" ${ARCH_FULL:-mips-linux-gnu}
   do for libdir in usr/lib lib
      do LD_LIBRARY_PATH="${SCRIPTPATH%/bin}/$libdir/$fullarch:$LD_LIBRARY_PATH"
      done

@@ -1,10 +1,20 @@
-from .base import PlatformInfo
+from .base import PlatformInfo, _SCRIPT_DIR
 
 from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
-from os import makedirs, chmod
-from shutil import copy
-from .base import _SCRIPT_DIR
+from re import sub as sed
+
+from glob import glob
+from os import makedirs, chmod, readlink, symlink
+from os.path import basename, islink
+from shutil import copy2
+
+def copy(src, dst):
+    if islink(src):
+        linkto = readlink(src)
+        symlink(linkto, dst)
+    else:
+        copy2(src,dst)
 
 
 class MIPS32R2PlatformInfo(PlatformInfo):
@@ -94,18 +104,18 @@ class MIPS32R2PlatformInfo(PlatformInfo):
         self.buildEnv.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
 class MIPS32R2Dyn(MIPS32R2PlatformInfo):
-    name = 'mips32r2_dyn'
+    name = MIPS32R2PlatformInfo.build + '_dyn'
     static = False
 
 class MIPS32R2Static(MIPS32R2PlatformInfo):
-    name = 'mips32r2_static'
+    name = MIPS32R2PlatformInfo.build + '_static'
     static = True
 
 
 
 
 class MIPS32R2_UC_GCXXPlatformInfo(MIPS32R2PlatformInfo):
-    build = 'mips32r2_uclibc_gclibcxx' # "shared, heterogenous" (gnu c++ lib "on top of" uClibc)
+    build = 'mips32r2_uclibc_gclibcxx' # "shared, heterogeneous"
     arch_full = 'mips-linux-uclibc'
 
     @property
@@ -122,26 +132,35 @@ class MIPS32R2_UC_GCXXPlatformInfo(MIPS32R2PlatformInfo):
         env['CXXFLAGS'] = " -msoft-float -Os -pipe -Wa,--trap "+env['CXXFLAGS']
 
 class MIPS32R2_UC_GCXXDyn(MIPS32R2_UC_GCXXPlatformInfo):
-    name = 'mips32r2_uclibc_gclibcxx_dyn'
+    name = MIPS32R2_UC_GCXXPlatformInfo.build + '_dyn'
     static = False
 
     def finalize_setup(self):
         super().finalize_setup()
-        dest = pj(_SCRIPT_DIR, '..', '..', 'BUILD_'+self.name, 'INSTALL', 'bin')
-        makedirs(dest, mode=0o755, exist_ok=True)
-        dest = pj(dest, 'fixenv-run-in-nonstd-installdir.sh')
-        copy(pj(_SCRIPT_DIR, '..', 'patches', 'fixenv-run-in-nonstd-installdir.sh'), dest)
-        chmod(dest, 0o755)
+        d = pj(_SCRIPT_DIR, '..', '..', 'BUILD_'+self.name, 'INSTALL')
+
+        makedirs(pj(d, 'bin'), mode=0o755, exist_ok=True)
+        with open(pj(_SCRIPT_DIR, '..', 'patches', 'fixenv-nonstd-libdir.sh'), "r") as sources:
+            lines = sources.readlines()
+        with open(pj(d, 'bin', 'fixenv-nonstd-libdir'), "w") as sources:
+            for line in lines:
+                sources.write(sed(r'\$\{ARCH_FULL[^}]*\}', self.arch_full, line))
+        chmod(pj(d, 'bin', 'fixenv-nonstd-libdir'), 0o755)
+
+        d = pj(d, 'lib', self.arch_full)
+        makedirs(d, mode=0o755, exist_ok=True)
+        for f in glob(pj(self.tclibdir, 'libstdc++.so*')):
+            copy(f, pj(d, basename(f)))
 
 class MIPS32R2_UC_GCXXStatic(MIPS32R2_UC_GCXXPlatformInfo):
-    name = 'mips32r2_uclibc_gclibcxx_static'
+    name = MIPS32R2_UC_GCXXPlatformInfo.build + '_static'
     static = True
 
 
 
 
 class MIPS32R2_UC_UCXXPlatformInfo(MIPS32R2_UC_GCXXPlatformInfo):
-    build = 'mips32r2_uclibc_uclibcxx' # "pure, homogenous"
+    build = 'mips32r2_uclibc_uclibcxx' # "pure, homogeneous"
 
     def get_cross_config(self):
         conf = super().get_cross_config()
@@ -160,9 +179,9 @@ class MIPS32R2_UC_UCXXPlatformInfo(MIPS32R2_UC_GCXXPlatformInfo):
         env['PATH'] = ':'.join([pj(self.tcbindir), env['PATH']])
 
 class MIPS32R2_UC_UCXXDyn(MIPS32R2_UC_UCXXPlatformInfo):
-    name = 'mips32r2_uclibc_uclibcxx_dyn'
+    name = MIPS32R2_UC_UCXXPlatformInfo.build + '_dyn'
     static = False
 
 class MIPS32R2_UC_UCXXStatic(MIPS32R2_UC_UCXXPlatformInfo):
-    name = 'mips32r2_uclibc_uclibcxx_static'
+    name = MIPS32R2_UC_UCXXPlatformInfo.build + '_static'
     static = True

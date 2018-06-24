@@ -100,6 +100,8 @@ class BuildEnv:
         return os.path.isfile('/etc/debian_version')
 
     def _detect_libdir(self):
+        if getattr(self.platformInfo, 'build', '').startswith('mips'):
+            return 'lib/' + self.platformInfo.arch_full
         if self._is_debianlike():
             try:
                 pc = subprocess.Popen(['dpkg-architecture', '-qDEB_HOST_MULTIARCH'],
