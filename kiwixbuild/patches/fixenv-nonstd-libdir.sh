@@ -16,7 +16,7 @@ do
   fi
 done
 
-cat <<EOF > run-nonroot
+cat <<'EOF' > run-nonroot
 #!/bin/sh
 
 BASENAME=`basename $0`
