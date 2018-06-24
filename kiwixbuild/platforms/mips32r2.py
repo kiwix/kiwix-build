@@ -2,19 +2,28 @@ from .base import PlatformInfo, _SCRIPT_DIR
 
 from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
-from re import sub as sed
 
 from glob import glob
 from os import makedirs, chmod, readlink, symlink
 from os.path import basename, islink
+from re import sub as subst
 from shutil import copy2
 
-def copy(src, dst):
+def copy(src, dst, search=None, repl=None, mode=None):
     if islink(src):
         linkto = readlink(src)
         symlink(linkto, dst)
     else:
-        copy2(src,dst)
+        if search is None:
+            copy2(src, dst)
+        else:
+            with open(src, "r") as sources:
+                lines = sources.readlines()
+            with open(dst, "w") as sources:
+                for line in lines:
+                    sources.write(subst(search, repl, line))
+    if mode is not None:
+        chmod(dst, mode)
 
 
 class MIPS32R2PlatformInfo(PlatformInfo):
@@ -115,7 +124,7 @@ class MIPS32R2Static(MIPS32R2PlatformInfo):
 
 
 class MIPS32R2_UC_GCXXPlatformInfo(MIPS32R2PlatformInfo):
-    build = 'mips32r2_uclibc_gclibcxx' # "shared, heterogeneous"
+    build = 'mips32r2_uclibc_glibcxx' # "shared, heterogeneous"
     arch_full = 'mips-linux-uclibc'
 
     @property
@@ -140,12 +149,11 @@ class MIPS32R2_UC_GCXXDyn(MIPS32R2_UC_GCXXPlatformInfo):
         d = pj(_SCRIPT_DIR, '..', '..', 'BUILD_'+self.name, 'INSTALL')
 
         makedirs(pj(d, 'bin'), mode=0o755, exist_ok=True)
-        with open(pj(_SCRIPT_DIR, '..', 'patches', 'fixenv-nonstd-libdir.sh'), "r") as sources:
-            lines = sources.readlines()
-        with open(pj(d, 'bin', 'fixenv-nonstd-libdir'), "w") as sources:
-            for line in lines:
-                sources.write(sed(r'\$\{ARCH_FULL[^}]*\}', self.arch_full, line))
-        chmod(pj(d, 'bin', 'fixenv-nonstd-libdir'), 0o755)
+        copy(pj(_SCRIPT_DIR, '..', 'patches', 'fixenv-nonstd-libdir'),
+             pj(d, 'bin', 'fixenv-nonstd-libdir'),
+             search=r'\$\{ARCH_FULL[^}]*\}',
+             repl=self.arch_full,
+             mode=0o755)
 
         d = pj(d, 'lib', self.arch_full)
         makedirs(d, mode=0o755, exist_ok=True)

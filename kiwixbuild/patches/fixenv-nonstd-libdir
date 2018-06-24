@@ -1,0 +1,27 @@
+#!/bin/sh
+
+BASENAME=`basename $0`
+SCRIPT=`realpath $0`
+SCRIPTPATH=`dirname $SCRIPT`
+
+if ! test -L "$0"
+then
+  cd "$SCRIPTPATH" && find -type f | grep -v ".real$" | \
+  while read b
+  do
+    if hexdump -C "$b" | head -1 | grep -q ELF
+    then
+      mv -iv "$b" "$b.real"
+      ln -s "$BASENAME" "$b"
+    fi
+  done
+else
+  for fullarch in "" mips-linux-uclibc
+  do for libdir in usr/lib lib
+     do LD_LIBRARY_PATH="${SCRIPTPATH%/bin}/$libdir/$fullarch:$LD_LIBRARY_PATH"
+     done
+  done
+
+  export LD_LIBRARY_PATH
+  exec ${SCRIPTPATH}/$BASENAME.real "$@"
+fi
