@@ -218,7 +218,8 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
             archive.close()
 
 
-def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cross_env_only=False):
+def run_command(command, cwd, context, buildEnv=None, env=None, input=None,
+                cross_env_only=False, capture_output=False):
     os.makedirs(cwd, exist_ok=True)
     if env is None:
         env = Defaultdict(str, os.environ)
@@ -232,7 +233,8 @@ def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cros
             cross_compile_path = False
         if cross_env_only:
             cross_compile_compiler = False
-        env = buildEnv._set_env(env, cross_compile_env, cross_compile_compiler, cross_compile_path)
+        env = buildEnv._set_env(
+          env, cross_compile_env, cross_compile_compiler, cross_compile_path)
     log = None
     try:
         if not option('verbose'):
@@ -246,12 +248,23 @@ def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cros
         kwargs = dict()
         if input:
             kwargs['stdin'] = subprocess.PIPE
-        process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+        if capture_output:
+            stdout = subprocess.PIPE
+        else:
+            stdout = log or sys.stdout
+        process = subprocess.Popen(
+          command, shell=True, cwd=cwd, env=env, stdout=stdout, stderr=subprocess.STDOUT,
+          **kwargs)
+        input_encoded = None
         if input:
-            process.communicate(input.encode())
+            input_encoded = input.encode()
+        if input_encoded or capture_output:
+            (stdout_data, stderr_data) = process.communicate(input_encoded)
         retcode = process.wait()
         if retcode:
             raise subprocess.CalledProcessError(retcode, command)
+        if capture_output:
+            return stdout_data
     finally:
         if log:
             log.close()
