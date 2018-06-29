@@ -158,6 +158,7 @@ class GitClone(Source):
             self.git_ref)
         run_command(command, self.git_path, context)
         run_command("git checkout "+self.git_ref, self.git_path, context)
+        run_command("git merge origin/master")
 
     def prepare(self):
         self.command('gitclone', self._git_clone)
