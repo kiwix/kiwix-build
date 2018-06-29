@@ -72,8 +72,11 @@ class Source:
             context._finalise()
             print("OK")
             return ret
-        except SkipCommand:
-            print("SKIP")
+        except SkipCommand as e:
+            message = "SKIP"
+            if e.message:
+                message += " : " + e.message
+            print(message)
         except subprocess.CalledProcessError:
             print("ERROR")
             try:

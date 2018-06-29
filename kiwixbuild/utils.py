@@ -132,7 +132,8 @@ def download_remote(what, where):
 
 
 class SkipCommand(Exception):
-    pass
+    def __init__(self, message=None):
+        self.message = message
 
 
 class StopBuild(Exception):
