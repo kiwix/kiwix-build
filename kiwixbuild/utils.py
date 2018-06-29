@@ -218,7 +218,8 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
             archive.close()
 
 
-def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cross_env_only=False):
+def run_command(command, cwd, context, buildEnv=None, env=None, input=None,
+                cross_env_only=False, capture_output=False):
     os.makedirs(cwd, exist_ok=True)
     if env is None:
         env = Defaultdict(str, os.environ)
@@ -232,7 +233,8 @@ def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cros
             cross_compile_path = False
         if cross_env_only:
             cross_compile_compiler = False
-        env = buildEnv._set_env(env, cross_compile_env, cross_compile_compiler, cross_compile_path)
+        env = buildEnv._set_env(
+          env, cross_compile_env, cross_compile_compiler, cross_compile_path)
     log = None
     try:
         if not option('verbose'):
@@ -246,25 +248,34 @@ def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cros
         kwargs = dict()
         if input:
             kwargs['stdin'] = subprocess.PIPE
-        process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+        if capture_output:
+            stdout = subprocess.PIPE
+        else:
+            stdout = log or sys.stdout
+        process = subprocess.Popen(
+          command, shell=True, cwd=cwd, env=env, stdout=stdout, stderr=subprocess.STDOUT,
+          **kwargs)
+        input_encoded = None
         if input:
             input = input.encode()
         while True:
             try:
-                if input is None:
+                if input_encoded is None:
                     process.wait(timeout=30)
                 else:
-                    process.communicate(input, timeout=30)
+                    process.communicate(input_encoded, timeout=30)
             except subprocess.TimeoutExpired:
-                # Either `wait` timeout (and `input` is None) or
-                # `communicate` timeout (and we must set `input` to None
+                # Either `wait` timeout (and `input_encoded` is None) or
+                # `communicate` timeout (and we must set `input_encoded` to None
                 # to not communicate again).
-                input = None
+                input_encoded = None
                 print('.', end='', flush=True)
             else:
                 break
         if process.returncode:
             raise subprocess.CalledProcessError(process.returncode, command)
+        if capture_output:
+            return stdout_data
     finally:
         if log:
             log.close()

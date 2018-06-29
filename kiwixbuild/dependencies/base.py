@@ -154,10 +154,30 @@ class GitClone(Source):
         run_command(command, neutralEnv('source_dir'), context)
 
     def _git_update(self, context):
-        command = "git fetch origin {}".format(
-            self.git_ref)
-        run_command(command, self.git_path, context)
-        run_command("git checkout "+self.git_ref, self.git_path, context)
+        fetch_command = "git fetch origin {}".format(self.git_ref)
+        run_command(fetch_command, self.git_path, context)
+        branch, changed_files = self._git_status(context)
+        # Try not to mess up local feature branches.
+        if branch != self.git_ref:
+            return
+        # Try not to create merge conflicts with localy modified files.
+        if changed_files:
+            return
+        run_command("git rebase origin/{}".format(self.git_ref))
+
+    def _git_status(self, context):
+        status_command = "git status --porcelain=v1 --branch --untracked"
+        output_encoded = run_command(
+            status_command, self.git_path, context, capture_output=True)
+        output = output_encoded.decode()
+        branch = ""
+        changed_files = []
+        for line in output.splitlines():
+            if line.startswith("## "):
+                branch = line[3:]
+            else:
+                changed_files.append(line[3:])
+        return branch, changed_files
 
     def prepare(self):
         self.command('gitclone', self._git_clone)
