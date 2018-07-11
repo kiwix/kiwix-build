@@ -32,7 +32,10 @@ NIGHTLY_ZIM_ARCHIVES_DIR = HOME/'NIGHTLY_ZIM_ARCHIVES'/NIGHTLY_DATE
 RELEASE_ZIM_ARCHIVES_DIR = HOME/'RELEASE_ZIM_ARCHIVES'
 DIST_KIWIX_ARCHIVES_DIR = HOME/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = HOME/'DIST_ZIM_ARCHIVES'
-SSH_KEY = environ.get('TRAVISCI_SSH_KEY', Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key')
+if 'TRAVISCI_SSH_KEY' in environ:
+    SSH_KEY = Path(environ['TRAVISCI_SSH_KEY'])
+else:
+    SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
 
 # We have build everything. Now create archives for public deployement.
 BINARIES = {
@@ -225,12 +228,11 @@ try:
 except URLError:
     print_message("Cannot get archive. Build dependencies")
     run_kiwix_build('alldependencies', platform=PLATFORM)
-    archive = make_deps_archive('alldependencies', full=True)
-    destination = 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/{}'
-    destination = destination.format(base_dep_archive_name)
-    scp(archive, destination)
-
-
+    if SSH_KEY.exists():
+        archive = make_deps_archive('alldependencies', full=True)
+        destination = 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/{}'
+        destination = destination.format(base_dep_archive_name)
+        scp(archive, destination)
 
 
 # A basic compilation to be sure everything is working (for a PR)
