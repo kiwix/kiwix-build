@@ -161,7 +161,16 @@ def make_archive(project, platform):
 def make_deps_archive(target, full=False):
     archive_name = "deps_{}_{}_{}.tar.gz".format(
         TRAVIS_OS_NAME, PLATFORM, target)
+    print_message("Create archive {}.", archive_name)
     files_to_archive = [BASE_DIR/'INSTALL']
+    if PLATFORM.startswith('android'):
+        files_to_archive.append(HOME/'BUILD_neutral'/'INSTALL')
+    if PLATFORM == 'android':
+        for arch in ('arm', 'arm64', 'x86', 'x86_64'):
+            base_dir = HOME/"BUILD_android_{}".format(arch)
+            files_to_archive.append(base_dir/'INSTALL')
+            if (base_dir/'meson_cross_file.txt').exists():
+                files_to_archive.append(base_dir/'meson_cross_file.txt')
     files_to_archive += HOME.glob('BUILD_*/android-ndk*')
     files_to_archive += HOME.glob('BUILD_*/android-sdk*')
     if (BASE_DIR/'meson_cross_file.txt').exists():
@@ -177,7 +186,7 @@ def make_deps_archive(target, full=False):
         files_to_archive += BASE_DIR.glob('*/.*_ok')
         files_to_archive += (HOME/"BUILD_native_dyn").glob('*/.*_ok')
         files_to_archive += (HOME/"BUILD_native_static").glob('*/.*_ok')
-        files_to_archive += HOME.glob('BUILD_android*/.*_ok')
+        files_to_archive += HOME.glob('BUILD_android*/**/.*_ok')
         files_to_archive += SOURCE_DIR.glob('*/.*_ok')
         files_to_archive += [SOURCE_DIR/'pugixml-{}'.format(
             base_deps_versions['pugixml'])]
@@ -221,12 +230,26 @@ base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.gz".format(
 
 print_message("Getting archive {}", base_dep_archive_name)
 try:
-    local_filename, headers = urlretrieve(
+    local_filename, _ = urlretrieve(
         'http://tmp.kiwix.org/ci/{}'.format(base_dep_archive_name))
     with tarfile.open(local_filename) as f:
         f.extractall(str(HOME))
 except URLError:
     print_message("Cannot get archive. Build dependencies")
+    if PLATFORM == 'android':
+        for arch in ('arm', 'arm64', 'x86', 'x86_64'):
+            archive_name = "base_deps_{os}_android_{arch}_{version}.tar.gz".format(
+                os=TRAVIS_OS_NAME,
+                arch=arch,
+                version=base_deps_meta_version)
+            print_message("Getting archive {}", archive_name)
+            try:
+                local_filename, _ = urlretrieve(
+                   'http://tmp.kiwix.org/ci/{}'.format(archive_name))
+                with tarfile.open(local_filename) as f:
+                    f.extractall(str(HOME))
+            except URLError:
+                pass
     run_kiwix_build('alldependencies', platform=PLATFORM)
     if SSH_KEY.exists():
         archive = make_deps_archive('alldependencies', full=True)
@@ -290,8 +313,7 @@ for target in TARGETS:
 
     run_kiwix_build(target,
                     platform=PLATFORM,
-                    make_release=make_release,
-                    target_only=environ['TRAVIS_EVENT_TYPE'] == 'cron')
+                    make_release=make_release)
     if target == 'kiwix-desktop':
         create_app_image()
     if make_release and PLATFORM == 'native_dyn':
