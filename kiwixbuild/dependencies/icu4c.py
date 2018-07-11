@@ -1,20 +1,18 @@
 from .base import (
     Dependency,
-    SvnClone,
+    ReleaseDownload,
     MakeBuilder
 )
 
-from kiwixbuild.utils import SkipCommand
+from kiwixbuild.utils import SkipCommand, Remotefile
 from kiwixbuild._global import get_target_step
 
 class Icu(Dependency):
     name = "icu4c"
 
-    class Source(SvnClone):
-        name = "icu4c"
-        svn_remote = "http://source.icu-project.org/repos/icu/tags/release-58-2/icu4c"
-        svn_dir = "icu4c"
-
+    class Source(ReleaseDownload):
+        archive = Remotefile('icu4c_svn_58-2.tar.gz',
+                             'fd8fcc1f1b8b2b71b879e88844480ebec107189c21076c81573f71dca5686a0d')
         patches = ["icu4c_fix_static_lib_name_mingw.patch",
                    "icu4c_android_elf64_st_info.patch",
                    "icu4c_custom_data.patch",
