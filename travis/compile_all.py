@@ -195,8 +195,13 @@ def make_deps_archive(target, full=False):
         files_to_archive += HOME.glob('**/TOOLCHAINS')
         relative_path = HOME
 
+    counter = 50
     with tarfile.open(str(relative_path/archive_name), 'w:gz') as tar:
         for name in set(files_to_archive):
+            counter -= 1
+            if not counter:
+                print('.', end='', flush=True)
+                counter = 50
             tar.add(str(name), arcname=str(name.relative_to(relative_path)))
     return relative_path/archive_name
 
