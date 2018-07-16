@@ -175,19 +175,14 @@ class SvnClone(Source):
     def svn_path(self):
         return pj(neutralEnv('source_dir'), self.svn_dir)
 
-    def _svn_checkout(self, context):
+    def _svn_export(self, context):
         if os.path.exists(self.svn_path):
             raise SkipCommand()
-        command = "svn checkout {} {}".format(self.svn_remote, self.svn_dir)
+        command = "svn export {} {}".format(self.svn_remote, self.svn_dir)
         run_command(command, neutralEnv('source_dir'), context)
 
-    def _svn_update(self, context):
-        context.try_skip(self.svn_path)
-        run_command("svn update", self.svn_path, context)
-
     def prepare(self):
-        self.command('svncheckout', self._svn_checkout)
-        self.command('svnupdate', self._svn_update)
+        self.command('svnexport', self._svn_export)
         if hasattr(self, 'patches'):
             self.command('patch', self._patch)
 
