@@ -108,7 +108,7 @@ When building `kiwix-lib`, you should directly use the
 target-platform `android_<arch>`:
 
 ```
-$ kiwix-build kiwix-android --target-platform android_arm
+$ kiwix-build kiwix-lib --target-platform android_arm
 ```
 
 But, `kiwix-android` apk can also be multi arch (ie, it includes
@@ -117,15 +117,15 @@ But, `kiwix-android` apk can also be multi arch (ie, it includes
 
 ```
 $ kiwix-build --target-platform android kiwix-android
-$ kiwix-build kiwix-android # because `android` platform is the default `kiwix-android`
+$ kiwix-build kiwix-android # because `android` platform is the default for `kiwix-android`
 ```
 
 By default, when using platform `android`, `kiwix-lib` will be build for
-all architectures. This can be change by using the option `--android-arch` :
+all architectures. This can be changed by using the option `--android-arch` :
 
 ```
 $ kiwix-build kiwix-android # apk for all architectures
-$ kiwix-build kiwix-android --android-arch arm # apk for arm architectures (equivalent to `kiwix-android --target-platform android_arm`)
+$ kiwix-build kiwix-android --android-arch arm # apk for arm architecture
 $ kiwix-build kiwix-anrdoid --android-arch arm --android-arch arm64 # apk for arm and arm64 architectures
 ```
 
