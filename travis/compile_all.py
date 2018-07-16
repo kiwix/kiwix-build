@@ -308,7 +308,7 @@ else:
     TARGETS = ('libzim', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 
 for target in TARGETS:
-    if environ['TRAVIS_EVENT_TYPE'] == 'cron':
+    if environ['TRAVIS_EVENT_TYPE'] == 'cron' and PLATFORM != 'android':
         run_kiwix_build(target,
                         platform=PLATFORM,
                         build_deps_only=True)
