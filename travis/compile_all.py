@@ -180,7 +180,7 @@ def make_deps_archive(target, full=False):
     write_manifest(manifest_file, archive_name, target, PLATFORM)
     files_to_archive.append(manifest_file)
 
-    relative_path = BASE_DIR
+    relative_path = HOME
     if full:
         files_to_archive += ARCHIVE_DIR.glob(".*_ok")
         files_to_archive += BASE_DIR.glob('*/.*_ok')
@@ -193,7 +193,6 @@ def make_deps_archive(target, full=False):
         files_to_archive += HOME.glob('BUILD_*/pugixml-{}'.format(
             base_deps_versions['pugixml']))
         files_to_archive += HOME.glob('**/TOOLCHAINS')
-        relative_path = HOME
 
     counter = 50
     with tarfile.open(str(relative_path/archive_name), 'w:gz') as tar:
