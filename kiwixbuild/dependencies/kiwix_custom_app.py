@@ -6,15 +6,11 @@ from .base import (
     GitClone,
     GradleBuilder)
 
-from kiwixbuild.utils import Remotefile, pj, SkipCommand
+from kiwixbuild.utils import Remotefile, pj, copy_tree, SkipCommand, run_command
 from kiwixbuild._global import option, get_target_step
 
 class KiwixCustomApp(Dependency):
     name = "kiwix-android-custom"
-
-    def __init__(self, buildEnv):
-        super().__init__(buildEnv)
-        self.custom_name = option('android_custom_app')
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-android-custom"
@@ -25,7 +21,7 @@ class KiwixCustomApp(Dependency):
 
         @property
         def gradle_target(self):
-            return "assemble{}".format(self.target.custom_name)
+            return "assemble{}".format(option('android_custom_app'))
 
         @property
         def gradle_option(self):
@@ -43,17 +39,17 @@ class KiwixCustomApp(Dependency):
 
         @property
         def build_path(self):
-            return pj(self.buildEnv.build_dir, "{}_{}".format(self.target.full_name, self.target.custom_name))
+            return pj(self.buildEnv.build_dir, "{}_{}".format(self.target.full_name(), option('android_custom_app')))
 
         @property
         def custom_build_path(self):
-            return pj(self.build_path, 'custom', self.target.custom_name)
+            return pj(self.build_path, 'custom', option('android_custom_app'))
 
         def _get_zim_size(self):
             try:
                 zim_size = option('zim_file_size')
             except AttributeError:
-                with open(pj(self.source_path, self.target.custom_name, 'info.json')) as f:
+                with open(pj(self.source_path, option('android_custom_app'), 'info.json')) as f:
                     app_info = json.load(f)
                 zim_size = os.path.getsize(pj(self.custom_build_path, app_info['zim_file']))
             return zim_size
@@ -67,7 +63,7 @@ class KiwixCustomApp(Dependency):
             zim_url = option('zim_file_url')
             if zim_url is None:
                 raise SkipCommand()
-            with open(pj(self.source_path, self.target.custom_name, 'info.json')) as f:
+            with open(pj(self.source_path, option('android_custom_app'), 'info.json')) as f:
                 app_info = json.load(f)
             zim_url = app_info.get('zim_url', zim_url)
             out_filename = urlparse(zim_url).path
@@ -88,16 +84,28 @@ class KiwixCustomApp(Dependency):
                 shutil.rmtree(pj(self.build_path, 'kiwixlib', 'src', 'main'))
             except FileNotFoundError:
                 pass
-            shutil.copytree(pj(self.buildEnv.install_dir, 'kiwix-lib'),
-                            pj(self.build_path, 'kiwixlib', 'src', 'main'))
+            for arch in option('android_arch'):
+                try:
+                    kiwix_builder = get_target_step('kiwix-lib', 'android_{}'.format(arch))
+                except KeyError:
+                    pass
+                else:
+                    copy_tree(pj(kiwix_builder.buildEnv.install_dir, 'kiwix-lib'),
+                              pj(self.build_path, 'kiwixlib', 'src', 'main'))
             os.makedirs(
                 pj(self.build_path, 'app', 'src', 'main', 'assets', 'icu'),
                 exist_ok=True)
-            shutil.copy2(pj(self.buildEnv.install_dir, 'share', 'icu', '58.2',
-                            'icudt58l.dat'),
-                         pj(self.build_path, 'app', 'src', 'main', 'assets',
-                            'icu', 'icudt58l.dat'))
-
+            for arch in option('android_arch'):
+                try:
+                    kiwix_builder = get_target_step('kiwix-lib', 'android_{}'.format(arch))
+                except KeyError:
+                    pass
+                else:
+                    shutil.copy2(pj(kiwix_builder.buildEnv.install_dir, 'share', 'icu', '58.2',
+                                    'icudt58l.dat'),
+                                 pj(self.build_path, 'app', 'src', 'main', 'assets',
+                                    'icu', 'icudt58l.dat'))
+                    break
             # Generate custom directory
             try:
                 shutil.rmtree(pj(self.build_path, 'custom'))
@@ -106,7 +114,7 @@ class KiwixCustomApp(Dependency):
             os.makedirs(pj(self.build_path, 'custom'))
             command = "./gen-custom-android-directory.py {custom_name} --output-dir {custom_dir}"
             command = command.format(
-                custom_name=self.target.custom_name,
-                custom_dir=pj(self.build_path, 'custom', self.target.custom_name)
+                custom_name=option('android_custom_app'),
+                custom_dir=pj(self.build_path, 'custom', option('android_custom_app'))
             )
-            self.buildEnv.run_command(command, self.source_path, context)
+            run_command(command, self.source_path, context, buildEnv=self.buildEnv)
