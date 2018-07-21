@@ -255,10 +255,23 @@ def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cros
             kwargs['stdin'] = subprocess.PIPE
         process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
         if input:
-            process.communicate(input.encode())
-        retcode = process.wait()
-        if retcode:
-            raise subprocess.CalledProcessError(retcode, command)
+            input = input.encode()
+        while True:
+            try:
+                if input is None:
+                    process.wait(timeout=30)
+                else:
+                    process.communicate(input, timeout=30)
+            except subprocess.TimeoutExpired:
+                # Either `wait` timeout (and `input` is None) or
+                # `communicate` timeout (and we must set `input` to None
+                # to not communicate again).
+                input = None
+                print('.', end='', flush=True)
+            else:
+                break
+        if process.returncode:
+            raise subprocess.CalledProcessError(process.returncode, command)
     finally:
         if log:
             log.close()

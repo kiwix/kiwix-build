@@ -36,7 +36,7 @@ class AndroidPlatformInfo(PlatformInfo):
             'install_path': install_path,
             'binaries': self.binaries(install_path),
             'root_path': pj(install_path, 'sysroot'),
-            'extra_libs': [],
+            'extra_libs': ['-llog'],
             'extra_cflags': [],
             'host_machine': {
                 'system': 'Android',
@@ -125,7 +125,7 @@ class Android(MetaPlatformInfo):
         return ['android_{}'.format(arch) for arch in option('android_arch')]
 
     def add_targets(self, targetName, targets):
-        if targetName != 'kiwix-android':
+        if targetName not in ('kiwix-android', 'kiwix-android-custom'):
             return super().add_targets(targetName, targets)
         else:
             return AndroidPlatformInfo.add_targets(self, targetName, targets)
