@@ -135,6 +135,12 @@ class SkipCommand(Exception):
     def __init__(self, message=None):
         self.message = message
 
+    def __str__(self):
+        if self.message:
+            return "SKIP: " + self.message
+        else:
+            return "SKIP"
+
 
 class StopBuild(Exception):
     pass

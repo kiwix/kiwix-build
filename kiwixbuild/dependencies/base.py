@@ -73,10 +73,7 @@ class Source:
             print("OK")
             return ret
         except SkipCommand as e:
-            message = "SKIP"
-            if e.message:
-                message += " : " + e.message
-            print(message)
+            print(e)
         except subprocess.CalledProcessError:
             print("ERROR")
             try:
