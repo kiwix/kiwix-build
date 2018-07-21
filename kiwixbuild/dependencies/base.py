@@ -159,10 +159,10 @@ class GitClone(Source):
         branch, changed_files = self._git_status(context)
         # Try not to mess up local feature branches.
         if branch != self.git_ref:
-            return
+            raise SkipCommand()
         # Try not to create merge conflicts with localy modified files.
         if changed_files:
-            return
+            raise SkipCommand()
         run_command("git rebase origin/{}".format(self.git_ref))
 
     def _git_status(self, context):

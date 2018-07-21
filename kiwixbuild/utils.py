@@ -257,7 +257,7 @@ def run_command(command, cwd, context, buildEnv=None, env=None, input=None,
           **kwargs)
         input_encoded = None
         if input:
-            input = input.encode()
+            input_encoded = input.encode()
         while True:
             try:
                 if input_encoded is None:
