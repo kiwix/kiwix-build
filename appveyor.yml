@@ -3,7 +3,7 @@ version: '0.1.{build}'
 environment:
   EXTRA_DIR: 'C:\extra'
   MINGW64_EXTRA_DIR: '/c/extra'
-  PATH: '%PATH%;%EXTRA_DIR%\bin;C:\\Python36\\Scripts'
+  PATH: '%PATH%;%EXTRA_DIR%\bin;C:\\Python36\\Scripts;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\%platform%'
   PKG_CONFIG_PATH: '%EXTRA_DIR%\lib\pkgconfig'
   MSYS2_PATH_TYPE: 'inherit'
   MSYS2_ARG_CONV_EXCL: '-Tp'
@@ -48,6 +48,8 @@ build_script:
   - appveyor\install_kiwix-desktop.cmd
 
 before_deploy:
+  - cmd: openssl enc -d -aes-256-cbc -md sha256 -pass pass:%win_certificate_secret% -in appveyor\kiwix.p12.enc -out appveyor\kiwix.pfx
+  - cmd: signtool.exe sign /f appveyor\kiwix.pfx /p %win_certificate_password% /t http://timestamp.verisign.com/scripts/timstamp.dll /d "Kiwix-desktop application" C:\projects\kiwix-build\kiwix-desktop\Release\kiwix-desktop.exe
   - cmd: '%MINGW64_RUN% "cd /c/projects/kiwix-build && appveyor/package_kiwix-desktop.sh"'
   - cmd: openssl enc -d -aes-256-cbc -md sha256 -pass pass:%ENC_PASSWD% -in appveyor\nightlybot_id_key.enc -out appveyor\nightlybot_id_key
 
