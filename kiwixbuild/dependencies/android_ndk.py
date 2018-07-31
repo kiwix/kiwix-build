@@ -27,7 +27,7 @@ class android_ndk(Dependency):
 
         @property
         def api(self):
-            return '21' if self.arch in ('arm64', 'mips64', 'x86_64') else '14'
+            return '21'
 
         @property
         def platform(self):
