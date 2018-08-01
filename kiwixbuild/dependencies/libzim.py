@@ -13,3 +13,11 @@ class Libzim(Dependency):
     class Builder(MesonBuilder):
         test_option = "-t 8"
         dependencies = ['zlib', 'lzma', 'xapian-core', 'icu4c']
+
+        @property
+        def configure_option(self):
+            options = ""
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'android':
+                options += "-DUSE_BUFFER_HEADER=false"
+            return options
