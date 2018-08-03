@@ -97,7 +97,7 @@ def run_kiwix_build(target, platform,
 
 def create_app_image():
     command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
-               str(BASE_DIR/'INSTALL'), str(HOME/'AppDir')]
+               str(BASE_DIR/'INSTALL'), str(HOME/'SOURCE'/'kiwix-desktop'), str(HOME/'AppDir')]
     print_message("Build AppImage of kiwix-desktop")
     subprocess.check_call(command, cwd=str(HOME))
     if make_release:
