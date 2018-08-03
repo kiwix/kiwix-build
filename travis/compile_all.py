@@ -97,7 +97,7 @@ def run_kiwix_build(target, platform,
 
 def create_app_image():
     command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
-               str(BASE_DIR/'INSTALL'), str(HOME/'AppDir')]
+               str(BASE_DIR/'INSTALL'), str(HOME/'SOURCE'/'kiwix-desktop'), str(HOME/'AppDir')]
     print_message("Build AppImage of kiwix-desktop")
     subprocess.check_call(command, cwd=str(HOME))
     if make_release:
@@ -112,7 +112,7 @@ def create_app_image():
     except FileExistsError:
         pass
 
-    app_name = "kiwix-desktop_x86_64_{}".format(postfix)
+    app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
     print_message("Copy AppImage to {}".format(archive_dir/app_name))
     shutil.copy(str(HOME/'Kiwix-x86_64.AppImage'), str(archive_dir/app_name))
 
