@@ -37,6 +37,8 @@ RUN \
     libqt5gui5 \
     qtbase5-dev \
     qtwebengine5-dev \
+    libqt5svg5-dev \
+    qt5-image-formats-plugins \
     qt5-default \
 # To create the appimage of kiwix-desktop
     libfuse2 \

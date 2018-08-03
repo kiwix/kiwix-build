@@ -28,8 +28,8 @@ wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/lin
 chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 
 # Fill with all deps libs and so
-./linuxdeployqt-continuous-x86_64.AppImage $APPDIR/usr/bin/kiwix-desktop -verbose=3 -bundle-non-qt-libs
+./linuxdeployqt-continuous-x86_64.AppImage $APPDIR/usr/bin/kiwix-desktop -verbose=3 -bundle-non-qt-libs -extra-plugins=imageformats,iconengines
 # Fix the RPATH of QtWebEngineProcess [TODO] Fill a issue ?
 patchelf --set-rpath '$ORIGIN/../lib' $APPDIR/usr/libexec/QtWebEngineProcess
 # Build the image.
-./linuxdeployqt-continuous-x86_64.AppImage $APPDIR/usr/share/applications/kiwix.desktop -verbose=3 -bundle-non-qt-libs -appimage
+./linuxdeployqt-continuous-x86_64.AppImage $APPDIR/usr/share/applications/kiwix.desktop -verbose=3 -bundle-non-qt-libs -extra-plugins=imageformats,iconengines -appimage
