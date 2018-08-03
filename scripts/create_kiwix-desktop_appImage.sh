@@ -19,6 +19,9 @@ cp $INSTALLDIR/lib/x86_64-linux-gnu/*.so* $APPDIR/usr/lib
 rm $APPDIR/usr/lib/libmagic.so*
 # Copy nss lib (to not conflict with host's ones)
 cp -a /usr/lib/x86_64-linux-gnu/nss $APPDIR/usr/lib
+cp -a /usr/lib/x86_64-linux-gnu/libstdc++.so* $APPDIR/usr/lib
+cp -a /usr/lib/x86_64-linux-gnu/libc.so* $APPDIR/usr/lib
+cp -a /usr/lib/x86_64-linux-gnu/libz.so* $APPDIR/usr/lib
 cp $ICONFILE $APPDIR/usr/share/icons/hicolor/48x48/apps/kiwix-desktop.svg
 mkdir -p $APPDIR/usr/share/applications
 cp $DESKTOPFILE $APPDIR/usr/share/applications/kiwix.desktop
