@@ -112,7 +112,7 @@ def create_app_image():
     except FileExistsError:
         pass
 
-    app_name = "kiwix-desktop_x86_64_{}".format(postfix)
+    app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
     print_message("Copy AppImage to {}".format(archive_dir/app_name))
     shutil.copy(str(HOME/'Kiwix-x86_64.AppImage'), str(archive_dir/app_name))
 
