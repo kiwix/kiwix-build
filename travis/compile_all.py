@@ -300,8 +300,7 @@ elif PLATFORM.startswith('native_'):
         TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib')
     else:
         if PLATFORM == 'native_dyn' and KIWIX_DESKTOP_ONLY:
-            if not make_release:
-                TARGETS = ('kiwix-desktop', )
+            TARGETS = ('kiwix-desktop', )
         else:
             TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 else:
@@ -330,7 +329,7 @@ for target in TARGETS:
 # We have build everything. Now create archives for public deployement.
 if make_release and PLATFORM == 'native_dyn':
     for target in TARGETS:
-        if target in ('kiwix-lib', 'kiwix-tools'):
+        if target in ('kiwix-lib', 'kiwix-tools', 'kiwix-desktop'):
             out_dir = DIST_KIWIX_ARCHIVES_DIR
         else:
             out_dir = DIST_ZIM_ARCHIVES_DIR
