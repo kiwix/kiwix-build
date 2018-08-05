@@ -33,7 +33,7 @@ script:
   if [[ $TRAVIS_OS_NAME = "linux" && $DESKTOP_ONLY == 1 ]]
   then
     docker build -t kiwix/build -f travis/Dockerfile .
-    docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e TRAVIS_BUILD_DIR -e DESKTOP_ONLY --device /dev/fuse --cap-add SYS_ADMIN kiwix/build
+    docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e TRAVIS_BUILD_DIR -e DESKTOP_ONLY -e TRAVIS_TAG --device /dev/fuse --cap-add SYS_ADMIN kiwix/build
   else
     travis/compile_all.py
   fi
