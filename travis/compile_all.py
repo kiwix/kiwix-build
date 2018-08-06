@@ -96,16 +96,19 @@ def run_kiwix_build(target, platform,
 
 
 def create_app_image():
-    command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
-               str(BASE_DIR/'INSTALL'), str(HOME/'SOURCE'/'kiwix-desktop'), str(HOME/'AppDir')]
-    print_message("Build AppImage of kiwix-desktop")
-    subprocess.check_call(command, cwd=str(HOME))
     if make_release:
         postfix = main_project_versions['kiwix-desktop']
         archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/'kiwix-desktop'
+        src_dir = SOURCE_DIR/'kiwix-desktop-{}'.format(postfix)
     else:
         postfix = _date
         archive_dir = NIGHTLY_KIWIX_ARCHIVES_DIR
+        src_dir = SOURCE_DIR/'kiwix-desktop'
+
+    command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
+               str(BASE_DIR/'INSTALL'), str(src_dir), str(HOME/'AppDir')]
+    print_message("Build AppImage of kiwix-desktop")
+    subprocess.check_call(command, cwd=str(HOME))
 
     try:
         archive_dir.mkdir(parents=True)
