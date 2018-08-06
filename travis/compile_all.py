@@ -99,7 +99,7 @@ def create_app_image():
     if make_release:
         postfix = main_project_versions['kiwix-desktop']
         archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/'kiwix-desktop'
-        src_dir = SOURCE_DIR/'kiwix-desktop-{}'.format(postfix)
+        src_dir = SOURCE_DIR/'kiwix-desktop_release'
     else:
         postfix = _date
         archive_dir = NIGHTLY_KIWIX_ARCHIVES_DIR
