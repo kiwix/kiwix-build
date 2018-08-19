@@ -96,23 +96,26 @@ def run_kiwix_build(target, platform,
 
 
 def create_app_image():
-    command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
-               str(BASE_DIR/'INSTALL'), str(HOME/'AppDir')]
-    print_message("Build AppImage of kiwix-desktop")
-    subprocess.check_call(command, cwd=str(HOME))
     if make_release:
         postfix = main_project_versions['kiwix-desktop']
         archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/'kiwix-desktop'
+        src_dir = SOURCE_DIR/'kiwix-desktop_release'
     else:
         postfix = _date
         archive_dir = NIGHTLY_KIWIX_ARCHIVES_DIR
+        src_dir = SOURCE_DIR/'kiwix-desktop'
+
+    command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
+               str(BASE_DIR/'INSTALL'), str(src_dir), str(HOME/'AppDir')]
+    print_message("Build AppImage of kiwix-desktop")
+    subprocess.check_call(command, cwd=str(HOME))
 
     try:
         archive_dir.mkdir(parents=True)
     except FileExistsError:
         pass
 
-    app_name = "kiwix-desktop_x86_64_{}".format(postfix)
+    app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
     print_message("Copy AppImage to {}".format(archive_dir/app_name))
     shutil.copy(str(HOME/'Kiwix-x86_64.AppImage'), str(archive_dir/app_name))
 
@@ -161,7 +164,16 @@ def make_archive(project, platform):
 def make_deps_archive(target, full=False):
     archive_name = "deps_{}_{}_{}.tar.gz".format(
         TRAVIS_OS_NAME, PLATFORM, target)
+    print_message("Create archive {}.", archive_name)
     files_to_archive = [BASE_DIR/'INSTALL']
+    if PLATFORM.startswith('android'):
+        files_to_archive.append(HOME/'BUILD_neutral'/'INSTALL')
+    if PLATFORM == 'android':
+        for arch in ('arm', 'arm64', 'x86', 'x86_64'):
+            base_dir = HOME/"BUILD_android_{}".format(arch)
+            files_to_archive.append(base_dir/'INSTALL')
+            if (base_dir/'meson_cross_file.txt').exists():
+                files_to_archive.append(base_dir/'meson_cross_file.txt')
     files_to_archive += HOME.glob('BUILD_*/android-ndk*')
     files_to_archive += HOME.glob('BUILD_*/android-sdk*')
     if (BASE_DIR/'meson_cross_file.txt').exists():
@@ -171,23 +183,27 @@ def make_deps_archive(target, full=False):
     write_manifest(manifest_file, archive_name, target, PLATFORM)
     files_to_archive.append(manifest_file)
 
-    relative_path = BASE_DIR
+    relative_path = HOME
     if full:
         files_to_archive += ARCHIVE_DIR.glob(".*_ok")
         files_to_archive += BASE_DIR.glob('*/.*_ok')
         files_to_archive += (HOME/"BUILD_native_dyn").glob('*/.*_ok')
         files_to_archive += (HOME/"BUILD_native_static").glob('*/.*_ok')
-        files_to_archive += HOME.glob('BUILD_android*/.*_ok')
+        files_to_archive += HOME.glob('BUILD_android*/**/.*_ok')
         files_to_archive += SOURCE_DIR.glob('*/.*_ok')
         files_to_archive += [SOURCE_DIR/'pugixml-{}'.format(
             base_deps_versions['pugixml'])]
         files_to_archive += HOME.glob('BUILD_*/pugixml-{}'.format(
             base_deps_versions['pugixml']))
         files_to_archive += HOME.glob('**/TOOLCHAINS')
-        relative_path = HOME
 
+    counter = 50
     with tarfile.open(str(relative_path/archive_name), 'w:gz') as tar:
         for name in set(files_to_archive):
+            counter -= 1
+            if not counter:
+                print('.', end='', flush=True)
+                counter = 50
             tar.add(str(name), arcname=str(name.relative_to(relative_path)))
     return relative_path/archive_name
 
@@ -221,12 +237,26 @@ base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.gz".format(
 
 print_message("Getting archive {}", base_dep_archive_name)
 try:
-    local_filename, headers = urlretrieve(
+    local_filename, _ = urlretrieve(
         'http://tmp.kiwix.org/ci/{}'.format(base_dep_archive_name))
     with tarfile.open(local_filename) as f:
         f.extractall(str(HOME))
 except URLError:
     print_message("Cannot get archive. Build dependencies")
+    if PLATFORM == 'android':
+        for arch in ('arm', 'arm64', 'x86', 'x86_64'):
+            archive_name = "base_deps_{os}_android_{arch}_{version}.tar.gz".format(
+                os=TRAVIS_OS_NAME,
+                arch=arch,
+                version=base_deps_meta_version)
+            print_message("Getting archive {}", archive_name)
+            try:
+                local_filename, _ = urlretrieve(
+                   'http://tmp.kiwix.org/ci/{}'.format(archive_name))
+                with tarfile.open(local_filename) as f:
+                    f.extractall(str(HOME))
+            except URLError:
+                pass
     run_kiwix_build('alldependencies', platform=PLATFORM)
     if SSH_KEY.exists():
         archive = make_deps_archive('alldependencies', full=True)
@@ -273,15 +303,14 @@ elif PLATFORM.startswith('native_'):
         TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib')
     else:
         if PLATFORM == 'native_dyn' and KIWIX_DESKTOP_ONLY:
-            if not make_release:
-                TARGETS = ('kiwix-desktop', )
+            TARGETS = ('kiwix-desktop', )
         else:
             TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 else:
     TARGETS = ('libzim', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 
 for target in TARGETS:
-    if environ['TRAVIS_EVENT_TYPE'] == 'cron':
+    if environ['TRAVIS_EVENT_TYPE'] == 'cron' and PLATFORM != 'android':
         run_kiwix_build(target,
                         platform=PLATFORM,
                         build_deps_only=True)
@@ -290,8 +319,7 @@ for target in TARGETS:
 
     run_kiwix_build(target,
                     platform=PLATFORM,
-                    make_release=make_release,
-                    target_only=environ['TRAVIS_EVENT_TYPE'] == 'cron')
+                    make_release=make_release)
     if target == 'kiwix-desktop':
         create_app_image()
     if make_release and PLATFORM == 'native_dyn':
@@ -304,7 +332,7 @@ for target in TARGETS:
 # We have build everything. Now create archives for public deployement.
 if make_release and PLATFORM == 'native_dyn':
     for target in TARGETS:
-        if target in ('kiwix-lib', 'kiwix-tools'):
+        if target in ('kiwix-lib', 'kiwix-tools', 'kiwix-desktop'):
             out_dir = DIST_KIWIX_ARCHIVES_DIR
         else:
             out_dir = DIST_ZIM_ARCHIVES_DIR

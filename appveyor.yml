@@ -1,0 +1,56 @@
+image: Visual Studio 2017
+version: '0.1.{build}'
+environment:
+  EXTRA_DIR: 'C:\extra'
+  MINGW64_EXTRA_DIR: '/c/extra'
+  PATH: '%PATH%;%EXTRA_DIR%\bin;C:\\Python36\\Scripts;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\%platform%'
+  PKG_CONFIG_PATH: '%EXTRA_DIR%\lib\pkgconfig'
+  MSYS2_PATH_TYPE: 'inherit'
+  MSYS2_ARG_CONV_EXCL: '-Tp'
+  MINGW64_RUN: 'C:\msys64\usr\bin\bash.exe --login -c'
+  MSYSTEM: 'MINGW64'
+
+init:
+ - cmd: |
+     echo %TEST_VAR%
+     REM Set VC 2017
+     "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+     mkdir C:\extra\bin
+
+install:
+  - cmd: |
+     cd C:\projects
+     REM Install meson
+     C:\Python36\Scripts\pip install meson
+
+     REM Install ninja
+     curl -o ninja-win.zip -L https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip
+     7z e ninja-win.zip -o%EXTRA_DIR%\bin
+
+     REM Install pkg-config-lite
+     curl -o pkg-config-lite-0.28-1.zip https://netix.dl.sourceforge.net/project/pkgconfiglite/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip
+     7z e pkg-config-lite-0.28-1.zip -o%EXTRA_DIR%\bin pkg-config-lite-0.28-1/bin/pkg-config.exe
+     cd kiwix-build
+
+     REM Install openssh (scp) for deployement
+     choco install openssh openssl.light
+
+build_script:
+  - appveyor\install_zlib.cmd
+  - appveyor\install_lzma.cmd
+  - appveyor\install_pthread.cmd
+  - appveyor\install_dirent.cmd
+  - appveyor\install_xapian.cmd
+  - appveyor\install_icu.cmd
+  - appveyor\install_libzim.cmd
+  - appveyor\install_pugixml.cmd
+  - appveyor\install_kiwix-lib.cmd
+  - appveyor\install_kiwix-desktop.cmd
+
+before_deploy:
+  - cmd: openssl enc -d -aes-256-cbc -md sha256 -pass pass:%win_certificate_secret% -in appveyor\kiwix.p12.enc -out appveyor\kiwix.pfx
+  - cmd: '%MINGW64_RUN% "cd /c/projects/kiwix-build && appveyor/package_kiwix-desktop.sh"'
+  - cmd: openssl enc -d -aes-256-cbc -md sha256 -pass pass:%ENC_PASSWD% -in appveyor\nightlybot_id_key.enc -out appveyor\nightlybot_id_key
+
+deploy_script:
+  - cmd: '%MINGW64_RUN% "cd /c/projects/kiwix-build && appveyor/deploy.sh"'
