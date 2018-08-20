@@ -18,11 +18,6 @@ class Builder:
         PlatformInfo.get_platform('neutral', self._targets)
 
         target_platform = option('target_platform')
-        if not target_platform:
-            if option('target') == 'kiwix-android':
-                target_platform = 'android'
-            else:
-                target_platform = 'native_dyn'
         platform = PlatformInfo.get_platform(target_platform, self._targets)
         if neutralEnv('distname') not in platform.compatible_hosts:
             print(('ERROR: The target platform {} cannot be build on host {}.\n'

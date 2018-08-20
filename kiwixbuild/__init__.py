@@ -72,6 +72,12 @@ def parse_args():
     if not options.ios_arch:
         options.ios_arch = ['armv7', 'arm64', 'i386', 'x86_64']
 
+    if not options.target_platform:
+        if options.target in ('kiwix-android', 'kiwix-android-custom'):
+             options.target_platform = 'android'
+        else:
+             options.target_platform = 'native_dyn'
+
     return options
 
 def main():
