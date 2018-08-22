@@ -173,7 +173,7 @@ def travis_launch_build(organisation, repository, options, zim_size):
     }
     uuid = uuid4()
     envs = []
-    for platform_index, platform in enumerate(['arm', 'arm64', 'x86', 'x86_64', 'mips', 'mips64']):
+    for platform_index, platform in enumerate(['arm', 'arm64', 'x86', 'x86_64']):
         d = {
             'PLATFORM': "android_{}".format(platform),
             'VERSION_CODE': gen_version_code(platform_index, options.base_version)

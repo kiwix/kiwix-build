@@ -130,12 +130,6 @@ matrix:
       addons: *android_addons
     - env: PLATFORM="android_x86_64"
       addons: *android_addons
-    - env: PLATFORM="android_mips"
-      if: type!=cron AND type!=pull_request
-      addons: *android_addons
-    - env: PLATFORM="android_mips64"
-      if: type!=cron AND type!=pull_request
-      addons: *android_addons
     - env: PLATFORM="native_dyn"
       os: osx
     - env: PLATFORM="iOS_arm64"
