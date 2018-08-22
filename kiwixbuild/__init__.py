@@ -68,7 +68,7 @@ def parse_args():
         if err:
             sys.exit(1)
     if not options.android_arch:
-        options.android_arch = ['arm', 'arm64', 'mips', 'mips64', 'x86', 'x86_64']
+        options.android_arch = ['arm', 'arm64', 'x86', 'x86_64']
     if not options.ios_arch:
         options.ios_arch = ['armv7', 'arm64', 'i386', 'x86_64']
 
