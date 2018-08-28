@@ -15,9 +15,8 @@ from uuid import uuid4
 from contextlib import contextmanager
 from urllib.parse import urlparse
 
-from utils import (
-    Remotefile,
-    download_remote
+from kiwixbuild import (
+    utils
 )
 
 import requests

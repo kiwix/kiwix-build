@@ -53,40 +53,44 @@ $ENV{VERSION_NAME} = $date;
 
 # Compile apps
 $ENV{VERSION_CODE} = $version_code_base;
-$cmd = "kiwix-build --target-platform android_arm --android-custom-app $custom_app --zim-file-size $zim_size kiwix-android-custom"; system $cmd;
+$cmd = "kiwix-build kiwix-android-custom --android-arch arm --android-custom-app $custom_app --zim-file-size $zim_size"; system $cmd;
+
+$cmd = "./BUILD_neutral/TOOLCHAINS/android-sdk-r25.2.3/build-tools/27.0.3/apksigner sign -ks \"${keystore}\" --ks-pass env:KIWIX_KEY --out signed_apks/app-${version_code_base}-release-signed.apk BUILD_android/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
+system $cmd;
+
 
 $ENV{VERSION_CODE} = "1" . $version_code_base;
-$cmd = "kiwix-build --target-platform android_arm64 --android-custom-app $custom_app --zim-file-size $zim_size kiwix-android-custom"; system $cmd;
+$cmd = "kiwix-build kiwix-android-custom --android-arch arm64 --android-custom-app $custom_app --zim-file-size $zim_size"; system $cmd;
+
+$cmd = "./BUILD_neutral/TOOLCHAINS/android-sdk-r25.2.3/build-tools/27.0.3/apksigner sign -ks \"${keystore}\" --ks-pass env:KIWIX_KEY --out signed_apks/app-1${version_code_base}-release-signed.apk BUILD_android/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
+system $cmd;
+
 
 $ENV{VERSION_CODE} = "2" . $version_code_base;
-$cmd = "kiwix-build --target-platform android_x86 --android-custom-app $custom_app --zim-file-size $zim_size kiwix-android-custom"; system $cmd;
+$cmd = "kiwix-build kiwix-android-custom --android-arch x86 --android-custom-app $custom_app --zim-file-size $zim_size"; system $cmd;
+
+$cmd = "./BUILD_neutral/TOOLCHAINS/android-sdk-r25.2.3/build-tools/27.0.3/apksigner sign -ks \"${keystore}\" --ks-pass env:KIWIX_KEY --out signed_apks/app-2${version_code_base}-release-signed.apk BUILD_android/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
+system $cmd;
+
 
 $ENV{VERSION_CODE} = "3" . $version_code_base;
-$cmd = "kiwix-build --target-platform android_x86_64 --android-custom-app $custom_app --zim-file-size $zim_size kiwix-android-custom"; system $cmd;
+$cmd = "kiwix-build kiwix-android-custom --android-arch x86_64 --android-custom-app $custom_app --zim-file-size $zim_size"; system $cmd;
+
+$cmd = "./BUILD_neutral/TOOLCHAINS/android-sdk-r25.2.3/build-tools/27.0.3/apksigner sign -ks \"${keystore}\" --ks-pass env:KIWIX_KEY --out signed_apks/app-3${version_code_base}-release-signed.apk BUILD_android/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
+system $cmd;
+
 
 $ENV{VERSION_CODE} = "4" . $version_code_base;
-$cmd = "kiwix-build --target-platform android_mips --android-custom-app $custom_app --zim-file-size $zim_size kiwix-android-custom"; system $cmd;
+$cmd = "kiwix-build kiwix-android-custom --android-arch mips --android-custom-app $custom_app --zim-file-size $zim_size"; system $cmd;
+
+$cmd = "./BUILD_neutral/TOOLCHAINS/android-sdk-r25.2.3/build-tools/27.0.3/apksigner sign -ks \"${keystore}\" --ks-pass env:KIWIX_KEY --out signed_apks/app-4${version_code_base}-release-signed.apk BUILD_android/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
+system $cmd;
+
 
 $ENV{VERSION_CODE} = "5" . $version_code_base;
-$cmd = "kiwix-build --target-platform android_mips64 --android-custom-app $custom_app --zim-file-size $zim_size kiwix-android-custom"; system $cmd;
+$cmd = "kiwix-build kiwix-android-custom --android-arch mips64 --android-custom-app $custom_app --zim-file-size $zim_size"; system $cmd;
 
-# Sign apps
-$cmd = "./TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign -ks \"${keystore}\" --out signed_apks/app-${version_code_base}-release-signed.apk BUILD_android_arm/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
-system $cmd;
-
-$cmd = "./TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign -ks \"${keystore}\" --out signed_apks/app-1${version_code_base}-release-signed.apk BUILD_android_arm64/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
-system $cmd;
-
-$cmd = "./TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign -ks \"${keystore}\" --out signed_apks/app-2${version_code_base}-release-signed.apk BUILD_android_x86/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
-system $cmd;
-
-$cmd = "./TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign -ks \"${keystore}\" --out signed_apks/app-3${version_code_base}-release-signed.apk BUILD_android_x86_64/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
-system $cmd;
-
-$cmd = "./TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign -ks \"${keystore}\" --out signed_apks/app-4${version_code_base}-release-signed.apk BUILD_android_mips/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
-system $cmd;
-
-$cmd = "./TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign -ks \"${keystore}\" --out signed_apks/app-5${version_code_base}-release-signed.apk BUILD_android_mips64/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
+$cmd = "./BUILD_neutral/TOOLCHAINS/android-sdk-r25.2.3/build-tools/27.0.3/apksigner sign -ks \"${keystore}\" --ks-pass env:KIWIX_KEY --out signed_apks/app-5${version_code_base}-release-signed.apk BUILD_android/kiwix-android-custom_${custom_app}/app/build/outputs/apk/${custom_app}/release/app-${custom_app}-release-unsigned.apk";
 system $cmd;
 
 # Upload
