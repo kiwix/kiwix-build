@@ -6,7 +6,7 @@ from kiwixbuild._global import neutralEnv
 
 
 class Win32PlatformInfo(PlatformInfo):
-    extra_libs = ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr90', '-liphlpapi']
+    extra_libs = ['-lwinmm', '-lws2_32', '-lshlwapi', '-lrpcrt4', '-lmsvcr100', '-liphlpapi']
     build = 'win32'
     compatible_hosts = ['fedora', 'debian']
     arch_full = 'i686-w64-mingw32'
