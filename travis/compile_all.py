@@ -13,6 +13,7 @@ from urllib.error import URLError
 
 from kiwixbuild.versions import (
     main_project_versions,
+    release_versions,
     base_deps_versions,
     base_deps_meta_version)
 
@@ -98,6 +99,12 @@ def run_kiwix_build(target, platform,
 def create_app_image():
     if make_release:
         postfix = main_project_versions['kiwix-desktop']
+        extra_postfix = release_versions.get('kiwix-desktop')
+        if extra_postfix is None:
+            # We should not make archives for release not wanted
+            return
+        if extra_postfix:
+            postfix = "{}-{}".format(postfix, extra_postfix)
         archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/'kiwix-desktop'
         src_dir = SOURCE_DIR/'kiwix-desktop_release'
     else:
@@ -126,6 +133,12 @@ def make_archive(project, platform):
 
     if make_release:
         postfix = main_project_versions[project]
+        extra_postfix = release_versions.get(project)
+        if extra_postfix is None:
+            # We should not make archives for release not wanted
+            return
+        if extra_postfix:
+            postfix = "{}-{}".format(postfix, extra_postfix)
         if project in ('kiwix-lib', 'kiwix-tools'):
             archive_dir = RELEASE_KIWIX_ARCHIVES_DIR/project
         else:
@@ -322,7 +335,7 @@ for target in TARGETS:
                     make_release=make_release)
     if target == 'kiwix-desktop':
         create_app_image()
-    if make_release and PLATFORM == 'native_dyn':
+    if make_release and PLATFORM == 'native_dyn' and release_versions.get(target) == 0:
         run_kiwix_build(target,
                         platform=PLATFORM,
                         make_release=True,
@@ -332,6 +345,9 @@ for target in TARGETS:
 # We have build everything. Now create archives for public deployement.
 if make_release and PLATFORM == 'native_dyn':
     for target in TARGETS:
+        if release_versions.get(target) != 0:
+            # Do not release project not in release_versions
+            continue
         if target in ('kiwix-lib', 'kiwix-tools', 'kiwix-desktop'):
             out_dir = DIST_KIWIX_ARCHIVES_DIR
         else:
@@ -346,7 +362,8 @@ if make_release and PLATFORM == 'native_dyn':
             in_file = BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(
                 target,
                 main_project_versions[target])
-            shutil.copy(str(in_file), str(out_dir/target))
+            if in_file.exists():
+                shutil.copy(str(in_file), str(out_dir/target))
 elif PLATFORM == 'native_static':
     for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
         make_archive(target, 'linux-x86_64')
