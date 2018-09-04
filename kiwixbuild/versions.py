@@ -1,3 +1,4 @@
+# This file reference all the versions of the depedencies we use in kiwix-build.
 
 main_project_versions = {
     'kiwix-lib': '2.0.2',
@@ -6,6 +7,23 @@ main_project_versions = {
     'zim-tools': '1.0.0',
     'zimwriterfs': '1.2',
     'kiwix-desktop': '2.0-alpha2'
+}
+
+# This dictionnary specify what we need to build at each release process.
+# - Values are integer or None
+# - If a project is not in the dict (or None), the project is not released.
+# - If release_versions[project] == 0, this is the first time the project is
+#   build for this release, so publish src and build archives.
+# - If release_versions[project] > 0, release only the build archive with a
+#   build postfix.
+# To change this dictionnary, use the following algorithm:
+# - If project version change, set release_versions[project] = 0
+# - Else
+#    - If project depedencies have not change, remove project from release_versions
+#    - Else, increment the value. If no value was present, see in
+#      http://download.kiwikorg/releases what to set.
+
+release_versions = {
 }
 
 
