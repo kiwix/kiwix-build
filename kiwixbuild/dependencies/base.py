@@ -402,6 +402,15 @@ class QMakeBuilder(MakeBuilder):
         )
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
 
+    def _make_dist(self, context):
+        command = "git archive -o {build_dir}/{name}.tar.gz --prefix={name}/ HEAD"
+        command = command.format(
+            build_dir = self.build_path,
+            name = self.target.full_name()
+        )
+        run_command(command, self.source_path, context, buildEnv=self.buildEnv)
+
+
 
 class MesonBuilder(Builder):
     configure_option = ""

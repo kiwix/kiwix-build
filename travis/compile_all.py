@@ -353,15 +353,18 @@ if make_release and PLATFORM == 'native_dyn':
         else:
             out_dir = DIST_ZIM_ARCHIVES_DIR
 
-        if target in ('kiwix-lib', 'kiwix-tools', 'libzim', 'zim-tools', 'zimwriterfs'):
+        if target in ('kiwix-lib', 'kiwix-tools', 'libzim', 'zim-tools', 'zimwriterfs', 'kiwix-desktop'):
             try:
                 (out_dir/target).mkdir(parents=True)
             except FileExistsError:
                 pass
 
             full_target_name = "{}-{}".format(target, main_project_versions[target])
-            in_file = BASE_DIR/full_target_name/'meson-dist'/'{}.tar.xz'.format(
-                full_target_name)
+            if target != 'kiwix-desktop':
+                in_file = BASE_DIR/full_target_name/'meson-dist'/'{}.tar.xz'.format(
+                    full_target_name)
+            else:
+                in_file = BASE_DIR/full_target_name/'{}.tar.gz'.format(full_target_name)
             if in_file.exists():
                 shutil.copy(str(in_file), str(out_dir/target))
 elif PLATFORM == 'native_static':
