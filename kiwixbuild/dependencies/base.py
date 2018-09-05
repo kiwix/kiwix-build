@@ -24,7 +24,10 @@ class Dependency(metaclass=_MetaDependency):
 
     @classmethod
     def version(cls):
-        return base_deps_versions.get(cls.name, None)
+        if cls.name in base_deps_versions:
+            return base_deps_versions[cls.name]
+        else:
+            return main_project_versions.get(cls.name, None)
 
     @classmethod
     def full_name(cls):
@@ -398,6 +401,15 @@ class QMakeBuilder(MakeBuilder):
             make_option=self.make_option
         )
         run_command(command, self.build_path, context, buildEnv=self.buildEnv)
+
+    def _make_dist(self, context):
+        command = "git archive -o {build_dir}/{name}.tar.gz --prefix={name}/ HEAD"
+        command = command.format(
+            build_dir = self.build_path,
+            name = self.target.full_name()
+        )
+        run_command(command, self.source_path, context, buildEnv=self.buildEnv)
+
 
 
 class MesonBuilder(Builder):
