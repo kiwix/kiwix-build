@@ -359,9 +359,9 @@ if make_release and PLATFORM == 'native_dyn':
             except FileExistsError:
                 pass
 
-            in_file = BASE_DIR/target/'meson-dist'/'{}-{}.tar.xz'.format(
-                target,
-                main_project_versions[target])
+            full_target_name = "{}-{}".format(target, main_project_versions[target])
+            in_file = BASE_DIR/full_target_name/'meson-dist'/'{}.tar.xz'.format(
+                full_target_name)
             if in_file.exists():
                 shutil.copy(str(in_file), str(out_dir/target))
 elif PLATFORM == 'native_static':
