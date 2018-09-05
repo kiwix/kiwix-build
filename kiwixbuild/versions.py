@@ -3,10 +3,10 @@
 main_project_versions = {
     'kiwix-lib': '2.0.2',
     'kiwix-tools': '0.6.1',
-    'libzim': '4.0.3',
+    'libzim': '4.0.4',
     'zim-tools': '1.0.0',
     'zimwriterfs': '1.2',
-    'kiwix-desktop': '2.0-alpha2'
+    'kiwix-desktop': '2.0-alpha3'
 }
 
 # This dictionnary specify what we need to build at each release process.
@@ -24,6 +24,12 @@ main_project_versions = {
 #      http://download.kiwikorg/releases what to set.
 
 release_versions = {
+    'libzim': 0, # Depends of base deps
+    'kiwix-lib': 1, # Depends of libzim
+    'kiwix-tools': 1, # Depends of kiwix-lib and libzim
+    'zim-tools': 1, # Depends of libzim
+    'zimwriterfs': 1, # Depends of libzim
+    'kiwix-desktop': 0 # Depends of kiwix-lib and libzim
 }
 
 
