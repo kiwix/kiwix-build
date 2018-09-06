@@ -26,8 +26,9 @@ class Dependency(metaclass=_MetaDependency):
     def version(cls):
         if cls.name in base_deps_versions:
             return base_deps_versions[cls.name]
-        else:
+        elif option('make_release'):
             return main_project_versions.get(cls.name, None)
+        return None
 
     @classmethod
     def full_name(cls):
