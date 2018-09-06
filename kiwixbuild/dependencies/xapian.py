@@ -23,6 +23,8 @@ class Xapian(Dependency):
 
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
+            if (platformInfo.build == 'flatpak'):
+                return []
             deps = ['zlib', 'lzma']
             if (platformInfo.build == 'win32'
              or neutralEnv('distname') == 'Darwin'):

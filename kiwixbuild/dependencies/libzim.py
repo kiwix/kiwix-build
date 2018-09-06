@@ -12,7 +12,13 @@ class Libzim(Dependency):
 
     class Builder(MesonBuilder):
         test_option = "-t 8"
-        dependencies = ['zlib', 'lzma', 'xapian-core', 'icu4c']
+        @classmethod
+        def get_dependencies(cls, platformInfo, allDeps):
+            core_dependencies = ['xapian-core']
+            if (platformInfo.build == 'flatpak'):
+                return core_dependencies
+            dependencies = core_dependencies + ['zlib', 'lzma', 'icu4c']
+            return dependencies
 
         @property
         def configure_option(self):

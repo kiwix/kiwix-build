@@ -51,6 +51,9 @@ PACKAGE_NAME_MAPPERS = {
     'fedora_android': {
         'COMMON': _fedora_common + ['java-1.8.0-openjdk-devel']
     },
+    'fedora_flatpak': {
+        'COMMON': ['flatpak', 'flatpak-builder']
+    },
     'debian_native_dyn': {
         'COMMON': _debian_common + ['libbz2-dev', 'libmagic-dev'],
         'zlib': ['zlib1g-dev'],
@@ -93,6 +96,9 @@ PACKAGE_NAME_MAPPERS = {
     'debian_android': {
         'COMMON': _debian_common + ['default-jdk'],
         'ctpp2c': ['ctpp2-utils'],
+    },
+    'debian_flatpak': {
+        'COMMON': ['flatpak', 'flatpak-builder']
     },
     'Darwin_native_dyn': {
         'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],

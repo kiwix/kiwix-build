@@ -13,6 +13,7 @@ from . import (
     kiwix_android,
     kiwix_custom_app,
     kiwix_desktop,
+    kiwix_desktop_flatpak,
     kiwix_lib,
     kiwix_tools,
     libaria2,

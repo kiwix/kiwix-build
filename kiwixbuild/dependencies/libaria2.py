@@ -15,6 +15,9 @@ class Aria2(Dependency):
                              'https://github.com/aria2/aria2/archive/release-1.33.1.tar.gz')
 
         patches = ["libaria2_android.patch"]
+        flatpak_no_autogen = True
+        # Run it twice to pass `too many loops` error
+        flatpak_command = "autoreconf -i; autoreconf -i"
 
         def _post_prepare_script(self, context):
             context.try_skip(self.extract_path)
@@ -22,5 +25,9 @@ class Aria2(Dependency):
             run_command(command, self.extract_path, context)
 
     class Builder(MakeBuilder):
-        dependencies = ['zlib']
         configure_option = "--enable-libaria2 --disable-ssl --disable-bittorent --disable-metalink --without-sqlite3 --without-libxml2 --without-libexpat"
+        @classmethod
+        def get_dependencies(cls, platformInfo, allDeps):
+            if (platformInfo.build == 'flatpak'):
+                return []
+            return ['zlib']

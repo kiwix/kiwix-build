@@ -11,7 +11,14 @@ class KiwixDesktop(Dependency):
         git_dir = "kiwix-desktop"
 
     class Builder(QMakeBuilder):
-        dependencies = ["qt", "qtwebengine", "kiwix-lib"]
+        @classmethod
+        def get_dependencies(cls, platformInfo, allDeps):
+            core_dependencies = ["kiwix-lib"]
+            if (platformInfo.build == 'flatpak'):
+                return core_dependencies
+            dependencies = core_dependencies + ["qt", "qtwebengine"]
+            return dependencies
+
         @property
         def configure_option(self):
             options = ["PREFIX={}".format(self.buildEnv.install_dir)]
