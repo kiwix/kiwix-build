@@ -15,7 +15,7 @@ from . import (
     kiwix_desktop,
     kiwix_lib,
     kiwix_tools,
-    libaria2,
+    libcurl,
     libmagic,
     libmicrohttpd,
     libzim,
