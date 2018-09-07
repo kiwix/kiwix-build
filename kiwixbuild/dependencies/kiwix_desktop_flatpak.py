@@ -9,7 +9,6 @@ from .base import (
     QMakeBuilder,
     MakeBuilder,
     SCRIPT_DIR)
-import kiwixbuild.versions as versions
 from kiwixbuild.utils import pj, run_command, REMOTE_PREFIX
 from kiwixbuild._global import neutralEnv
 from shutil import copyfile
@@ -101,13 +100,6 @@ class KiwixDesktopFlatpak(Dependency):
                 packages += [package] + sub_packages
             return packages
 
-        def _get_version(self, package, versions):
-            for item in dir(versions):
-                if item.endswith('versions'):
-                    result = getattr(versions, item)
-                    if package in result:
-                        return result[package]
-
         def _generate_modules(self, deps):
             modules = []
             for dep in deps:
@@ -166,7 +158,7 @@ class KiwixDesktopFlatpak(Dependency):
                 source = {
                     'type': 'git',
                     'url': dep.Source.git_remote,
-                    'tag': self._get_version(dep.name, versions)
+                    'tag': dep.version()
                 }
                 sources = [source]
 
