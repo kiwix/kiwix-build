@@ -12,8 +12,8 @@ class Xapian(Dependency):
     name = "xapian-core"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('xapian-core-1.4.5.tar.xz',
-                             '85b5f952de9df925fd13e00f6e82484162fd506d38745613a50b0a2064c6b02b')
+        archive = Remotefile('xapian-core-1.4.7.tar.xz',
+                             '13f08a0b649c7afa804fa0e85678d693fd6069dd394c9b9e7d41973d74a3b5d3')
         patches = ['xapian_sys_types.patch']
 
     class Builder(MakeBuilder):
