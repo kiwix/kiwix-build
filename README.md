@@ -32,7 +32,7 @@ $ source bin/activate      # Activate the virtualenv
 
 Then, download and install kiwix-build and its dependencies:
 ```
-$ git clone git://github.com/kiwix/kiwix-build.git
+$ git clone https://github.com/kiwix/kiwix-build.git
 $ cd kiwix-build
 $ pip install .
 $ hash -r                  # Refresh bash paths
