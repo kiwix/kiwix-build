@@ -1,6 +1,6 @@
-diff -ur xapian-core-1.4.5/backends/glass/glass_dbcheck.h xapian-core-1.4.5.patched/backends/glass/glass_dbcheck.h
---- xapian-core-1.4.5/backends/glass/glass_dbcheck.h	2017-10-16 04:32:24.000000000 +0200
-+++ xapian-core-1.4.5.patched/backends/glass/glass_dbcheck.h	2018-06-13 14:55:58.574898188 +0200
+diff -ur xapian-core-1.4.7/backends/glass/glass_dbcheck.h xapian-core-1.4.7.patched/backends/glass/glass_dbcheck.h
+--- xapian-core-1.4.7/backends/glass/glass_dbcheck.h	2017-10-16 04:32:24.000000000 +0200
++++ xapian-core-1.4.7.patched/backends/glass/glass_dbcheck.h	2018-06-13 14:55:58.574898188 +0200
 @@ -24,7 +24,7 @@
  
  #include "xapian/types.h"
