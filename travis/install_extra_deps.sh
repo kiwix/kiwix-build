@@ -4,8 +4,6 @@ set -e
 
 if [[ "$TRAVIS_OS_NAME" == "osx" ]]
 then
-  brew update
-  brew upgrade python3
   pip3 install pillow
   pip3 install .
 
