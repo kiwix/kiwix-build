@@ -12,7 +12,7 @@ class AllBaseDependencies(Dependency):
     class Builder(NoopBuilder):
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
-            base_deps = ['zlib', 'lzma', 'xapian-core', 'pugixml', 'libaria2', 'icu4c']
+            base_deps = ['zlib', 'lzma', 'xapian-core', 'pugixml', 'libcurl', 'icu4c']
             # zimwriterfs
             if platformInfo.build not in ('android', 'win32'):
                 base_deps += ['libmagic', 'gumbo']
