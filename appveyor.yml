@@ -45,6 +45,7 @@ build_script:
   - appveyor\install_icu.cmd
   - appveyor\install_libzim.cmd
   - appveyor\install_pugixml.cmd
+  - appveyor\install_aria2.cmd
   - appveyor\install_kiwix-lib.cmd
   - appveyor\install_kiwix-desktop.cmd
 
