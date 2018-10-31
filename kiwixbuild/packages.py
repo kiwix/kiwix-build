@@ -16,7 +16,6 @@ PACKAGE_NAME_MAPPERS = {
         'zimlib': None,
         'file' : ['file-devel'],
         'gumbo' : ['gumbo-parser-devel'],
-        'libcurl' : ['libcurl-devel'],
     },
     'fedora_native_static': {
         'COMMON': _fedora_common + ['glibc-static', 'libstdc++-static'],
@@ -26,7 +25,6 @@ PACKAGE_NAME_MAPPERS = {
     },
     'fedora_i586_dyn': {
         'COMMON': _fedora_common + ['glibc-devel.i686', 'libstdc++-devel.i686'],
-        'libcurl':  ['libcurl-devel.i686'],
     },
     'fedora_i586_static': {
         'COMMON': _fedora_common + ['glibc-devel.i686'],
@@ -36,7 +34,6 @@ PACKAGE_NAME_MAPPERS = {
         'zlib': ['mingw32-zlib'],
         'lzma': ['mingw32-xz-libs'],
         'libmicrohttpd': ['mingw32-libmicrohttpd'],
-        'libcurl': ['mingw32-curl'],
     },
     'fedora_win32_static': {
         'COMMON': _fedora_common + ['mingw32-gcc-c++', 'mingw32-bzip2-static', 'mingw32-win-iconv-static', 'mingw32-winpthreads-static', 'wine'],
@@ -44,7 +41,6 @@ PACKAGE_NAME_MAPPERS = {
         'lzma': ['mingw32-xz-libs-static'],
         'libmicrohttpd': None, # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
                                # gcc cannot found them.
-        'libcurl': ['mingw32-curl-static'],
     },
     'fedora_armhf_static': {
         'COMMON': _fedora_common
@@ -64,7 +60,6 @@ PACKAGE_NAME_MAPPERS = {
         'libmicrohttpd': ['libmicrohttpd-dev', 'ccache'],
         'qt' : ['libqt5gui5', 'qtbase5-dev', 'qt5-default'],
         'qtwebengine' : ['qtwebengine5-dev'],
-        'libcurl': ['libcurl4-openssl-dev'],
     },
     'debian_native_static': {
         'COMMON': _debian_common + ['libbz2-dev', 'libmagic-dev'],
@@ -72,15 +67,12 @@ PACKAGE_NAME_MAPPERS = {
         'uuid': ['uuid-dev'],
         'ctpp2': ['libctpp2-dev'],
         'ctpp2c': ['ctpp2-utils'],
-        'libcurl': ['libcurl4-openssl-dev'],
     },
     'debian_i586_dyn': {
         'COMMON': _debian_common + ['libc6-dev:i386', 'libstdc++-6-dev:i386', 'gcc-multilib', 'g++-multilib'],
-        'libcurl': ['libcurl4-openssl-dev:i386'],
     },
     'debian_i586_static': {
         'COMMON': _debian_common + ['libc6-dev:i386', 'libstdc++-6-dev:i386', 'gcc-multilib', 'g++-multilib'],
-        'libcurl': ['libcurl4-openssl-dev:i386'],
     },
     'debian_win32_dyn': {
         'COMMON': _debian_common + ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools'],

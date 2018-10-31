@@ -33,7 +33,6 @@ RUN \
     ctpp2-utils \
     libctpp2-dev \
     libmicrohttpd-dev \
-    libcurl4-openssl-dev \
 # Qt packages
     libqt5gui5 \
     qtbase5-dev \
