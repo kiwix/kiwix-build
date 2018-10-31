@@ -38,6 +38,7 @@ install:
 build_script:
   - appveyor\install_zlib.cmd
   - appveyor\install_lzma.cmd
+  - appveyor\install_libcurl.cmd
   - appveyor\install_pthread.cmd
   - appveyor\install_dirent.cmd
   - appveyor\install_xapian.cmd
