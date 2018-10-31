@@ -35,24 +35,29 @@ install:
      REM Install openssh (scp) for deployement
      choco install openssh openssl.light
 
+  - cmd: openssl enc -d -aes-256-cbc -md sha256 -pass pass:%ENC_PASSWD% -in appveyor\nightlybot_id_key.enc -out appveyor\nightlybot_id_key
+
+
+
 build_script:
-  - appveyor\install_zlib.cmd
-  - appveyor\install_lzma.cmd
-  - appveyor\install_libcurl.cmd
-  - appveyor\install_pthread.cmd
-  - appveyor\install_dirent.cmd
-  - appveyor\install_xapian.cmd
-  - appveyor\install_icu.cmd
+  - IF "%USE_CACHE%" EQU "1" appveyor\setup_from_cache.cmd
+  - IF "%USE_CACHE%" NEQ "1" appveyor\install_zlib.cmd
+  - IF "%USE_CACHE%" NEQ "1" appveyor\install_lzma.cmd
+  - IF "%USE_CACHE%" NEQ "1" appveyor\install_libcurl.cmd
+  - IF "%USE_CACHE%" NEQ "1" appveyor\install_pthread.cmd
+  - IF "%USE_CACHE%" NEQ "1" appveyor\install_dirent.cmd
+  - IF "%USE_CACHE%" NEQ "1" appveyor\install_xapian.cmd
+  - IF "%USE_CACHE%" NEQ "1" appveyor\install_icu.cmd
+  - IF "%USE_CACHE%" NEQ "1" appveyor\install_pugixml.cmd
+  - IF "%USE_CACHE%" NEQ "1" appveyor\install_aria2.cmd
+  - IF "%USE_CACHE%" NEQ "1" %MINGW64_RUN% "cd /c/projects/kiwix-build && appveyor/create_cache.sh"
   - appveyor\install_libzim.cmd
-  - appveyor\install_pugixml.cmd
-  - appveyor\install_aria2.cmd
   - appveyor\install_kiwix-lib.cmd
   - appveyor\install_kiwix-desktop.cmd
 
 before_deploy:
   - cmd: openssl enc -d -aes-256-cbc -md sha256 -pass pass:%win_certificate_secret% -in appveyor\kiwix.p12.enc -out appveyor\kiwix.pfx
   - cmd: '%MINGW64_RUN% "cd /c/projects/kiwix-build && appveyor/package_kiwix-desktop.sh"'
-  - cmd: openssl enc -d -aes-256-cbc -md sha256 -pass pass:%ENC_PASSWD% -in appveyor\nightlybot_id_key.enc -out appveyor\nightlybot_id_key
 
 deploy_script:
   - cmd: '%MINGW64_RUN% "cd /c/projects/kiwix-build && appveyor/deploy.sh"'
