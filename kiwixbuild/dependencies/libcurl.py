@@ -18,4 +18,12 @@ class LibCurl(Dependency):
                              'ef6e55192d04713673b4409ccbcb4cb6cd723137d6e10ca45b0c593a454e1720',
                              'https://curl.haxx.se/download/curl-7.61.0.tar.xz')
 
-    Builder = MakeBuilder
+    class Builder(MakeBuilder):
+        dependencies = ['zlib']
+        configure_option = " ".join(
+            ["--without-{}".format(p)
+                for p in ('libssh2', 'ssl', 'libmetalink', 'librtmp')] +
+            ["--disable-{}".format(p)
+                for p in ('ftp', 'file', 'ldap', 'ldaps', 'rtsp', 'dict',
+                          'telnet', 'tftp', 'pop3', 'imap', 'smb', 'smtp',
+                          'gopher', 'manual')])
