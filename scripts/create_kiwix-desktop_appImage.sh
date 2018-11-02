@@ -26,6 +26,11 @@ cp $ICONFILE $APPDIR/usr/share/icons/hicolor/48x48/apps/kiwix-desktop.svg
 mkdir -p $APPDIR/usr/share/applications
 cp $DESKTOPFILE $APPDIR/usr/share/applications/kiwix.desktop
 
+# get the aria2
+wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.34.0/aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2
+tar xf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2 aria2c -C $APPDIR/usr/bin/
+tar xf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2 ca-certificate.crt -C $APPDIR/etc/ssl/certs/
+
 # Get linuxdeployqt
 wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
 chmod a+x linuxdeployqt-continuous-x86_64.AppImage
