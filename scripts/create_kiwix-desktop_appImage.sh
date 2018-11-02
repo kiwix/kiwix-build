@@ -28,8 +28,8 @@ cp $DESKTOPFILE $APPDIR/usr/share/applications/kiwix.desktop
 
 # get the aria2
 wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.34.0/aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2
-tar xf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2 aria2c -C $APPDIR/usr/bin/
-tar xf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2 ca-certificate.crt -C $APPDIR/etc/ssl/certs/
+mkdir -p $APPDIR/usr/bin/ && tar -C $APPDIR/usr/bin/ -xf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.34.0-linux-gnu-64bit-build1/aria2c --strip-components=1
+mkdir -p $APPDIR/etc/ssl/certs/ && tar -C $APPDIR/etc/ssl/certs/ -xf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.34.0-linux-gnu-64bit-build1/ca-certificates.crt --strip-components=1
 
 # Get linuxdeployqt
 wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
