@@ -1,12 +1,12 @@
 # This file reference all the versions of the depedencies we use in kiwix-build.
 
 main_project_versions = {
-    'kiwix-lib': '3.0.1',
+    'kiwix-lib': '3.0.2',
     'kiwix-tools': '0.7.0',
     'libzim': '4.0.4',
     'zim-tools': '1.0.0',
     'zimwriterfs': '1.2',
-    'kiwix-desktop': '2.0-alpha5'
+    'kiwix-desktop': '2.0-alpha6'
 }
 
 # This dictionnary specify what we need to build at each release process.
