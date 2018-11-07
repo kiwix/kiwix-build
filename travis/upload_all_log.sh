@@ -10,4 +10,4 @@ tar -czf fail_log_${PLATFORM}.tar.gz BUILD_${PLATFORM}
 
 scp -vrp -i ${SSH_KEY} \
   fail_log_${PLATFORM}.tar.gz \
-  nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci
+  ci@tmp.kiwix.org:/data/tmp/ci

@@ -283,7 +283,7 @@ def travis_launch_build(organisation, repository, options, zim_size):
         })
     else:
         global_env.append({
-            'DEPLOY_DIR' : '/var/www/tmp.kiwix.org/custom_apps/{}_{}'.format(
+            'DEPLOY_DIR' : '/data/tmp/custom_apps/{}_{}'.format(
                 options.custom_app, options.base_version)
         })
 
