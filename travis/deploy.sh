@@ -17,7 +17,7 @@ then
     nightlybot@download.kiwix.org:/var/www/download.kiwix.org/nightly
   scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
     ${NIGHTLY_ZIM_ARCHIVES_DIR} \
-    nightlybot@download.kiwix.org:/var/www/download.openzim.org/nightly
+    ci@download.openzim.org:/data/openzim/nightly
 
 elif [[ "x$TRAVIS_TAG" != "x" ]]
 then
@@ -41,7 +41,7 @@ then
       subdir=$(basename $(dirname $archive))
       scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
-        nightlybot@download.openzim.org:/var/www/download.openzim.org/release/${subdir}
+        ci@download.openzim.org:/data/openzim/release/${subdir}
     done
   fi
 
@@ -65,7 +65,7 @@ then
       subdir=$(basename $(dirname $archive))
       scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
-        nightlybot@download.openzim.org:/var/www/download.openzim.org/release/${subdir}
+        ci@download.openzim.org:/data/openzim/release/${subdir}
     done
   fi
 fi

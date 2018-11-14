@@ -273,7 +273,7 @@ except URLError:
     run_kiwix_build('alldependencies', platform=PLATFORM)
     if SSH_KEY.exists():
         archive = make_deps_archive('alldependencies', full=True)
-        destination = 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/{}'
+        destination = 'ci@tmp.kiwix.org:/data/tmp/ci/{}'
         destination = destination.format(base_dep_archive_name)
         scp(archive, destination)
 
@@ -328,7 +328,7 @@ for target in TARGETS:
                         platform=PLATFORM,
                         build_deps_only=True)
         archive = make_deps_archive(target)
-        scp(archive, 'nightlybot@download.kiwix.org:/var/www/tmp.kiwix.org/ci/')
+        scp(archive, 'ci@tmp.kiwix.org:/data/tmp/ci/')
 
     run_kiwix_build(target,
                     platform=PLATFORM,
