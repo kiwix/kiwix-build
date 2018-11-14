@@ -88,7 +88,6 @@ def copy_tree(src, dst, post_copy_function=None):
 
 def download_remote(what, where):
     file_path = pj(where, what.name)
-    file_url = what.url or (REMOTE_PREFIX + what.name)
     if os.path.exists(file_path):
         if what.sha256 == get_sha256(file_path):
             raise SkipCommand()
@@ -104,7 +103,7 @@ def download_remote(what, where):
     extra_args = {'context':context} if sys.version_info >= (3, 4, 3) else {}
     progress_chars = "/-\|"
     try:
-        with urllib.request.urlopen(file_url, **extra_args) as resource, open(file_path, 'wb') as file:
+        with urllib.request.urlopen(what.url, **extra_args) as resource, open(file_path, 'wb') as file:
             tsize = resource.info().get('Content-Length', None)
             if tsize is not None:
                 tsize = int(tsize)
@@ -121,7 +120,7 @@ def download_remote(what, where):
                    current = (current+1)%4
                 file.write(batch)
     except urllib.error.URLError as e:
-        print("Cannot download url {}:\n{}".format(file_url, e.reason))
+        print("Cannot download url {}:\n{}".format(what.url, e.reason))
         raise StopBuild()
 
     if not what.sha256:
@@ -142,6 +141,10 @@ class StopBuild(Exception):
 class Remotefile(namedtuple('Remotefile', ('name', 'sha256', 'url'))):
     def __new__(cls, name, sha256, url=None):
         return super().__new__(cls, name, sha256, url)
+
+    @property
+    def url(self):
+        return self.url or (REMOTE_PREFIX + self.name)
 
 
 class Context:
