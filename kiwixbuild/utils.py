@@ -140,11 +140,9 @@ class StopBuild(Exception):
 
 class Remotefile(namedtuple('Remotefile', ('name', 'sha256', 'url'))):
     def __new__(cls, name, sha256, url=None):
+        if url is None:
+            url = REMOTE_PREFIX + name
         return super().__new__(cls, name, sha256, url)
-
-    @property
-    def url(self):
-        return self.url or (REMOTE_PREFIX + self.name)
 
 
 class Context:

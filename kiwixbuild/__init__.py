@@ -6,6 +6,7 @@ import argparse
 from .dependencies import Dependency
 from .platforms import PlatformInfo
 from .builder import Builder
+from .flatpak_builder import FlatpakBuilder
 from . import _global
 
 def parse_args():
@@ -86,6 +87,9 @@ def main():
     _global.set_options(options)
     neutralEnv = buildenv.PlatformNeutralEnv()
     _global.set_neutralEnv(neutralEnv)
-    builder = Builder()
+    if options.target_platform == 'flatpak':
+        builder = FlatpakBuilder()
+    else:
+        builder = Builder()
     builder.run()
 

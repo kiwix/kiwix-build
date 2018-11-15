@@ -9,7 +9,8 @@ from .dependencies import Dependency
 from .packages import PACKAGE_NAME_MAPPERS
 from ._global import (
     neutralEnv, option,
-    add_target_step, get_target_step, target_steps)
+    add_target_step, get_target_step, target_steps,
+    backend)
 from . import _global
 
 class Builder:

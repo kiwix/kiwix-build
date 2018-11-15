@@ -6,6 +6,7 @@ from . import (
     android_sdk,
     armhf,
     ctpp2,
+    flatpak,
     gradle,
     gumbo,
     icu4c,
