@@ -96,7 +96,7 @@ def run_kiwix_build(target, platform,
     subprocess.check_call(command, cwd=str(HOME))
 
 
-def create_app_image():
+def create_desktop_image():
     if make_release:
         postfix = main_project_versions['kiwix-desktop']
         extra_postfix = release_versions.get('kiwix-desktop')
@@ -112,19 +112,24 @@ def create_app_image():
         archive_dir = NIGHTLY_KIWIX_ARCHIVES_DIR
         src_dir = SOURCE_DIR/'kiwix-desktop'
 
-    command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
-               str(BASE_DIR/'INSTALL'), str(src_dir), str(HOME/'AppDir')]
-    print_message("Build AppImage of kiwix-desktop")
-    subprocess.check_call(command, cwd=str(HOME))
+    if PLATFORM == 'flatpak':
+        build_path = BASE_DIR/'BUILD_flatpak'/'org.kiwix.Client.flatpak'
+        app_name = 'org.kiwix.Client.{}.flatpak'.format(postfix)
+    else:
+        build_path = HOME/'Kiwix-x86_64.AppImage'
+        app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
+        command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
+                   str(BASE_DIR/'INSTALL'), str(src_dir), str(HOME/'AppDir')]
+        print_message("Build AppImage of kiwix-desktop")
+        subprocess.check_call(command, cwd=str(HOME))
 
     try:
         archive_dir.mkdir(parents=True)
     except FileExistsError:
         pass
 
-    app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
-    print_message("Copy AppImage to {}".format(archive_dir/app_name))
-    shutil.copy(str(HOME/'Kiwix-x86_64.AppImage'), str(archive_dir/app_name))
+    print_message("Copy Build to {}".format(archive_dir/app_name))
+    shutil.copy(str(build_path), str(archive_dir/app_name))
 
 
 def make_archive(project, platform):
@@ -291,6 +296,8 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
             TARGETS = ('kiwix-desktop', )
         else:
             TARGETS = ('kiwix-tools', 'zim-tools', 'zimwriterfs')
+    elif PLATFORM == 'flatpak':
+        TARGETS = ('kiwix-desktop', )
     else:
         TARGETS = ('kiwix-tools', )
 
@@ -319,6 +326,8 @@ elif PLATFORM.startswith('native_'):
             TARGETS = ('kiwix-desktop', )
         else:
             TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
+elif PLATFORM == 'flatpak':
+    TARGETS = ('kiwix-desktop', )
 else:
     TARGETS = ('libzim', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 
@@ -334,7 +343,7 @@ for target in TARGETS:
                     platform=PLATFORM,
                     make_release=make_release)
     if target == 'kiwix-desktop':
-        create_app_image()
+        create_desktop_image()
     if make_release and PLATFORM == 'native_dyn' and release_versions.get(target) == 0:
         run_kiwix_build(target,
                         platform=PLATFORM,
