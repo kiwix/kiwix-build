@@ -75,6 +75,8 @@ def run_kiwix_build(target, platform,
     command = ['kiwix-build']
     command.append(target)
     command.append('--hide-progress')
+    if platform == 'flatpak':
+        command.append('--assume-packages-installed')
     if target == 'kiwix-android' and platform.startswith('android_'):
         command.extend(['--target-platform', 'android', '--android-arch', platform[8:]])
     elif platform == 'android':
@@ -96,7 +98,7 @@ def run_kiwix_build(target, platform,
     subprocess.check_call(command, cwd=str(HOME))
 
 
-def create_app_image():
+def create_desktop_image():
     if make_release:
         postfix = main_project_versions['kiwix-desktop']
         extra_postfix = release_versions.get('kiwix-desktop')
@@ -112,19 +114,24 @@ def create_app_image():
         archive_dir = NIGHTLY_KIWIX_ARCHIVES_DIR
         src_dir = SOURCE_DIR/'kiwix-desktop'
 
-    command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
-               str(BASE_DIR/'INSTALL'), str(src_dir), str(HOME/'AppDir')]
-    print_message("Build AppImage of kiwix-desktop")
-    subprocess.check_call(command, cwd=str(HOME))
+    if PLATFORM == 'flatpak':
+        build_path = BASE_DIR/'BUILD_flatpak'/'org.kiwix.Client.flatpak'
+        app_name = 'org.kiwix.Client.{}.flatpak'.format(postfix)
+    else:
+        build_path = HOME/'Kiwix-x86_64.AppImage'
+        app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
+        command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
+                   str(BASE_DIR/'INSTALL'), str(src_dir), str(HOME/'AppDir')]
+        print_message("Build AppImage of kiwix-desktop")
+        subprocess.check_call(command, cwd=str(HOME))
 
     try:
         archive_dir.mkdir(parents=True)
     except FileExistsError:
         pass
 
-    app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
-    print_message("Copy AppImage to {}".format(archive_dir/app_name))
-    shutil.copy(str(HOME/'Kiwix-x86_64.AppImage'), str(archive_dir/app_name))
+    print_message("Copy Build to {}".format(archive_dir/app_name))
+    shutil.copy(str(build_path), str(archive_dir/app_name))
 
 
 def make_archive(project, platform):
@@ -242,40 +249,41 @@ for p in (NIGHTLY_KIWIX_ARCHIVES_DIR,
 
 make_release = re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", environ.get('TRAVIS_TAG', '')) is not None
 
-# The first thing we need to do is to (potentially) download already compiled base dependencies.
-base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.gz".format(
-    os=TRAVIS_OS_NAME,
-    platform=PLATFORM,
-    version=base_deps_meta_version)
+if PLATFORM != 'flatpak':
+    # The first thing we need to do is to (potentially) download already compiled base dependencies.
+    base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.gz".format(
+        os=TRAVIS_OS_NAME,
+        platform=PLATFORM,
+        version=base_deps_meta_version)
 
-print_message("Getting archive {}", base_dep_archive_name)
-try:
-    local_filename, _ = urlretrieve(
-        'http://tmp.kiwix.org/ci/{}'.format(base_dep_archive_name))
-    with tarfile.open(local_filename) as f:
-        f.extractall(str(HOME))
-except URLError:
-    print_message("Cannot get archive. Build dependencies")
-    if PLATFORM == 'android':
-        for arch in ('arm', 'arm64', 'x86', 'x86_64'):
-            archive_name = "base_deps_{os}_android_{arch}_{version}.tar.gz".format(
-                os=TRAVIS_OS_NAME,
-                arch=arch,
-                version=base_deps_meta_version)
-            print_message("Getting archive {}", archive_name)
-            try:
-                local_filename, _ = urlretrieve(
-                   'http://tmp.kiwix.org/ci/{}'.format(archive_name))
-                with tarfile.open(local_filename) as f:
-                    f.extractall(str(HOME))
-            except URLError:
-                pass
-    run_kiwix_build('alldependencies', platform=PLATFORM)
-    if SSH_KEY.exists():
-        archive = make_deps_archive('alldependencies', full=True)
-        destination = 'ci@tmp.kiwix.org:/data/tmp/ci/{}'
-        destination = destination.format(base_dep_archive_name)
-        scp(archive, destination)
+    print_message("Getting archive {}", base_dep_archive_name)
+    try:
+        local_filename, _ = urlretrieve(
+            'http://tmp.kiwix.org/ci/{}'.format(base_dep_archive_name))
+        with tarfile.open(local_filename) as f:
+            f.extractall(str(HOME))
+    except URLError:
+        print_message("Cannot get archive. Build dependencies")
+        if PLATFORM == 'android':
+            for arch in ('arm', 'arm64', 'x86', 'x86_64'):
+                archive_name = "base_deps_{os}_android_{arch}_{version}.tar.gz".format(
+                    os=TRAVIS_OS_NAME,
+                    arch=arch,
+                    version=base_deps_meta_version)
+                print_message("Getting archive {}", archive_name)
+                try:
+                    local_filename, _ = urlretrieve(
+                        'http://tmp.kiwix.org/ci/{}'.format(archive_name))
+                    with tarfile.open(local_filename) as f:
+                        f.extractall(str(HOME))
+                except URLError:
+                    pass
+        run_kiwix_build('alldependencies', platform=PLATFORM)
+        if SSH_KEY.exists():
+            archive = make_deps_archive('alldependencies', full=True)
+            destination = 'ci@tmp.kiwix.org:/data/tmp/ci/{}'
+            destination = destination.format(base_dep_archive_name)
+            scp(archive, destination)
 
 
 # A basic compilation to be sure everything is working (for a PR)
@@ -291,6 +299,8 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
             TARGETS = ('kiwix-desktop', )
         else:
             TARGETS = ('kiwix-tools', 'zim-tools', 'zimwriterfs')
+    elif PLATFORM == 'flatpak':
+        TARGETS = ('kiwix-desktop', )
     else:
         TARGETS = ('kiwix-tools', )
 
@@ -319,6 +329,8 @@ elif PLATFORM.startswith('native_'):
             TARGETS = ('kiwix-desktop', )
         else:
             TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
+elif PLATFORM == 'flatpak':
+    TARGETS = ('kiwix-desktop', )
 else:
     TARGETS = ('libzim', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 
@@ -334,7 +346,7 @@ for target in TARGETS:
                     platform=PLATFORM,
                     make_release=make_release)
     if target == 'kiwix-desktop':
-        create_app_image()
+        create_desktop_image()
     if make_release and PLATFORM == 'native_dyn' and release_versions.get(target) == 0:
         run_kiwix_build(target,
                         platform=PLATFORM,

@@ -11,9 +11,11 @@ class KiwixDesktop(Dependency):
         git_dir = "kiwix-desktop"
 
     class Builder(QMakeBuilder):
-        dependencies = ["qt", "qtwebengine", "kiwix-lib"]
+        dependencies = ["qt", "qtwebengine", "kiwix-lib", "aria2"]
         @property
         def configure_option(self):
+            if self.buildEnv.platformInfo.name == 'flatpak':
+                return []
             options = ["PREFIX={}".format(self.buildEnv.install_dir)]
             if self.buildEnv.platformInfo.static:
                 options.append('"CONFIG+=static"')

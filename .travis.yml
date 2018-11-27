@@ -32,8 +32,13 @@ script:
 - |
   if [[ $TRAVIS_OS_NAME = "linux" && $DESKTOP_ONLY == 1 ]]
   then
-    docker build -t kiwix/build -f travis/Dockerfile .
-    docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e TRAVIS_BUILD_DIR -e DESKTOP_ONLY -e TRAVIS_TAG --device /dev/fuse --cap-add SYS_ADMIN kiwix/build
+    if [[ $PLATFORM = "flatpak" ]]
+    then
+      docker build -t kiwix/build -f travis/Dockerfile_flatpak .
+    else
+      docker build -t kiwix/build -f travis/Dockerfile .
+    fi
+    docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e TRAVIS_BUILD_DIR -e DESKTOP_ONLY -e TRAVIS_TAG --device /dev/fuse --cap-add ALL kiwix/build
   else
     travis/compile_all.py
   fi
@@ -80,6 +85,10 @@ matrix:
     - env: PLATFORM="android"
   include:
     - env: PLATFORM="native_dyn" DESKTOP_ONLY=1
+      addons:
+        apt:
+          packages: []
+    - env: PLATFORM="flatpak" DESKTOP_ONLY=1
       addons:
         apt:
           packages: []

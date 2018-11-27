@@ -6,6 +6,7 @@ import argparse
 from .dependencies import Dependency
 from .platforms import PlatformInfo
 from .builder import Builder
+from .flatpak_builder import FlatpakBuilder
 from . import _global
 
 def parse_args():
@@ -37,6 +38,8 @@ def parse_args():
                           help="Clean all intermediate files after the (successfull) build")
     subgroup.add_argument('--dont-install-packages', action='store_true',
                           help="Do not try to install packages before compiling")
+    subgroup.add_argument('--assume-packages-installed', action='store_true',
+                          help="Assume the package to install to be aleady installed")
     subgroup.add_argument('--android-arch', action='append',
                           help=("Specify the architecture to build for android application/libraries.\n"
                                 "Can be specified several times to build for several architectures.\n"
@@ -86,6 +89,9 @@ def main():
     _global.set_options(options)
     neutralEnv = buildenv.PlatformNeutralEnv()
     _global.set_neutralEnv(neutralEnv)
-    builder = Builder()
+    if options.target_platform == 'flatpak':
+        builder = FlatpakBuilder()
+    else:
+        builder = Builder()
     builder.run()
 

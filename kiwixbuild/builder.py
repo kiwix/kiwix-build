@@ -9,7 +9,8 @@ from .dependencies import Dependency
 from .packages import PACKAGE_NAME_MAPPERS
 from ._global import (
     neutralEnv, option,
-    add_target_step, get_target_step, target_steps)
+    add_target_step, get_target_step, target_steps,
+    backend)
 from . import _global
 
 class Builder:
@@ -147,6 +148,10 @@ class Builder:
     def install_packages(self):
         packages_to_have = self._get_packages()
         packages_to_have = remove_duplicates(packages_to_have)
+
+        if option('assume_packages_installed'):
+            print("SKIP, Assume package installed")
+            return
 
         distname = neutralEnv('distname')
         if distname in ('fedora', 'redhat', 'centos'):
