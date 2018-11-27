@@ -8,7 +8,7 @@ APPDIR=${3:-$PWD/AppDir}
 
 #TODO We should have our icon
 ICONFILE=$SOURCEDIR/resources/icons/kiwix/app_icon.svg
-DESKTOPFILE=$SOURCEDIR/kiwix.desktop
+DESKTOPFILE=$SOURCEDIR/resources/kiwix-desktop.desktop
 
 # Create structure
 mkdir -p $APPDIR/usr/{bin,lib,share} $APPDIR/usr/share/applications $APPDIR/usr/share/icons/hicolor/48x48/apps
@@ -24,7 +24,7 @@ cp -a /usr/lib/x86_64-linux-gnu/libc.so* $APPDIR/usr/lib
 cp -a /usr/lib/x86_64-linux-gnu/libz.so* $APPDIR/usr/lib
 cp $ICONFILE $APPDIR/usr/share/icons/hicolor/48x48/apps/kiwix-desktop.svg
 mkdir -p $APPDIR/usr/share/applications
-cp $DESKTOPFILE $APPDIR/usr/share/applications/kiwix.desktop
+cp $DESKTOPFILE $APPDIR/usr/share/applications/kiwix-desktop.desktop
 
 # get the aria2
 wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.34.0/aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2
@@ -40,4 +40,4 @@ chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 # Fix the RPATH of QtWebEngineProcess [TODO] Fill a issue ?
 patchelf --set-rpath '$ORIGIN/../lib' $APPDIR/usr/libexec/QtWebEngineProcess
 # Build the image.
-./linuxdeployqt-continuous-x86_64.AppImage $APPDIR/usr/share/applications/kiwix.desktop -verbose=3 -bundle-non-qt-libs -extra-plugins=imageformats,iconengines -appimage
+./linuxdeployqt-continuous-x86_64.AppImage $APPDIR/usr/share/applications/kiwix-desktop.desktop -verbose=3 -bundle-non-qt-libs -extra-plugins=imageformats,iconengines -appimage
