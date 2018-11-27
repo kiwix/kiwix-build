@@ -230,28 +230,16 @@ class FlatpakBuilder:
 
 
     def _get_packages(self):
-        packages_list = []
-        for platform in PlatformInfo.all_running_platforms.values():
-            mapper_name = "{host}_{target}".format(
-                host=neutralEnv('distname'),
-                target=platform)
-            package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
-            packages_list += package_name_mapper.get('COMMON', [])
+        package_name_mapper = PACKAGE_NAME_MAPPERS.get('flatpak', {})
 
         to_drop = []
         for builderDef in self._targets:
             platformName, builderName = builderDef
-            mapper_name = "{host}_{target}".format(
-                host=neutralEnv('distname'),
-                target=platformName)
-            package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
             packages = package_name_mapper.get(builderName)
             if packages:
-                packages_list += packages
                 to_drop.append(builderDef)
         for dep in to_drop:
             del self._targets[dep]
-        return packages_list
 
     def run(self):
         try:

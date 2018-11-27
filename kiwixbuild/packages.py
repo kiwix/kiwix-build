@@ -3,6 +3,18 @@
 _fedora_common = ['automake', 'libtool', 'cmake', 'git', 'subversion', 'ccache', 'pkgconfig', 'gcc-c++', 'gettext-devel']
 _debian_common = ['automake', 'libtool', 'cmake', 'git', 'subversion', 'ccache', 'pkg-config', 'gcc', 'autopoint']
 PACKAGE_NAME_MAPPERS = {
+    'flatpak': {
+        'zlib': True,
+        'lzma': True,
+        'icu4c': True,
+        'qt': True,
+        'qtwebengine': True,
+        'ctpp2': True,
+        'ctpp2c': True,
+        'uuid': True,
+        'libxml2': True,
+        'libssl': True,
+    },
     'fedora_native_dyn': {
         'COMMON': _fedora_common,
         'uuid': ['libuuid-devel'],
