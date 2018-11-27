@@ -26,7 +26,7 @@ import json
 from shutil import copyfile
 
 MANIFEST = {
-    'id': 'org.kiwix.Client',
+    'app-id': 'org.kiwix.Client',
     'runtime': 'org.kde.Platform',
     'runtime-version': '5.11',
     'sdk': 'org.kde.Sdk',
@@ -217,7 +217,7 @@ class FlatpakBuilder:
         log = pj(self.platform.buildEnv.log_dir, 'cmd_bundle_flatpak.log')
         context = Context('bundle', log, False)
         command = "flatpak build-bundle repo {id}.flatpak {id}"
-        command = command.format(id = self.target.flatpak['manifest']['id'])
+        command = command.format(id = MANIFEST['app-id'])
         try:
             run_command(command, self.platform.buildEnv.build_dir, context, self.platform.buildEnv)
             context._finalise()
