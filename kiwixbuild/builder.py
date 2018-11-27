@@ -149,6 +149,10 @@ class Builder:
         packages_to_have = self._get_packages()
         packages_to_have = remove_duplicates(packages_to_have)
 
+        if option('assume_packages_installed'):
+            print("SKIP, Assume package installed")
+            return
+
         distname = neutralEnv('distname')
         if distname in ('fedora', 'redhat', 'centos'):
             package_installer = 'sudo dnf install {}'

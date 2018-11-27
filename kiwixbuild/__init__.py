@@ -38,6 +38,8 @@ def parse_args():
                           help="Clean all intermediate files after the (successfull) build")
     subgroup.add_argument('--dont-install-packages', action='store_true',
                           help="Do not try to install packages before compiling")
+    subgroup.add_argument('--assume-packages-installed', action='store_true',
+                          help="Assume the package to install to be aleady installed")
     subgroup.add_argument('--android-arch', action='append',
                           help=("Specify the architecture to build for android application/libraries.\n"
                                 "Can be specified several times to build for several architectures.\n"
