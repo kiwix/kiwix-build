@@ -249,40 +249,41 @@ for p in (NIGHTLY_KIWIX_ARCHIVES_DIR,
 
 make_release = re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", environ.get('TRAVIS_TAG', '')) is not None
 
-# The first thing we need to do is to (potentially) download already compiled base dependencies.
-base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.gz".format(
-    os=TRAVIS_OS_NAME,
-    platform=PLATFORM,
-    version=base_deps_meta_version)
+if PLATFORM != 'flatpak':
+    # The first thing we need to do is to (potentially) download already compiled base dependencies.
+    base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.gz".format(
+        os=TRAVIS_OS_NAME,
+        platform=PLATFORM,
+        version=base_deps_meta_version)
 
-print_message("Getting archive {}", base_dep_archive_name)
-try:
-    local_filename, _ = urlretrieve(
-        'http://tmp.kiwix.org/ci/{}'.format(base_dep_archive_name))
-    with tarfile.open(local_filename) as f:
-        f.extractall(str(HOME))
-except URLError:
-    print_message("Cannot get archive. Build dependencies")
-    if PLATFORM == 'android':
-        for arch in ('arm', 'arm64', 'x86', 'x86_64'):
-            archive_name = "base_deps_{os}_android_{arch}_{version}.tar.gz".format(
-                os=TRAVIS_OS_NAME,
-                arch=arch,
-                version=base_deps_meta_version)
-            print_message("Getting archive {}", archive_name)
-            try:
-                local_filename, _ = urlretrieve(
-                   'http://tmp.kiwix.org/ci/{}'.format(archive_name))
-                with tarfile.open(local_filename) as f:
-                    f.extractall(str(HOME))
-            except URLError:
-                pass
-    run_kiwix_build('alldependencies', platform=PLATFORM)
-    if SSH_KEY.exists():
-        archive = make_deps_archive('alldependencies', full=True)
-        destination = 'ci@tmp.kiwix.org:/data/tmp/ci/{}'
-        destination = destination.format(base_dep_archive_name)
-        scp(archive, destination)
+    print_message("Getting archive {}", base_dep_archive_name)
+    try:
+        local_filename, _ = urlretrieve(
+            'http://tmp.kiwix.org/ci/{}'.format(base_dep_archive_name))
+        with tarfile.open(local_filename) as f:
+            f.extractall(str(HOME))
+    except URLError:
+        print_message("Cannot get archive. Build dependencies")
+        if PLATFORM == 'android':
+            for arch in ('arm', 'arm64', 'x86', 'x86_64'):
+                archive_name = "base_deps_{os}_android_{arch}_{version}.tar.gz".format(
+                    os=TRAVIS_OS_NAME,
+                    arch=arch,
+                    version=base_deps_meta_version)
+                print_message("Getting archive {}", archive_name)
+                try:
+                    local_filename, _ = urlretrieve(
+                        'http://tmp.kiwix.org/ci/{}'.format(archive_name))
+                    with tarfile.open(local_filename) as f:
+                        f.extractall(str(HOME))
+                except URLError:
+                    pass
+        run_kiwix_build('alldependencies', platform=PLATFORM)
+        if SSH_KEY.exists():
+            archive = make_deps_archive('alldependencies', full=True)
+            destination = 'ci@tmp.kiwix.org:/data/tmp/ci/{}'
+            destination = destination.format(base_dep_archive_name)
+            scp(archive, destination)
 
 
 # A basic compilation to be sure everything is working (for a PR)
