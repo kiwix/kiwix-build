@@ -202,7 +202,7 @@ class FlatpakBuilder:
     def build(self):
         log = pj(self.platform.buildEnv.log_dir, 'cmd_build_flatpak.log')
         context = Context('build', log, False)
-        command = "flatpak-builder --ccache --force-clean --repo=repo builddir manifest.json"
+        command = "flatpak-builder --user --ccache --force-clean --repo=repo builddir manifest.json"
         try:
             run_command(command, self.platform.buildEnv.build_dir, context, self.platform.buildEnv)
             context._finalise()
