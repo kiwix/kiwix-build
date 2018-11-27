@@ -28,6 +28,7 @@ PACKAGE_NAME_MAPPERS = {
         'zimlib': None,
         'file' : ['file-devel'],
         'gumbo' : ['gumbo-parser-devel'],
+        'aria2': ['aria2'],
     },
     'fedora_native_static': {
         'COMMON': _fedora_common + ['glibc-static', 'libstdc++-static'],
@@ -72,6 +73,7 @@ PACKAGE_NAME_MAPPERS = {
         'libmicrohttpd': ['libmicrohttpd-dev', 'ccache'],
         'qt' : ['libqt5gui5', 'qtbase5-dev', 'qt5-default'],
         'qtwebengine' : ['qtwebengine5-dev'],
+        'aria2': ['aria2'],
     },
     'debian_native_static': {
         'COMMON': _debian_common + ['libbz2-dev', 'libmagic-dev'],

@@ -11,7 +11,7 @@ class KiwixDesktop(Dependency):
         git_dir = "kiwix-desktop"
 
     class Builder(QMakeBuilder):
-        dependencies = ["qt", "qtwebengine", "kiwix-lib"]
+        dependencies = ["qt", "qtwebengine", "kiwix-lib", "aria2"]
         @property
         def configure_option(self):
             options = ["PREFIX={}".format(self.buildEnv.install_dir)]
