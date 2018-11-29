@@ -14,6 +14,7 @@ PACKAGE_NAME_MAPPERS = {
         'uuid': True,
         'libxml2': True,
         'libssl': True,
+        'libcurl': True,
     },
     'fedora_native_dyn': {
         'COMMON': _fedora_common,
