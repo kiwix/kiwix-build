@@ -214,6 +214,7 @@ class FlatpakBuilder:
             try:
                 with open(log, 'r') as f:
                     print(f.read())
+                raise StopBuild()
             except:
                 pass
 
@@ -229,6 +230,7 @@ class FlatpakBuilder:
             try:
                 with open(log, 'r') as f:
                     print(f.read())
+                raise StopBuild()
             except:
                 pass
 
