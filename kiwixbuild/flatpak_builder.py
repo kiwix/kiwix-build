@@ -181,7 +181,7 @@ class FlatpakBuilder:
                 elif isinstance(builder, QMakeBuilder):
                     module['buildsystem'] = 'qmake'
                 # config-opts
-                print(builder)
+                print(module['name'])
                 if getattr(builder, 'configure_option', ''):
                     module['config-opts'] = builder.configure_option.split(' ')
 
@@ -214,6 +214,7 @@ class FlatpakBuilder:
             try:
                 with open(log, 'r') as f:
                     print(f.read())
+                raise StopBuild()
             except:
                 pass
 
@@ -229,6 +230,7 @@ class FlatpakBuilder:
             try:
                 with open(log, 'r') as f:
                     print(f.read())
+                raise StopBuild()
             except:
                 pass
 

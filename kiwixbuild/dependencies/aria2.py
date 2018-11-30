@@ -23,4 +23,4 @@ class Aria2(Dependency):
 
     class Builder(MakeBuilder):
         dependencies = ['zlib']
-        configure_option = "--disable-libaria2 --without-sqlite3"
+        configure_option = "--disable-libaria2 --disable-websocket --without-sqlite3"

@@ -115,7 +115,7 @@ def create_desktop_image():
         src_dir = SOURCE_DIR/'kiwix-desktop'
 
     if PLATFORM == 'flatpak':
-        build_path = BASE_DIR/'BUILD_flatpak'/'org.kiwix.Client.flatpak'
+        build_path = BASE_DIR/'org.kiwix.Client.flatpak'
         app_name = 'org.kiwix.Client.{}.flatpak'.format(postfix)
     else:
         build_path = HOME/'Kiwix-x86_64.AppImage'
@@ -335,7 +335,7 @@ else:
     TARGETS = ('libzim', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 
 for target in TARGETS:
-    if environ['TRAVIS_EVENT_TYPE'] == 'cron' and PLATFORM != 'android':
+    if environ['TRAVIS_EVENT_TYPE'] == 'cron' and PLATFORM not in ('android', 'flatpak'):
         run_kiwix_build(target,
                         platform=PLATFORM,
                         build_deps_only=True)
