@@ -8,5 +8,5 @@ SSH_KEY=C:\\projects\\kiwix-build\\appveyor\\nightlybot_id_key
 #then
   scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
     ${NIGHTLY_KIWIX_ARCHIVES_DIR} \
-    nightlybot@download.kiwix.org:/var/www/download.kiwix.org/nightly
+    ci@download.kiwix.org:/data/download/nightly
 #fi

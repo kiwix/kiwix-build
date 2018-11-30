@@ -13,9 +13,9 @@ BASE_DIR="BUILD_${PLATFORM}"
 
 mkdir -p ${HOME}/APKS
 
-scp -i ${SSH_KEY} nightlybot@download.kiwix.org:${DEPLOY_DIR}/* ${HOME}/APKS
+scp -i ${SSH_KEY} ci@download.kiwix.org:${DEPLOY_DIR}/* ${HOME}/APKS
 
-ssh -i ${SSH_KEY} nightlybot@download.kiwix.org "rm -rf ${DEPLOY_DIR}"
+ssh -i ${SSH_KEY} ci@download.kiwix.org "rm -rf ${DEPLOY_DIR}"
 
 ${TRAVIS_BUILD_DIR}/build_custom_app.py \
   --step publish \

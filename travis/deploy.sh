@@ -14,7 +14,7 @@ if [[ "$TRAVIS_EVENT_TYPE" = "cron" ]]
 then
   scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
     ${NIGHTLY_KIWIX_ARCHIVES_DIR} \
-    nightlybot@download.kiwix.org:/var/www/download.kiwix.org/nightly
+    ci@download.kiwix.org:/data/download/nightly
   scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
     ${NIGHTLY_ZIM_ARCHIVES_DIR} \
     ci@download.openzim.org:/data/openzim/nightly
@@ -29,7 +29,7 @@ then
       subdir=$(basename $(dirname $archive))
       scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
-        nightlybot@download.kiwix.org:/var/www/download.kiwix.org/release/${subdir}
+        ci@download.kiwix.org:/data/download/release/${subdir}
     done
   fi
 
@@ -53,7 +53,7 @@ then
       subdir=$(basename $(dirname $archive))
       scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
-        nightlybot@download.kiwix.org:/var/www/download.kiwix.org/release/${subdir}
+        ci@download.kiwix.org:/data/download/release/${subdir}
     done
   fi
 
