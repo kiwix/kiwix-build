@@ -20,8 +20,8 @@ TOOLCHAINS/android-sdk-r25.2.3/build-tools/25.0.2/apksigner sign \
   --out ${SIGNED_APK} \
   ${INPUT_APK_FILE}
 
-ssh -i ${SSH_KEY} nightlybot@download.kiwix.org "mkdir -p ${DEPLOY_DIR}"
+ssh -i ${SSH_KEY} ci@download.kiwix.org "mkdir -p ${DEPLOY_DIR}"
 
 scp -i ${SSH_KEY} \
   ${SIGNED_APK} \
-  nightlybot@download.kiwix.org:${DEPLOY_DIR}
+  ci@download.kiwix.org:${DEPLOY_DIR}
