@@ -41,7 +41,7 @@ else:
 # We have build everything. Now create archives for public deployement.
 BINARIES = {
     'kiwix-tools': ('kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve'),
-    'zim-tools': ('zimbench', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit'),
+    'zim-tools': ('zimbench', 'zimcheck', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit'),
     'zimwriterfs': ('zimwriterfs',)
 }
 
