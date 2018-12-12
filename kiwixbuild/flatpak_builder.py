@@ -187,6 +187,10 @@ class FlatpakBuilder:
 
         manifest = MANIFEST.copy()
         modules = [m for m in modules.values() if m.get('sources')]
+        for m in modules:
+            temp = m['sources']
+            del m['sources']
+            m['sources'] = temp
         manifest['modules'] = modules
         manifest_name = "{}.json".format(MANIFEST['app-id'])
         manifest_path = pj(self.platform.buildEnv.build_dir, manifest_name)
