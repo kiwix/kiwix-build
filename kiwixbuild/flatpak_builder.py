@@ -175,7 +175,6 @@ class FlatpakBuilder:
                 builder = get_target_step(stepDef)
                 if isinstance(builder, MesonBuilder):
                     module['buildsystem'] = 'meson'
-                    module['builddir'] = True
                 elif isinstance(builder, CMakeBuilder):
                     module['buildsystem'] = 'cmake'
                     module['builddir'] = True
