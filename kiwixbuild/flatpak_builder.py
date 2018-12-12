@@ -187,7 +187,9 @@ class FlatpakBuilder:
 
         manifest = MANIFEST.copy()
         manifest['modules'] = list(modules.values())
-        with open(pj(self.platform.buildEnv.build_dir, 'manifest.json'), 'w') as f:
+        manifest_name = "{}.json".format(MANIFEST['app-id'])
+        manifest_path = pj(self.platform.buildEnv.build_dir, manifest_name)
+        with open(manifest_path, 'w') as f:
             f.write(json.dumps(manifest, indent=4))
 
     def copy_patches(self):
@@ -206,7 +208,8 @@ class FlatpakBuilder:
     def build(self):
         log = pj(self.platform.buildEnv.log_dir, 'cmd_build_flatpak.log')
         context = Context('build', log, False)
-        command = "flatpak-builder --user --ccache --force-clean --repo=repo builddir manifest.json"
+        command = "flatpak-builder --user --ccache --force-clean --repo=repo builddir {id}.json"
+        command = command.format(id = MANIFEST['app-id'])
         try:
             run_command(command, self.platform.buildEnv.build_dir, context, self.platform.buildEnv)
             context._finalise()
