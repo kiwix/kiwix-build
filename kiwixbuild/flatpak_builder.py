@@ -186,7 +186,8 @@ class FlatpakBuilder:
                     module['config-opts'] = builder.configure_option.split(' ')
 
         manifest = MANIFEST.copy()
-        manifest['modules'] = list(modules.values())
+        modules = [m for m in modules.values() if m.get('sources')]
+        manifest['modules'] = modules
         manifest_name = "{}.json".format(MANIFEST['app-id'])
         manifest_path = pj(self.platform.buildEnv.build_dir, manifest_name)
         with open(manifest_path, 'w') as f:
