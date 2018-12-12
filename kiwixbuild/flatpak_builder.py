@@ -138,7 +138,8 @@ class FlatpakBuilder:
             module['name'] = stepDef[1]
             if stepDef[0] == 'source':
                 source = get_target_step(stepDef)
-                module['no-autogen'] = getattr(source, 'flatpack_no_autogen', False)
+                if getattr(source, 'flatpak_no_autogen', False):
+                    module['no-autogen'] = True
                 module_sources = module.setdefault('sources', [])
                 if isinstance(source, ReleaseDownload):
                     src = {
