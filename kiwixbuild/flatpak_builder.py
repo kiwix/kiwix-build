@@ -138,7 +138,8 @@ class FlatpakBuilder:
             module['name'] = stepDef[1]
             if stepDef[0] == 'source':
                 source = get_target_step(stepDef)
-                module['no-autogen'] = getattr(source, 'flatpack_no_autogen', False)
+                if getattr(source, 'flatpak_no_autogen', False):
+                    module['no-autogen'] = True
                 module_sources = module.setdefault('sources', [])
                 if isinstance(source, ReleaseDownload):
                     src = {
@@ -174,7 +175,6 @@ class FlatpakBuilder:
                 builder = get_target_step(stepDef)
                 if isinstance(builder, MesonBuilder):
                     module['buildsystem'] = 'meson'
-                    module['builddir'] = True
                 elif isinstance(builder, CMakeBuilder):
                     module['buildsystem'] = 'cmake'
                     module['builddir'] = True
@@ -186,8 +186,15 @@ class FlatpakBuilder:
                     module['config-opts'] = builder.configure_option.split(' ')
 
         manifest = MANIFEST.copy()
-        manifest['modules'] = list(modules.values())
-        with open(pj(self.platform.buildEnv.build_dir, 'manifest.json'), 'w') as f:
+        modules = [m for m in modules.values() if m.get('sources')]
+        for m in modules:
+            temp = m['sources']
+            del m['sources']
+            m['sources'] = temp
+        manifest['modules'] = modules
+        manifest_name = "{}.json".format(MANIFEST['app-id'])
+        manifest_path = pj(self.platform.buildEnv.build_dir, manifest_name)
+        with open(manifest_path, 'w') as f:
             f.write(json.dumps(manifest, indent=4))
 
     def copy_patches(self):
@@ -206,7 +213,8 @@ class FlatpakBuilder:
     def build(self):
         log = pj(self.platform.buildEnv.log_dir, 'cmd_build_flatpak.log')
         context = Context('build', log, False)
-        command = "flatpak-builder --user --ccache --force-clean --repo=repo builddir manifest.json"
+        command = "flatpak-builder --user --ccache --force-clean --repo=repo builddir {id}.json"
+        command = command.format(id = MANIFEST['app-id'])
         try:
             run_command(command, self.platform.buildEnv.build_dir, context, self.platform.buildEnv)
             context._finalise()
