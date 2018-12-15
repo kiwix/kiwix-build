@@ -115,8 +115,8 @@ def create_desktop_image():
         src_dir = SOURCE_DIR/'kiwix-desktop'
 
     if PLATFORM == 'flatpak':
-        build_path = BASE_DIR/'org.kiwix.Client.flatpak'
-        app_name = 'org.kiwix.Client.{}.flatpak'.format(postfix)
+        build_path = BASE_DIR/'org.kiwix.desktop.flatpak'
+        app_name = 'org.kiwix.desktop.{}.flatpak'.format(postfix)
     else:
         build_path = HOME/'Kiwix-x86_64.AppImage'
         app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)

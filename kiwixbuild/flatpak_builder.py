@@ -26,12 +26,11 @@ import json
 from shutil import copyfile
 
 MANIFEST = {
-    'app-id': 'org.kiwix.Client',
+    'app-id': 'org.kiwix.desktop',
     'runtime': 'org.kde.Platform',
     'runtime-version': '5.11',
     'sdk': 'org.kde.Sdk',
     'command': 'kiwix-desktop',
-    'rename-desktop-file' : 'kiwix-desktop.desktop',
     'rename-icon': 'kiwix-desktop',
     'finish-args': [
         '--socket=wayland',
@@ -40,7 +39,6 @@ MANIFEST = {
         '--share=ipc',
         '--device=dri',
         '--socket=pulseaudio',
-        '--filesystem=xdg-data',
     ],
     'cleanup': [
         '/include',
