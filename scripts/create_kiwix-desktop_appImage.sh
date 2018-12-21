@@ -8,7 +8,7 @@ APPDIR=${3:-$PWD/AppDir}
 
 #TODO We should have our icon
 ICONFILE=$SOURCEDIR/resources/icons/kiwix/app_icon.svg
-DESKTOPFILE=$SOURCEDIR/resources/kiwix-desktop.desktop
+DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop.desktop
 
 # Create structure
 mkdir -p $APPDIR/usr/{bin,lib,share} $APPDIR/usr/share/applications $APPDIR/usr/share/icons/hicolor/48x48/apps
