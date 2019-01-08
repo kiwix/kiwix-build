@@ -50,7 +50,7 @@ base_deps_versions = {
   'icu4c' : '58.2',
   'gradle' : '4.6',
   'libaria2' : '1.33.1',
-  'libmagic' : '5.33',
+  'libmagic' : '5.35',
   'android-sdk' : 'r25.2.3',
   'android-ndk' : 'r13b',
   'qt' : '5.10.1',

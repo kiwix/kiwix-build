@@ -15,9 +15,10 @@ class LibMagic(Dependency):
     class Source(ReleaseDownload):
         name = "libmagic"
         source_dir = "libmagic"
-        archive = Remotefile('file-5.33.tar.gz',
-                             '1c52c8c3d271cd898d5511c36a68059cda94036111ab293f01f83c3525b737c6',
-                             'https://fossies.org/linux/misc/file-5.33.tar.gz')
+        archive_top_dir = 'file-5.35'
+        archive = Remotefile('file-5.35.tar.gz',
+                             '30c45e817440779be7aac523a905b123cba2a6ed0bf4f5439e1e99ba940b5546',
+                             'https://fossies.org/linux/misc/file-5.35.tar.gz')
 
     class Builder(MakeBuilder):
 
