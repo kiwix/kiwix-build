@@ -17,7 +17,7 @@ class Win32PlatformInfo(PlatformInfo):
             'binaries': self.binaries,
             'root_path': self.root_path,
             'extra_libs': self.extra_libs,
-            'extra_cflags': ['-DWIN32'],
+            'extra_cflags': ['-DWIN32', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
             'host_machine': {
                 'system': 'Windows',
                 'lsystem': 'windows',
