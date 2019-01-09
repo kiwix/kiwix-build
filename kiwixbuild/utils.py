@@ -161,6 +161,7 @@ class Context:
 
     def _finalise(self):
         if self.autoskip_file is not None:
+            os.makedirs(os.path.dirname(self.autoskip_file), exist_ok=True)
             with open(self.autoskip_file, 'w'):
                 pass
 

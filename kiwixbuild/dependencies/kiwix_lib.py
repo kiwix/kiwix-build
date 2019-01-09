@@ -12,23 +12,13 @@ class Kiwixlib(Dependency):
         git_dir = "kiwix-lib"
 
     class Builder(MesonBuilder):
-        @classmethod
-        def get_dependencies(cls, platformInfo, allDeps):
-            base_dependencies = ["pugixml", "libzim", "zlib", "lzma", "libcurl", "icu4c"]
-            if (platformInfo.build != 'android' and
-                neutralEnv('distname') != 'Darwin'):
-                base_dependencies += ['ctpp2c', 'ctpp2']
-            return base_dependencies
-
+        dependencies = ["pugixml", "libzim", "zlib", "lzma", "libcurl", "icu4c", "mustache"]
 
         @property
         def configure_option(self):
-            if self.buildEnv.platformInfo.build == 'flatpak':
-                return ""
-            base_option = "-Dctpp2-install-prefix={buildEnv.install_dir}"
             if self.buildEnv.platformInfo.build == 'android':
-                base_option += ' -Dandroid=true'
-            return base_option
+                return '-Dandroid=true'
+            return ''
 
         @property
         def library_type(self):

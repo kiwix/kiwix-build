@@ -50,6 +50,7 @@ build_script:
   - IF "%USE_CACHE%" NEQ "1" appveyor\install_icu.cmd
   - IF "%USE_CACHE%" NEQ "1" appveyor\install_pugixml.cmd
   - IF "%USE_CACHE%" NEQ "1" appveyor\install_aria2.cmd
+  - IF "%USE_CACHE%" NEQ "1" appveyor\install_mustache.cmd
   - IF "%USE_CACHE%" NEQ "1" %MINGW64_RUN% "cd /c/projects/kiwix-build && appveyor/create_cache.sh"
   - appveyor\install_libzim.cmd
   - appveyor\install_kiwix-lib.cmd
