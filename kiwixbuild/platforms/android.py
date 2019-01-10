@@ -37,7 +37,7 @@ class AndroidPlatformInfo(PlatformInfo):
             'binaries': self.binaries(install_path),
             'root_path': pj(install_path, 'sysroot'),
             'extra_libs': ['-llog'],
-            'extra_cflags': [],
+            'extra_cflags': ['-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
             'host_machine': {
                 'system': 'Android',
                 'lsystem': 'android',
