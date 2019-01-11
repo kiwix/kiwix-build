@@ -1,7 +1,7 @@
 import os
 
 from .base import PlatformInfo
-from kiwixbuild.utils import which
+from kiwixbuild.utils import which, pj
 
 
 class I586PlatformInfo(PlatformInfo):
