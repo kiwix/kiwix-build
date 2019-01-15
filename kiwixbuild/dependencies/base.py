@@ -470,7 +470,7 @@ class MesonBuilder(Builder):
 
 
 class GradleBuilder(Builder):
-    gradle_target = "build"
+    gradle_target = "assembleKiwixRelease assembleKiwixDebug"
     gradle_option = "-i --no-daemon --build-cache"
 
     def build(self):
