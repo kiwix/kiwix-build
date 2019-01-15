@@ -208,12 +208,9 @@ class FlatpakBuilder:
             run_command(command, self.platform.buildEnv.build_dir, context, self.platform.buildEnv)
             context._finalise()
         except subprocess.CalledProcessError:
-            try:
-                with open(log, 'r') as f:
-                    print(f.read())
-                raise StopBuild()
-            except:
-                pass
+            with open(log, 'r') as f:
+                print(f.read())
+            raise StopBuild()
 
     def bundle(self):
         log = pj(self.platform.buildEnv.log_dir, 'cmd_bundle_flatpak.log')
@@ -224,12 +221,9 @@ class FlatpakBuilder:
             run_command(command, self.platform.buildEnv.build_dir, context, self.platform.buildEnv)
             context._finalise()
         except subprocess.CalledProcessError:
-            try:
-                with open(log, 'r') as f:
-                    print(f.read())
-                raise StopBuild()
-            except:
-                pass
+            with open(log, 'r') as f:
+                print(f.read())
+            raise StopBuild()
 
 
     def _get_packages(self):
