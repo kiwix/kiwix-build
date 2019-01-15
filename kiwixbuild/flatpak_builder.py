@@ -171,17 +171,8 @@ class FlatpakBuilder:
 
             else:
                 builder = get_target_step(stepDef)
-                if isinstance(builder, MesonBuilder):
-                    module['buildsystem'] = 'meson'
-                elif isinstance(builder, CMakeBuilder):
-                    module['buildsystem'] = 'cmake'
-                    module['builddir'] = True
-                elif isinstance(builder, QMakeBuilder):
-                    module['buildsystem'] = 'qmake'
-                # config-opts
+                builder.set_flatpak_buildsystem(module)
                 print(module['name'])
-                if getattr(builder, 'configure_option', ''):
-                    module['config-opts'] = builder.configure_option.split(' ')
 
         manifest = MANIFEST.copy()
         modules = [m for m in modules.values() if m.get('sources')]

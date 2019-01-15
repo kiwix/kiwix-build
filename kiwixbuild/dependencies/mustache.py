@@ -24,3 +24,6 @@ class Mustache(Dependency):
             copy2(pj(self.source_path, 'mustache.hpp'),
                   pj(self.buildEnv.install_dir, 'include'))
 
+        def set_flatpak_buildsystem(self, module):
+            module['buildsystem'] = 'simple'
+            module['build-commands'] = ['cp mustache.hpp /app/include']

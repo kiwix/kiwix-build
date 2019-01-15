@@ -263,6 +263,12 @@ class Builder:
         self.command('configure', self._configure)
         self.command('make_dist', self._make_dist)
 
+    def set_flatpak_buildsystem(self, module):
+        if getattr(self, 'flatpak_buildsystem', None):
+            module['buildsystem'] = self.flatpak_buildsystem
+        if getattr(self, 'configure_option', ''):
+            module['config-opts'] = self.configure_option.split(' ')
+
 
 class NoopBuilder(Builder):
     def build(self):
@@ -283,6 +289,7 @@ class MakeBuilder(Builder):
     configure_env = None
     make_target = ""
     make_install_target = "install"
+    flatpak_buildsystem = None
 
     @property
     def all_configure_option(self):
@@ -337,6 +344,8 @@ class MakeBuilder(Builder):
 
 
 class CMakeBuilder(MakeBuilder):
+    flatpak_buildsystem = 'cmake'
+
     def _configure(self, context):
         context.try_skip(self.build_path)
         cross_option = ""
@@ -367,9 +376,14 @@ class CMakeBuilder(MakeBuilder):
             env.update(self.configure_env)
         run_command(command, self.build_path, context, env=env, buildEnv=self.buildEnv, cross_env_only=True)
 
+    def set_flatpak_buildsystem(self, module):
+        super().set_flatpak_buildsystem( module)
+        module['buildir'] = True
+
 
 class QMakeBuilder(MakeBuilder):
     qmake_target = ""
+    flatpak_buildsystem = 'qmake'
 
     @property
     def env_option(self):
@@ -416,6 +430,7 @@ class QMakeBuilder(MakeBuilder):
 class MesonBuilder(Builder):
     configure_option = ""
     test_option = ""
+    flatpak_buildsystem = 'meson'
 
     @property
     def library_type(self):
