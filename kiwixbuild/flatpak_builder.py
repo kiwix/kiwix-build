@@ -171,17 +171,8 @@ class FlatpakBuilder:
 
             else:
                 builder = get_target_step(stepDef)
-                if isinstance(builder, MesonBuilder):
-                    module['buildsystem'] = 'meson'
-                elif isinstance(builder, CMakeBuilder):
-                    module['buildsystem'] = 'cmake'
-                    module['builddir'] = True
-                elif isinstance(builder, QMakeBuilder):
-                    module['buildsystem'] = 'qmake'
-                # config-opts
+                builder.set_flatpak_buildsystem(module)
                 print(module['name'])
-                if getattr(builder, 'configure_option', ''):
-                    module['config-opts'] = builder.configure_option.split(' ')
 
         manifest = MANIFEST.copy()
         modules = [m for m in modules.values() if m.get('sources')]
@@ -217,12 +208,9 @@ class FlatpakBuilder:
             run_command(command, self.platform.buildEnv.build_dir, context, self.platform.buildEnv)
             context._finalise()
         except subprocess.CalledProcessError:
-            try:
-                with open(log, 'r') as f:
-                    print(f.read())
-                raise StopBuild()
-            except:
-                pass
+            with open(log, 'r') as f:
+                print(f.read())
+            raise StopBuild()
 
     def bundle(self):
         log = pj(self.platform.buildEnv.log_dir, 'cmd_bundle_flatpak.log')
@@ -233,12 +221,9 @@ class FlatpakBuilder:
             run_command(command, self.platform.buildEnv.build_dir, context, self.platform.buildEnv)
             context._finalise()
         except subprocess.CalledProcessError:
-            try:
-                with open(log, 'r') as f:
-                    print(f.read())
-                raise StopBuild()
-            except:
-                pass
+            with open(log, 'r') as f:
+                print(f.read())
+            raise StopBuild()
 
 
     def _get_packages(self):
