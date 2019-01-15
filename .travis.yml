@@ -76,6 +76,7 @@ addons:
       - libmagic-dev
 matrix:
   allow_failures:
+    - env: PLATFORM="native_dyn" DESKTOP_ONLY=1
     - env: PLATFORM="android_arm"
     - env: PLATFORM="android_arm64"
     - env: PLATFORM="android_mips"
