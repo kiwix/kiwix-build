@@ -7,6 +7,7 @@ from .platforms import PlatformInfo
 from .utils import remove_duplicates, run_command, StopBuild, Context
 from .dependencies import Dependency
 from .packages import PACKAGE_NAME_MAPPERS
+from .versions import base_deps_versions
 from ._global import (
     neutralEnv, option,
     add_target_step, get_target_step, target_steps,
@@ -28,7 +29,7 @@ from shutil import copyfile
 MANIFEST = {
     'app-id': 'org.kiwix.desktop',
     'runtime': 'org.kde.Platform',
-    'runtime-version': '5.11',
+    'runtime-version': base_deps_versions['org.kde'],
     'sdk': 'org.kde.Sdk',
     'command': 'kiwix-desktop',
     'rename-icon': 'kiwix-desktop',
