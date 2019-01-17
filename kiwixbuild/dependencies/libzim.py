@@ -16,8 +16,9 @@ class Libzim(Dependency):
 
         @property
         def configure_option(self):
-            options = ""
             platformInfo = self.buildEnv.platformInfo
             if platformInfo.build == 'android':
-                options += "-DUSE_BUFFER_HEADER=false"
-            return options
+                return "-DUSE_BUFFER_HEADER=false"
+            if platformInfo.build == 'iOS':
+                return "-Db_bitcode=true"
+            return ""
