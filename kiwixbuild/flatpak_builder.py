@@ -25,6 +25,9 @@ from .dependencies.base import (
     SCRIPT_DIR)
 import json
 from shutil import copyfile
+from urllib.parse import urlparse
+from urllib.request import urlopen
+import json
 
 MANIFEST = {
     'app-id': 'org.kiwix.desktop',
@@ -58,7 +61,7 @@ MANIFEST = {
     ]
 }
 
-
+GET_REF_URL_API_TEMPLATE = 'https://api.github.com/repos{repo}/git/refs/tags/{ref}'
 
 class FlatpakBuilder:
     def __init__(self):
@@ -155,6 +158,18 @@ class FlatpakBuilder:
                         'url': source.git_remote,
                         'tag': source.git_ref
                     }
+                    try:
+                        parsed = urlparse(source.git_remote)
+                        if parsed.hostname == 'github.com':
+                            repo = parsed.path[:-4]
+                            api_url = GET_REF_URL_API_TEMPLATE.format(
+                                repo = repo,
+                                ref = source.git_ref)
+                            with urlopen(api_url) as r:
+                                ret = json.loads(r.read())
+                            src['commit'] = ret['object']['sha']
+                    except:
+                        pass
                     module_sources.append(src)
                 for p in getattr(source, 'patches', []):
                     patch = {
