@@ -10,9 +10,12 @@ then
   wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-mac.zip
   unzip ninja-mac.zip ninja
 else
-  pip3 install --user --upgrade pip wheel
-  pip3 install --user pillow
-  pip3 install --user .
+  wget https://bootstrap.pypa.io/get-pip.py
+  python3.5 get-pip.py --user
+  python3.5 -m pip install --user --upgrade pip wheel
+  python3.5 -m pip install --user pillow
+  python3.5 -m pip install --user .
+  python3.5 -m pip show -f kiwix-build
 
   wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
   unzip ninja-linux.zip ninja

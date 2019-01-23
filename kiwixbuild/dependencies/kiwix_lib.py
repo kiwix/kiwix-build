@@ -18,6 +18,8 @@ class Kiwixlib(Dependency):
         def configure_option(self):
             if self.buildEnv.platformInfo.build == 'android':
                 return '-Dandroid=true'
+            if self.buildEnv.platformInfo.build == 'iOS':
+                return '-Db_bitcode=true'
             return ''
 
         @property
