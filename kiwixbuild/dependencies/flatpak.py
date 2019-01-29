@@ -8,7 +8,6 @@ pj = os.path.join
 class org_kde(Dependency):
     neutral = False
     name = 'org.kde'
-    version = '5.11'
 
     Source = NoopSource
 
@@ -26,7 +25,7 @@ class org_kde(Dependency):
             command = command.format(
                 remote_name = 'flathub',
                 name = self.target.name,
-                version = self.target.version
+                version = self.target.version()
             )
             run_command(command, self.buildEnv.build_dir, context, buildEnv=self.buildEnv)
 
@@ -34,4 +33,3 @@ class org_kde(Dependency):
             self.command('setup_remote', self._setup_remote)
             self.command('install_sdk', self._install_sdk)
 
-     
