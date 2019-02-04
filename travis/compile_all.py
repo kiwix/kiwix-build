@@ -40,9 +40,10 @@ else:
 
 # We have build everything. Now create archives for public deployement.
 BINARIES = {
-    'kiwix-tools': ('kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve'),
-    'zim-tools': ('zimbench', 'zimcheck', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit'),
-    'zimwriterfs': ('zimwriterfs',)
+    'kiwix-tools': ('bin', ('kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve')),
+    'zim-tools': ('bin', ('zimbench', 'zimcheck', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit')),
+    'zimwriterfs': ('bin', ('zimwriterfs',)),
+    'libzim': ('lib/x86_64-linux-gnu', ('libzim.so',))
 }
 
 _date = date.today().isoformat()
@@ -135,8 +136,8 @@ def create_desktop_image():
 
 
 def make_archive(project, platform):
-    file_to_archives = BINARIES[project]
-    base_bin_dir = BASE_DIR/'INSTALL'/'bin'
+    base_dir, file_to_archives = BINARIES[project]
+    base_dir = BASE_DIR/'INSTALL'/base_dir
 
     if make_release:
         postfix = main_project_versions[project]
@@ -167,11 +168,11 @@ def make_archive(project, platform):
     if platform == "win-i686":
         file_to_archives = ['{}.exe'.format(f) for f in file_to_archives]
         open_archive = lambda a : zipfile.ZipFile(str(a), 'w', compression=zipfile.ZIP_DEFLATED)
-        archive_add = lambda a, f : a.write(str(base_bin_dir/f), arcname=str(f))
+        archive_add = lambda a, f : a.write(str(base_dir/f), arcname=str(f))
         archive_ext = ".zip"
     else:
         open_archive = lambda a : tarfile.open(str(a), 'w:gz')
-        archive_add = lambda a, f : a.add(str(base_bin_dir/f), arcname="{}/{}".format(archive_name, str(f)))
+        archive_add = lambda a, f : a.add(str(base_dir/f), arcname="{}/{}".format(archive_name, str(f)))
         archive_ext = ".tar.gz"
 
 
@@ -186,6 +187,8 @@ def make_deps_archive(target, full=False):
         TRAVIS_OS_NAME, PLATFORM, target)
     print_message("Create archive {}.", archive_name)
     files_to_archive = [BASE_DIR/'INSTALL']
+    if PLATFORM == 'native_mixed':
+        files_to_archive += [HOME/'BUILD_native_static'/'INSTALL']
     if PLATFORM.startswith('android'):
         files_to_archive.append(HOME/'BUILD_neutral'/'INSTALL')
     if PLATFORM == 'android':
@@ -297,6 +300,8 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
             TARGETS = ('kiwix-lib', 'zim-tools', 'zimwriterfs')
         elif PLATFORM == 'native_dyn' and KIWIX_DESKTOP_ONLY:
             TARGETS = ('kiwix-desktop', )
+        elif PLATFORM == 'native_mixed':
+            TARGETS = ('libzim', )
         else:
             TARGETS = ('kiwix-tools', 'zim-tools', 'zimwriterfs')
     elif PLATFORM == 'flatpak':
@@ -327,6 +332,8 @@ elif PLATFORM.startswith('native_'):
     else:
         if PLATFORM == 'native_dyn' and KIWIX_DESKTOP_ONLY:
             TARGETS = ('kiwix-desktop', )
+        elif PLATFORM == 'native_mixed':
+            TARGETS = ('libzim', )
         else:
             TARGETS = ('libzim', 'zimwriterfs', 'zim-tools', 'kiwix-lib', 'kiwix-tools')
 elif PLATFORM == 'flatpak':
@@ -379,6 +386,8 @@ if make_release and PLATFORM == 'native_dyn':
                 in_file = BASE_DIR/full_target_name/'{}.tar.gz'.format(full_target_name)
             if in_file.exists():
                 shutil.copy(str(in_file), str(out_dir/target))
+elif PLATFORM == 'native_mixed':
+    make_archive('libzim', 'linux-x86_64')
 elif PLATFORM == 'native_static':
     for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
         make_archive(target, 'linux-x86_64')

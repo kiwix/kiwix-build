@@ -2,6 +2,7 @@ from .base import (
     Dependency,
     GitClone,
     MesonBuilder)
+from kiwixbuild._global import option
 
 class Libzim(Dependency):
     name = "libzim"
@@ -21,4 +22,6 @@ class Libzim(Dependency):
                 return "-DUSE_BUFFER_HEADER=false"
             if platformInfo.build == 'iOS':
                 return "-Db_bitcode=true"
+            if platformInfo.name == 'native_mixed' and option('target') == 'libzim':
+                return "-Dstatic-linkage=true"
             return ""

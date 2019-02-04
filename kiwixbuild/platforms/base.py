@@ -65,6 +65,13 @@ class PlatformInfo(metaclass=_MetaPlatform):
             depPlatform.add_targets(depName, targets)
         return [(self.name, targetName)]
 
+    def get_fully_qualified_dep(self, dep):
+         if isinstance(dep, tuple):
+            return dep
+         else:
+            return self.name, dep
+
+
     def get_cross_config(self):
         return {}
 

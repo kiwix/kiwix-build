@@ -30,7 +30,6 @@ PACKAGE_NAME_MAPPERS = {
     },
     'fedora_native_static': {
         'COMMON': _fedora_common + ['glibc-static', 'libstdc++-static'],
-        'zlib': ['zlib-devel', 'zlib-static'],
         'lzma': ['xz-devel', 'xz-static']
         # Either there is no packages, or no static or too old
     },
@@ -73,8 +72,6 @@ PACKAGE_NAME_MAPPERS = {
     },
     'debian_native_static': {
         'COMMON': _debian_common + ['libbz2-dev', 'libmagic-dev'],
-        'zlib': ['zlib1g-dev'],
-        'uuid': ['uuid-dev'],
     },
     'debian_i586_dyn': {
         'COMMON': _debian_common + ['libc6-dev:i386', 'libstdc++-6-dev:i386', 'gcc-multilib', 'g++-multilib'],
