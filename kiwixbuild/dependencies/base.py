@@ -312,6 +312,7 @@ class MakeBuilder(Builder):
         env = Defaultdict(str, os.environ)
         if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
+            env['CXXFLAGS'] = env['CXXFLAGS'] + ' -fPIC'
         if self.configure_env:
             for k in self.configure_env:
                 if k.startswith('_format_'):
@@ -367,6 +368,7 @@ class CMakeBuilder(MakeBuilder):
         env = Defaultdict(str, os.environ)
         if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
+            env['CXXFLAGS'] = env['CXXFLAGS'] + ' -fPIC'
         if self.configure_env:
             for k in self.configure_env:
                 if k.startswith('_format_'):
