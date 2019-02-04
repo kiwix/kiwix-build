@@ -68,6 +68,7 @@ env:
     - PLATFORM="native_dyn"
     - PLATFORM="armhf_dyn"
     - PLATFORM="armhf_static"
+    - PLATFORM="native_mixed"
 addons:
   ssh_known_hosts:
   - download.kiwix.org
