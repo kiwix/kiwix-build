@@ -8,7 +8,7 @@ from datetime import date
 import tarfile, zipfile
 import subprocess
 import re
-from urllib.request import urlretrieve
+from urllib.request import urlopen
 from urllib.error import URLError
 
 from kiwixbuild.versions import (
@@ -252,6 +252,19 @@ for p in (NIGHTLY_KIWIX_ARCHIVES_DIR,
 
 make_release = re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", environ.get('TRAVIS_TAG', '')) is not None
 
+def download_base_archive(base_name):
+    url = 'http://tmp.kiwix.org/ci/{}'.format(base_name)
+    file_path = str(HOME/base_name)
+    batch_size = 1024*1024*8
+    with urlopen(url) as resource, open(file_path, 'wb') as file:
+        while True:
+            batch = resource.read(batch_size)
+            if not batch:
+                break
+            print(".", end="")
+            file.write(batch)
+    return file_path
+
 if PLATFORM != 'flatpak':
     # The first thing we need to do is to (potentially) download already compiled base dependencies.
     base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.gz".format(
@@ -261,8 +274,7 @@ if PLATFORM != 'flatpak':
 
     print_message("Getting archive {}", base_dep_archive_name)
     try:
-        local_filename, _ = urlretrieve(
-            'http://tmp.kiwix.org/ci/{}'.format(base_dep_archive_name))
+        local_filename = download_base_archive(base_dep_archive_name)
         with tarfile.open(local_filename) as f:
             f.extractall(str(HOME))
     except URLError:
@@ -275,8 +287,7 @@ if PLATFORM != 'flatpak':
                     version=base_deps_meta_version)
                 print_message("Getting archive {}", archive_name)
                 try:
-                    local_filename, _ = urlretrieve(
-                        'http://tmp.kiwix.org/ci/{}'.format(archive_name))
+                    local_filename = download_base_archive(archive_name)
                     with tarfile.open(local_filename) as f:
                         f.extractall(str(HOME))
                 except URLError:

@@ -27,16 +27,15 @@ class android_sdk(Dependency):
             shutil.copytree(self.source_path, tools_dir)
             script = pj(tools_dir, 'android')
             command = '{script} --verbose update sdk -a --no-ui --filter {packages}'
+            packages = [
+                'tools','platform-tools',
+                'build-tools-28.0.3', 'build-tools-27.0.3',
+                'android-28', 'android-27'
+            ]
             command = command.format(
                 script=script,
-                packages = ','.join(str(i) for i in [1,2,8,34,162])
+                packages = ','.join(packages)
             )
-            # packages correspond to :
-            # - 1 : Android SDK Tools, revision 25.2.5
-            # - 2 : Android SDK Platform-tools, revision 25.0.3
-            # - 8 : Android SDK Build-tools, revision 24.0.1
-            # - 34 : SDK Platform Android 7.0, API 24, revision 2
-            # - 162 : Android Support Repository, revision 44
             run_command(command, self.install_path, context, input="y\n")
 
         def _fix_licenses(self, context):

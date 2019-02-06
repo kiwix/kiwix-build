@@ -10,9 +10,9 @@ class Gradle(Dependency):
     name = "gradle"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('gradle-4.6-bin.zip',
-                             '98bd5fd2b30e070517e03c51cbb32beee3e2ee1a84003a5a5d748996d4b1b915',
-                             'https://services.gradle.org/distributions/gradle-4.6-bin.zip')
+        archive = Remotefile('gradle-5.1.1-bin.zip',
+                             '4953323605c5d7b89e97d0dc7779e275bccedefcdac090aec123375eae0cc798',
+                             'https://services.gradle.org/distributions/gradle-5.1.1-bin.zip')
 
     class Builder(BaseBuilder):
         @property

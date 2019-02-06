@@ -84,13 +84,6 @@ addons:
 matrix:
   allow_failures:
     - env: PLATFORM="native_dyn" DESKTOP_ONLY=1
-    - env: PLATFORM="android_arm"
-    - env: PLATFORM="android_arm64"
-    - env: PLATFORM="android_mips"
-    - env: PLATFORM="android_mips64"
-    - env: PLATFORM="android_x86"
-    - env: PLATFORM="android_x86_64"
-    - env: PLATFORM="android"
   include:
     - env: PLATFORM="native_dyn" DESKTOP_ONLY=1
       addons:
