@@ -218,7 +218,10 @@ def make_deps_archive(target, full=False):
             base_deps_versions['pugixml'])]
         files_to_archive += HOME.glob('BUILD_*/pugixml-{}'.format(
             base_deps_versions['pugixml']))
-        files_to_archive += HOME.glob('**/TOOLCHAINS')
+        toolchains_subdirs = HOME.glob('**/TOOLCHAINS/*/*')
+        for subdir in toolchains_subdirs:
+            if not subdir.match('tools'):
+                files_to_archive.append(subdir)
 
     with tarfile.open(str(relative_path/archive_name), 'w:xz') as tar:
         for name in set(files_to_archive):
