@@ -183,7 +183,7 @@ def make_archive(project, platform):
 
 
 def make_deps_archive(target, full=False):
-    archive_name = "deps_{}_{}_{}.tar.gz".format(
+    archive_name = "deps_{}_{}_{}.tar.xz".format(
         TRAVIS_OS_NAME, PLATFORM, target)
     print_message("Create archive {}.", archive_name)
     files_to_archive = [BASE_DIR/'INSTALL']
@@ -220,13 +220,9 @@ def make_deps_archive(target, full=False):
             base_deps_versions['pugixml']))
         files_to_archive += HOME.glob('**/TOOLCHAINS')
 
-    counter = 50
-    with tarfile.open(str(relative_path/archive_name), 'w:gz') as tar:
+    with tarfile.open(str(relative_path/archive_name), 'w:xz') as tar:
         for name in set(files_to_archive):
-            counter -= 1
-            if not counter:
-                print('.', end='', flush=True)
-                counter = 50
+            print('.', end='', flush=True)
             tar.add(str(name), arcname=str(name.relative_to(relative_path)))
     return relative_path/archive_name
 
@@ -261,13 +257,13 @@ def download_base_archive(base_name):
             batch = resource.read(batch_size)
             if not batch:
                 break
-            print(".", end="")
+            print(".", end="", flush=True)
             file.write(batch)
     return file_path
 
 if PLATFORM != 'flatpak':
     # The first thing we need to do is to (potentially) download already compiled base dependencies.
-    base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.gz".format(
+    base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.xz".format(
         os=TRAVIS_OS_NAME,
         platform=PLATFORM,
         version=base_deps_meta_version)
@@ -281,7 +277,7 @@ if PLATFORM != 'flatpak':
         print_message("Cannot get archive. Build dependencies")
         if PLATFORM == 'android':
             for arch in ('arm', 'arm64', 'x86', 'x86_64'):
-                archive_name = "base_deps_{os}_android_{arch}_{version}.tar.gz".format(
+                archive_name = "base_deps_{os}_android_{arch}_{version}.tar.xz".format(
                     os=TRAVIS_OS_NAME,
                     arch=arch,
                     version=base_deps_meta_version)
