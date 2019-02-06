@@ -43,7 +43,7 @@ BINARIES = {
     'kiwix-tools': ('bin', ('kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve')),
     'zim-tools': ('bin', ('zimbench', 'zimcheck', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit')),
     'zimwriterfs': ('bin', ('zimwriterfs',)),
-    'libzim': ('lib/x86_64-linux-gnu', ('libzim.so',))
+    'libzim': ('lib/x86_64-linux-gnu', ('libzim.so.{}'.format(main_project_versions['libzim']),))
 }
 
 _date = date.today().isoformat()
