@@ -64,6 +64,7 @@ command line :
 
 ```
 $ kiwix-build kiwix-lib # will build kiwix-build and its dependencies
+$ kiwix-build kiwix-desktop # will build kiwix-desktop and its dependencies
 $ kiwix-build zim-tools # will build zim-tools and its dependencies
 ```
 
@@ -81,6 +82,7 @@ But you can select another target platform using the option
 platforms :
 
 - native_dyn
+- native_mixed
 - native_static
 - win32_dyn
 - win32_static
@@ -91,6 +93,7 @@ platforms :
 - android_mips64
 - android_x86
 - android_x86_64
+- flatpak
 
 So, if you want to compile `kiwix-tools` for win32 using static linkage:
 
