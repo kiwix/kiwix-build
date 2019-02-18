@@ -69,8 +69,8 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     def set_env(self, env):
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['CFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
-        env['CXXFLAGS'] = " -O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
+        env['CFLAGS'] = " -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
+        env['CXXFLAGS'] = " -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
         env['QEMU_LD_PREFIX'] = pj(self.root_path, "arm-linux-gnueabihf", "libc")
         env['QEMU_SET_ENV'] = "LD_LIBRARY_PATH={}".format(
             ':'.join([
@@ -79,8 +79,8 @@ class ArmhfPlatformInfo(PlatformInfo):
         ]))
 
     def set_compiler(self, env):
-        env['CC'] = self.binaries['CC']
-        env['CXX'] = self.binaries['CXX']
+        for k, v in self.binaries.items():
+            env[k] = v
 
     def finalize_setup(self):
         super().finalize_setup()

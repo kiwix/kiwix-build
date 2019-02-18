@@ -71,8 +71,8 @@ class iOSPlatformInfo(PlatformInfo):
         return '--host={}'.format(self.arch_full)
 
     def set_compiler(self, env):
-        env['CC'] = self.binaries['CC']
-        env['CXX'] = self.binaries['CXX']
+        for k,v in self.binaries.items():
+            env[k] = v
 
 
 class iOSArmv7(iOSPlatformInfo):

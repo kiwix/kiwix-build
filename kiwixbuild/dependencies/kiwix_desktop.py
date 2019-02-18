@@ -12,6 +12,8 @@ class KiwixDesktop(Dependency):
 
     class Builder(QMakeBuilder):
         dependencies = ["qt", "qtwebengine", "kiwix-lib", "aria2"]
+        make_install_target = 'install'
+
         @property
         def configure_option(self):
             if self.buildEnv.platformInfo.name == 'flatpak':

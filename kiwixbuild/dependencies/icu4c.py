@@ -23,6 +23,7 @@ class Icu(Dependency):
 
     class Builder(MakeBuilder):
         subsource_dir = "source"
+        make_install_target = "install"
 
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):

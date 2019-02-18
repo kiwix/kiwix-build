@@ -66,8 +66,8 @@ class AndroidPlatformInfo(PlatformInfo):
 
     def set_compiler(self, env):
         binaries = self.binaries(self.ndk_builder.install_path)
-        env['CC'] = binaries['CC']
-        env['CXX'] = binaries['CXX']
+        for k,v in binaries.items():
+            env[k] = v
 
     @property
     def configure_option(self):

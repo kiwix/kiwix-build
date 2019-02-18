@@ -288,8 +288,13 @@ class MakeBuilder(Builder):
     configure_script = "configure"
     configure_env = None
     make_target = ""
-    make_install_target = "install"
     flatpak_buildsystem = None
+
+    @property
+    def make_install_target(self):
+        if self.buildEnv.platformInfo.build == 'iOS':
+            return 'install'
+        return 'install-strip'
 
     @property
     def all_configure_option(self):
@@ -435,6 +440,14 @@ class MesonBuilder(Builder):
     flatpak_buildsystem = 'meson'
 
     @property
+    def build_type(self):
+        return 'release' if option('make_release') else 'debugoptimized'
+
+    @property
+    def strip_option(self):
+        return '--strip' if option('make_release') else ''
+
+    @property
     def library_type(self):
         return 'static' if self.buildEnv.platformInfo.static else 'shared'
 
@@ -449,6 +462,7 @@ class MesonBuilder(Builder):
             cross_option = "--cross-file {}".format(
                 self.buildEnv.meson_crossfile)
         command = ("{command} . {build_path}"
+                   " --buildtype={build_type} {strip_option}"
                    " --default-library={library_type}"
                    " {configure_option}"
                    " --prefix={buildEnv.install_dir}"
@@ -456,6 +470,8 @@ class MesonBuilder(Builder):
                    " {cross_option}")
         command = command.format(
             command=neutralEnv('meson_command'),
+            build_type=self.build_type,
+            strip_option=self.strip_option,
             library_type=self.library_type,
             configure_option=configure_option,
             build_path=self.build_path,
