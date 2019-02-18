@@ -332,6 +332,18 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
         run_kiwix_build(target,
                         platform=PLATFORM)
 
+    if PLATFORM == 'native_mixed':
+        make_archive('libzim', 'linux-x86_64')
+    elif PLATFORM == 'native_static':
+        for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
+            make_archive(target, 'linux-x86_64')
+    elif PLATFORM == 'win32_static':
+        make_archive('kiwix-tools', 'win-i686')
+    elif PLATFORM == 'armhf_static':
+        make_archive('kiwix-tools', 'linux-armhf')
+    elif PLATFORM == 'i586_static':
+        make_archive('kiwix-tools', 'linux-i586')
+
     sys.exit(0)
 
 
