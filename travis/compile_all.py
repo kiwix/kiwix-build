@@ -26,7 +26,7 @@ KIWIX_DESKTOP_ONLY = environ.get('DESKTOP_ONLY') == '1'
 BASE_DIR = HOME/"BUILD_{}".format(PLATFORM)
 SOURCE_DIR = HOME/"SOURCE"
 ARCHIVE_DIR = HOME/"ARCHIVE"
-TOOLCHAINS_DIR = HOME/"TOOLCHAINS"
+INSTALL_DIR = BASE_DIR/"INSTALL"
 NIGHTLY_KIWIX_ARCHIVES_DIR = HOME/'NIGHTLY_KIWIX_ARCHIVES'/NIGHTLY_DATE
 RELEASE_KIWIX_ARCHIVES_DIR = HOME/'RELEASE_KIWIX_ARCHIVES'
 NIGHTLY_ZIM_ARCHIVES_DIR = HOME/'NIGHTLY_ZIM_ARCHIVES'/NIGHTLY_DATE
@@ -38,12 +38,20 @@ if 'TRAVISCI_SSH_KEY' in environ:
 else:
     SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
 
+BIN_EXT = '.exe' if PLATFORM.startswith('win-') else ''
+
 # We have build everything. Now create archives for public deployement.
-BINARIES = {
-    'kiwix-tools': ('bin', ('kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve')),
-    'zim-tools': ('bin', ('zimbench', 'zimcheck', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit')),
-    'zimwriterfs': ('bin', ('zimwriterfs',)),
-    'libzim': ('lib/x86_64-linux-gnu', ('libzim.so.{}'.format(main_project_versions['libzim']),))
+EXPORT_FILES = {
+    'kiwix-tools':
+        (INSTALL_DIR/'bin', [f+BIN_EXT for f in ('kiwix-manage', 'kiwix-read', 'kiwix-search', 'kiwix-serve')]),
+    'zim-tools':
+        (INSTALL_DIR/'bin', [f+BIN_EXT for f in ('zimbench', 'zimcheck', 'zimdump', 'zimsearch', 'zimdiff', 'zimpatch', 'zimsplit')]),
+    'zimwriterfs':
+        (INSTALL_DIR/'bin', ['zimwriterfs'+BIN_EXT]),
+    'libzim':
+        (INSTALL_DIR, ('lib/x86_64-linux-gnu/libzim.so.{}'.format(main_project_versions['libzim']),
+                       'lib/x86_64-linux-gnu/libzim.so.{}'.format(main_project_versions['libzim'][0]),
+                       'include/zim/*.h'))
 }
 
 _date = date.today().isoformat()
@@ -122,7 +130,7 @@ def create_desktop_image():
         build_path = HOME/'Kiwix-x86_64.AppImage'
         app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
         command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
-                   str(BASE_DIR/'INSTALL'), str(src_dir), str(HOME/'AppDir')]
+                   str(INSTALL_DIR), str(src_dir), str(HOME/'AppDir')]
         print_message("Build AppImage of kiwix-desktop")
         subprocess.check_call(command, cwd=str(HOME))
 
@@ -136,8 +144,7 @@ def create_desktop_image():
 
 
 def make_archive(project, platform):
-    base_dir, file_to_archives = BINARIES[project]
-    base_dir = BASE_DIR/'INSTALL'/base_dir
+    base_dir, export_files = EXPORT_FILES[project]
 
     if make_release:
         postfix = main_project_versions[project]
@@ -165,20 +172,22 @@ def make_archive(project, platform):
 
     archive_name = "{}_{}-{}".format(project, platform, postfix)
 
+    files_to_archive = []
+    for export_file in export_files:
+        files_to_archive.extend(base_dir.glob(export_file))
     if platform == "win-i686":
-        file_to_archives = ['{}.exe'.format(f) for f in file_to_archives]
         open_archive = lambda a : zipfile.ZipFile(str(a), 'w', compression=zipfile.ZIP_DEFLATED)
-        archive_add = lambda a, f : a.write(str(base_dir/f), arcname=str(f))
+        archive_add = lambda a, f : a.write(str(f), arcname=str(f.relative_to(base_dir)))
         archive_ext = ".zip"
     else:
         open_archive = lambda a : tarfile.open(str(a), 'w:gz')
-        archive_add = lambda a, f : a.add(str(base_dir/f), arcname="{}/{}".format(archive_name, str(f)))
+        archive_add = lambda a, f : a.add(str(f), arcname="{}/{}".format(archive_name, str(f.relative_to(base_dir))))
         archive_ext = ".tar.gz"
 
 
     archive = archive_dir/'{}{}'.format(archive_name, archive_ext)
     with open_archive(archive) as arch:
-        for f in file_to_archives:
+        for f in files_to_archive:
             archive_add(arch, f)
 
 
@@ -186,7 +195,7 @@ def make_deps_archive(target, full=False):
     archive_name = "deps_{}_{}_{}.tar.xz".format(
         TRAVIS_OS_NAME, PLATFORM, target)
     print_message("Create archive {}.", archive_name)
-    files_to_archive = [BASE_DIR/'INSTALL']
+    files_to_archive = [INSTALL_DIR/'INSTALL']
     if PLATFORM == 'native_mixed':
         files_to_archive += [HOME/'BUILD_native_static'/'INSTALL']
     if PLATFORM.startswith('android'):
@@ -322,6 +331,18 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
     for target in TARGETS:
         run_kiwix_build(target,
                         platform=PLATFORM)
+
+    if PLATFORM == 'native_mixed':
+        make_archive('libzim', 'linux-x86_64')
+    elif PLATFORM == 'native_static':
+        for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
+            make_archive(target, 'linux-x86_64')
+    elif PLATFORM == 'win32_static':
+        make_archive('kiwix-tools', 'win-i686')
+    elif PLATFORM == 'armhf_static':
+        make_archive('kiwix-tools', 'linux-armhf')
+    elif PLATFORM == 'i586_static':
+        make_archive('kiwix-tools', 'linux-i586')
 
     sys.exit(0)
 
