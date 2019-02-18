@@ -14,7 +14,10 @@ class Xapian(Dependency):
     class Source(ReleaseDownload):
         archive = Remotefile('xapian-core-1.4.10.tar.xz',
                              '68669327e08544ac88fe3473745dbcae4e8e98d5060b436c4d566f1f78709bb8')
-        patches = ['xapian_sys_types.patch']
+        patches = [
+            'xapian_sys_types.patch',
+            'xapian_fix_include_errno.patch'
+        ]
 
     class Builder(MakeBuilder):
         configure_option = "--disable-sse --disable-backend-chert --disable-backend-inmemory --disable-documentation"
