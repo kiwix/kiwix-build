@@ -1,0 +1,11 @@
+diff -ur xapian-core-1.4.10/examples/xapian-pos.cc xapian-core-1.4.10.patched/examples/xapian-pos.cc
+--- xapian-core-1.4.10/examples/xapian-pos.cc	2019-02-11 22:27:21.000000000 +0100
++++ xapian-core-1.4.10.patched/examples/xapian-pos.cc	2019-02-18 16:43:08.593354559 +0100
+@@ -29,6 +29,7 @@
+ #include <algorithm>
+ #include <cstdlib>
+ #include <limits>
++#include <errno.h>
+ 
+ #include "gnu_getopt.h"
+ #include "stringutils.h"
