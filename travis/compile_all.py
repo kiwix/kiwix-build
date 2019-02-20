@@ -21,6 +21,7 @@ PLATFORM = environ['PLATFORM']
 TRAVIS_OS_NAME = environ['TRAVIS_OS_NAME']
 HOME = Path(os.path.expanduser('~'))
 NIGHTLY_DATE = environ['NIGHTLY_DATE']
+KBUILD_SOURCE_DIR = Path(environ['TRAVIS_BUILD_DIR'])
 KIWIX_DESKTOP_ONLY = environ.get('DESKTOP_ONLY') == '1'
 
 BASE_DIR = HOME/"BUILD_{}".format(PLATFORM)
@@ -36,7 +37,7 @@ DIST_ZIM_ARCHIVES_DIR = HOME/'DIST_ZIM_ARCHIVES'
 if 'TRAVISCI_SSH_KEY' in environ:
     SSH_KEY = Path(environ['TRAVISCI_SSH_KEY'])
 else:
-    SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
+    SSH_KEY = KBUILD_SOURCE_DIR/'travis'/'travisci_builder_id_key'
 
 BIN_EXT = '.exe' if PLATFORM.startswith('win-') else ''
 
