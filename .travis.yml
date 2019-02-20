@@ -82,8 +82,6 @@ addons:
       - ctpp2-utils
       - libmagic-dev
 matrix:
-  allow_failures:
-    - env: PLATFORM="native_dyn" DESKTOP_ONLY=1
   include:
     - env: PLATFORM="native_dyn" DESKTOP_ONLY=1
       addons:
