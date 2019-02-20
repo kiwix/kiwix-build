@@ -196,6 +196,7 @@ def make_deps_archive(target, full=False):
         TRAVIS_OS_NAME, PLATFORM, target)
     print_message("Create archive {}.", archive_name)
     files_to_archive = [INSTALL_DIR]
+    files_to_archive += HOME.glob('BUILD_*/LOGS')
     if PLATFORM == 'native_mixed':
         files_to_archive += [HOME/'BUILD_native_static'/'INSTALL']
     if PLATFORM.startswith('android'):

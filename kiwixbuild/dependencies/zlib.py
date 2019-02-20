@@ -20,6 +20,7 @@ class zlib(Dependency):
     class Builder(MakeBuilder):
         dynamic_configure_option = "--shared"
         static_configure_option = "--static"
+        make_install_target = 'install'
         configure_option_template = "{dep_options} {static_option} --prefix {install_dir} --libdir {libdir}"
 
         def _pre_build_script(self, context):
