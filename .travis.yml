@@ -38,7 +38,7 @@ script:
     else
       docker build -t kiwix/build -f travis/Dockerfile .
     fi
-    docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e TRAVIS_BUILD_DIR -e DESKTOP_ONLY -e TRAVIS_TAG --device /dev/fuse --cap-add ALL --privileged kiwix/build
+    docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e DESKTOP_ONLY -e TRAVIS_TAG --device /dev/fuse --cap-add ALL --privileged kiwix/build
   else
     if [[ $TRAVIS_OS_NAME = "linux" ]]
     then
