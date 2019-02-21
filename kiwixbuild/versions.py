@@ -3,7 +3,7 @@
 main_project_versions = {
     'kiwix-lib': '4.0.0',
     'kiwix-tools': '0.9.0',
-    'libzim': '4.0.4',
+    'libzim': '4.0.5',
     'zim-tools': '1.0.0',
     'zimwriterfs': '1.2',
     'kiwix-desktop': '2.0-beta3'
@@ -19,17 +19,17 @@ main_project_versions = {
 # To change this dictionnary, use the following algorithm:
 # - If project version change, set release_versions[project] = 0
 # - Else
-#    - If project depedencies have not change, remove project from release_versions
-#    - Else, increment the value. If no value was present, see in
-#      http://download.kiwikorg/releases what to set.
+#    - If project depedencies have not change, set it to None and update the
+#     `(was ...)`.
+#    - Else, increment the value. If no value was present, see `(was ...)`.
 
 release_versions = {
-    'libzim': None, # Depends of base deps (was 0)
-    'kiwix-lib': 0, # Depends of libzim (was 0)
-    'kiwix-tools': 0, # Depends of kiwix-lib and libzim (was 0)
-    'zim-tools': None, # Depends of libzim (was 2)
-    'zimwriterfs': None, # Depends of libzim (was 1)
-    'kiwix-desktop': 0 # Depends of kiwix-lib and libzim
+    'libzim': 0, # Depends of base deps (was 0)
+    'kiwix-lib': 1, # Depends of libzim (was 0)
+    'kiwix-tools': 1, # Depends of kiwix-lib and libzim (was 0)
+    'zim-tools': 3, # Depends of libzim (was 2)
+    'zimwriterfs': 2, # Depends of libzim (was 1)
+    'kiwix-desktop': 1 # Depends of kiwix-lib and libzim
 }
 
 
