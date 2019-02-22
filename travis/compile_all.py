@@ -51,7 +51,7 @@ EXPORT_FILES = {
     'libzim':
         (INSTALL_DIR, ('lib/x86_64-linux-gnu/libzim.so.{}'.format(main_project_versions['libzim']),
                        'lib/x86_64-linux-gnu/libzim.so.{}'.format(main_project_versions['libzim'][0]),
-                       'include/zim/*.h'))
+                       'include/zim/**/*.h'))
 }
 
 _date = date.today().isoformat()
