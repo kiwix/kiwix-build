@@ -127,12 +127,14 @@ def create_desktop_image():
         build_path = BASE_DIR/'org.kiwix.desktop.flatpak'
         app_name = 'org.kiwix.desktop.{}.flatpak'.format(postfix)
     else:
-        build_path = HOME/'Kiwix-x86_64.AppImage'
+        build_path = HOME/'Kiwix-{}-x86_64.AppImage'.format(postfix)
         app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
         command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
                    str(INSTALL_DIR), str(src_dir), str(HOME/'AppDir')]
+        env = dict(os.environ)
+        env['VERSION'] = postfix
         print_message("Build AppImage of kiwix-desktop")
-        subprocess.check_call(command, cwd=str(HOME))
+        subprocess.check_call(command, cwd=str(HOME), env=env)
 
     try:
         archive_dir.mkdir(parents=True)
