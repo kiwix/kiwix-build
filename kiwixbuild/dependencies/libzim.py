@@ -14,6 +14,7 @@ class Libzim(Dependency):
     class Builder(MesonBuilder):
         test_option = "-t 8"
         dependencies = ['zlib', 'lzma', 'xapian-core', 'icu4c']
+        strip_option = ''
 
         @property
         def configure_option(self):

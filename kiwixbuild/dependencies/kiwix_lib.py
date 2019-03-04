@@ -13,6 +13,7 @@ class Kiwixlib(Dependency):
 
     class Builder(MesonBuilder):
         dependencies = ["pugixml", "libzim", "zlib", "lzma", "libcurl", "icu4c", "mustache"]
+        strip_option = ''
 
         @property
         def configure_option(self):
