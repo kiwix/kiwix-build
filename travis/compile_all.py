@@ -231,6 +231,8 @@ def make_deps_archive(target, full=False):
         files_to_archive += HOME.glob('BUILD_*/pugixml-{}'.format(
             base_deps_versions['pugixml']))
         toolchains_subdirs = HOME.glob('**/TOOLCHAINS/*/*')
+        if PLATFORM.startswith('armhf'):
+            files_to_archive += [SOURCE_DIR/'raspberrypi-tools']
         for subdir in toolchains_subdirs:
             if not subdir.match('tools'):
                 files_to_archive.append(subdir)
@@ -278,10 +280,11 @@ def download_base_archive(base_name):
 
 if PLATFORM != 'flatpak':
     # The first thing we need to do is to (potentially) download already compiled base dependencies.
-    base_dep_archive_name = "base_deps_{os}_{platform}_{version}.tar.xz".format(
+    base_dep_archive_name = "base_deps_{os}_{platform}_{version}_{release}.tar.xz".format(
         os=TRAVIS_OS_NAME,
         platform=PLATFORM,
-        version=base_deps_meta_version)
+        version=base_deps_meta_version,
+        release='release' if make_release else 'debug')
 
     print_message("Getting archive {}", base_dep_archive_name)
     try:
@@ -292,10 +295,11 @@ if PLATFORM != 'flatpak':
         print_message("Cannot get archive. Build dependencies")
         if PLATFORM == 'android':
             for arch in ('arm', 'arm64', 'x86', 'x86_64'):
-                archive_name = "base_deps_{os}_android_{arch}_{version}.tar.xz".format(
+                archive_name = "base_deps_{os}_android_{arch}_{version}_{release}.tar.xz".format(
                     os=TRAVIS_OS_NAME,
                     arch=arch,
-                    version=base_deps_meta_version)
+                    version=base_deps_meta_version,
+                    release='release' if make_release else 'debug')
                 print_message("Getting archive {}", archive_name)
                 try:
                     local_filename = download_base_archive(archive_name)
