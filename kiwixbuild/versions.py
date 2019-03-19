@@ -6,7 +6,7 @@ main_project_versions = {
     'libzim': '4.0.5',
     'zim-tools': '1.0.0',
     'zimwriterfs': '1.2',
-    'kiwix-desktop': '2.0-beta3'
+    'kiwix-desktop': '2.0-beta3' # Also need to be change in appveyor/package_kiwix-desktop.sh
 }
 
 # This dictionnary specify what we need to build at each release process.
