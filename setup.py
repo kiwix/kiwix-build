@@ -35,7 +35,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
-        'meson'
+        'meson==0.49.2'
     ],
     entry_points={
         'console_scripts': [
