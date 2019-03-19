@@ -152,3 +152,9 @@ notifications:
      - "chat.freenode.net#kiwix"
     on_success: change
     on_failure: always
+  email:
+    recipients:
+      - contact@kiwix.org
+      - mgautier@kymeria.fr
+    on_success: change
+    on_failure: always
