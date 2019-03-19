@@ -72,7 +72,7 @@ COPY . kiwix-build/
 RUN sudo chown -R travis:travis /home/travis/kiwix-build
 RUN pip3 install --user -e kiwix-build
 
-ENV TRAVISCI_SSH_KEY /home/travis/kiwix-build/travis/travisci_builder_id_key
+ENV TRAVIS_BUILD_DIR /home/travis/kiwix-build
 ENV TRAVIS_OS_NAME linux_artful
 
 CMD kiwix-build/travis/compile_all.py && kiwix-build/travis/deploy.sh

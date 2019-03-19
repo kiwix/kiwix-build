@@ -21,6 +21,7 @@ PLATFORM = environ['PLATFORM']
 TRAVIS_OS_NAME = environ['TRAVIS_OS_NAME']
 HOME = Path(os.path.expanduser('~'))
 NIGHTLY_DATE = environ['NIGHTLY_DATE']
+KBUILD_SOURCE_DIR = Path(environ['TRAVIS_BUILD_DIR'])
 KIWIX_DESKTOP_ONLY = environ.get('DESKTOP_ONLY') == '1'
 
 BASE_DIR = HOME/"BUILD_{}".format(PLATFORM)
@@ -33,10 +34,7 @@ NIGHTLY_ZIM_ARCHIVES_DIR = HOME/'NIGHTLY_ZIM_ARCHIVES'/NIGHTLY_DATE
 RELEASE_ZIM_ARCHIVES_DIR = HOME/'RELEASE_ZIM_ARCHIVES'
 DIST_KIWIX_ARCHIVES_DIR = HOME/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = HOME/'DIST_ZIM_ARCHIVES'
-if 'TRAVISCI_SSH_KEY' in environ:
-    SSH_KEY = Path(environ['TRAVISCI_SSH_KEY'])
-else:
-    SSH_KEY = Path(environ['TRAVIS_BUILD_DIR'])/'travis'/'travisci_builder_id_key'
+SSH_KEY = KBUILD_SOURCE_DIR/'travis'/'travisci_builder_id_key'
 
 BIN_EXT = '.exe' if PLATFORM.startswith('win-') else ''
 
@@ -53,6 +51,8 @@ EXPORT_FILES = {
                        'lib/x86_64-linux-gnu/libzim.so.{}'.format(main_project_versions['libzim'][0]),
                        'include/zim/**/*.h'))
 }
+
+FLATPAK_GIT_REMOTE = 'git@github.com:flathub/org.kiwix.desktop.git'
 
 _date = date.today().isoformat()
 
@@ -244,6 +244,29 @@ def make_deps_archive(target, full=False):
     return relative_path/archive_name
 
 
+def update_flathub_git():
+    env = dict(os.environ)
+    env['GIT_SSH_COMMAND'] = 'ssh -o StrictHostKeyChecking=no -i {}'.format(SSH_KEY)
+    env['GIT_AUTHOR_NAME'] = env['GIT_COMMITTER_NAME'] = "KiwixBot"
+    env['GIT_AUTHOR_EMAIL'] = env['GIT_COMMITTER_EMAIL'] = "kiwixbot@kymeria.fr"
+    command = ['git', 'clone', FLATPAK_GIT_REMOTE]
+    subprocess.check_call(command, env=env, cwd=str(HOME))
+    shutil.copy(str(BASE_DIR/'org.kiwix.desktop.json'),
+                str(HOME/'org.kiwix.desktop'))
+    patch_dir = KBUILD_SOURCE_DIR/'kiwixbuild'/'patches'
+    for dep in ('libaria2', 'mustache', 'pugixml', 'xapian'):
+        for f in patch_dir.glob('{}_*.patch'.format(dep)):
+            shutil.copy(str(f), str(HOME/'org.kiwix.desktop'/'patches'))
+    command = ['git', 'add', '-A', '.']
+    subprocess.check_call(command, env=env, cwd=str(HOME/'org.kiwix.desktop'))
+    command = ['git', 'commit', '-m',
+               'Update to version {}'.format(main_project_versions['kiwix-desktop'])]
+    subprocess.check_call(command, env=env, cwd=str(HOME/'org.kiwix.desktop'))
+    command = ['git', 'push']
+    subprocess.check_call(command, env=env, cwd=str(HOME/'org.kiwix.desktop'))
+
+
+
 def scp(what, where):
     print_message("Copy {} to {}", what, where)
     command = ['scp', '-o', 'StrictHostKeyChecking=no',
@@ -398,7 +421,6 @@ for target in TARGETS:
                         make_release=True,
                         make_dist=True)
 
-
 # We have build everything. Now create archives for public deployement.
 if make_release and PLATFORM == 'native_dyn':
     for target in TARGETS:
@@ -435,6 +457,8 @@ elif PLATFORM == 'armhf_static':
     make_archive('kiwix-tools', 'linux-armhf')
 elif PLATFORM == 'i586_static':
     make_archive('kiwix-tools', 'linux-i586')
+elif make_release and PLATFORM == 'flatpak':
+    update_flathub_git()
 elif PLATFORM.startswith('android') and 'kiwix-android' in TARGETS:
     APK_NAME = "kiwix-{}".format(PLATFORM)
     source_debug_dir = HOME/'BUILD_android'/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'debug'
