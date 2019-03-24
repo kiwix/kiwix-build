@@ -13,10 +13,10 @@ if: type != push OR tag IS present
 before_install:
 - PATH=$PATH:${HOME}/bin:${HOME}/.local/bin
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then PATH=$PATH:$(brew --prefix)/opt/gettext/bin; fi
-- '[ -n "$encrypted_eba2f7543984_iv" ] && openssl aes-256-cbc
+- 'if [[ -n "$encrypted_eba2f7543984_iv" ]]; then openssl aes-256-cbc
   -K $encrypted_eba2f7543984_key -iv $encrypted_eba2f7543984_iv
-  -in travis/travisci_builder_id_key.enc -out travis/travisci_builder_id_key -d'
-- chmod 600 travis/travisci_builder_id_key
+  -in travis/travisci_builder_id_key.enc -out travis/travisci_builder_id_key -d; fi'
+- if [[ -n "$encrypted_eba2f7543984_iv" ]]; then chmod 600 travis/travisci_builder_id_key; fi
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -30,21 +30,26 @@ cache:
 install: if [[ $TRAVIS_OS_NAME != "linux" || $DESKTOP_ONLY != 1 ]]; then travis/install_extra_deps.sh; fi
 script:
 - |
-  if [[ $TRAVIS_OS_NAME = "linux" && $DESKTOP_ONLY == 1 ]]
+  if [[ $TEST_SUITE = "flake8_check" ]]
   then
-    if [[ $PLATFORM = "flatpak" ]]
-    then
-      docker build -t kiwix/build -f travis/Dockerfile_flatpak .
-    else
-      docker build -t kiwix/build -f travis/Dockerfile .
-    fi
-    docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e DESKTOP_ONLY -e TRAVIS_TAG --device /dev/fuse --cap-add ALL --privileged kiwix/build
+    flake8 .
   else
-    if [[ $TRAVIS_OS_NAME = "linux" ]]
+    if [[ $TRAVIS_OS_NAME = "linux" && $DESKTOP_ONLY == 1 ]]
     then
-      python3.5 travis/compile_all.py
+      if [[ $PLATFORM = "flatpak" ]]
+      then
+        docker build -t kiwix/build -f travis/Dockerfile_flatpak .
+      else
+        docker build -t kiwix/build -f travis/Dockerfile .
+      fi
+      docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e DESKTOP_ONLY -e TRAVIS_TAG --device /dev/fuse --cap-add ALL --privileged kiwix/build
     else
-      python3 travis/compile_all.py
+      if [[ $TRAVIS_OS_NAME = "linux" ]]
+      then
+        python3.5 travis/compile_all.py
+      else
+        python3 travis/compile_all.py
+      fi
     fi
   fi
 after_failure: travis/upload_all_log.sh
@@ -144,6 +149,8 @@ matrix:
     - env: PLATFORM="iOS_arm64"
       os: osx
     - env: PLATFORM="iOS_i386"
+      os: osx
+    - env: TEST_SUITE="flake8_check"
       os: osx
 
 notifications:
