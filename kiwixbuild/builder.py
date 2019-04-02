@@ -136,8 +136,10 @@ class Builder:
             package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
             packages = package_name_mapper.get(builderName)
             if packages:
-                packages_list += packages
                 to_drop.append(builderDef)
+                if packages is not True:
+                    # True means "assume the dependency is install but do not try to install anything for it"
+                    packages_list += packages
         for dep in to_drop:
             del self._targets[dep]
         return packages_list
