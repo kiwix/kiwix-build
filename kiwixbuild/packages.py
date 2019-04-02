@@ -27,6 +27,8 @@ PACKAGE_NAME_MAPPERS = {
         'file' : ['file-devel'],
         'gumbo' : ['gumbo-parser-devel'],
         'aria2': ['aria2'],
+        'qt': ['qt5-qtbase-devel', 'qt5-devel', 'qt5-qtsvg'],
+        'qtwebengine': ['qt5-qtwebengine-devel']
     },
     'fedora_native_static': {
         'COMMON': _fedora_common + ['glibc-static', 'libstdc++-static'],
