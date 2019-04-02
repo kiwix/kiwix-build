@@ -36,7 +36,7 @@ DIST_KIWIX_ARCHIVES_DIR = HOME/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = HOME/'DIST_ZIM_ARCHIVES'
 SSH_KEY = KBUILD_SOURCE_DIR/'travis'/'travisci_builder_id_key'
 
-BIN_EXT = '.exe' if PLATFORM.startswith('win-') else ''
+BIN_EXT = '.exe' if PLATFORM.startswith('win32_') else ''
 
 # We have build everything. Now create archives for public deployement.
 EXPORT_FILES = {
