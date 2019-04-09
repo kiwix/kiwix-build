@@ -134,7 +134,7 @@ class FlatpakBuilder:
 
     def configure(self):
         steps = remove_duplicates(target_steps())
-        modules = {}
+        modules = OrderedDict()
         for stepDef in steps:
             module = modules.setdefault(stepDef[1], {})
             module['name'] = stepDef[1]
