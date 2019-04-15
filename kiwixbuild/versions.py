@@ -2,10 +2,10 @@
 
 main_project_versions = {
     'kiwix-lib': '4.1.0',
-    'kiwix-tools': '1.1.0',
-    'libzim': '4.0.6',
-    'zim-tools': '1.0.0',
-    'zimwriterfs': '1.3',
+    'kiwix-tools': '1.2.0',
+    'libzim': '4.0.7',
+    'zim-tools': '1.0.1',
+    'zimwriterfs': '1.3.1',
     'kiwix-desktop': '2.0-beta4' # Also need to be change in appveyor/package_kiwix-desktop.sh
 }
 
@@ -27,9 +27,9 @@ release_versions = {
     'libzim': 0, # Depends of base deps (was 0)
     'kiwix-lib': 0, # Depends of libzim (was 0)
     'kiwix-tools': 0, # Depends of kiwix-lib and libzim (was 0)
-    'zim-tools': 4, # Depends of libzim (was 3)
+    'zim-tools': 0, # Depends of libzim (was 0)
     'zimwriterfs': 0, # Depends of libzim (was 0)
-    'kiwix-desktop': 0 # Depends of kiwix-lib and libzim
+    'kiwix-desktop': 1 # Depends of kiwix-lib and libzim
 }
 
 
