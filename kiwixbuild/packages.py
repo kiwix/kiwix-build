@@ -76,10 +76,10 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON': _debian_common + ['libbz2-dev', 'libmagic-dev'],
     },
     'debian_i586_dyn': {
-        'COMMON': _debian_common + ['libc6-dev:i386', 'libstdc++-6-dev:i386', 'gcc-multilib', 'g++-multilib'],
+        'COMMON': _debian_common + ['libc6-dev-i386', 'lib32stdc++6', 'gcc-multilib', 'g++-multilib'],
     },
     'debian_i586_static': {
-        'COMMON': _debian_common + ['libc6-dev:i386', 'libstdc++-6-dev:i386', 'gcc-multilib', 'g++-multilib'],
+        'COMMON': _debian_common + ['libc6-dev-i386', 'lib32stdc++6', 'gcc-multilib', 'g++-multilib'],
     },
     'debian_win32_dyn': {
         'COMMON': _debian_common + ['g++-mingw-w64-i686', 'gcc-mingw-w64-i686', 'gcc-mingw-w64-base', 'mingw-w64-tools'],

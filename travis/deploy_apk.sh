@@ -4,7 +4,6 @@ set -e
 
 KEYSTORE_FILE=${TRAVIS_BUILD_DIR}/travis/kiwix-android.keystore
 GOOGLE_API_KEY=${TRAVIS_BUILD_DIR}/travis/googleplay_android_developer-5a411156212c.json
-SSH_KEY=${TRAVIS_BUILD_DIR}/travis/travisci_builder_id_key
 
 cd ${HOME}
 
