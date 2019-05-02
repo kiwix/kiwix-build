@@ -34,6 +34,7 @@ class ArmhfPlatformInfo(PlatformInfo):
     @property
     def root_path(self):
         return pj(self.tlc_source.source_path,
+                  'raspberrypi-tools',
                   'arm-bcm2708',
                   'gcc-linaro-{}-raspbian-x64'.format(self.arch_full))
 

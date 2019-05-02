@@ -230,9 +230,9 @@ def make_deps_archive(target, full=False):
             base_deps_versions['pugixml'])]
         files_to_archive += HOME.glob('BUILD_*/pugixml-{}'.format(
             base_deps_versions['pugixml']))
-        toolchains_subdirs = HOME.glob('**/TOOLCHAINS/*/*')
         if PLATFORM.startswith('armhf'):
-            files_to_archive += [SOURCE_DIR/'raspberrypi-tools']
+            files_to_archive += (SOURCE_DIR/'armhf').glob('*')
+        toolchains_subdirs = HOME.glob('**/TOOLCHAINS/*/*')
         for subdir in toolchains_subdirs:
             if not subdir.match('tools'):
                 files_to_archive.append(subdir)
