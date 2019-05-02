@@ -12,7 +12,8 @@ if: type != push OR tag IS present
 
 stages:
 - build_docker_images
-- test
+- build
+- android_build
 
 jobs:
   include:
@@ -33,8 +34,9 @@ jobs:
     - stage: build_docker_images
       script: *build_images
       env: VARIANT=appimage
-    - stage: test
-      env: PLATFORM="native_dyn"
+    - stage: android_build
+      env: PLATFORM="android"
+    - env: PLATFORM="native_dyn"
       os: osx
     - env: PLATFORM="iOS_arm64"
       os: osx
@@ -63,6 +65,7 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
 install: if [[ $TRAVIS_OS_NAME != "linux" ]]; then travis/install_extra_deps.sh; fi
+stage: build
 script:
 - |
   if [[ $TRAVIS_OS_NAME = "linux" ]]
@@ -117,7 +120,6 @@ env:
     - PLATFORM="i586_static"
     - PLATFORM="native_dyn" DESKTOP_ONLY=1
     - PLATFORM="flatpak" DESKTOP_ONLY=1
-    - PLATFORM="android"
     - PLATFORM="android_arm"
     - PLATFORM="android_arm64"
     - PLATFORM="android_x86"
