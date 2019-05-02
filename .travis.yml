@@ -10,6 +10,39 @@ branches:
   - /\d+\.\d+\.\d+$/
 if: type != push OR tag IS present
 
+stages:
+- build_docker_images
+- test
+
+jobs:
+  include:
+    - stage: build_docker_images
+      script: &build_images
+        - |
+          if [ ! $(curl -sflL https://hub.docker.com/v2/repositories/kiwix/kiwix-build_ci/tags/${VARIANT}-${TRAVIS_COMMIT}) ]
+          then
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker build -t kiwix-build_ci -f travis/${VARIANT}_builder.dockerfile .
+            docker tag kiwix-build_ci kiwix/kiwix-build_ci:${VARIANT}-${TRAVIS_COMMIT}
+            docker push kiwix/kiwix-build_ci:${VARIANT}-${TRAVIS_COMMIT}
+          fi
+      env: VARIANT=xenial
+    - stage: build_docker_images
+      script: *build_images
+      env: VARIANT=flatpak
+    - stage: build_docker_images
+      script: *build_images
+      env: VARIANT=appimage
+    - stage: test
+      env: PLATFORM="native_dyn"
+      os: osx
+    - env: PLATFORM="iOS_arm64"
+      os: osx
+    - env: PLATFORM="iOS_i386"
+      os: osx
+
+
+
 before_install:
 - PATH=$PATH:${HOME}/bin:${HOME}/.local/bin
 - mkdir -p /tmp/private $HOME/EXPORT/BASE
@@ -34,25 +67,20 @@ script:
 - |
   if [[ $TRAVIS_OS_NAME = "linux" ]]
   then
-    PODMAN_FILE=xenial_builder.dockerfile
-    if [[ $PLATFORM = "flatpak" && $DESKTOP_ONLY = 1 ]]; then PODMAN_FILE=Dockerfile_flatpak; fi
-    if [[ $PLATFORM = "native_dyn" && $DESKTOP_ONLY = 1 ]]; then PODMAN_FILE=Dockerfile; fi
+    VARIANT=xenial
+    if [[ $PLATFORM = "flatpak" && $DESKTOP_ONLY = 1 ]]; then VARIANT=flatpak; fi
+    if [[ $PLATFORM = "native_dyn" && $DESKTOP_ONLY = 1 ]]; then VARIANT=appimage; fi
   fi
 - |
   if [[ $TRAVIS_OS_NAME = "linux" ]]
   then
-    docker build -t kiwix/build -f travis/$PODMAN_FILE .
-  fi
-- |
-  if [[ $TRAVIS_OS_NAME = "linux" ]]
-  then
-    docker run \
+    docker run --rm \
       -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e DESKTOP_ONLY -e TRAVIS_TAG \
       --device /dev/fuse --cap-add ALL --privileged \
       --mount=type=bind,src=$HOME/EXPORT,dst=/home/builder/EXPORT \
       --mount=type=bind,src=$HOME/.cache,dst=/home/builder/.cache \
       --mount=type=bind,src=$HOME/.gradle/caches,dst=/home/builder/.gradle/caches \
-      kiwix/build
+      kiwix/kiwix-build_ci:${VARIANT}-${TRAVIS_COMMIT}
   fi
 - if [[ $TRAVIS_OS_NAME != "linux" ]]; then python3 travis/compile_all.py; fi
 after_success:
@@ -85,6 +113,10 @@ env:
     - PLATFORM="armhf_static"
     - PLATFORM="win32_dyn"
     - PLATFORM="win32_static"
+    - PLATFORM="i586_dyn"
+    - PLATFORM="i586_static"
+    - PLATFORM="native_dyn" DESKTOP_ONLY=1
+    - PLATFORM="flatpak" DESKTOP_ONLY=1
     - PLATFORM="android"
     - PLATFORM="android_arm"
     - PLATFORM="android_arm64"
@@ -95,35 +127,6 @@ addons:
   - download.kiwix.org
   - tmp.kiwix.org
   - download.openzim.org
-matrix:
-  include:
-    - env: PLATFORM="native_dyn" DESKTOP_ONLY=1
-      addons:
-        apt:
-          packages: []
-    - env: PLATFORM="flatpak" DESKTOP_ONLY=1
-      addons:
-        apt:
-          packages: []
-    - env: PLATFORM="i586_dyn"
-      addons: &i586_addons
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *common
-            - gcc-multilib
-            - g++-multilib
-            - libc6-dev:i386
-            - libstdc++-6-dev:i386
-    - env: PLATFORM="i586_static"
-      addons: *i586_addons
-    - env: PLATFORM="native_dyn"
-      os: osx
-    - env: PLATFORM="iOS_arm64"
-      os: osx
-    - env: PLATFORM="iOS_i386"
-      os: osx
 
 notifications:
   irc:
