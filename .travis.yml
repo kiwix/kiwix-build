@@ -110,6 +110,7 @@ env:
     - NIGHTLY_DATE=$(date +%Y-%m-%d)
     - SSH_KEY=/tmp/private/travisci_builder_id_key
   matrix:
+    - PLATFORM="flatpak" DESKTOP_ONLY=1
     - PLATFORM="native_dyn"
     - PLATFORM="native_static"
     - PLATFORM="native_mixed"
@@ -120,7 +121,6 @@ env:
     - PLATFORM="i586_dyn"
     - PLATFORM="i586_static"
     - PLATFORM="native_dyn" DESKTOP_ONLY=1
-    - PLATFORM="flatpak" DESKTOP_ONLY=1
     - PLATFORM="android_arm"
     - PLATFORM="android_arm64"
     - PLATFORM="android_x86"
