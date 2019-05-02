@@ -324,8 +324,9 @@ if PLATFORM != 'flatpak':
                         f.extractall(str(HOME))
                 except URLError:
                     pass
-        run_kiwix_build('alldependencies', platform=PLATFORM)
-        make_deps_archive(name=base_dep_archive_name, full=True)
+        else:
+            run_kiwix_build('alldependencies', platform=PLATFORM)
+            make_deps_archive(name=base_dep_archive_name, full=True)
 
 
 # A basic compilation to be sure everything is working (for a PR)
