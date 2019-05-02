@@ -36,6 +36,7 @@ jobs:
       env: VARIANT=appimage
     - stage: android_build
       env: PLATFORM="android"
+      if: type != pull_request
     - env: PLATFORM="native_dyn"
       os: osx
     - env: PLATFORM="iOS_arm64"
