@@ -1,11 +1,12 @@
-from .base import Dependency, GitClone, NoopBuilder
+from .base import Dependency, ReleaseDownload, NoopBuilder
+from kiwixbuild.utils import Remotefile
 
 class armhf_toolchain(Dependency):
     neutral = True
     name = 'armhf'
 
-    class Source(GitClone):
-        git_remote = "https://github.com/raspberrypi/tools"
-        git_dir = "raspberrypi-tools"
+    class Source(ReleaseDownload):
+        archive = Remotefile('raspberrypi-tools.tar.gz',
+                             'e72b35436f2f23f2f7df322d6c318b9be57b21596b5ff0b8936af4ad94e04f2e')
 
     Builder = NoopBuilder

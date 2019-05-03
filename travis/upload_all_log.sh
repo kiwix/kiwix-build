@@ -2,8 +2,6 @@
 
 set -e
 
-SSH_KEY=$(pwd)/travis/travisci_builder_id_key
-
 cd $HOME
 
 tar -czf fail_log_${PLATFORM}.tar.gz BUILD_${PLATFORM}

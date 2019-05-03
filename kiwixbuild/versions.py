@@ -35,7 +35,7 @@ release_versions = {
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = '18'
+base_deps_meta_version = '51'
 
 
 base_deps_versions = {

@@ -1,6 +1,6 @@
 language: cpp
 
-dist: trusty
+dist: xenial
 sudo: required
 services:
 - docker
@@ -10,13 +10,51 @@ branches:
   - /\d+\.\d+\.\d+$/
 if: type != push OR tag IS present
 
+stages:
+- build_docker_images
+- build
+- android_build
+
+jobs:
+  include:
+    - stage: build_docker_images
+      script: &build_images
+        - |
+          if [ ! $(curl -sflL https://hub.docker.com/v2/repositories/kiwix/kiwix-build_ci/tags/${VARIANT}-${TRAVIS_COMMIT}) ]
+          then
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker build -t kiwix-build_ci -f travis/${VARIANT}_builder.dockerfile .
+            docker tag kiwix-build_ci kiwix/kiwix-build_ci:${VARIANT}-${TRAVIS_COMMIT}
+            docker push kiwix/kiwix-build_ci:${VARIANT}-${TRAVIS_COMMIT}
+          fi
+      env: VARIANT=xenial
+    - stage: build_docker_images
+      script: *build_images
+      env: VARIANT=flatpak
+    - stage: build_docker_images
+      script: *build_images
+      env: VARIANT=appimage
+    - stage: android_build
+      env: PLATFORM="android"
+      if: type != pull_request
+    - env: PLATFORM="native_dyn"
+      os: osx
+    - env: PLATFORM="iOS_arm64"
+      os: osx
+    - env: PLATFORM="iOS_i386"
+      os: osx
+
+
+
 before_install:
 - PATH=$PATH:${HOME}/bin:${HOME}/.local/bin
+- mkdir -p /tmp/private $HOME/EXPORT/BASE
+- chmod -R a+w $HOME/EXPORT
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then PATH=$PATH:$(brew --prefix)/opt/gettext/bin; fi
 - '[ -n "$encrypted_eba2f7543984_iv" ] && openssl aes-256-cbc
   -K $encrypted_eba2f7543984_key -iv $encrypted_eba2f7543984_iv
-  -in travis/travisci_builder_id_key.enc -out travis/travisci_builder_id_key -d'
-- chmod 600 travis/travisci_builder_id_key
+  -in travis/travisci_builder_id_key.enc -out $SSH_KEY -d'
+- chmod 600 $SSH_KEY
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -27,27 +65,33 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
-install: if [[ $TRAVIS_OS_NAME != "linux" || $DESKTOP_ONLY != 1 ]]; then travis/install_extra_deps.sh; fi
+install: if [[ $TRAVIS_OS_NAME != "linux" ]]; then travis/install_extra_deps.sh; fi
+stage: build
 script:
 - |
-  if [[ $TRAVIS_OS_NAME = "linux" && $DESKTOP_ONLY == 1 ]]
+  if [[ $TRAVIS_OS_NAME = "linux" ]]
   then
-    if [[ $PLATFORM = "flatpak" ]]
-    then
-      docker build -t kiwix/build -f travis/Dockerfile_flatpak .
-    else
-      docker build -t kiwix/build -f travis/Dockerfile .
-    fi
-    docker run -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e DESKTOP_ONLY -e TRAVIS_TAG --device /dev/fuse --cap-add ALL --privileged kiwix/build
-  else
-    if [[ $TRAVIS_OS_NAME = "linux" ]]
-    then
-      python3.5 travis/compile_all.py
-    else
-      python3 travis/compile_all.py
-    fi
+    VARIANT=xenial
+    if [[ $PLATFORM = "flatpak" && $DESKTOP_ONLY = 1 ]]; then VARIANT=flatpak; fi
+    if [[ $PLATFORM = "native_dyn" && $DESKTOP_ONLY = 1 ]]; then VARIANT=appimage; fi
   fi
-after_failure: travis/upload_all_log.sh
+- |
+  if [[ $TRAVIS_OS_NAME = "linux" ]]
+  then
+    docker run --rm \
+      -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e DESKTOP_ONLY -e TRAVIS_TAG \
+      --device /dev/fuse --cap-add ALL --privileged \
+      --mount=type=bind,src=$HOME/EXPORT,dst=/home/builder/EXPORT \
+      --mount=type=bind,src=$HOME/.cache,dst=/home/builder/.cache \
+      --mount=type=bind,src=$HOME/.gradle/caches,dst=/home/builder/.gradle/caches \
+      kiwix/kiwix-build_ci:${VARIANT}-${TRAVIS_COMMIT}
+  fi
+- if [[ $TRAVIS_OS_NAME != "linux" ]]; then python3 travis/compile_all.py; fi
+after_success:
+- travis/upload_base_deps.sh
+after_failure:
+- travis/upload_base_deps.sh
+- travis/upload_all_log.sh
 deploy:
   - provider: script
     skip_cleanup: true
@@ -64,87 +108,28 @@ deploy:
 env:
   global:
     - NIGHTLY_DATE=$(date +%Y-%m-%d)
+    - SSH_KEY=/tmp/private/travisci_builder_id_key
   matrix:
+    - PLATFORM="flatpak" DESKTOP_ONLY=1
     - PLATFORM="native_dyn"
+    - PLATFORM="native_static"
+    - PLATFORM="native_mixed"
     - PLATFORM="armhf_dyn"
     - PLATFORM="armhf_static"
-    - PLATFORM="native_mixed"
+    - PLATFORM="win32_dyn"
+    - PLATFORM="win32_static"
+    - PLATFORM="i586_dyn"
+    - PLATFORM="i586_static"
+    - PLATFORM="native_dyn" DESKTOP_ONLY=1
+    - PLATFORM="android_arm"
+    - PLATFORM="android_arm64"
+    - PLATFORM="android_x86"
+    - PLATFORM="android_x86_64"
 addons:
   ssh_known_hosts:
   - download.kiwix.org
   - tmp.kiwix.org
   - download.openzim.org
-  apt:
-    packages: &common
-      - cmake
-      - autopoint
-      - python3.5
-      - python3-pip
-      - ctpp2-utils
-      - libmagic-dev
-matrix:
-  include:
-    - env: PLATFORM="native_dyn" DESKTOP_ONLY=1
-      addons:
-        apt:
-          packages: []
-    - env: PLATFORM="flatpak" DESKTOP_ONLY=1
-      addons:
-        apt:
-          packages: []
-    - env: PLATFORM="native_static"
-      addons:
-        apt:
-          packages:
-            - *common
-            - libbz2-dev
-            - zlib1g-dev
-            - uuid-dev
-            - libctpp2-dev
-    - env: PLATFORM="win32_dyn"
-      addons: &win32_addons
-        apt:
-          packages:
-            - *common
-            - g++-mingw-w64-i686
-            - gcc-mingw-w64-i686
-            - gcc-mingw-w64-base
-            - mingw-w64-tools
-    - env: PLATFORM="win32_static"
-      addons: *win32_addons
-    - env: PLATFORM="i586_dyn"
-      addons: &i586_addons
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *common
-            - gcc-multilib
-            - g++-multilib
-            - libc6-dev:i386
-            - libstdc++-6-dev:i386
-    - env: PLATFORM="i586_static"
-      addons: *i586_addons
-    - env: PLATFORM="android"
-      addons: &android_addons
-        apt:
-          packages:
-            - *common
-            - default-jdk
-    - env: PLATFORM="android_arm"
-      addons: *android_addons
-    - env: PLATFORM="android_arm64"
-      addons: *android_addons
-    - env: PLATFORM="android_x86"
-      addons: *android_addons
-    - env: PLATFORM="android_x86_64"
-      addons: *android_addons
-    - env: PLATFORM="native_dyn"
-      os: osx
-    - env: PLATFORM="iOS_arm64"
-      os: osx
-    - env: PLATFORM="iOS_i386"
-      os: osx
 
 notifications:
   irc:

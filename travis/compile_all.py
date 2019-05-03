@@ -25,6 +25,8 @@ KBUILD_SOURCE_DIR = Path(environ['TRAVIS_BUILD_DIR'])
 KIWIX_DESKTOP_ONLY = environ.get('DESKTOP_ONLY') == '1'
 
 BASE_DIR = HOME/"BUILD_{}".format(PLATFORM)
+BASE_EXPORT_DIR = HOME/"EXPORT"/"BASE"
+GIT_EXPORT_DIR = HOME/"EXPORT"/"GIT"
 SOURCE_DIR = HOME/"SOURCE"
 ARCHIVE_DIR = HOME/"ARCHIVE"
 INSTALL_DIR = BASE_DIR/"INSTALL"
@@ -34,7 +36,6 @@ NIGHTLY_ZIM_ARCHIVES_DIR = HOME/'NIGHTLY_ZIM_ARCHIVES'/NIGHTLY_DATE
 RELEASE_ZIM_ARCHIVES_DIR = HOME/'RELEASE_ZIM_ARCHIVES'
 DIST_KIWIX_ARCHIVES_DIR = HOME/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = HOME/'DIST_ZIM_ARCHIVES'
-SSH_KEY = KBUILD_SOURCE_DIR/'travis'/'travisci_builder_id_key'
 
 BIN_EXT = '.exe' if PLATFORM.startswith('win32_') else ''
 
@@ -193,8 +194,8 @@ def make_archive(project, platform):
             archive_add(arch, f)
 
 
-def make_deps_archive(target, full=False):
-    archive_name = "deps_{}_{}_{}.tar.xz".format(
+def make_deps_archive(target=None, name=None, full=False):
+    archive_name = name or "deps_{}_{}_{}.tar.xz".format(
         TRAVIS_OS_NAME, PLATFORM, target)
     print_message("Create archive {}.", archive_name)
     files_to_archive = [INSTALL_DIR]
@@ -230,49 +231,40 @@ def make_deps_archive(target, full=False):
             base_deps_versions['pugixml'])]
         files_to_archive += HOME.glob('BUILD_*/pugixml-{}'.format(
             base_deps_versions['pugixml']))
-        toolchains_subdirs = HOME.glob('**/TOOLCHAINS/*/*')
         if PLATFORM.startswith('armhf'):
-            files_to_archive += [SOURCE_DIR/'raspberrypi-tools']
+            files_to_archive += (SOURCE_DIR/'armhf').glob('*')
+        toolchains_subdirs = HOME.glob('**/TOOLCHAINS/*/*')
         for subdir in toolchains_subdirs:
             if not subdir.match('tools'):
                 files_to_archive.append(subdir)
 
-    with tarfile.open(str(relative_path/archive_name), 'w:xz') as tar:
+    with tarfile.open(str(BASE_EXPORT_DIR/archive_name), 'w:xz') as tar:
         for name in set(files_to_archive):
-            print('.', end='', flush=True)
+            print('.{}'.format(name), flush=True)
             tar.add(str(name), arcname=str(name.relative_to(relative_path)))
-    return relative_path/archive_name
 
 
 def update_flathub_git():
+    GIT_REPO_DIR = GIT_EXPORT_DIR/"org.kiwix.desktop"
     env = dict(os.environ)
-    env['GIT_SSH_COMMAND'] = 'ssh -o StrictHostKeyChecking=no -i {}'.format(SSH_KEY)
     env['GIT_AUTHOR_NAME'] = env['GIT_COMMITTER_NAME'] = "KiwixBot"
     env['GIT_AUTHOR_EMAIL'] = env['GIT_COMMITTER_EMAIL'] = "kiwixbot@kymeria.fr"
+    def call(command, cwd=None):
+        cwd = cwd or GIT_REPO_DIR
+        subprocess.check_call(command, env=env, cwd=str(cwd))
     command = ['git', 'clone', FLATPAK_GIT_REMOTE]
-    subprocess.check_call(command, env=env, cwd=str(HOME))
-    shutil.copy(str(BASE_DIR/'org.kiwix.desktop.json'),
-                str(HOME/'org.kiwix.desktop'))
+    call(command, cwd=GIT_EXPORT_DIR)
+    shutil.copy(str(BASE_DIR/'org.kiwix.desktop.json'), str(GIT_REPO_DIR))
     patch_dir = KBUILD_SOURCE_DIR/'kiwixbuild'/'patches'
     for dep in ('libaria2', 'mustache', 'pugixml', 'xapian'):
         for f in patch_dir.glob('{}_*.patch'.format(dep)):
-            shutil.copy(str(f), str(HOME/'org.kiwix.desktop'/'patches'))
+            shutil.copy(str(f), str(GIT_REPO_DIR/'patches'))
     command = ['git', 'add', '-A', '.']
-    subprocess.check_call(command, env=env, cwd=str(HOME/'org.kiwix.desktop'))
+    call(command)
     command = ['git', 'commit', '-m',
                'Update to version {}'.format(main_project_versions['kiwix-desktop'])]
-    subprocess.check_call(command, env=env, cwd=str(HOME/'org.kiwix.desktop'))
-    command = ['git', 'push']
-    subprocess.check_call(command, env=env, cwd=str(HOME/'org.kiwix.desktop'))
+    call(command)
 
-
-
-def scp(what, where):
-    print_message("Copy {} to {}", what, where)
-    command = ['scp', '-o', 'StrictHostKeyChecking=no',
-                      '-i', str(SSH_KEY),
-                      str(what), str(where)]
-    subprocess.check_call(command)
 
 
 for p in (NIGHTLY_KIWIX_ARCHIVES_DIR,
@@ -280,7 +272,9 @@ for p in (NIGHTLY_KIWIX_ARCHIVES_DIR,
           RELEASE_KIWIX_ARCHIVES_DIR,
           RELEASE_ZIM_ARCHIVES_DIR,
           DIST_KIWIX_ARCHIVES_DIR,
-          DIST_ZIM_ARCHIVES_DIR):
+          DIST_ZIM_ARCHIVES_DIR,
+          BASE_EXPORT_DIR,
+          GIT_EXPORT_DIR):
     try:
         p.mkdir(parents=True)
     except FileExistsError:
@@ -330,12 +324,9 @@ if PLATFORM != 'flatpak':
                         f.extractall(str(HOME))
                 except URLError:
                     pass
-        run_kiwix_build('alldependencies', platform=PLATFORM)
-        if SSH_KEY.exists():
-            archive = make_deps_archive('alldependencies', full=True)
-            destination = 'ci@tmp.kiwix.org:/data/tmp/ci/{}'
-            destination = destination.format(base_dep_archive_name)
-            scp(archive, destination)
+        else:
+            run_kiwix_build('alldependencies', platform=PLATFORM)
+            make_deps_archive(name=base_dep_archive_name, full=True)
 
 
 # A basic compilation to be sure everything is working (for a PR)
@@ -407,8 +398,7 @@ for target in TARGETS:
         run_kiwix_build(target,
                         platform=PLATFORM,
                         build_deps_only=True)
-        archive = make_deps_archive(target)
-        scp(archive, 'ci@tmp.kiwix.org:/data/tmp/ci/')
+        make_deps_archive(target=target)
 
     run_kiwix_build(target,
                     platform=PLATFORM,
