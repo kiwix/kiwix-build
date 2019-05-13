@@ -30,10 +30,7 @@ jobs:
       env: VARIANT=xenial
     - stage: build_docker_images
       script: *build_images
-      env: VARIANT=flatpak
-    - stage: build_docker_images
-      script: *build_images
-      env: VARIANT=appimage
+      env: VARIANT=bionic
     - stage: android_build
       env: PLATFORM="android"
       if: type != pull_request
@@ -48,8 +45,8 @@ jobs:
 
 before_install:
 - PATH=$PATH:${HOME}/bin:${HOME}/.local/bin
-- mkdir -p /tmp/private $HOME/EXPORT/BASE
-- chmod -R a+w $HOME/EXPORT
+- mkdir -p /tmp/private $HOME/EXPORT/BASE /$HOME/.cache $HOME/.gradle/caches
+- chmod -R a+w $HOME/EXPORT $HOME/.cache $HOME/.gradle
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then PATH=$PATH:$(brew --prefix)/opt/gettext/bin; fi
 - '[ -n "$encrypted_eba2f7543984_iv" ] && openssl aes-256-cbc
   -K $encrypted_eba2f7543984_key -iv $encrypted_eba2f7543984_iv
@@ -72,8 +69,7 @@ script:
   if [[ $TRAVIS_OS_NAME = "linux" ]]
   then
     VARIANT=xenial
-    if [[ $PLATFORM = "flatpak" && $DESKTOP_ONLY = 1 ]]; then VARIANT=flatpak; fi
-    if [[ $PLATFORM = "native_dyn" && $DESKTOP_ONLY = 1 ]]; then VARIANT=appimage; fi
+    if [[ $DESKTOP_ONLY = 1 ]]; then VARIANT=bionic; fi
   fi
 - |
   if [[ $TRAVIS_OS_NAME = "linux" ]]
