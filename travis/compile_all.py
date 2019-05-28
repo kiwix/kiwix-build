@@ -190,6 +190,7 @@ def make_archive(project, platform):
 
 
     archive = archive_dir/'{}{}'.format(archive_name, archive_ext)
+    print_message("create archive {} with {}", archive, files_to_archive)
     with open_archive(archive) as arch:
         for f in files_to_archive:
             archive_add(arch, f)

@@ -46,7 +46,7 @@ jobs:
 before_install:
 - PATH=$PATH:${HOME}/bin:${HOME}/.local/bin
 - mkdir -p /tmp/private $HOME/EXPORT/BASE /$HOME/.cache $HOME/.gradle/caches
-- chmod -R a+w $HOME/EXPORT $HOME/.cache $HOME/.gradle
+- chmod -R a+wX $HOME/EXPORT $HOME/.cache $HOME/.gradle
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then PATH=$PATH:$(brew --prefix)/opt/gettext/bin; fi
 - '[ -n "$encrypted_eba2f7543984_iv" ] && openssl aes-256-cbc
   -K $encrypted_eba2f7543984_key -iv $encrypted_eba2f7543984_iv
@@ -77,9 +77,9 @@ script:
     docker run --rm \
       -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e DESKTOP_ONLY -e TRAVIS_TAG \
       --device /dev/fuse --cap-add ALL --privileged \
-      --mount=type=bind,src=$HOME/EXPORT,dst=/home/builder/EXPORT \
-      --mount=type=bind,src=$HOME/.cache,dst=/home/builder/.cache \
-      --mount=type=bind,src=$HOME/.gradle/caches,dst=/home/builder/.gradle/caches \
+      --mount=type=bind,src=$HOME/EXPORT,dst=/home/ci_builder/EXPORT \
+      --mount=type=bind,src=$HOME/.cache,dst=/home/ci_builder/.cache \
+      --mount=type=bind,src=$HOME/.gradle/caches,dst=/home/ci_builder/.gradle/caches \
       kiwix/kiwix-build_ci:${VARIANT}-${TRAVIS_COMMIT}
   fi
 - if [[ $TRAVIS_OS_NAME != "linux" ]]; then python3 travis/compile_all.py; fi
