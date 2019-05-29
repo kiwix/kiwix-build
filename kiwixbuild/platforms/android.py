@@ -8,34 +8,42 @@ class AndroidPlatformInfo(PlatformInfo):
     static = True
     toolchain_names = ['android-ndk']
     compatible_hosts = ['fedora', 'debian']
+    api = "24"
 
     def __str__(self):
         return "android"
 
-    def binaries(self, install_path):
-        binaries = ((k,'{}-{}'.format(self.arch_full, v))
-                for k, v in (('CC', 'gcc'),
-                             ('CXX', 'g++'),
-                             ('AR', 'ar'),
-                             ('STRIP', 'strip'),
-                             ('WINDRES', 'windres'),
-                             ('RANLIB', 'ranlib'),
-                             ('LD', 'ld'))
-               )
+    @property
+    def binaries_name(self):
+        arch_full = self.arch_full
+        return {
+          'CC': '{}{}-{}'.format(arch_full, self.api, 'clang'),
+          'CXX': '{}{}-{}'.format(arch_full, self.api, 'clang++'),
+          'AR': '{}-{}'.format(arch_full, 'ar'),
+          'STRIP': '{}-{}'.format(arch_full, 'strip'),
+          'RANLIB': '{}-{}'.format(arch_full, 'ranlib'),
+          'LD': '{}-{}'.format(arch_full, 'ld')
+        }
+
+    def binaries(self):
+        install_path = self.install_path
         return {k:pj(install_path, 'bin', v)
-                for k,v in binaries}
+                for k,v in self.binaries_name.items()}
 
     @property
-    def ndk_builder(self):
-        return get_target_step('android-ndk', self.name)
+    def ndk_source(self):
+        return get_target_step('android-ndk', 'source')
+
+    @property
+    def install_path(self):
+        return pj(self.ndk_source.source_path, 'toolchains', 'llvm', 'prebuilt', 'linux-x86_64')
 
     def get_cross_config(self):
-        install_path = self.ndk_builder.install_path
         return {
             'exec_wrapper_def': '',
-            'install_path': install_path,
-            'binaries': self.binaries(install_path),
-            'root_path': pj(install_path, 'sysroot'),
+            'install_path': self.install_path,
+            'binaries': self.binaries(),
+            'root_path': pj(self.install_path, 'sysroot'),
             'extra_libs': ['-llog'],
             'extra_cflags': ['-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
             'host_machine': {
@@ -49,10 +57,10 @@ class AndroidPlatformInfo(PlatformInfo):
         }
 
     def get_bin_dir(self):
-        return [pj(self.ndk_builder.install_path, 'bin')]
+        return [pj(self.install_path, 'bin')]
 
     def set_env(self, env):
-        root_path = pj(self.ndk_builder.install_path, 'sysroot')
+        root_path = pj(self.install_path, 'sysroot')
         env['PKG_CONFIG_LIBDIR'] = pj(root_path, 'lib', 'pkgconfig')
         env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CFLAGS']
         env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CXXFLAGS']
@@ -65,7 +73,7 @@ class AndroidPlatformInfo(PlatformInfo):
         env['NDK_DEBUG'] = '0'
 
     def set_compiler(self, env):
-        binaries = self.binaries(self.ndk_builder.install_path)
+        binaries = self.binaries()
         for k,v in binaries.items():
             env[k] = v
 
@@ -82,38 +90,37 @@ class AndroidPlatformInfo(PlatformInfo):
 class AndroidArm(AndroidPlatformInfo):
     name = 'android_arm'
     arch = cpu = 'arm'
-    arch_full = 'arm-linux-androideabi'
-    abi = 'armeabi'
+    arch_full = 'armv7a-linux-androideabi'
+    abi = 'armeabi-v7a'
 
-class AndroidArm(AndroidPlatformInfo):
+    @property
+    def binaries_name(self):
+        names = super().binaries_name
+        for bin in ('AR', 'STRIP', 'RANLIB', 'LD'):
+            names[bin] = 'arm-linux-androideabi-{}'.format(bin.lower())
+        return names
+
+
+class AndroidArm64(AndroidPlatformInfo):
     name = 'android_arm64'
     arch = 'arm64'
     arch_full = 'aarch64-linux-android'
     cpu = 'aarch64'
     abi = 'arm64-v8a'
 
-class AndroidArm(AndroidPlatformInfo):
-    name = 'android_mips'
-    arch = abi = 'mips'
-    arch_full = 'mipsel-linux-android'
-    cpu = 'mipsel'
 
-class AndroidArm(AndroidPlatformInfo):
-    name = 'android_mips64'
-    arch = abi = 'mips64'
-    arch_full = 'mips64el-linux-android'
-    cpu = 'mips64el'
-
-class AndroidArm(AndroidPlatformInfo):
+class AndroidX86(AndroidPlatformInfo):
     name = 'android_x86'
     arch = abi = 'x86'
     arch_full = 'i686-linux-android'
     cpu = 'i686'
 
-class AndroidArm(AndroidPlatformInfo):
+
+class AndroidX8664(AndroidPlatformInfo):
     name = 'android_x86_64'
     arch = cpu = abi = 'x86_64'
     arch_full = 'x86_64-linux-android'
+
 
 class Android(MetaPlatformInfo):
     name = "android"
