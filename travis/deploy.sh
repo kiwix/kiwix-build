@@ -69,12 +69,13 @@ then
     done
   fi
 
+  cd ${EXPORT_DIR}/GIT
   GIT_REPOS=$(ls -d */)
   if [[ "x$GIT_REPOS" != "x" ]]
   then
     for repo in $GIT_REPOS
     do
-      (cd repo;
+      (cd $repo;
       GIT_SSH_COMMAND"ssh -o StrictHostKeyChecking=no -i $SSH_KEY" git push
       )
     done
