@@ -8,7 +8,6 @@ class AndroidPlatformInfo(PlatformInfo):
     static = True
     toolchain_names = ['android-ndk']
     compatible_hosts = ['fedora', 'debian']
-    api = "24"
 
     def __str__(self):
         return "android"
@@ -62,8 +61,8 @@ class AndroidPlatformInfo(PlatformInfo):
     def set_env(self, env):
         root_path = pj(self.install_path, 'sysroot')
         env['PKG_CONFIG_LIBDIR'] = pj(root_path, 'lib', 'pkgconfig')
-        env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CFLAGS']
-        env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CXXFLAGS']
+        env['CFLAGS'] = '-fPIC --sysroot={} '.format(root_path) + env['CFLAGS']
+        env['CXXFLAGS'] = '-fPIC --sysroot={} '.format(root_path) + env['CXXFLAGS']
         env['LDFLAGS'] = '--sysroot={} '.format(root_path) + env['LDFLAGS']
         #env['CFLAGS'] = ' -fPIC -D_FILE_OFFSET_BITS=64 -O3 '+env['CFLAGS']
         #env['CXXFLAGS'] = (' -D__OPTIMIZE__ -fno-strict-aliasing '
@@ -92,6 +91,7 @@ class AndroidArm(AndroidPlatformInfo):
     arch = cpu = 'arm'
     arch_full = 'armv7a-linux-androideabi'
     abi = 'armeabi-v7a'
+    api = '24'
 
     @property
     def binaries_name(self):
@@ -107,6 +107,7 @@ class AndroidArm64(AndroidPlatformInfo):
     arch_full = 'aarch64-linux-android'
     cpu = 'aarch64'
     abi = 'arm64-v8a'
+    api = '21'
 
 
 class AndroidX86(AndroidPlatformInfo):
@@ -114,12 +115,14 @@ class AndroidX86(AndroidPlatformInfo):
     arch = abi = 'x86'
     arch_full = 'i686-linux-android'
     cpu = 'i686'
+    api = '24'
 
 
 class AndroidX8664(AndroidPlatformInfo):
     name = 'android_x86_64'
     arch = cpu = abi = 'x86_64'
     arch_full = 'x86_64-linux-android'
+    api = '21'
 
 
 class Android(MetaPlatformInfo):
