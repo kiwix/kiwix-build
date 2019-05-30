@@ -94,13 +94,13 @@ deploy:
     script: travis/deploy.sh
     on:
       tags: true
-      condition: $TRAVIS_BUILD_STAGE_NAME != "Build_docker_images" && ($TRAVIS_OS_NAME != "linux" || $DESKTOP_ONLY != 1)
+      condition: $TRAVIS_BUILD_STAGE_NAME != "Build_docker_images"
   - provider: script
     skip_cleanup: true
     script: travis/deploy.sh
     on:
       branch: master
-      condition: $TRAVIS_BUILD_STAGE_NAME != "Build_docker_images" && $TRAVIS_EVENT_TYPE = cron && ( $TRAVIS_OS_NAME != "linux" || $DESKTOP_ONLY != 1 )
+      condition: $TRAVIS_BUILD_STAGE_NAME != "Build_docker_images" && $TRAVIS_EVENT_TYPE = cron
 env:
   global:
     - NIGHTLY_DATE=$(date +%Y-%m-%d)
