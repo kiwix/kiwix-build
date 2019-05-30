@@ -16,7 +16,8 @@ class Xapian(Dependency):
                              '68669327e08544ac88fe3473745dbcae4e8e98d5060b436c4d566f1f78709bb8')
         patches = [
             'xapian_sys_types.patch',
-            'xapian_fix_include_errno.patch'
+            'xapian_fix_include_errno.patch',
+            'xapian_configure.patch'
         ]
 
     class Builder(MakeBuilder):
