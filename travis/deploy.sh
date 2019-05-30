@@ -70,7 +70,7 @@ then
   fi
 
   cd ${EXPORT_DIR}/GIT
-  GIT_REPOS=$(ls -d */)
+  GIT_REPOS=$(ls -l | awk '/^d/ { print $9 }')
   if [[ "x$GIT_REPOS" != "x" ]]
   then
     for repo in $GIT_REPOS
