@@ -20,7 +20,7 @@ class Xapian(Dependency):
         ]
 
     class Builder(MakeBuilder):
-        configure_option = "--disable-sse --disable-backend-chert --disable-backend-inmemory --disable-documentation"
+        configure_option = "--disable-sse --disable-backend-chert --disable-backend-remote --disable-backend-inmemory --disable-documentation"
         configure_env = {'_format_LDFLAGS': "{env.LDFLAGS} -L{buildEnv.install_dir}/{buildEnv.libprefix}",
                          '_format_CXXFLAGS': "{env.CXXFLAGS} -I{buildEnv.install_dir}/include"}
 
