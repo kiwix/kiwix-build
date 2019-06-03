@@ -37,7 +37,6 @@ release_versions = {
 # Change this when you change base_deps_versions.
 base_deps_meta_version = '51'
 
-
 base_deps_versions = {
   'zlib' : '1.2.8',
   'lzma' : '5.2.4',
@@ -48,7 +47,7 @@ base_deps_versions = {
   'libmicrohttpd' : '0.9.46',
   'gumbo' : '0.10.1',
   'icu4c' : '58.2',
-  'gradle' : '5.1.1',
+  'gradle' : '5.2',
   'libaria2' : '1.33.1',
   'libmagic' : '5.35',
   'android-sdk' : 'r26.1.1',
