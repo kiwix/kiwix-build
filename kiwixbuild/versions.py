@@ -50,7 +50,7 @@ base_deps_versions = {
   'gradle' : '5.2',
   'libaria2' : '1.33.1',
   'libmagic' : '5.35',
-  'android-sdk' : 'r26.1.1',
+  'android-sdk' : 'r25.2.3',
   'android-ndk' : 'r13b',
   'qt' : '5.10.1',
   'qtwebengine' : '5.10.1',
