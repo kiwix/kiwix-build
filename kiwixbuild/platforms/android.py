@@ -85,32 +85,20 @@ class AndroidArm(AndroidPlatformInfo):
     arch_full = 'arm-linux-androideabi'
     abi = 'armeabi'
 
-class AndroidArm(AndroidPlatformInfo):
+class AndroidArm64(AndroidPlatformInfo):
     name = 'android_arm64'
     arch = 'arm64'
     arch_full = 'aarch64-linux-android'
     cpu = 'aarch64'
     abi = 'arm64-v8a'
 
-class AndroidArm(AndroidPlatformInfo):
-    name = 'android_mips'
-    arch = abi = 'mips'
-    arch_full = 'mipsel-linux-android'
-    cpu = 'mipsel'
-
-class AndroidArm(AndroidPlatformInfo):
-    name = 'android_mips64'
-    arch = abi = 'mips64'
-    arch_full = 'mips64el-linux-android'
-    cpu = 'mips64el'
-
-class AndroidArm(AndroidPlatformInfo):
+class AndroidX86(AndroidPlatformInfo):
     name = 'android_x86'
     arch = abi = 'x86'
     arch_full = 'i686-linux-android'
     cpu = 'i686'
 
-class AndroidArm(AndroidPlatformInfo):
+class AndroidX8664(AndroidPlatformInfo):
     name = 'android_x86_64'
     arch = cpu = abi = 'x86_64'
     arch_full = 'x86_64-linux-android'
