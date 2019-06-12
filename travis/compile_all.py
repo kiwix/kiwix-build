@@ -54,6 +54,7 @@ EXPORT_FILES = {
                        'include/zim/**/*.h'))
 }
 
+FLATPAK_HTTP_GIT_REMOTE = 'https://github.com/flathub/org.kiwix.desktop.git'
 FLATPAK_GIT_REMOTE = 'git@github.com:flathub/org.kiwix.desktop.git'
 
 _date = date.today().isoformat()
@@ -254,7 +255,7 @@ def update_flathub_git():
     def call(command, cwd=None):
         cwd = cwd or GIT_REPO_DIR
         subprocess.check_call(command, env=env, cwd=str(cwd))
-    command = ['git', 'clone', FLATPAK_GIT_REMOTE]
+    command = ['git', 'clone', FLATPAK_HTTP_GIT_REMOTE]
     call(command, cwd=GIT_EXPORT_DIR)
     shutil.copy(str(BASE_DIR/'org.kiwix.desktop.json'), str(GIT_REPO_DIR))
     patch_dir = KBUILD_SOURCE_DIR/'kiwixbuild'/'patches'
@@ -265,6 +266,8 @@ def update_flathub_git():
     call(command)
     command = ['git', 'commit', '-m',
                'Update to version {}'.format(main_project_versions['kiwix-desktop'])]
+    call(command)
+    command = ['git', 'config', 'remote.origin.pushurl', FLATPAK_GIT_REMOTE]
     call(command)
 
 
