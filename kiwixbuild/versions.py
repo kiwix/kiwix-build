@@ -28,7 +28,7 @@ release_versions = {
     'kiwix-lib': None, # Depends of libzim (was 0)
     'kiwix-tools': None, # Depends of kiwix-lib and libzim (was 0)
     'zim-tools': None, # Depends of libzim (was 0)
-    'zimwriterfs': 0, # Depends of libzim (was 0)
+    'zimwriterfs': None, # Depends of libzim (was 0)
     'kiwix-desktop': 0 # Depends of kiwix-lib and libzim (was 0)
 }
 
