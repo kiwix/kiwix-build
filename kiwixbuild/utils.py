@@ -245,6 +245,8 @@ def run_command(command, cwd, context, buildEnv=None, env=None, input=None, cros
         for k, v in env.items():
             print("  {} : {!r}".format(k, v), file=log)
 
+        if log:
+            log.flush()
         kwargs = dict()
         if input:
             kwargs['stdin'] = subprocess.PIPE
