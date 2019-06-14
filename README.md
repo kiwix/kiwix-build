@@ -87,8 +87,6 @@ platforms :
 - android
 - android_arm
 - android_arm64
-- android_mips
-- android_mips64
 - android_x86
 - android_x86_64
 
