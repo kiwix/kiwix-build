@@ -76,7 +76,7 @@ then
     for repo in $GIT_REPOS
     do
       (cd $repo;
-      GIT_SSH_COMMAND"ssh -o StrictHostKeyChecking=no -i $SSH_KEY" git push
+      GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -i $SSH_KEY" git push
       )
     done
   fi
