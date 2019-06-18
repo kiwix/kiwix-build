@@ -50,7 +50,7 @@ class iOSPlatformInfo(PlatformInfo):
         env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -arch {arch} -miphoneos-version-min=9.0 ".format(SDKROOT=self.root_path, arch=self.arch) + env['CFLAGS']
         env['CXXFLAGS'] = env['CFLAGS'] + " -stdlib=libc++ -std=c++11 "+env['CXXFLAGS']
         env['LDFLAGS'] = " -arch {arch} -isysroot {SDKROOT} ".format(SDKROOT=self.root_path, arch=self.arch)
-        env['MACOSX_DEPLOYMENT_TARGET'] = "10.7"
+        env['MACOSX_DEPLOYMENT_TARGET'] = "10.10"
 
     def get_bin_dir(self):
         return [pj(self.root_path, 'bin')]
