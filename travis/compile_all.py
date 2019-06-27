@@ -8,6 +8,7 @@ from datetime import date
 import tarfile, zipfile
 import subprocess
 import re
+import json
 from urllib.request import urlopen
 from urllib.error import URLError
 
@@ -37,6 +38,7 @@ NIGHTLY_ZIM_ARCHIVES_DIR = EXPORT_DIR/'NIGHTLY_ZIM_ARCHIVES'/NIGHTLY_DATE
 RELEASE_ZIM_ARCHIVES_DIR = EXPORT_DIR/'RELEASE_ZIM_ARCHIVES'
 DIST_KIWIX_ARCHIVES_DIR = EXPORT_DIR/'DIST_KIWIX_ARCHIVES'
 DIST_ZIM_ARCHIVES_DIR = EXPORT_DIR/'DIST_ZIM_ARCHIVES'
+BINTRAY_ARCHIVES_DIR = EXPORT_DIR/'BINTRAY_ARCHIVES'
 
 BIN_EXT = '.exe' if PLATFORM.startswith('win32_') else ''
 
@@ -286,6 +288,7 @@ for p in (NIGHTLY_KIWIX_ARCHIVES_DIR,
           RELEASE_ZIM_ARCHIVES_DIR,
           DIST_KIWIX_ARCHIVES_DIR,
           DIST_ZIM_ARCHIVES_DIR,
+          BINTRAY_ARCHIVES_DIR,
           BASE_EXPORT_DIR,
           GIT_EXPORT_DIR):
     try:
@@ -397,7 +400,9 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
 
 
 TARGETS = tuple()
-if PLATFORM.startswith('android'):
+if PLATFORM == 'android':
+    TARGETS = ('kiwix-lib-app',)
+elif PLATFORM.startswith('android_'):
     TARGETS = ('libzim', 'kiwix-lib')
 elif PLATFORM.startswith('iOS'):
     TARGETS = ('libzim', 'kiwix-lib')
@@ -472,12 +477,25 @@ elif PLATFORM == 'i586_static':
     make_archive('kiwix-tools', 'linux-i586')
 elif make_release and PLATFORM == 'flatpak':
     update_flathub_git()
-elif PLATFORM.startswith('android') and 'kiwix-android' in TARGETS:
-    APK_NAME = "kiwix-{}".format(PLATFORM)
-    source_debug_dir = HOME/'BUILD_android'/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'debug'
-    source_release_dir = HOME/'BUILD_android'/'kiwix-android'/'app'/'build'/'outputs'/'apk'/'kiwix'/'release'
-    shutil.copy(str(source_debug_dir/'app-kiwix-debug.apk'),
-                str(NIGHTLY_KIWIX_ARCHIVES_DIR/"{}-debug.apk".format(APK_NAME)))
-    shutil.copy(str(source_release_dir/'app-kiwix-release-unsigned.apk'),
-                str(NIGHTLY_KIWIX_ARCHIVES_DIR/"{}-release_signed".format(APK_NAME)))
+elif PLATFORM == 'android' and 'kiwix-lib-app' in TARGETS:
+    if make_release and release_versions.get(project) is not None:
+        postfix = main_project_versions[project]
+        extra_postfix = release_versions.get(project)
+        if extra_postfix:
+            postfix = "{}-{}".format(postfix, extra_postfix)
+
+        arr_name = "kiwixlib-{}.aar".format(postfix)
+
+        source_release_dir = HOME/'BUILD_android'/'kiwix-lib-app'/'kiwixLibAndroid'/'build'/'outputs'/'aar'
+        shutil.copy(str(source_release_dir/'kiwixLibAndroid-release.aar'),
+                    str(BINTRAY_ARCHIVES_DIR/arr_name))
+
+        json_filename = '{}_bintray_info.json'.format(arr_name)
+        data = {
+            version: main_project_versions[project],
+            filename : arr_name,
+            artefact: 'kiwixlib-5.1.0.aar'
+        }
+        with open(str(BINTRAY_ARCHIVES_DIR/json_filename), 'w') as f:
+            json.dump(data, f)
 
