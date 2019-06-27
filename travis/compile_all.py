@@ -246,6 +246,14 @@ def make_deps_archive(target=None, name=None, full=False):
             print('.{}'.format(name), flush=True)
             tar.add(str(name), arcname=str(name.relative_to(relative_path)))
 
+def make_flatpak_cache_archive():
+    archive_name = "base_deps_{os}_{platform}.tar.xz".format(
+        os=TRAVIS_OS_NAME,
+        platform=PLATFORM)
+    cache = BASE_DIR/'.flatpak-builder'
+    with tarfile.open(str(BASE_EXPORT_DIR/archive_name), 'w:xz') as tar:
+        tar.add(str(cache), arcname=str(cache.relative_to(BASE_DIR)))
+
 
 def update_flathub_git():
     GIT_REPO_DIR = GIT_EXPORT_DIR/"org.kiwix.desktop"
@@ -332,12 +340,25 @@ if PLATFORM != 'flatpak':
         else:
             run_kiwix_build('alldependencies', platform=PLATFORM)
             make_deps_archive(name=base_dep_archive_name, full=True)
+else:
+    base_dep_archive_name = "base_deps_{os}_{platform}.tar.xz".format(
+        os=TRAVIS_OS_NAME,
+        platform=PLATFORM)
+
+    print_message("Getting archive {}", base_dep_archive_name)
+    try:
+        local_filename = download_base_archive(base_dep_archive_name)
+        BASE_DIR.mkdir(parents=True)
+        with tarfile.open(local_filename) as f:
+            f.extractall(str(BASE_DIR))
+    except URLError:
+        print_message("Cannot get archive. Move on")
 
 
 # A basic compilation to be sure everything is working (for a PR)
 if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
     if PLATFORM.startswith('android'):
-        TARGETS = ('kiwix-android',)
+        TARGETS = ('kiwix-lib',)
     elif PLATFORM.startswith('iOS'):
         TARGETS = ('kiwix-lib',)
     elif PLATFORM.startswith('native_'):
@@ -369,18 +390,15 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
         make_archive('kiwix-tools', 'linux-armhf')
     elif PLATFORM == 'i586_static':
         make_archive('kiwix-tools', 'linux-i586')
+    elif PLATFORM == 'flatpak':
+        make_flatpak_cache_archive()
 
     sys.exit(0)
 
 
 TARGETS = tuple()
 if PLATFORM.startswith('android'):
-    if make_release:
-        # (For now ?) kiwix-android follow it own release process.
-        # Do not try to make a release of it
-        TARGETS = ('libzim', 'kiwix-lib')
-    else:
-        TARGETS = ('libzim', 'kiwix-lib', 'kiwix-android')
+    TARGETS = ('libzim', 'kiwix-lib')
 elif PLATFORM.startswith('iOS'):
     TARGETS = ('libzim', 'kiwix-lib')
 elif PLATFORM.startswith('native_'):
