@@ -358,7 +358,7 @@ else:
 # A basic compilation to be sure everything is working (for a PR)
 if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
     if PLATFORM.startswith('android'):
-        TARGETS = ('kiwix-android',)
+        TARGETS = ('kiwix-lib',)
     elif PLATFORM.startswith('iOS'):
         TARGETS = ('kiwix-lib',)
     elif PLATFORM.startswith('native_'):
@@ -398,12 +398,7 @@ if environ['TRAVIS_EVENT_TYPE'] != 'cron' and not make_release:
 
 TARGETS = tuple()
 if PLATFORM.startswith('android'):
-    if make_release:
-        # (For now ?) kiwix-android follow it own release process.
-        # Do not try to make a release of it
-        TARGETS = ('libzim', 'kiwix-lib')
-    else:
-        TARGETS = ('libzim', 'kiwix-lib', 'kiwix-android')
+    TARGETS = ('libzim', 'kiwix-lib')
 elif PLATFORM.startswith('iOS'):
     TARGETS = ('libzim', 'kiwix-lib')
 elif PLATFORM.startswith('native_'):
