@@ -1,6 +1,7 @@
 import subprocess
 import os
 import shutil
+import time
 
 from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild, run_command
 from kiwixbuild.versions import main_project_versions, base_deps_versions
@@ -72,9 +73,11 @@ class Source:
         log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
         context = Context(name, log, True)
         try:
+            start_time = time.time()
             ret = function(*args, context=context)
             context._finalise()
-            print("OK")
+            duration = time.time() - start_time
+            print("OK ({:.1f}s)".format(duration))
             return ret
         except SkipCommand:
             print("SKIP")
@@ -228,9 +231,11 @@ class Builder:
         log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
         context = Context(name, log, self.target.force_native_build)
         try:
+            start_time = time.time()
             ret = function(*args, context=context)
             context._finalise()
-            print("OK")
+            duration = time.time() - start_time
+            print("OK ({:.1f}s)".format(duration))
             return ret
         except SkipCommand:
             print("SKIP")
