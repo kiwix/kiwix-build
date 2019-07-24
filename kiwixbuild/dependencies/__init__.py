@@ -11,8 +11,6 @@ from . import (
     icu4c,
     ios_fat_lib,
     mustache,
-    kiwix_android,
-    kiwix_custom_app,
     kiwix_desktop,
     kiwix_lib,
     kiwix_tools,

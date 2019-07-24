@@ -48,35 +48,15 @@ def parse_args():
                           help=("Specify the architecture to build for ios application/libraries.\n"
                                 "Can be specified several times to build for several architectures.\n"
                                 "If not specified, all architectures will be build."))
-    subgroup = parser.add_argument_group('custom app',
-                                         description="Android custom app specific options")
-    subgroup.add_argument('--android-custom-app',
-                          help="The custom android app to build")
-    subgroup.add_argument('--zim-file-url',
-                          help="The url of the zim file to download")
-    subgroup.add_argument('--zim-file-size',
-                          help="The size of the zim file.")
     options = parser.parse_args()
 
-    if options.target == 'kiwix-android-custom':
-        err = False
-        if not options.android_custom_app:
-            print("You need to specify ANDROID_CUSTOM_APP if you "
-                  "want to build a kiwix-android-custom target")
-            err = True
-        if not options.zim_file_url and not options.zim_file_size:
-            print("You need to specify ZIM_FILE_SIZE or ZIM_FILE_URL if you "
-                  "want to build a kiwix-android-custom target")
-            err = True
-        if err:
-            sys.exit(1)
     if not options.android_arch:
         options.android_arch = ['arm', 'arm64', 'x86', 'x86_64']
     if not options.ios_arch:
         options.ios_arch = ['armv7', 'arm64', 'i386', 'x86_64']
 
     if not options.target_platform:
-        if options.target in ('kiwix-android', 'kiwix-android-custom'):
+        if options.target in ('kiwix-lib-app',):
              options.target_platform = 'android'
         else:
              options.target_platform = 'native_dyn'
