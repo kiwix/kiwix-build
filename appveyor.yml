@@ -54,6 +54,7 @@ build_script:
   - IF "%USE_CACHE%" NEQ "1" %MINGW64_RUN% "cd /c/projects/kiwix-build && appveyor/create_cache.sh"
   - appveyor\install_libzim.cmd
   - appveyor\install_kiwix-lib.cmd
+  - appveyor\install_kiwix-tools.cmd
   - appveyor\install_kiwix-desktop.cmd
 
 before_deploy:
