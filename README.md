@@ -69,7 +69,7 @@ By default, `kiwix-build` will build `kiwix-tools` .
 
 If no target platform is specified, a default one will be infered from
 the specified target :
-- `kiwix-android` will be build using the platform `android`
+- `kiwix-lib-app` will be build using the platform `android`
 - Other targets will be build using the platform `native_dyn`
 
 But you can select another target platform using the option
@@ -93,9 +93,14 @@ kiwix-build --target-platform win32_dyn
 
 ## Android
 
-Android apk (kiwix-android) is a bit a special case.
-`kiwix-android` itself is architecture independent (it is written in
-java) but it use `kiwix-lib` who is architecture dependent.
+`kiwix-android` (https://github.com/kiwix/kiwix-android) depends of
+the `kiwix-lib` project.
+It uses a special `.aar` file that represent (and embed) the kiwix-lib for
+all supported android arch. This is a kind of fat archive we have for MacOs.
+
+The `.aar` file is build using the `kiwix-lib-app` project.
+`kiwix-lib-app` itself is architecture independent (it is just a packaging of
+other archives) but it use `kiwix-lib` who is architecture dependent.
 
 When building `kiwix-lib`, you should directly use the
 target-platform `android_<arch>`:
@@ -103,21 +108,22 @@ target-platform `android_<arch>`:
 kiwix-build kiwix-lib --target-platform android_arm
 ```
 
-But, `kiwix-android` apk can also be multi arch (ie, it includes
-`kiwix-lib` for several architectures). To do so, you must ask to build
-`kiwix-android` using the `android` platform:
+But, `kiwix-lib-app` is mainly multi arch.
+To compile `kiwix-lib-app`, you must use the `android` platform:
 ```bash
-kiwix-build --target-platform android kiwix-android
-kiwix-build kiwix-android # because `android` platform is the default for `kiwix-android`
+$ kiwix-build --target-platform android kiwix-lib-app
+$ kiwix-build kiwix-lib-app # because `android` platform is the default for `kiwix-lib-app`
 ```
 
 By default, when using platform `android`, `kiwix-lib` will be build for
 all architectures. This can be changed by using the option `--android-arch` :
 ```bash
-kiwix-build kiwix-android # apk for all architectures
-kiwix-build kiwix-android --android-arch arm # apk for arm architecture
-kiwix-build kiwix-anrdoid --android-arch arm --android-arch arm64 # apk for arm and arm64 architectures
+$ kiwix-build kiwix-lib-app # aar with all architectures
+$ kiwix-build kiwix-lib-app --android-arch arm # aar with arm architecture
+$ kiwix-build kiwix-lib-app --android-arch arm --android-arch arm64 # aan with arm and arm64 architectures
 ```
+
+To build `kiwix-android` itself, you should see the documentation of `kiwix-android`.
 
 ## IOS
 
