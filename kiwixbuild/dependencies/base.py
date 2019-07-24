@@ -525,7 +525,7 @@ class GradleBuilder(Builder):
         shutil.copytree(self.source_path, self.build_path)
 
     def _compile(self, context):
-        command = "gradle {gradle_target} {gradle_option}"
+        command = "./gradlew {gradle_target} {gradle_option}"
         command = command.format(
             gradle_target=self.gradle_target,
             gradle_option=self.gradle_option)

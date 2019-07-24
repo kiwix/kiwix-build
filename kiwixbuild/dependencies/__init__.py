@@ -7,7 +7,6 @@ from . import (
     aria2,
     armhf,
     flatpak,
-    gradle,
     gumbo,
     icu4c,
     ios_fat_lib,

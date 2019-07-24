@@ -123,7 +123,7 @@ class AndroidX8664(AndroidPlatformInfo):
 
 class Android(MetaPlatformInfo):
     name = "android"
-    toolchain_names = ['android-sdk', 'gradle']
+    toolchain_names = ['android-sdk']
     compatible_hosts = ['fedora', 'debian']
 
     @property
@@ -143,10 +143,5 @@ class Android(MetaPlatformInfo):
     def sdk_builder(self):
         return get_target_step('android-sdk', 'neutral')
 
-    @property
-    def gradle_builder(self):
-        return get_target_step('gradle', 'neutral')
-
     def set_env(self, env):
         env['ANDROID_HOME'] = self.sdk_builder.install_path
-        env['PATH'] = ':'.join([pj(self.gradle_builder.install_path, 'bin'), env['PATH']])
