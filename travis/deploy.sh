@@ -69,7 +69,7 @@ then
     done
   fi
 
-  cd ${EXPORT_DIR}/GIT
+  (cd ${EXPORT_DIR}/GIT
   GIT_REPOS=$(ls -l | awk '/^d/ { print $9 }')
   if [[ "x$GIT_REPOS" != "x" ]]
   then
@@ -80,5 +80,16 @@ then
       )
     done
   fi
+  )
+
+  BINTRAY_ARCHIVES=$(find $BINTRAY_ARCHIVES_DIR/*_bintray_info.json -type f)
+  if [[ "x$BINTRAY_ARCHIVES" != "x" ]]
+  then
+    for archive_info in $BINTRAY_ARCHIVES
+    do
+      ${HOME}/kiwix-build/scripts/upload_kiwix_lib_android_to_bintray.py $archive_info
+    done
+ fi
+
 fi
 

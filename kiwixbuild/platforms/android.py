@@ -131,7 +131,7 @@ class Android(MetaPlatformInfo):
         return ['android_{}'.format(arch) for arch in option('android_arch')]
 
     def add_targets(self, targetName, targets):
-        if targetName not in ('kiwix-android', 'kiwix-android-custom'):
+        if targetName not in ('kiwix-android', 'kiwix-android-custom', 'kiwix-lib-app'):
             return super().add_targets(targetName, targets)
         else:
             return AndroidPlatformInfo.add_targets(self, targetName, targets)
