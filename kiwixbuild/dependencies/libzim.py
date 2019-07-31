@@ -25,4 +25,6 @@ class Libzim(Dependency):
                 return "-Db_bitcode=true"
             if platformInfo.name == 'native_mixed' and option('target') == 'libzim':
                 return "-Dstatic-linkage=true"
+            if platformInfo.name == "flatpak":
+                return "--wrap-mode=nodownload"
             return ""
