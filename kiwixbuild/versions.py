@@ -6,7 +6,7 @@ main_project_versions = {
     'libzim': '5.0.1',
     'zim-tools': '1.0.3',
     'zimwriterfs': '1.3.3',
-    'kiwix-desktop': '2.0-beta5' # Also need to be change in appveyor/package_kiwix-desktop.sh
+    'kiwix-desktop': '2.0-rc1' # Also need to be change in appveyor/package_kiwix-desktop.sh
 }
 
 # This dictionnary specify what we need to build at each release process.
@@ -24,12 +24,12 @@ main_project_versions = {
 #    - Else, increment the value. If no value was present, see `(was ...)`.
 
 release_versions = {
-    'libzim': 0, # Depends of base deps (was 0)
-    'kiwix-lib': 0, # Depends of libzim (was 0)
-    'kiwix-tools': 0, # Depends of kiwix-lib and libzim (was 0)
-    'zim-tools': 0, # Depends of libzim (was 0)
-    'zimwriterfs': 2, # Depends of libzim (was 1)
-    'kiwix-desktop': None # Depends of kiwix-lib and libzim (was 0)
+    'libzim': None, # Depends of base deps (was 0)
+    'kiwix-lib': None, # Depends of libzim (was 0)
+    'kiwix-tools': None, # Depends of kiwix-lib and libzim (was 0)
+    'zim-tools': None, # Depends of libzim (was 0)
+    'zimwriterfs': None, # Depends of libzim (was 2)
+    'kiwix-desktop': 0 # Depends of kiwix-lib and libzim (was 0)
 }
 
 
