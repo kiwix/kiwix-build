@@ -37,7 +37,8 @@ class Kiwixlib(Dependency):
 class KiwixlibApp(Dependency):
     name = "kiwix-lib-app"
 
-    Source = Kiwixlib.Source
+    class Source(Kiwixlib.Source):
+        name = "kiwix-lib"
 
     class Builder(GradleBuilder):
         dependencies = ["kiwix-lib"]
