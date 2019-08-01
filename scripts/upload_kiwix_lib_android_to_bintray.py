@@ -64,7 +64,7 @@ def create_version(version):
         print("Bintray Version created!")
         return True
 
-    print("ERROR : Bintray API response {}".format(code))
+    print("ERROR : Bintray API response {}".format(rcode))
     return False
 
 
@@ -87,7 +87,7 @@ def upload_archive(version, filename, artefact):
         return False
 
     # Upload the pom file
-    pom_artefact = os.path.splitext(artefact) + ".pom"
+    pom_artefact = os.path.splitext(artefact)[0] + ".pom"
     url = url_template.format(version=version, artefact=pom_artefact)
     data = generate_pom_file(version)
     r = requests.put(url, data=data, auth=bintray_auth, params=parameters)

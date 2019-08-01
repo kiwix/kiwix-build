@@ -478,9 +478,9 @@ elif PLATFORM == 'i586_static':
 elif make_release and PLATFORM == 'flatpak':
     update_flathub_git()
 elif PLATFORM == 'android' and 'kiwix-lib-app' in TARGETS:
-    if make_release and release_versions.get(project) is not None:
-        postfix = main_project_versions[project]
-        extra_postfix = release_versions.get(project)
+    if make_release and release_versions.get('kiwix-lib') is not None:
+        postfix = main_project_versions['kiwix-lib']
+        extra_postfix = release_versions.get('kiwix-lib')
         if extra_postfix:
             postfix = "{}-{}".format(postfix, extra_postfix)
 
@@ -492,9 +492,9 @@ elif PLATFORM == 'android' and 'kiwix-lib-app' in TARGETS:
 
         json_filename = '{}_bintray_info.json'.format(arr_name)
         data = {
-            version: main_project_versions[project],
-            filename : arr_name,
-            artefact: 'kiwixlib-5.1.0.aar'
+            'version': postfix,
+            'filename': arr_name,
+            'artefact': arr_name
         }
         with open(str(BINTRAY_ARCHIVES_DIR/json_filename), 'w') as f:
             json.dump(data, f)
