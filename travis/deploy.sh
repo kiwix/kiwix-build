@@ -88,7 +88,7 @@ then
   then
     for archive_info in $BINTRAY_ARCHIVES
     do
-      ${HOME}/kiwix-build/scripts/upload_kiwix_lib_android_to_bintray.py $archive_info
+      ${TRAVIS_BUILD_DIR}/scripts/upload_kiwix_lib_android_to_bintray.py $archive_info
     done
  fi
 
