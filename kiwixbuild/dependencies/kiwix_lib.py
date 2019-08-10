@@ -16,7 +16,7 @@ class Kiwixlib(Dependency):
         git_dir = "kiwix-lib"
 
     class Builder(MesonBuilder):
-        dependencies = ["pugixml", "libzim", "zlib", "lzma", "libcurl", "icu4c", "mustache"]
+        dependencies = ["pugixml", "libzim", "zlib", "lzma", "libcurl", "libmicrohttpd", "icu4c", "mustache"]
         strip_option = ''
 
         @property

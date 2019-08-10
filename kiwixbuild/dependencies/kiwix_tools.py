@@ -11,7 +11,7 @@ class KiwixTools(Dependency):
         git_dir = "kiwix-tools"
 
     class Builder(MesonBuilder):
-        dependencies = ["kiwix-lib", "libmicrohttpd", "zlib"]
+        dependencies = ["kiwix-lib"]
 
         @property
         def configure_option(self):

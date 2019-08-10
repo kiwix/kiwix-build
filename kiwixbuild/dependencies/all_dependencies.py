@@ -12,13 +12,9 @@ class AllBaseDependencies(Dependency):
     class Builder(NoopBuilder):
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
-            base_deps = ['zlib', 'lzma', 'xapian-core', 'pugixml', 'libcurl', 'icu4c', 'mustache']
+            base_deps = ['zlib', 'lzma', 'xapian-core', 'pugixml', 'libcurl', 'icu4c', 'mustache', 'libmicrohttpd']
             # zimwriterfs
             if platformInfo.build not in ('android', 'win32'):
                 base_deps += ['libmagic', 'gumbo']
-            # kiwix-tools
-            if (platformInfo.build != 'android' and
-                neutralEnv('distname') != 'Darwin'):
-                base_deps += ['libmicrohttpd']
 
             return base_deps
