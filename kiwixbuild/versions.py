@@ -28,14 +28,14 @@ release_versions = {
     'kiwix-lib': None, # Depends of libzim (was 0)
     'kiwix-tools': None, # Depends of kiwix-lib and libzim (was 0)
     'zim-tools': 0, # Depends of libzim (was 0)
-    'zimwriterfs': None, # Depends of libzim (was 2)
+    'zimwriterfs': None, # Depends of libzim (was 0)
     'kiwix-desktop': None # Depends of kiwix-lib and libzim (was 0)
 }
 
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = '51'
+base_deps_meta_version = '52'
 
 base_deps_versions = {
   'zlib' : '1.2.8',
