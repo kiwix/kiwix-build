@@ -21,10 +21,13 @@ class Kiwixlib(Dependency):
 
         @property
         def configure_option(self):
-            if self.buildEnv.platformInfo.build == 'android':
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'android':
                 return '-Dandroid=true'
-            if self.buildEnv.platformInfo.build == 'iOS':
+            if platformInfo.build == 'iOS':
                 return '-Db_bitcode=true'
+            if platformInfo.name == 'flatpak':
+                return '--wrap-mode=nodownload'
             return ''
 
         @property
