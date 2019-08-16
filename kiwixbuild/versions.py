@@ -5,7 +5,7 @@ main_project_versions = {
     'kiwix-tools': '2.1.0',
     'libzim': '5.0.1',
     'zim-tools': '1.0.4',
-    'zimwriterfs': '1.3.4',
+    'zimwriterfs': '1.3.5',
     'kiwix-desktop': '2.0-rc1' # Also need to be change in appveyor/package_kiwix-desktop.sh
 }
 
