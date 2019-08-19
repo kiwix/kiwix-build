@@ -9,9 +9,9 @@ class MicroHttpd(Dependency):
     name = "libmicrohttpd"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('libmicrohttpd-0.9.46.tar.gz',
-                             '06dbd2654f390fa1e8196fe063fc1449a6c2ed65a38199a49bf29ad8a93b8979',
-                             'http://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.46.tar.gz')
+        archive = Remotefile('libmicrohttpd-0.9.65.tar.gz',
+                             'f2467959c5dd5f7fdf8da8d260286e7be914d18c99b898e22a70dafd2237b3c9',
+                             'http://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.65.tar.gz')
 
     class Builder(MakeBuilder):
         configure_option = "--disable-https --without-libgcrypt --without-libcurl --disable-doc --disable-examples"
