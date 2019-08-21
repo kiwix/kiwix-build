@@ -484,17 +484,19 @@ elif PLATFORM == 'android' and 'kiwix-lib-app' in TARGETS:
         if extra_postfix:
             postfix = "{}-{}".format(postfix, extra_postfix)
 
-        arr_name = "kiwixlib-{}.aar".format(postfix)
+        basename = "kiwixlib-{}".format(postfix)
 
-        source_release_dir = HOME/'BUILD_android'/'kiwix-lib-app'/'kiwixLibAndroid'/'build'/'outputs'/'aar'
-        shutil.copy(str(source_release_dir/'kiwixLibAndroid-release.aar'),
-                    str(BINTRAY_ARCHIVES_DIR/arr_name))
+        output_release_dir = HOME/'BUILD_android'/'kiwix-lib-app'/'kiwixLibAndroid'/'build'/'outputs'
+        shutil.copy(str(output_release_dir/'aar'/'kiwixLibAndroid-release.aar'),
+                    str(BINTRAY_ARCHIVES_DIR/basename+'.aar'))
+        shutil.copy(str(output_release_dir/'pom.xml'),
+                    str(BINTRAY_ARCHIVES_DIR/basename+'.pom'))
 
-        json_filename = '{}_bintray_info.json'.format(arr_name)
+
+        json_filename = '{}_bintray_info.json'.format(basename)
         data = {
             'version': postfix,
-            'filename': arr_name,
-            'artefact': arr_name
+            'files': [basename+ext for ext in ('.aar', '.pom')]
         }
         with open(str(BINTRAY_ARCHIVES_DIR/json_filename), 'w') as f:
             json.dump(data, f)

@@ -45,7 +45,7 @@ class KiwixlibApp(Dependency):
 
     class Builder(GradleBuilder):
         dependencies = ["kiwix-lib"]
-        gradle_target = "assembleRelease"
+        gradle_target = "assembleRelease writePom"
 
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
