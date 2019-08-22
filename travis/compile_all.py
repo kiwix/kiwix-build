@@ -486,8 +486,8 @@ elif PLATFORM == 'android' and 'kiwix-lib-app' in TARGETS:
 
         basename = "kiwixlib-{}".format(postfix)
 
-        output_release_dir = HOME/'BUILD_android'/'kiwix-lib-app'/'kiwixLibAndroid'/'build'/'outputs'
-        shutil.copy(str(output_release_dir/'aar'/'kiwixLibAndroid-release.aar'),
+        output_release_dir = HOME/'BUILD_android'/'kiwix-lib-app'/'kiwixLibAndroid'/'build'
+        shutil.copy(str(output_release_dir/'outputs'/'aar'/'kiwixLibAndroid-release.aar'),
                     str(BINTRAY_ARCHIVES_DIR/(basename+'.aar')))
         shutil.copy(str(output_release_dir/'pom.xml'),
                     str(BINTRAY_ARCHIVES_DIR/(basename+'.pom')))
