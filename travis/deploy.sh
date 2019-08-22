@@ -83,6 +83,7 @@ then
   fi
   )
 
+  ls $BINTRAY_ARCHIVES_DIR
   BINTRAY_ARCHIVES=$(find $BINTRAY_ARCHIVES_DIR -name "*_bintray_info.json" -type f)
   if [[ "x$BINTRAY_ARCHIVES" != "x" ]]
   then

@@ -1,9 +1,9 @@
 # This file reference all the versions of the depedencies we use in kiwix-build.
 
 main_project_versions = {
-    'kiwix-lib': '6.0.1',
+    'kiwix-lib': '6.0.2',
     'kiwix-tools': '3.0.1',
-    'libzim': '5.0.2',
+    'libzim': '5.1.0',
     'zim-tools': '1.0.4',
     'zimwriterfs': '1.3.5',
     'kiwix-desktop': '2.0-rc1' # Also need to be change in appveyor/package_kiwix-desktop.sh
@@ -27,8 +27,8 @@ release_versions = {
     'libzim': None, # Depends of base deps (was 0)
     'kiwix-lib': None, # Depends of libzim (was 0)
     'kiwix-tools': 0, # Depends of kiwix-lib and libzim (was 0)
-    'zim-tools': None, # Depends of libzim (was 1)
-    'zimwriterfs': None, # Depends of libzim (was 1)
+    'zim-tools': None, # Depends of libzim (was 2)
+    'zimwriterfs': None, # Depends of libzim (was 2)
     'kiwix-desktop': None # Depends of kiwix-lib and libzim (was 1)
 }
 
