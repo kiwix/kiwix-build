@@ -48,6 +48,7 @@ def upload(version, filepath, artefact):
     rcode_family = rcode // 100
     if rcode_family not in (2, 3):
         print("ERROR: Fail to upload artefact")
+        print(r.text)
         return False
 
     return True
