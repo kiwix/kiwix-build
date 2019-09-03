@@ -7,6 +7,7 @@ main_project_versions = {
     'zim-tools': '1.0.4',
     'zimwriterfs': '1.3.5',
     'kiwix-desktop': '2.0-rc1' # Also need to be change in appveyor/package_kiwix-desktop.sh
+                               # Also change KIWIX_DESKTOP_VERSION and KIWIX_DESKTOP_RELEASE in appveyor.yml
 }
 
 # This dictionnary specify what we need to build at each release process.
@@ -22,6 +23,12 @@ main_project_versions = {
 #    - If project depedencies have not change, set it to None and update the
 #     `(was ...)`.
 #    - Else, increment the value. If no value was present, see `(was ...)`.
+
+# For kiwix-desktop, if this is not None:
+# - set KIWIX_DESKTOP_RELEASE to 1
+# - set KIWIX_DESKTOP_VERSION to the version of the release (including release_versions)
+# If this is None:
+# - set KIWIX_DESKTOP_RELEASE to 0
 
 release_versions = {
     'libzim': None, # Depends of base deps (was 0)
