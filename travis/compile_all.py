@@ -428,6 +428,11 @@ for target in TARGETS:
                         build_deps_only=True)
         make_deps_archive(target=target)
 
+    if target == 'kiwix-lib-app':
+        extra_postfix = release_versions.get('kiwix-lib')
+        if extra_postfix:
+            env['KIWIXLIB_BUILDVERSION'] = extra_postfix
+
     run_kiwix_build(target,
                     platform=PLATFORM,
                     make_release=make_release)
