@@ -29,11 +29,7 @@ USER ci_builder
 WORKDIR /home/ci_builder
 ENV PATH="/home/ci_builder/.local/bin:${PATH}"
 
-# Install kiwix-build
-COPY --chown=ci_builder:ci_builder . kiwix-build
-RUN pip3 install --user -e ./kiwix-build
-
 ENV TRAVIS_BUILD_DIR /home/ci_builder/kiwix-build
 ENV TRAVIS_OS_NAME linux_bionic
 
-CMD kiwix-build/travis/compile_all.py
+CMD pip3 install --user ./kiwix-build && kiwix-build/travis/compile_all.py

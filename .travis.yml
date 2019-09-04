@@ -20,12 +20,12 @@ jobs:
     - stage: build_docker_images
       script: &build_images
         - |
-          if [ ! $(curl -sflL https://hub.docker.com/v2/repositories/kiwix/kiwix-build_ci/tags/${VARIANT}-${TRAVIS_COMMIT}) ]
+          if [ ! $(curl -sflL https://hub.docker.com/v2/repositories/kiwix/kiwix-build_ci/tags/${VARIANT}-${DOCKER_VERSION}) ]
           then
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
             docker build -t kiwix-build_ci -f travis/${VARIANT}_builder.dockerfile .
-            docker tag kiwix-build_ci kiwix/kiwix-build_ci:${VARIANT}-${TRAVIS_COMMIT}
-            docker push kiwix/kiwix-build_ci:${VARIANT}-${TRAVIS_COMMIT}
+            docker tag kiwix-build_ci kiwix/kiwix-build_ci:${VARIANT}-${DOCKER_VERSION}
+            docker push kiwix/kiwix-build_ci:${VARIANT}-${DOCKER_VERSION}
           fi
       env: VARIANT=xenial
     - stage: build_docker_images
@@ -80,7 +80,8 @@ script:
       --mount=type=bind,src=$HOME/EXPORT,dst=/home/ci_builder/EXPORT \
       --mount=type=bind,src=$HOME/.cache,dst=/home/ci_builder/.cache \
       --mount=type=bind,src=$HOME/.gradle/caches,dst=/home/ci_builder/.gradle/caches \
-      kiwix/kiwix-build_ci:${VARIANT}-${TRAVIS_COMMIT}
+      --mount=type=bind,src=$TRAVIS_BUILD_DIR,dst=/home/ci_builder/kiwix-build \
+      kiwix/kiwix-build_ci:${VARIANT}-${DOCKER_VERSION}
   fi
 - if [[ $TRAVIS_OS_NAME != "linux" ]]; then python3 travis/compile_all.py; fi
 after_success:
@@ -105,6 +106,7 @@ env:
   global:
     - NIGHTLY_DATE=$(date +%Y-%m-%d)
     - SSH_KEY=/tmp/private/travisci_builder_id_key
+    - DOCKER_VERSION=1
   matrix:
     - PLATFORM="flatpak" DESKTOP_ONLY=1
     - PLATFORM="native_dyn"
