@@ -2,9 +2,8 @@ FROM ubuntu:bionic
 
 ENV LANG C.UTF-8
 
-RUN apt update -q
-RUN \
-  apt install -q -y --no-install-recommends \
+RUN apt update -q && \
+    apt install -q -y --no-install-recommends \
 # Base build tools
     build-essential automake libtool cmake ccache pkg-config autopoint patch \
     python3-pip python3-setuptools python3-wheel git subversion wget unzip \
@@ -22,7 +21,7 @@ RUN \
 #    vim less grep \
   && \
   apt-get clean -y && \
-  rm -rf /usr/share/doc/* /var/cache/debconf/*
+  rm -rf /var/lib/apt/lists/* /usr/share/doc/* /var/cache/debconf/*
 
 # Create user
 RUN useradd --create-home ci_builder
