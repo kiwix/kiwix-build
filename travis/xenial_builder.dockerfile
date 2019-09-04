@@ -2,8 +2,7 @@ FROM ubuntu:xenial
 
 ENV LANG C.UTF-8
 
-RUN apt update -q
-RUN \
+RUN apt update -q && \
   dpkg --add-architecture i386 && \
   apt install -q -y --no-install-recommends \
 # Base build tools
@@ -23,7 +22,7 @@ RUN \
 #    vim less grep \
   && \
   apt-get clean -y && \
-  rm -rf /usr/share/doc/* /var/cache/debconf/*
+  rm -rf /var/lib/apt/list/* /usr/share/doc/* /var/cache/debconf/*
 
 # Create user
 RUN useradd --create-home ci_builder
