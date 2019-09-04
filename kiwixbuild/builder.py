@@ -204,6 +204,7 @@ class Builder:
                     platform.clean_intermediate_directories()
             else:
                 print("SKIP")
-        except StopBuild:
+        except StopBuild as e:
+            print(e)
             sys.exit("Stopping build due to errors")
 

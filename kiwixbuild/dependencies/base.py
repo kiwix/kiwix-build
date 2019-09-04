@@ -446,7 +446,7 @@ class MesonBuilder(Builder):
 
     @property
     def build_type(self):
-        return 'release' if option('make_release') else 'debugoptimized'
+        return 'release' if option('make_release') else 'debug'
 
     @property
     def strip_option(self):

@@ -110,9 +110,11 @@ def run_kiwix_build(target, platform,
     print_message("Build {} (deps={}, release={}, dist={})",
         target, build_deps_only, make_release, make_dist)
     subprocess.check_call(command, cwd=str(HOME))
+    print_message("Build ended")
 
 
 def create_desktop_image():
+    print_message("creating desktop image")
     if make_release:
         postfix = main_project_versions['kiwix-desktop']
         extra_postfix = release_versions.get('kiwix-desktop')
@@ -131,6 +133,7 @@ def create_desktop_image():
     if PLATFORM == 'flatpak':
         build_path = BASE_DIR/'org.kiwix.desktop.flatpak'
         app_name = 'org.kiwix.desktop.{}.flatpak'.format(postfix)
+        print_message("archive is ", build_path)
     else:
         build_path = HOME/'Kiwix-{}-x86_64.AppImage'.format(postfix)
         app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
@@ -253,8 +256,16 @@ def make_flatpak_cache_archive():
         os=TRAVIS_OS_NAME,
         platform=PLATFORM)
     cache = BASE_DIR/'.flatpak-builder'
+    print_message("make flatpak cache archive")
+    nb_files = 0
+    def pseudo_filter(tarinfo):
+        nonlocal nb_files
+        nb_files += 1
+        if (nb_files % 1000) == 0:
+            print('.', flush=True)
+        return tarinfo
     with tarfile.open(str(BASE_EXPORT_DIR/archive_name), 'w:xz') as tar:
-        tar.add(str(cache), arcname=str(cache.relative_to(BASE_DIR)))
+        tar.add(str(cache), arcname=str(cache.relative_to(BASE_DIR)), filter=pseudo_filter)
 
 
 def update_flathub_git():
@@ -264,6 +275,7 @@ def update_flathub_git():
     env['GIT_AUTHOR_EMAIL'] = env['GIT_COMMITTER_EMAIL'] = "kiwixbot@kymeria.fr"
     def call(command, cwd=None):
         cwd = cwd or GIT_REPO_DIR
+        print_message("call ", command)
         subprocess.check_call(command, env=env, cwd=str(cwd))
     command = ['git', 'clone', FLATPAK_HTTP_GIT_REMOTE]
     call(command, cwd=GIT_EXPORT_DIR)
@@ -436,6 +448,7 @@ for target in TARGETS:
     run_kiwix_build(target,
                     platform=PLATFORM,
                     make_release=make_release)
+    print_message("target is ", target)
     if target == 'kiwix-desktop':
         create_desktop_image()
     if make_release and PLATFORM == 'native_dyn' and release_versions.get(target) == 0:

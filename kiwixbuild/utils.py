@@ -127,7 +127,7 @@ def download_remote(what, where):
         print('Sha256 for {} not set, do no verify download'.format(what.name))
     elif what.sha256 != get_sha256(file_path):
         os.remove(file_path)
-        raise StopBuild()
+        raise StopBuild("Sha 256 doesn't correspond")
 
 
 class SkipCommand(Exception):
@@ -135,7 +135,11 @@ class SkipCommand(Exception):
 
 
 class StopBuild(Exception):
-    pass
+    def __init__(self, msg=""):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
 
 
 class Remotefile(namedtuple('Remotefile', ('name', 'sha256', 'url'))):
