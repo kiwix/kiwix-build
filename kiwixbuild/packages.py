@@ -1,6 +1,6 @@
 
 
-_fedora_common = ['automake', 'libtool', 'cmake', 'git', 'subversion', 'ccache', 'pkgconfig', 'gcc-c++', 'gettext-devel']
+_fedora_common = ['automake', 'libtool', 'cmake', 'git', 'subversion', 'ccache', 'pkg-config', 'gcc-c++', 'gettext-devel']
 _debian_common = ['automake', 'libtool', 'cmake', 'git', 'subversion', 'ccache', 'pkg-config', 'gcc', 'autopoint']
 PACKAGE_NAME_MAPPERS = {
     'flatpak': {
