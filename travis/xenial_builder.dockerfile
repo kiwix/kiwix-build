@@ -14,8 +14,6 @@ RUN apt update -q && \
 # Packaged dependencies
     libbz2-dev libmagic-dev uuid-dev zlib1g-dev default-jdk \
     libmicrohttpd-dev \
-# Cross win32 compiler
-    g++-mingw-w64-i686 gcc-mingw-w64-i686 gcc-mingw-w64-base mingw-w64-tools \
 # Cross compile i586
     libc6-dev-i386 lib32stdc++6 gcc-multilib g++-multilib \
 # Other tools (to remove)
