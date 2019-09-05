@@ -17,6 +17,8 @@ RUN apt update -q && \
     libfuse2 fuse patchelf \
 # Flatpak tools
     elfutils flatpak flatpak-builder \
+# Cross win32 compiler
+    g++-mingw-w64-i686 gcc-mingw-w64-i686 gcc-mingw-w64-base mingw-w64-tools \
 # Other tools (to remove)
 #    vim less grep \
   && \
