@@ -31,6 +31,9 @@ jobs:
     - stage: build_docker_images
       script: *build_images
       env: VARIANT=bionic
+    - stage: build_docker_images
+      script: *build_images
+      env: VARIANT=f30
     - stage: android_build
       env: PLATFORM="android"
       if: type != pull_request
@@ -70,7 +73,7 @@ script:
   then
     VARIANT=xenial
     if [[ $DESKTOP_ONLY = 1 ]]; then VARIANT=bionic; fi
-    if [[ $PLATFORM =~ ^win32_* ]]; then VARIANT=bionic; fi
+    if [[ $PLATFORM =~ ^win32_* ]]; then VARIANT=f30; fi
   fi
 - |
   if [[ $TRAVIS_OS_NAME = "linux" ]]
