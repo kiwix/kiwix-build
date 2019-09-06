@@ -18,32 +18,30 @@ instructions otherwise.
 
 Before anything else you need to install Python3 related tools. On Debian
 based systems:
-
-```
-$ sudo apt-get install python3-pip virtualenv
+```bash
+sudo apt-get install python3-pip virtualenv
 ```
 
 Create a virtual environment to install python module in it instead
 of modifying the system.
-```
-$ virtualenv -p python3 ./ # Create virtualenv
-$ source bin/activate      # Activate the virtualenv
+```bash
+virtualenv -p python3 ./ # Create virtualenv
+source bin/activate      # Activate the virtualenv
 ```
 
 Then, download and install kiwix-build and its dependencies:
-```
-$ git clone https://github.com/kiwix/kiwix-build.git
-$ cd kiwix-build
-$ pip install .
-$ hash -r                  # Refresh bash paths
+```bash
+git clone https://github.com/kiwix/kiwix-build.git
+cd kiwix-build
+pip install .
+hash -r                  # Refresh bash paths
 ```
 
 If your distribution doesn't provide ninja version > 1.6 you can get it
 this way :
-
-```
-$ wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
-$ unzip ninja-linux.zip ninja -d $HOME/bin
+```bash
+wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
+unzip ninja-linux.zip ninja -d $HOME/bin
 ```
 
 # Compilation
@@ -52,19 +50,17 @@ The compilation is handled by the `kiwix-build` command. It will compile
 everything. If you are using a supported platform (Redhat or Debian
 based) it will install missing packages using `sudo`. You can get
 `kiwix-build` usage like this:
-
-```
-$ kiwix-build --help
+```bash
+kiwix-build --help
 ```
 
 ## Target
 
 You may want to compile a specific target so you will have to specify it on the
 command line :
-
-```
-$ kiwix-build kiwix-lib # will build kiwix-build and its dependencies
-$ kiwix-build zim-tools # will build zim-tools and its dependencies
+```bash
+kiwix-build kiwix-lib # will build kiwix-build and its dependencies
+kiwix-build zim-tools # will build zim-tools and its dependencies
 ```
 
 By default, `kiwix-build` will build `kiwix-tools` .
@@ -91,9 +87,8 @@ platforms :
 - android_x86_64
 
 So, if you want to compile `kiwix-tools` for win32 using static linkage:
-
-```
-$ kiwix-build --target-platform win32_dyn
+```bash
+kiwix-build --target-platform win32_dyn
 ```
 
 ## Android
@@ -104,27 +99,24 @@ java) but it use `kiwix-lib` who is architecture dependent.
 
 When building `kiwix-lib`, you should directly use the
 target-platform `android_<arch>`:
-
-```
-$ kiwix-build kiwix-lib --target-platform android_arm
+```bash
+kiwix-build kiwix-lib --target-platform android_arm
 ```
 
 But, `kiwix-android` apk can also be multi arch (ie, it includes
 `kiwix-lib` for several architectures). To do so, you must ask to build
 `kiwix-android` using the `android` platform:
-
-```
-$ kiwix-build --target-platform android kiwix-android
-$ kiwix-build kiwix-android # because `android` platform is the default for `kiwix-android`
+```bash
+kiwix-build --target-platform android kiwix-android
+kiwix-build kiwix-android # because `android` platform is the default for `kiwix-android`
 ```
 
 By default, when using platform `android`, `kiwix-lib` will be build for
 all architectures. This can be changed by using the option `--android-arch` :
-
-```
-$ kiwix-build kiwix-android # apk for all architectures
-$ kiwix-build kiwix-android --android-arch arm # apk for arm architecture
-$ kiwix-build kiwix-anrdoid --android-arch arm --android-arch arm64 # apk for arm and arm64 architectures
+```bash
+kiwix-build kiwix-android # apk for all architectures
+kiwix-build kiwix-android --android-arch arm # apk for arm architecture
+kiwix-build kiwix-anrdoid --android-arch arm --android-arch arm64 # apk for arm and arm64 architectures
 ```
 
 ## IOS
@@ -135,16 +127,14 @@ for several architectures.
 To do so, you should directly use the target-platfrom `ios_multi`.
 As for `android`, `kiwix-build` will build the library several times
 (once for each platform) and then create the fat library.
-
-```
-$ kiwix-build --target-platform iOS_multi kiwix-lib
+```bash
+kiwix-build --target-platform iOS_multi kiwix-lib
 ```
 
 You can specify the supported architectures with the option `--ios-arch`:
-
-```
-$ kiwix-build --target-platform iOS_multi kiwix-lib # all architetures
-$ kiwix-build --target-platform iOS_multi --ios-arch arm --ios-arch arm64 # arm and arm64 arch only
+```bash
+kiwix-build --target-platform iOS_multi kiwix-lib # all architetures
+kiwix-build --target-platform iOS_multi --ios-arch arm --ios-arch arm64 # arm and arm64 arch only
 ```
 
 

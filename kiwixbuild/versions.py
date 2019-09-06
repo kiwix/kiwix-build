@@ -42,7 +42,7 @@ release_versions = {
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = '54'
+base_deps_meta_version = '55'
 
 base_deps_versions = {
   'zlib' : '1.2.8',
@@ -51,7 +51,7 @@ base_deps_versions = {
   'xapian-core' : '1.4.10',
   'mustache' : '3.2',
   'pugixml' : '1.2',
-  'libmicrohttpd' : '0.9.65',
+  'libmicrohttpd' : '0.9.66',
   'gumbo' : '0.10.1',
   'icu4c' : '58.2',
   'gradle' : '5.2',
