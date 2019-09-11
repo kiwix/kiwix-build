@@ -12,10 +12,6 @@ environment:
   KIWIX_DESKTOP_VERSION: '2.0-rc4'
   KIWIX_DESKTOP_RELEASE: 1
 
-branches:
-  only:
-    - master
-
 init:
   - cmd: |
      echo %TEST_VAR%
