@@ -20,7 +20,7 @@ mkdir -p $APPDIR/usr/{bin,lib,share} $APPDIR/usr/share/applications $APPDIR/usr/
 cp $INSTALLDIR/bin/kiwix-desktop $APPDIR/usr/bin/
 cp $INSTALLDIR/$SYSTEMLIBDIR/*.so* $APPDIR/usr/lib
 # Remove it as it break with linuxdeployqt (should we compile without it) ?
-rm $APPDIR/usr/lib/libmagic.so*
+# rm $APPDIR/usr/lib/libmagic.so*
 # Copy nss lib (to not conflict with host's ones)
 cp -a /usr/$SYSTEMLIBDIR/nss $APPDIR/usr/lib
 cp -a /usr/$SYSTEMLIBDIR/libstdc++.so* $APPDIR/usr/lib

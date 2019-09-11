@@ -12,7 +12,6 @@ environment:
   KIWIX_DESKTOP_VERSION: '2.0.1-1'
   KIWIX_DESKTOP_RELEASE: 0
 
-
 init:
   - cmd: |
      echo %TEST_VAR%
@@ -21,6 +20,7 @@ init:
      mkdir C:\extra\bin
 
 install:
+  - set QTDIR=C:\Qt\5.14.1
   - cmd: |
      cd C:\projects
      REM Install meson
