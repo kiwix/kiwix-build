@@ -13,7 +13,7 @@ class Win32PlatformInfo(PlatformInfo):
 
     def get_cross_config(self):
         return {
-            'exec_wrapper_def': self.exec_wrapper_def,
+            'exe_wrapper_def': self.exe_wrapper_def,
             'binaries': self.binaries,
             'root_path': self.root_path,
             'extra_libs': self.extra_libs,
@@ -53,13 +53,13 @@ class Win32PlatformInfo(PlatformInfo):
                }
 
     @property
-    def exec_wrapper_def(self):
+    def exe_wrapper_def(self):
         try:
             which('wine')
         except subprocess.CalledProcessError:
             return ""
         else:
-            return "exec_wrapper = 'wine'"
+            return "exe_wrapper = 'wine'"
 
     @property
     def configure_option(self):

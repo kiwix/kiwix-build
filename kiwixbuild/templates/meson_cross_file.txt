@@ -5,7 +5,7 @@ ar = '{binaries[AR]}'
 cpp = '{binaries[CXX]}'
 strip = '{binaries[STRIP]}'
 ranlib = '{binaries[RANLIB]}'
-{exec_wrapper_def}
+{exe_wrapper_def}
 
 [properties]
 c_link_args = {extra_libs!r}

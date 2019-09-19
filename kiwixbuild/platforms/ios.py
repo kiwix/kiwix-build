@@ -33,7 +33,7 @@ class iOSPlatformInfo(PlatformInfo):
         return {
             'root_path': self.root_path,
             'binaries': self.binaries,
-            'exec_wrapper_def': '',
+            'exe_wrapper_def': '',
             'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
             'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
             'host_machine': {

@@ -13,7 +13,7 @@ class ArmhfPlatformInfo(PlatformInfo):
     def get_cross_config(self):
         return {
             'binaries': self.binaries,
-            'exec_wrapper_def': '',
+            'exe_wrapper_def': '',
             'root_path': self.root_path,
             'extra_libs': [],
             'extra_cflags': ['-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
@@ -53,13 +53,13 @@ class ArmhfPlatformInfo(PlatformInfo):
                 for k,v in binaries}
 
     @property
-    def exec_wrapper_def(self):
+    def exe_wrapper_def(self):
         try:
             which('qemu-arm')
         except subprocess.CalledProcessError:
             return ""
         else:
-            return "exec_wrapper = 'qemu-arm'"
+            return "exe_wrapper = 'qemu-arm'"
 
     @property
     def configure_option(self):
