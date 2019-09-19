@@ -12,7 +12,7 @@ class I586PlatformInfo(PlatformInfo):
     def get_cross_config(self):
         return {
             'binaries': self.binaries,
-            'exec_wrapper_def': '',
+            'exe_wrapper_def': '',
             'extra_libs': ['-m32', '-march=i586', '-mno-sse'],
             'extra_cflags': ['-m32', '-march=i586', '-mno-sse', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
             'host_machine': {

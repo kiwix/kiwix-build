@@ -44,7 +44,7 @@ class AndroidPlatformInfo(PlatformInfo):
             extra_libs.append('-march={}'.format(self.march))
             extra_cflags.append('-march={}'.format(self.march))
         return {
-            'exec_wrapper_def': '',
+            'exe_wrapper_def': '',
             'install_path': self.install_path,
             'binaries': self.binaries(),
             'root_path': pj(self.install_path, 'sysroot'),
