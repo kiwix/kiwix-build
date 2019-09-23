@@ -130,20 +130,19 @@ def create_desktop_image():
         archive_dir = NIGHTLY_KIWIX_ARCHIVES_DIR
         src_dir = SOURCE_DIR/'kiwix-desktop'
 
-    if PLATFORM == 'flatpak':
-        build_path = BASE_DIR/'org.kiwix.desktop.flatpak'
-        app_name = 'org.kiwix.desktop.{}.flatpak'.format(postfix)
-        print_message("archive is ", build_path)
-    else:
-        build_path = HOME/'Kiwix-{}-x86_64.AppImage'.format(postfix)
-        app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
-        command = ['kiwix-build/scripts/create_kiwix-desktop_appImage.sh',
-                   str(INSTALL_DIR), str(src_dir), str(HOME/'AppDir')]
-        env = dict(os.environ)
-        env['VERSION'] = postfix
+    if PLATFORM != 'flatpak':
+        app_dir = EXPORT_DIR/'AppDir'
+        command = ['kiwix-build/scripts/prepare_kiwix-desktop_appImage.sh',
+                   str(INSTALL_DIR), str(src_dir), str(app_dir)]
         print_message("Build AppImage of kiwix-desktop")
-        subprocess.check_call(command, cwd=str(HOME), env=env)
+        subprocess.check_call(command, cwd=str(HOME))
+        with open(str(app_dir/'info.txt'), 'w') as f:
+            f.write("VERSION {}\nEXPORT_DIR {}".format(postfix, archive_dir))
+        return
 
+    build_path = BASE_DIR/'org.kiwix.desktop.flatpak'
+    app_name = 'org.kiwix.desktop.{}.flatpak'.format(postfix)
+    print_message("archive is ", build_path)
     try:
         archive_dir.mkdir(parents=True)
     except FileExistsError:

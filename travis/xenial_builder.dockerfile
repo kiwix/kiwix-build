@@ -16,6 +16,8 @@ RUN apt update -q && \
     libmicrohttpd-dev \
 # Cross compile i586
     libc6-dev-i386 lib32stdc++6 gcc-multilib g++-multilib \
+# To create the appimage of kiwix-desktop
+    libfuse2 fuse patchelf \
 # Other tools (to remove)
 #    vim less grep \
   && \

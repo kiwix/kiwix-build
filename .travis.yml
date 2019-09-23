@@ -86,6 +86,16 @@ script:
       --mount=type=bind,src=$HOME/.gradle/caches,dst=/home/ci_builder/.gradle/caches \
       --mount=type=bind,src=$TRAVIS_BUILD_DIR,dst=/home/ci_builder/kiwix-build \
       kiwix/kiwix-build_ci:${VARIANT}-${DOCKER_VERSION}
+    if [[ $PLATFORM = "native_dyn" && $DESKTOP_ONLY = 1 ]]
+    then
+      docker run -rm \
+      -e PLATFORM -e NIGHTLY_DATE -e TRAVIS_EVENT_TYPE -e DESKTOP_ONLY -e TRAVIS_TAG \
+      --device /dev/fuse --cap-add ALL --privileged \
+      --mount=type=bind,src=$HOME/EXPORT,dst=/home/ci_builder/EXPORT \
+      --mount=type=bind,src=$TRAVIS_BUILD_DIR,dst=/home/ci_builder/kiwix-build \
+      kiwix/kiwix-build_ci:xenial-${DOCKER_VERSION} \
+      /home/ci_builder/kiwix-build/scripts/create_kiwix-desktop_appImage.sh /home/ci_builder/EXPORT/AppDir
+    fi
   fi
 - if [[ $TRAVIS_OS_NAME != "linux" ]]; then python3 travis/compile_all.py; fi
 after_success:
@@ -110,7 +120,7 @@ env:
   global:
     - NIGHTLY_DATE=$(date +%Y-%m-%d)
     - SSH_KEY=/tmp/private/travisci_builder_id_key
-    - DOCKER_VERSION=2
+    - DOCKER_VERSION=3
   matrix:
     - PLATFORM="flatpak" DESKTOP_ONLY=1
     - PLATFORM="native_dyn"
