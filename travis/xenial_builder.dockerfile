@@ -14,6 +14,10 @@ RUN apt update -q && \
 # Packaged dependencies
     libbz2-dev libmagic-dev uuid-dev zlib1g-dev default-jdk \
     libmicrohttpd-dev \
+# Qt dependencies
+  libgl1-mesa-dev libxkbcommon-x11-0 libegl1-mesa \
+# To create the appimage of kiwix-desktop
+    libfuse2 fuse patchelf \
 # Cross compile i586
     libc6-dev-i386 lib32stdc++6 gcc-multilib g++-multilib \
 # Other tools (to remove)
@@ -22,11 +26,19 @@ RUN apt update -q && \
   apt-get clean -y && \
   rm -rf /var/lib/apt/lists/* /usr/share/doc/* /var/cache/debconf/*
 
+# Install Qt
+ENV PATH="/home/ci_builder/.local/bin:/opt/Qt/5.13.1/gcc_64/bin:/opt/bin:${PATH}"
+ADD https://mirrors.ukfast.co.uk/sites/qt.io/archive/online_installers/3.1/qt-unified-linux-x64-3.1.1-online.run /opt/bin/
+COPY qt-installer-nointeraction.qs .
+RUN chmod a+x /opt/bin/qt-unified-linux-x64-3.1.1-online.run && \
+  qt-unified-linux-x64-3.1.1-online.run -platform minimal --verbose \
+    --script ./qt-installer-nointeraction.qs && \
+  rm -rf /opt/Qt/Examples /opt/Qt/Docs /opt/Qt/Tools
+
 # Create user
 RUN useradd --create-home ci_builder
 USER ci_builder
 WORKDIR /home/ci_builder
-ENV PATH="/home/ci_builder/.local/bin:${PATH}"
 
 ENV TRAVIS_BUILD_DIR /home/ci_builder/kiwix-build
 ENV GRADLE_USER_HOME /home/ci_builder

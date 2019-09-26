@@ -72,7 +72,7 @@ script:
   if [[ $TRAVIS_OS_NAME = "linux" ]]
   then
     VARIANT=xenial
-    if [[ $DESKTOP_ONLY = 1 ]]; then VARIANT=bionic; fi
+    if [[ $PLATFORM = "flatpak" ]]; then VARIANT=bionic; fi
     if [[ $PLATFORM =~ ^win32_* ]]; then VARIANT=f30; fi
   fi
 - |
@@ -110,7 +110,7 @@ env:
   global:
     - NIGHTLY_DATE=$(date +%Y-%m-%d)
     - SSH_KEY=/tmp/private/travisci_builder_id_key
-    - DOCKER_VERSION=2
+    - DOCKER_VERSION=3
   matrix:
     - PLATFORM="flatpak" DESKTOP_ONLY=1
     - PLATFORM="native_dyn"
