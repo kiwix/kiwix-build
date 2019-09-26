@@ -31,11 +31,11 @@ main_project_versions = {
 # - set KIWIX_DESKTOP_RELEASE to 0
 
 release_versions = {
-    'libzim': 0, # Depends of base deps (was 0)
-    'kiwix-lib': 0, # Depends of libzim (was 0)
-    'kiwix-tools': 6, # Depends of kiwix-lib and libzim (was 5)
-    'zim-tools': 2, # Depends of libzim (was 1)
-    'zimwriterfs': 2, # Depends of libzim (was 1)
+    'libzim': None, # Depends of base deps (was 0)
+    'kiwix-lib': None, # Depends of libzim (was 0)
+    'kiwix-tools': None, # Depends of kiwix-lib and libzim (was 6)
+    'zim-tools': None, # Depends of libzim (was 2)
+    'zimwriterfs': None, # Depends of libzim (was 1)
     'kiwix-desktop': 0 # Depends of kiwix-lib and libzim (was 0)
 }
 
