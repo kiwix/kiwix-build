@@ -34,7 +34,7 @@ Then, download and install kiwix-build and its dependencies:
 git clone https://github.com/kiwix/kiwix-build.git
 cd kiwix-build
 pip install .
-hash -r                  # Refresh bash paths
+hash -r # Refresh bash paths
 ```
 
 If your distribution doesn't provide ninja version > 1.6 you can get it
