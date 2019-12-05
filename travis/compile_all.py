@@ -91,7 +91,7 @@ def run_kiwix_build(target, platform,
     command.append('--hide-progress')
     if platform == 'flatpak' or platform.startswith('win32_'):
         command.append('--assume-packages-installed')
-    if target == 'kiwix-android' and platform.startswith('android_'):
+    if target == 'kiwix-lib-app' and platform.startswith('android_'):
         command.extend(['--target-platform', 'android', '--android-arch', platform[8:]])
     elif platform == 'android':
         command.extend(['--target-platform', 'android'])

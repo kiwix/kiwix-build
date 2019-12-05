@@ -112,7 +112,6 @@ class MetaPlatformInfo(PlatformInfo):
     def add_targets(self, targetName, targets):
         targetDefs = []
         for platformName in self.subPlatformNames:
-            print("radd {}".format(platformName))
             platform = self.get_platform(platformName, targets)
             targetDefs += platform.add_targets(targetName, targets)
         return targetDefs
