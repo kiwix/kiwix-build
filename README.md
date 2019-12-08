@@ -38,7 +38,7 @@ hash -r                  # Refresh bash paths
 ```
 
 If your distribution doesn't provide ninja version > 1.6 you can get it
-this way :
+this way:
 ```bash
 wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
 unzip ninja-linux.zip ninja -d $HOME/bin
@@ -57,7 +57,7 @@ kiwix-build --help
 ## Target
 
 You may want to compile a specific target so you will have to specify it on the
-command line :
+command line:
 ```bash
 kiwix-build kiwix-lib # will build kiwix-build and its dependencies
 kiwix-build zim-tools # will build zim-tools and its dependencies
@@ -68,13 +68,13 @@ By default, `kiwix-build` will build `kiwix-tools` .
 ## Target platform
 
 If no target platform is specified, a default one will be infered from
-the specified target :
+the specified target:
 - `kiwix-lib-app` will be build using the platform `android`
 - Other targets will be build using the platform `native_dyn`
 
 But you can select another target platform using the option
 `--target-platform`. For now, there is ten different supported
-platforms :
+platforms:
 
 - native_dyn
 - native_static
@@ -116,7 +116,7 @@ $ kiwix-build kiwix-lib-app # because `android` platform is the default for `kiw
 ```
 
 By default, when using platform `android`, `kiwix-lib` will be build for
-all architectures. This can be changed by using the option `--android-arch` :
+all architectures. This can be changed by using the option `--android-arch`:
 ```bash
 $ kiwix-build kiwix-lib-app # aar with all architectures
 $ kiwix-build kiwix-lib-app --android-arch arm # aar with arm architecture
