@@ -145,3 +145,8 @@ notifications:
       - mgautier@kymeria.fr
     on_success: change
     on_failure: always
+
+# Build only on master branch
+branches:
+  only:
+  - master
