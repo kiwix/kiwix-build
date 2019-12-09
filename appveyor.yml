@@ -12,8 +12,12 @@ environment:
   KIWIX_DESKTOP_VERSION: '2.0-rc4'
   KIWIX_DESKTOP_RELEASE: 1
 
+branches:
+  only:
+    - master
+
 init:
- - cmd: |
+  - cmd: |
      echo %TEST_VAR%
      REM Set VC 2017
      "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"

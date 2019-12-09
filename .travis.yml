@@ -8,7 +8,8 @@ branches:
   only:
   - master
   - /\d+\.\d+\.\d+$/
-if: type != push OR tag IS present
+
+if: type != push OR tag IS present
 
 stages:
 - build_docker_images
