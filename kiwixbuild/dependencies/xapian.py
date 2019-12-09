@@ -12,11 +12,12 @@ class Xapian(Dependency):
     name = "xapian-core"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('xapian-core-1.4.10.tar.xz',
-                             '68669327e08544ac88fe3473745dbcae4e8e98d5060b436c4d566f1f78709bb8')
+        archive = Remotefile('xapian-core-1.4.14.tar.xz',
+                             '975a7ac018c9d34a15cc94a3ecc883204403469f748907e5c4c64d0aec2e4949')
         patches = [
             'xapian_sys_types.patch',
-            'xapian_fix_include_errno.patch'
+            'xapian_fix_include_errno.patch',
+            'xapian_remote.patch'
         ]
 
     class Builder(MakeBuilder):
