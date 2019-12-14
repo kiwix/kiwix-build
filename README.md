@@ -7,6 +7,7 @@ and libraries and deploy them. They have been tested on
 16.10+.
 
 [![Build Status](https://travis-ci.com/kiwix/kiwix-build.svg?branch=master)](https://travis-ci.com/kiwix/kiwix-build)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Prerequesites
 -------------
@@ -163,3 +164,9 @@ Kiwix-build.py will create several directories:
 
 If you want to install all those directories elsewhere, you can pass the
 `--working-dir` option to `kiwix-build`:
+
+License
+-------
+
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0) or later, see
+[LICENSE](LICENSE) for more details.
