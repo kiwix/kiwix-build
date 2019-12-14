@@ -39,13 +39,6 @@ pip install .
 hash -r # Refresh bash paths
 ```
 
-If your distribution doesn't provide ninja version > 1.6 you can get it
-this way:
-```bash
-wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
-unzip ninja-linux.zip ninja -d $HOME/bin
-```
-
 Compilation
 -----------
 
@@ -164,6 +157,23 @@ Kiwix-build.py will create several directories:
 
 If you want to install all those directories elsewhere, you can pass the
 `--working-dir` option to `kiwix-build`:
+
+Troubleshooting
+---------------
+
+If you need to install [Meson](https://mesonbuild.com/) "manually":
+```bash
+virtualenv -p python3 ./ # Create virtualenv
+source bin/activate      # Activate the virtualenv
+pip3 install meson       # Install Meson
+hash -r                  # Refresh bash paths
+```
+
+If you need to install [Ninja](https://ninja-build.org) "manually":
+```bash
+wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip
+unzip ninja-linux.zip ninja -d $HOME/bin
+```
 
 License
 -------
