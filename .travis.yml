@@ -34,6 +34,9 @@ jobs:
       env: VARIANT=bionic
     - stage: build_docker_images
       script: *build_images
+      env: VARIANT=focal
+    - stage: build_docker_images
+      script: *build_images
       env: VARIANT=f30
     - stage: android_build
       env: PLATFORM="android"
