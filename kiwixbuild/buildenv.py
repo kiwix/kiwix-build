@@ -25,7 +25,7 @@ class PlatformNeutralEnv:
             sys.exit("ERROR: ninja command not found")
         self.meson_command = self._detect_meson()
         if not self.meson_command:
-            sys.exit("ERROR: meson command not fount")
+            sys.exit("ERROR: meson command not found")
         self.mesontest_command = "{} test".format(self.meson_command)
 
     def detect_platform(self):
