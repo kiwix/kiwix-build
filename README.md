@@ -9,7 +9,7 @@ and libraries and deploy them. They have been tested on
 [![Build Status](https://travis-ci.com/kiwix/kiwix-build.svg?branch=master)](https://travis-ci.com/kiwix/kiwix-build)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-Prerequesites
+Prerequisites
 -------------
 
 You will need a recent version of [Meson](https://mesonbuild.com/) (>=
