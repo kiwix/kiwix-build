@@ -96,3 +96,44 @@ jobs:
       run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
       env:
         PLATFORM_TARGET: ${{matrix.target}}
+
+
+  Macos:
+    runs-on: macos-latest
+    env:
+      SSH_KEY: /tmp/id_rsa
+      OS_NAME: osx
+      PLATFORM_TARGET: native_dyn
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+    - name: Setup python 3.6
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.6'
+    - name: Install packages
+      uses: mstksg/get-package@v1
+      with:
+        brew: pkg-config ninja
+    - name: Install python modules
+      run: |
+        pip3 install meson==0.52.1 pytest
+        pip3 install --no-deps $GITHUB_WORKSPACE
+    - name: secret
+      shell: bash
+      run: |
+        echo "${{secrets.ssh_key}}" > $SSH_KEY
+        chmod 600 $SSH_KEY
+    - name: Ensure base deps
+      shell: bash
+      run: |
+        cd $HOME
+        $GITHUB_WORKSPACE/.github/scripts/ensure_base_deps.py
+    - name: Compile all deps
+      shell: bash
+      run: |
+        cd $HOME
+        $GITHUB_WORKSPACE/.github/scripts/compile_all_deps.py
+    - name: Upload failure logs
+      if: failure()
+      run: $GITHUB_WORKSPACE/.github/scripts/upload_failure_logs.sh
