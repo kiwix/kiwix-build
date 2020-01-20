@@ -37,7 +37,8 @@ class I586PlatformInfo(PlatformInfo):
                              ('AR', 'ar'),
                              ('STRIP', 'strip'),
                              ('RANLIB', 'ranlib'),
-                             ('LD', 'ld'))
+                             ('LD', 'ld'),
+                             ('PKGCONFIG', 'pkg-config'))
                }
 
     def set_env(self, env):

@@ -1,5 +1,5 @@
 [binaries]
-pkgconfig = 'pkg-config'
+pkgconfig = '{binaries[PKGCONFIG]}'
 c = '{binaries[CC]}'
 ar = '{binaries[AR]}'
 cpp = '{binaries[CXX]}'

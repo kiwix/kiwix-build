@@ -49,8 +49,10 @@ class ArmhfPlatformInfo(PlatformInfo):
                              ('RANLIB', 'ranlib'),
                              ('LD', 'ld'))
                )
-        return {k:pj(self.root_path, 'bin', v)
-                for k,v in binaries}
+        binaries = {k:pj(self.root_path, 'bin', v)
+                    for k,v in binaries}
+        binaries['PKGCONFIG'] = 'pkg-config'
+        return binaries
 
     @property
     def exe_wrapper_def(self):

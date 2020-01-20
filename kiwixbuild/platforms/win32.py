@@ -49,7 +49,8 @@ class Win32PlatformInfo(PlatformInfo):
                              ('AR', 'ar'),
                              ('STRIP', 'strip'),
                              ('WINDRES', 'windres'),
-                             ('RANLIB', 'ranlib'))
+                             ('RANLIB', 'ranlib'),
+                             ('PKGCONFIG', 'pkg-config'))
                }
 
     @property

@@ -64,6 +64,7 @@ class iOSPlatformInfo(PlatformInfo):
             'STRIP': '/usr/bin/strip',
             'RANLIB': '/usr/bin/ranlib',
             'LD': '/usr/bin/ld',
+            'PKGCONFIG': 'pkg-config',
         }
 
     @property

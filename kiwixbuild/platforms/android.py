@@ -26,8 +26,10 @@ class AndroidPlatformInfo(PlatformInfo):
 
     def binaries(self):
         install_path = self.install_path
-        return {k:pj(install_path, 'bin', v)
-                for k,v in self.binaries_name.items()}
+        binaries = {k:pj(install_path, 'bin', v)
+                    for k,v in self.binaries_name.items()}
+        binaries['PKGCONFIG'] = 'pkg-config'
+        return binaries
 
     @property
     def ndk_builder(self):
