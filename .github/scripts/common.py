@@ -88,7 +88,9 @@ def run_kiwix_build(
         make_release,
         make_dist,
     )
-    subprocess.check_call(command, cwd=str(HOME))
+    env = dict(_environ)
+    env['SKIP_BIG_MEMORY_TEST'] = '1'
+    subprocess.check_call(command, cwd=str(HOME), env=env)
     print_message("Build ended")
 
 

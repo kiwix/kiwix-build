@@ -84,6 +84,13 @@ jobs:
         kiwix-build/.github/scripts/ensure_base_deps.py
       env:
         PLATFORM_TARGET: ${{matrix.target}}
+    - name: Compile all deps
+      shell: bash
+      run: |
+        cd $HOME
+        kiwix-build/.github/scripts/compile_all_deps.py
+      env:
+        PLATFORM_TARGET: ${{matrix.target}}
     - name: Upload failure logs
       if: failure()
       run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
