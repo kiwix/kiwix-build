@@ -1,0 +1,28 @@
+name: Build Base
+
+on: [push]
+
+env:
+  DOCKER_VERSION: 25
+
+jobs:
+  Docker:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [xenial, bionic, f30, focal]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build docker image
+      shell: bash
+      run: |
+        TAGNAME=${{matrix.variant}}-${DOCKER_VERSION}
+        if [ ! $(curl -sflL https://hub.docker.com/v2/repositories/kiwix/kiwix-build_ci/tags/${TAGNAME}) ]
+        then
+          echo "${{secrets.docker_password}}" | docker login -u "${{secrets.docker_username}}" --password-stdin
+          FULLTAGNAME=kiwix/kiwix-build_ci:${TAGNAME}
+          docker build -t ${FULLTAGNAME} - < ${GITHUB_WORKSPACE}/.github/ci_images/${{matrix.variant}}_builder.dockerfile
+          docker push ${FULLTAGNAME}
+        fi
+
