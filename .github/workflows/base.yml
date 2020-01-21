@@ -13,6 +13,8 @@ jobs:
       matrix:
         target:
           - native_dyn
+          - iOS_arm64
+          - iOS_i386
     runs-on: macos-latest
     env:
       SSH_KEY: /tmp/id_rsa

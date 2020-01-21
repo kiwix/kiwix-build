@@ -47,9 +47,9 @@ class iOSPlatformInfo(PlatformInfo):
         }
 
     def set_env(self, env):
-        env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -arch {arch} -miphoneos-version-min=9.0 ".format(SDKROOT=self.root_path, arch=self.arch) + env['CFLAGS']
+        env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -miphoneos-version-min=9.0 ".format(SDKROOT=self.root_path) + env['CFLAGS']
         env['CXXFLAGS'] = env['CFLAGS'] + " -stdlib=libc++ -std=c++11 "+env['CXXFLAGS']
-        env['LDFLAGS'] = " -arch {arch} -isysroot {SDKROOT} ".format(SDKROOT=self.root_path, arch=self.arch)
+        env['LDFLAGS'] = " -isysroot {SDKROOT} ".format(SDKROOT=self.root_path)
         env['MACOSX_DEPLOYMENT_TARGET'] = "10.10"
 
     def get_bin_dir(self):
