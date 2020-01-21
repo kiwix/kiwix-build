@@ -10,6 +10,11 @@ from kiwixbuild.versions import base_deps_versions
 
 
 PLATFORM_TARGET = _environ["PLATFORM_TARGET"]
+if PLATFORM_TARGET == "native_desktop":
+    PLATFORM_TARGET = "native_dyn"
+    DESKTOP = True
+else:
+    DESKTOP = False
 OS_NAME = _environ["OS_NAME"]
 HOME = Path(os.path.expanduser("~"))
 

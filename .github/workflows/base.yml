@@ -33,10 +33,18 @@ jobs:
         target:
           - native_static
           - native_dyn
-          - android_arm
-          - android_arm64
+          - native_mixed
+          - native_desktop
+          - armhf_static
+          - armhf_dyn
           - win32_static
           - win32_dyn
+          - i586_static
+          - i586_dyn
+          - android_arm
+          - android_arm64
+          - android_x86
+          - android_x86_64
         include:
           - target: native_static
             image_variant: xenial
@@ -44,10 +52,16 @@ jobs:
           - target: native_dyn
             image_variant: xenial
             lib_postfix: '/x86_64-linux-gnu'
-          - target: android_arm
+          - target: native_mixed
             image_variant: xenial
             lib_postfix: '/x86_64-linux-gnu'
-          - target: android_arm64
+          - target: native_desktop
+            image_variant: bionic
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: armhf_static
+            image_variant: xenial
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: armhf_dyn
             image_variant: xenial
             lib_postfix: '/x86_64-linux-gnu'
           - target: win32_static
@@ -56,6 +70,24 @@ jobs:
           - target: win32_dyn
             image_variant: f30
             lib_postfix: '64'
+          - target: i586_static
+            image_variant: xenial
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: i586_dyn
+            image_variant: xenial
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: android_arm
+            image_variant: xenial
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: android_arm64
+            image_variant: xenial
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: android_x86
+            image_variant: xenial
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: android_x86_64
+            image_variant: xenial
+            lib_postfix: '/x86_64-linux-gnu'
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
@@ -99,11 +131,15 @@ jobs:
 
 
   Macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - native_dyn
     runs-on: macos-latest
     env:
       SSH_KEY: /tmp/id_rsa
       OS_NAME: osx
-      PLATFORM_TARGET: native_dyn
     steps:
     - name: Checkout code
       uses: actions/checkout@v1
@@ -129,11 +165,17 @@ jobs:
       run: |
         cd $HOME
         $GITHUB_WORKSPACE/.github/scripts/ensure_base_deps.py
+      env:
+        PLATFORM_TARGET: ${{matrix.target}}
     - name: Compile all deps
       shell: bash
       run: |
         cd $HOME
         $GITHUB_WORKSPACE/.github/scripts/compile_all_deps.py
+      env:
+        PLATFORM_TARGET: ${{matrix.target}}
     - name: Upload failure logs
       if: failure()
       run: $GITHUB_WORKSPACE/.github/scripts/upload_failure_logs.sh
+      env:
+        PLATFORM_TARGET: ${{matrix.target}}

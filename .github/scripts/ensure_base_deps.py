@@ -18,7 +18,6 @@ from common import (
     MAKE_RELEASE,
 )
 
-
 def download_base_archive(base_name):
     url = "http://tmp.kiwix.org/ci/{}".format(base_name)
     file_path = str(HOME / base_name)
