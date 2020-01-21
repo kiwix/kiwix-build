@@ -114,7 +114,7 @@ env:
   global:
     - NIGHTLY_DATE=$(date +%Y-%m-%d)
     - SSH_KEY=/tmp/private/travisci_builder_id_key
-    - DOCKER_VERSION=2
+    - DOCKER_VERSION=4
   matrix:
     - PLATFORM="flatpak" DESKTOP_ONLY=1
     - PLATFORM="native_dyn"

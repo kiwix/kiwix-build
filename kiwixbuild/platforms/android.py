@@ -26,8 +26,10 @@ class AndroidPlatformInfo(PlatformInfo):
 
     def binaries(self):
         install_path = self.install_path
-        return {k:pj(install_path, 'bin', v)
-                for k,v in self.binaries_name.items()}
+        binaries = {k:pj(install_path, 'bin', v)
+                    for k,v in self.binaries_name.items()}
+        binaries['PKGCONFIG'] = 'pkg-config'
+        return binaries
 
     @property
     def ndk_builder(self):
@@ -40,9 +42,6 @@ class AndroidPlatformInfo(PlatformInfo):
     def get_cross_config(self):
         extra_libs = ['-llog']
         extra_cflags = ['-I{}'.format(pj(self.buildEnv.install_dir, 'include'))]
-        if hasattr(self, 'march'):
-            extra_libs.append('-march={}'.format(self.march))
-            extra_cflags.append('-march={}'.format(self.march))
         return {
             'exe_wrapper_def': '',
             'install_path': self.install_path,
@@ -65,11 +64,10 @@ class AndroidPlatformInfo(PlatformInfo):
 
     def set_env(self, env):
         root_path = pj(self.install_path, 'sysroot')
-        march = '-march={}'.format(self.march) if hasattr(self,'march') else ''
         env['PKG_CONFIG_LIBDIR'] = pj(root_path, 'lib', 'pkgconfig')
-        env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} {} '.format(root_path, march) + env['CFLAGS']
-        env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} {} '.format(root_path, march) + env['CXXFLAGS']
-        env['LDFLAGS'] = '--sysroot={} {} '.format(root_path, march) + env['LDFLAGS']
+        env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CFLAGS']
+        env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CXXFLAGS']
+        env['LDFLAGS'] = '--sysroot={} '.format(root_path) + env['LDFLAGS']
         #env['CFLAGS'] = ' -fPIC -D_FILE_OFFSET_BITS=64 -O3 '+env['CFLAGS']
         #env['CXXFLAGS'] = (' -D__OPTIMIZE__ -fno-strict-aliasing '
         #                   ' -DU_HAVE_NL_LANGINFO_CODESET=0 '
@@ -97,7 +95,6 @@ class AndroidArm(AndroidPlatformInfo):
     arch = cpu = 'arm'
     arch_full = 'arm-linux-androideabi'
     abi = 'armeabi-v7a'
-    march = 'armv7-a'
 
 
 class AndroidArm64(AndroidPlatformInfo):
