@@ -3,14 +3,14 @@ name: Build Base
 on: [push]
 
 env:
-  DOCKER_VERSION: 25
+  DOCKER_VERSION: 26
 
 jobs:
   Docker:
     strategy:
       fail-fast: false
       matrix:
-        variant: [xenial, bionic, f30, focal]
+        variant: [xenial, bionic, f31, focal]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -65,10 +65,10 @@ jobs:
             image_variant: xenial
             lib_postfix: '/x86_64-linux-gnu'
           - target: win32_static
-            image_variant: f30
+            image_variant: f31
             lib_postfix: '64'
           - target: win32_dyn
-            image_variant: f30
+            image_variant: f31
             lib_postfix: '64'
           - target: i586_static
             image_variant: xenial
@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: Docker
     container:
-      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-25"
+      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-26"
     steps:
     - name: Checkout code
       shell: bash

@@ -1,7 +1,7 @@
-FROM fedora:30
+FROM fedora:31
 
 ENV LANG C.UTF-8
-ENV OS_NAME f30
+ENV OS_NAME f31
 
 RUN dnf install -y --nodocs \
 # Base build tools
@@ -11,6 +11,8 @@ RUN dnf install -y --nodocs \
     mingw32-gcc-c++ mingw32-bzip2-static mingw32-win-iconv-static \
     mingw32-winpthreads-static mingw32-zlib-static mingw32-xz-libs-static \
     mingw32-libmicrohttpd \
+# python3
+    python-unversioned-command \
 # Other tools (to remove)
 #    vim less grep
   && dnf remove -y "*-doc" \

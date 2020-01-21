@@ -9,7 +9,7 @@ RUN apt update -q \
 # Base build tools
     build-essential automake libtool cmake ccache pkg-config autopoint patch \
     python3-pip python3-setuptools python3-wheel git subversion wget unzip \
-    ninja-build openssh-client \
+    ninja-build openssh-client curl \
 # Python (2) is needed to install android-ndk
     python \
 # Packaged dependencies
