@@ -493,7 +493,9 @@ elif PLATFORM == 'armhf_static':
     make_archive('kiwix-tools', 'linux-armhf')
 elif PLATFORM == 'i586_static':
     make_archive('kiwix-tools', 'linux-i586')
-elif make_release and PLATFORM == 'flatpak':
+elif ( make_release
+   and PLATFORM == 'flatpak'
+   and release_versions.get('kiwix-desktop') is not None):
     update_flathub_git()
 elif PLATFORM == 'android' and 'kiwix-lib-app' in TARGETS:
     if make_release and release_versions.get('kiwix-lib') is not None:
