@@ -34,12 +34,12 @@ class iOSPlatformInfo(PlatformInfo):
             'root_path': self.root_path,
             'binaries': self.binaries,
             'exe_wrapper_def': '',
-            'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
-            'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
+            'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
+            'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-miphoneos-version-min=9.0', '-stdlib=libc++', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
             'host_machine': {
                 'system': 'Darwin',
                 'lsystem': 'darwin',
-                'cpu_family': self.arch,
+                'cpu_family': self.meson_arch,
                 'cpu': self.cpu,
                 'endian': '',
                 'abi': ''
@@ -79,24 +79,27 @@ class iOSPlatformInfo(PlatformInfo):
 class iOSArmv7(iOSPlatformInfo):
     name = 'iOS_armv7'
     arch = cpu = 'armv7'
+    meson_arch = 'arm'
     arch_full =  'arm-apple-darwin'
     sdk_name = 'iphoneos'
 
 class iOSArm64(iOSPlatformInfo):
     name = 'iOS_arm64'
     arch = cpu = 'arm64'
+    meson_arch = 'aarch64'
     arch_full =  'aarch64-apple-darwin'
     sdk_name = 'iphoneos'
 
 class iOSi386(iOSPlatformInfo):
     name = 'iOS_i386'
     arch = cpu = 'i386'
+    meson_arch = 'x86'
     arch_full =  'i386-apple-darwin'
     sdk_name = 'iphonesimulator'
 
 class iOSx64(iOSPlatformInfo):
     name = 'iOS_x86_64'
-    arch = cpu = 'x86_64'
+    arch = cpu = meson_arch = 'x86_64'
     arch_full =  'x86_64-apple-darwin'
     sdk_name = 'iphonesimulator'
 

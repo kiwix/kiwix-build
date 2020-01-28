@@ -483,6 +483,7 @@ class MesonBuilder(Builder):
             buildEnv=self.buildEnv,
             cross_option=cross_option
         )
+        context.force_native_build = True
         run_command(command, self.source_path, context, buildEnv=self.buildEnv, cross_env_only=True)
 
     def _compile(self, context):
