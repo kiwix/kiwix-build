@@ -1,6 +1,9 @@
 name: Build Base
 
-on: [push]
+on:
+ push:
+ schedule:
+   - cron: '45 10 * * *'
 
 env:
   DOCKER_VERSION: 26
