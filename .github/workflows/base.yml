@@ -3,7 +3,7 @@ name: Build Base
 on:
  push:
  schedule:
-   - cron: '45 10 * * *'
+   - cron: '*/20 * * * *'
 
 env:
   DOCKER_VERSION: 26
