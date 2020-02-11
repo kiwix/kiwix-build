@@ -324,7 +324,7 @@ class MakeBuilder(Builder):
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
             env['CXXFLAGS'] = env['CXXFLAGS'] + ' -fPIC'
         if self.configure_env:
-            for k in self.configure_env:
+            for k in list(self.configure_env):
                 if k.startswith('_format_'):
                     v = self.configure_env.pop(k)
                     v = v.format(buildEnv=self.buildEnv, env=env)
