@@ -34,11 +34,19 @@ class zlib(Dependency):
             return super()._configure(context)
 
         @property
+        def configure_option(self):
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'iOS':
+                return '''--archs="-arch {}"'''.format(platformInfo.arch)
+            return ""
+
+        @property
         def make_option(self):
-            if self.buildEnv.platformInfo.build == 'win32':
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'win32':
                 return "--makefile win32/Makefile.gcc PREFIX={host}- SHARED_MODE={static} INCLUDE_PATH={include_path} LIBRARY_PATH={library_path} BINARY_PATH={binary_path}".format(
                     host='i686-w64-mingw32',
-                    static="0" if self.buildEnv.platformInfo.static else "1",
+                    static="0" if platformInfo.static else "1",
                     include_path=pj(self.buildEnv.install_dir, 'include'),
                     library_path=pj(self.buildEnv.install_dir, self.buildEnv.libprefix),
                     binary_path=pj(self.buildEnv.install_dir, 'bin'),

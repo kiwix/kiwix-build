@@ -41,6 +41,9 @@ jobs:
       run: |
         echo "${{secrets.ssh_key}}" > $SSH_KEY
         chmod 600 $SSH_KEY
+    - name: Dump file
+      shell: bash
+      run: cat /Applications/Xcode_11.3.1.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS13.2.sdk/usr/include/machine/_types.h
     - name: Ensure base deps
       shell: bash
       run: |
