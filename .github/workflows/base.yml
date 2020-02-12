@@ -32,7 +32,7 @@ jobs:
         brew: pkg-config ninja
     - name: Install python modules
       run: |
-        pip3 install meson==0.52.1 pytest
+        pip3 install meson==0.50.0 pytest
         pip3 install --no-deps $GITHUB_WORKSPACE
     - name: secret
       shell: bash

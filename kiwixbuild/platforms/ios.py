@@ -34,8 +34,8 @@ class iOSPlatformInfo(PlatformInfo):
             'root_path': self.root_path,
             'binaries': self.binaries,
             'exe_wrapper_def': '',
-            'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
-            'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
+            'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=11.0', '-stdlib=libc++'],
+            'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=11.0', '-stdlib=libc++', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
             'host_machine': {
                 'system': 'Darwin',
                 'lsystem': 'darwin',
@@ -47,10 +47,10 @@ class iOSPlatformInfo(PlatformInfo):
         }
 
     def set_env(self, env):
-        env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -miphoneos-version-min=9.0 ".format(SDKROOT=self.root_path) + env['CFLAGS']
+        env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -miphoneos-version-min=11.0 ".format(SDKROOT=self.root_path) + env['CFLAGS']
         env['CXXFLAGS'] = env['CFLAGS'] + " -stdlib=libc++ -std=c++11 "+env['CXXFLAGS']
         env['LDFLAGS'] = " -isysroot {SDKROOT} ".format(SDKROOT=self.root_path)
-        env['MACOSX_DEPLOYMENT_TARGET'] = "10.10"
+        env['MACOSX_DEPLOYMENT_TARGET'] = "10.13"
 
     def get_bin_dir(self):
         return [pj(self.root_path, 'bin')]
