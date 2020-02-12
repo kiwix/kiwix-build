@@ -103,7 +103,7 @@ jobs:
       shell: bash
       run: |
         cd $HOME
-        git clone https://github.com/${REP} --depth=1 --branch ${GITHUB_REF##*/}
+        git clone https://github.com/${REP} --depth=1 --branch ${GITHUB_REF##*heads/}
         pip3 install --user --no-deps ./${REP##*/}
       env:
         REP: ${{github.repository}}
