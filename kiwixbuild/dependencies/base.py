@@ -334,7 +334,7 @@ class MakeBuilder(Builder):
 
     def _compile(self, context):
         context.try_skip(self.build_path)
-        command = "make -j4 {make_target} {make_option}".format(
+        command = "make {make_target} {make_option}".format(
             make_target=self.make_target,
             make_option=self.make_option
         )
