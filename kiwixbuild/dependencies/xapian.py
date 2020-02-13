@@ -22,9 +22,6 @@ class Xapian(Dependency):
 
     class Builder(MakeBuilder):
         configure_option = "--disable-sse --disable-backend-chert --disable-backend-remote --disable-backend-inmemory --disable-documentation"
-        configure_env = {'_format_LDFLAGS': "{env.LDFLAGS} -L{buildEnv.install_dir}/{buildEnv.libprefix}",
-                         '_format_CXXFLAGS': "{env.CXXFLAGS} -I{buildEnv.install_dir}/include"}
-
 
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
@@ -33,3 +30,13 @@ class Xapian(Dependency):
              or neutralEnv('distname') == 'Darwin'):
                 return deps
             return deps + ['uuid']
+
+        @property
+        def configure_env(self):
+            conf_env = {'_format_LDFLAGS': "{env.LDFLAGS} -L{buildEnv.install_dir}/{buildEnv.libprefix}",
+                        '_format_CXXFLAGS': "{env.CXXFLAGS} -I{buildEnv.install_dir}/include"}
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'iOS':
+                conf_env['_format_CFLAGS'] = "-arch {buildEnv.platformInfo.arch} {env['CFLAGS']}"
+                conf_env['_format_LDFLAGS'] = conf_env['_format_LDFLAGS'] + " -arch {buildEnv.platformInfo.arch} {env['LDFLAGS']}"
+            return conf_env
