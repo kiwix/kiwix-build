@@ -14,9 +14,9 @@ class LibCurl(Dependency):
 
     class Source(ReleaseDownload):
         name = "libcurl"
-        archive = Remotefile('curl-7.67.0.tar.xz',
-                             'f5d2e7320379338c3952dcc7566a140abb49edb575f9f99272455785c40e536c',
-                             'https://curl.haxx.se/download/curl-7.67.0.tar.xz')
+        archive = Remotefile('curl-7.61.0.tar.xz',
+                             'ef6e55192d04713673b4409ccbcb4cb6cd723137d6e10ca45b0c593a454e1720',
+                             'https://curl.haxx.se/download/curl-7.61.0.tar.xz')
 
     class Builder(MakeBuilder):
         dependencies = ['zlib']
