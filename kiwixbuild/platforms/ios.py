@@ -60,10 +60,10 @@ class iOSPlatformInfo(PlatformInfo):
         return {
             'CC': xrun_find('clang'),
             'CXX': xrun_find('clang++'),
-            'AR': '/usr/bin/ar',
-            'STRIP': '/usr/bin/strip',
-            'RANLIB': '/usr/bin/ranlib',
-            'LD': '/usr/bin/ld',
+            'AR': xrun_find('ar'),
+            'STRIP': xrun_find('strip'),
+            'RANLIB': xrun_find('ranlib'),
+            'LD': xrun_find('ld'),
             'PKGCONFIG': 'pkg-config',
         }
 
