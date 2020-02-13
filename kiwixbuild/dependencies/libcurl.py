@@ -20,13 +20,20 @@ class LibCurl(Dependency):
 
     class Builder(MakeBuilder):
         dependencies = ['zlib']
-        configure_option = " ".join(
+        _configure_option = " ".join(
             ["--without-{}".format(p)
                 for p in ('libssh2', 'ssl', 'libmetalink', 'librtmp')] +
             ["--disable-{}".format(p)
                 for p in ('ftp', 'file', 'ldap', 'ldaps', 'rtsp', 'dict',
                           'telnet', 'tftp', 'pop3', 'imap', 'smb', 'smtp',
                           'gopher', 'manual')])
+
+        @property
+        def configure_option(self):
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'iOS':
+                return self._configure_option + " --disable-unix-sockets"
+            return self._configure_option
 
         @property
         def configure_env(self):
