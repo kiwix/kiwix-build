@@ -27,3 +27,13 @@ class LibCurl(Dependency):
                 for p in ('ftp', 'file', 'ldap', 'ldaps', 'rtsp', 'dict',
                           'telnet', 'tftp', 'pop3', 'imap', 'smb', 'smtp',
                           'gopher', 'manual')])
+
+        @property
+        def configure_env(self):
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'iOS':
+                return {
+                    '_format_CFLAGS' : "-arch {buildEnv.platformInfo.arch} {env['CFLAGS']}",
+                    '_format_LDFLAGS' : "-arch {buildEnv.platformInfo.arch} {env['LDFLAGS']}"
+                }
+            return {}
