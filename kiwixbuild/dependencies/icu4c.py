@@ -45,3 +45,13 @@ class Icu(Dependency):
             if platformInfo.build == 'android':
                 options += " --with-data-packaging=archive"
             return options
+
+        @property
+        def configure_env(self):
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'iOS':
+                return {
+                    '_format_CFLAGS' : "-arch {buildEnv.platformInfo.arch} {env['CFLAGS']}",
+                    '_format_LDFLAGS' : "-arch {buildEnv.platformInfo.arch} {env['LDFLAGS']}"
+                }
+            return {}
