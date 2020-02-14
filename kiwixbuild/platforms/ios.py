@@ -73,6 +73,7 @@ class iOSPlatformInfo(PlatformInfo):
         return '--host={}'.format(self.arch_full)
 
     def set_compiler(self, env):
+        return
         for k,v in self.binaries.items():
             env[k] = v
 

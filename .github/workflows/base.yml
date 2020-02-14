@@ -41,10 +41,6 @@ jobs:
       run: |
         echo "${{secrets.ssh_key}}" > $SSH_KEY
         chmod 600 $SSH_KEY
-    - name: Find file
-      shell: bash
-      run: |
-        find / -name "socket.h"
     - name: Ensure base deps
       shell: bash
       run: |
