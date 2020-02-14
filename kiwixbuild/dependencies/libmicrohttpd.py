@@ -15,3 +15,13 @@ class MicroHttpd(Dependency):
 
     class Builder(MakeBuilder):
         configure_option = "--disable-https --without-libgcrypt --without-libcurl --disable-doc --disable-examples"
+
+        @property
+        def configure_env(self):
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'iOS':
+                return {
+                    '_format_CFLAGS' : "-arch {buildEnv.platformInfo.arch} {env['CFLAGS']}",
+                    '_format_LDFLAGS' : "-arch {buildEnv.platformInfo.arch} {env['LDFLAGS']}"
+                }
+            return {}
