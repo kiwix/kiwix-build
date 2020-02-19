@@ -20,4 +20,13 @@ class Gumbo(Dependency):
             command = "./autogen.sh"
             run_command(command, self.extract_path, context)
 
-    Builder = MakeBuilder
+    class Builder(MakeBuilder):
+        @property
+        def configure_env(self):
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'iOS':
+                return {
+                    '_format_CFLAGS' : "-arch {buildEnv.platformInfo.arch} {env['CFLAGS']}",
+                    '_format_LDFLAGS' : "-arch {buildEnv.platformInfo.arch} {env['LDFLAGS']}"
+                }
+            return {}

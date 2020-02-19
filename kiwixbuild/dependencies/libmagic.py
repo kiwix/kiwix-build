@@ -40,3 +40,13 @@ class LibMagic(Dependency):
             env = Defaultdict(str, os.environ)
             env['PATH'] = ':'.join([pj(libmagic_native_builder.build_path, 'src'), env['PATH']])
             run_command(command, self.build_path, context, buildEnv=self.buildEnv, env=env)
+
+        @property
+        def configure_env(self):
+            platformInfo = self.buildEnv.platformInfo
+            if platformInfo.build == 'iOS':
+                return {
+                    '_format_CFLAGS' : "-arch {buildEnv.platformInfo.arch} {env['CFLAGS']}",
+                    '_format_LDFLAGS' : "-arch {buildEnv.platformInfo.arch} {env['LDFLAGS']}"
+                }
+            return {}
