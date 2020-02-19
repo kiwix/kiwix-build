@@ -323,13 +323,14 @@ class MakeBuilder(Builder):
         if self.buildEnv.platformInfo.static:
             env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
             env['CXXFLAGS'] = env['CXXFLAGS'] + ' -fPIC'
-        if self.configure_env:
-            for k in list(self.configure_env):
+        dep_conf_env = self.configure_env
+        if dep_conf_env:
+            for k in list(dep_conf_env):
                 if k.startswith('_format_'):
-                    v = self.configure_env.pop(k)
+                    v = dep_conf_env.pop(k)
                     v = v.format(buildEnv=self.buildEnv, env=env)
-                    self.configure_env[k[8:]] = v
-            env.update(self.configure_env)
+                    dep_conf_env[k[8:]] = v
+            env.update(dep_conf_env)
         run_command(command, self.build_path, context, buildEnv=self.buildEnv, env=env)
 
     def _compile(self, context):
