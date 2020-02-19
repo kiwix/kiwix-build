@@ -71,11 +71,6 @@ class iOSPlatformInfo(PlatformInfo):
     def configure_option(self):
         return '--host={}'.format(self.arch_full)
 
-    def set_compiler(self, env):
-        for k,v in self.binaries.items():
-            env[k] = v
-
-
 class iOSArmv7(iOSPlatformInfo):
     name = 'iOS_armv7'
     arch = cpu = 'armv7'
