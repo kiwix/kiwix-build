@@ -75,13 +75,13 @@ class iOSPlatformInfo(PlatformInfo):
 class iOSArmv7(iOSPlatformInfo):
     name = 'iOS_armv7'
     arch = cpu = 'armv7'
-    arch_full =  'arm-apple-darwin'
+    arch_full =  'armv7-apple-darwin'
     sdk_name = 'iphoneos'
 
 class iOSArm64(iOSPlatformInfo):
     name = 'iOS_arm64'
     arch = cpu = 'arm64'
-    arch_full =  'aarch64-apple-darwin'
+    arch_full =  'arm-apple-darwin'
     sdk_name = 'iphoneos'
 
 class iOSi386(iOSPlatformInfo):
