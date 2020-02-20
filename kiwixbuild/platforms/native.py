@@ -38,12 +38,18 @@ class NativeMixed(NativePlatformInfo):
             return 'native_mixed', dep
         return 'native_static', dep
 
-    def set_env(self, env):
-        super().set_env(env)
+    def get_env(self):
+        env = super().get_env()
         static_platform = self.get_platform('native_static')
         static_buildEnv = static_platform.buildEnv
         static_install_dir = static_buildEnv.install_dir
-        env['CPPFLAGS'] = " ".join(['-I'+pj(static_install_dir, 'include'), env['CPPFLAGS']])
         env['PATH'] = ':'.join([pj(static_install_dir, 'bin')] + [env['PATH']])
         pkgconfig_path = pj(static_install_dir, static_buildEnv.libprefix, 'pkgconfig')
         env['PKG_CONFIG_PATH'] = ':'.join([env['PKG_CONFIG_PATH'], pkgconfig_path])
+        return env
+
+    def set_comp_flags(self, env):
+        super().set_comp_flags(env)
+        static_platform = self.get_platform('native_static')
+        static_install_dir = static_platform.buildEnv.install_dir
+        env['CPPFLAGS'] = " ".join(['-I'+pj(static_install_dir, 'include'), env['CPPFLAGS']])

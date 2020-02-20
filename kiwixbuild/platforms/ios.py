@@ -44,14 +44,20 @@ class iOSPlatformInfo(PlatformInfo):
                 'cpu': self.cpu,
                 'endian': '',
                 'abi': ''
-            },
+            }
         }
 
-    def set_env(self, env):
+    def get_env(self):
+        env = super().get_env()
+        env['MACOSX_DEPLOYMENT_TARGET'] = '10.10'
+        return env
+
+    def set_comp_flags(self, env):
+        super().set_comp_flags(env)
         env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -arch {arch} -miphoneos-version-min={min_iphoneos_version} ".format(SDKROOT=self.root_path, min_iphoneos_version=self.min_iphoneos_version, arch=self.arch) + env['CFLAGS']
         env['CXXFLAGS'] = env['CFLAGS'] + " -stdlib=libc++ -std=c++11 "+env['CXXFLAGS']
         env['LDFLAGS'] = " -arch {arch} -isysroot {SDKROOT} ".format(SDKROOT=self.root_path, arch=self.arch)
-        env['MACOSX_DEPLOYMENT_TARGET'] = "10.10"
+
 
     def get_bin_dir(self):
         return [pj(self.root_path, 'bin')]

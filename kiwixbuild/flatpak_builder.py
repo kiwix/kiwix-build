@@ -224,7 +224,7 @@ class FlatpakBuilder:
         command = "flatpak-builder --user --ccache --force-clean --repo=repo builddir {id}.json"
         command = command.format(id = MANIFEST['app-id'])
         try:
-            run_command(command, self.platform.buildEnv.build_dir, context, self.platform.buildEnv)
+            run_command(command, self.platform.buildEnv.build_dir, context, env=self.platform.get_env())
             context._finalise()
         except subprocess.CalledProcessError:
             with open(log, 'r') as f:
@@ -237,7 +237,7 @@ class FlatpakBuilder:
         command = "flatpak build-bundle repo {id}.flatpak {id}"
         command = command.format(id = MANIFEST['app-id'])
         try:
-            run_command(command, self.platform.buildEnv.build_dir, context, self.platform.buildEnv)
+            run_command(command, self.platform.buildEnv.build_dir, context, env=self.platform.get_env())
             context._finalise()
         except subprocess.CalledProcessError:
             with open(log, 'r') as f:
