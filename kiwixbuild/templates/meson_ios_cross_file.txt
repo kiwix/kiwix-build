@@ -1,0 +1,21 @@
+[binaries]
+pkgconfig = '{binaries[PKGCONFIG]}'
+c = '{binaries[CC]}'
+ar = '{binaries[AR]}'
+cpp = '{binaries[CXX]}'
+strip = '{binaries[STRIP]}'
+ranlib = '{binaries[RANLIB]}'
+{exe_wrapper_def}
+
+[properties]
+c_link_args = {extra_libs!r}
+cpp_link_args = {extra_libs!r}
+c_args = {extra_cflags!r}
+cpp_args = {extra_cflags!r}
+needs_exe_wrapper = true
+
+[host_machine]
+cpu_family = '{host_machine[cpu_family]}'
+cpu = '{host_machine[cpu]}'
+system = '{host_machine[lsystem]}'
+endian = '{host_machine[endian]}'

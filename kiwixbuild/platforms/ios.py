@@ -28,7 +28,7 @@ class iOSPlatformInfo(PlatformInfo):
     def finalize_setup(self):
         super().finalize_setup()
         self.buildEnv.cmake_crossfile = self._gen_crossfile('cmake_ios_cross_file.txt')
-        self.buildEnv.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
+        self.buildEnv.meson_crossfile = self._gen_crossfile('meson_ios_cross_file.txt')
 
     def get_cross_config(self):
         return {
