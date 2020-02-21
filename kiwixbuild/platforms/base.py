@@ -3,7 +3,7 @@ import os, sys
 import subprocess
 
 from kiwixbuild.dependencies import Dependency
-from kiwixbuild.utils import pj, remove_duplicates
+from kiwixbuild.utils import pj, remove_duplicates, DefaultEnv
 from kiwixbuild.buildenv import BuildEnv
 from kiwixbuild._global import neutralEnv, option, target_steps
 
@@ -75,14 +75,24 @@ class PlatformInfo(metaclass=_MetaPlatform):
     def get_cross_config(self):
         return {}
 
-    def set_env(self, env):
-        pass
 
-    def get_bind_dir(self):
+    def get_env(self):
+        return DefaultEnv()
+
+
+    def get_bin_dir(self):
         return []
+
 
     def set_compiler(self, env):
         pass
+
+
+    def set_comp_flags(self, env):
+        if self.static:
+            env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
+            env['CXXFLAGS'] = env['CXXFLAGS'] + ' -fPIC'
+
 
     def _gen_crossfile(self, name):
         crossfile = pj(self.buildEnv.build_dir, name)

@@ -36,7 +36,7 @@ class LibMagic(Dependency):
                 make_target=self.make_target,
                 make_option=self.make_option
             )
+            env = self.buildEnv.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
             libmagic_native_builder = get_target_step('libmagic', 'native_static')
-            env = Defaultdict(str, os.environ)
             env['PATH'] = ':'.join([pj(libmagic_native_builder.build_path, 'src'), env['PATH']])
-            run_command(command, self.build_path, context, buildEnv=self.buildEnv, env=env)
+            run_command(command, self.build_path, context, env=env)

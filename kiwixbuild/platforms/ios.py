@@ -9,6 +9,7 @@ class iOSPlatformInfo(PlatformInfo):
     build = 'iOS'
     static = True
     compatible_hosts = ['Darwin']
+    min_iphoneos_version = '9.0'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -17,7 +18,7 @@ class iOSPlatformInfo(PlatformInfo):
     @property
     def root_path(self):
         if self._root_path is None:
-            command = "xcodebuild -version -sdk {} | grep -E '^Path' | sed 's/Path: //'".format(self.sdk_name)
+            command = "xcrun --sdk {} --show-sdk-path".format(self.sdk_name)
             self._root_path = subprocess.check_output(command, shell=True)[:-1].decode()
         return self._root_path
 
@@ -27,15 +28,15 @@ class iOSPlatformInfo(PlatformInfo):
     def finalize_setup(self):
         super().finalize_setup()
         self.buildEnv.cmake_crossfile = self._gen_crossfile('cmake_ios_cross_file.txt')
-        self.buildEnv.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
+        self.buildEnv.meson_crossfile = self._gen_crossfile('meson_ios_cross_file.txt')
 
     def get_cross_config(self):
         return {
             'root_path': self.root_path,
             'binaries': self.binaries,
             'exe_wrapper_def': '',
-            'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++'],
-            'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min=9.0', '-stdlib=libc++', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
+            'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min={}'.format(self.min_iphoneos_version), '-stdlib=libc++'],
+            'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min={}'.format(self.min_iphoneos_version), '-stdlib=libc++', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
             'host_machine': {
                 'system': 'Darwin',
                 'lsystem': 'darwin',
@@ -43,14 +44,20 @@ class iOSPlatformInfo(PlatformInfo):
                 'cpu': self.cpu,
                 'endian': '',
                 'abi': ''
-            },
+            }
         }
 
-    def set_env(self, env):
-        env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -arch {arch} -miphoneos-version-min=9.0 ".format(SDKROOT=self.root_path, arch=self.arch) + env['CFLAGS']
+    def get_env(self):
+        env = super().get_env()
+        env['MACOSX_DEPLOYMENT_TARGET'] = '10.10'
+        return env
+
+    def set_comp_flags(self, env):
+        super().set_comp_flags(env)
+        env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -arch {arch} -miphoneos-version-min={min_iphoneos_version} ".format(SDKROOT=self.root_path, min_iphoneos_version=self.min_iphoneos_version, arch=self.arch) + env['CFLAGS']
         env['CXXFLAGS'] = env['CFLAGS'] + " -stdlib=libc++ -std=c++11 "+env['CXXFLAGS']
         env['LDFLAGS'] = " -arch {arch} -isysroot {SDKROOT} ".format(SDKROOT=self.root_path, arch=self.arch)
-        env['MACOSX_DEPLOYMENT_TARGET'] = "10.10"
+
 
     def get_bin_dir(self):
         return [pj(self.root_path, 'bin')]
@@ -60,10 +67,10 @@ class iOSPlatformInfo(PlatformInfo):
         return {
             'CC': xrun_find('clang'),
             'CXX': xrun_find('clang++'),
-            'AR': '/usr/bin/ar',
-            'STRIP': '/usr/bin/strip',
-            'RANLIB': '/usr/bin/ranlib',
-            'LD': '/usr/bin/ld',
+            'AR': xrun_find('ar'),
+            'STRIP': xrun_find('strip'),
+            'RANLIB': xrun_find('ranlib'),
+            'LD': xrun_find('ld'),
             'PKGCONFIG': 'pkg-config',
         }
 
@@ -71,21 +78,16 @@ class iOSPlatformInfo(PlatformInfo):
     def configure_option(self):
         return '--host={}'.format(self.arch_full)
 
-    def set_compiler(self, env):
-        for k,v in self.binaries.items():
-            env[k] = v
-
-
 class iOSArmv7(iOSPlatformInfo):
     name = 'iOS_armv7'
     arch = cpu = 'armv7'
-    arch_full =  'arm-apple-darwin'
+    arch_full =  'armv7-apple-darwin'
     sdk_name = 'iphoneos'
 
 class iOSArm64(iOSPlatformInfo):
     name = 'iOS_arm64'
     arch = cpu = 'arm64'
-    arch_full =  'aarch64-apple-darwin'
+    arch_full =  'arm-apple-darwin'
     sdk_name = 'iphoneos'
 
 class iOSi386(iOSPlatformInfo):

@@ -18,7 +18,8 @@ class org_kde(Dependency):
                 remote_name = 'flathub',
                 remote_url = 'https://flathub.org/repo/flathub.flatpakrepo'
             )
-            run_command(command, self.buildEnv.build_dir, context, buildEnv=self.buildEnv)
+            env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=False)
+            run_command(command, self.buildEnv.build_dir, context, env=env)
 
         def _install_sdk(self, context):
             command = "flatpak --user install -y {remote_name} {name}.Sdk//{version} {name}.Platform//{version}"
@@ -27,7 +28,8 @@ class org_kde(Dependency):
                 name = self.target.name,
                 version = self.target.version()
             )
-            run_command(command, self.buildEnv.build_dir, context, buildEnv=self.buildEnv)
+            env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=False)
+            run_command(command, self.buildEnv.build_dir, context, env=env)
 
         def build(self):
             self.command('setup_remote', self._setup_remote)

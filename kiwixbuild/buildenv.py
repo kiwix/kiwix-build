@@ -115,23 +115,12 @@ class BuildEnv:
             return 'lib64'
         return 'lib'
 
-    def _set_env(self, env, cross_compile_env, cross_compile_compiler, cross_compile_path):
-        if env is None:
-            env = Defaultdict(str, os.environ)
-
+    def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
+        env = self.platformInfo.get_env()
         pkgconfig_path = pj(self.install_dir, self.libprefix, 'pkgconfig')
         env['PKG_CONFIG_PATH'] = ':'.join([env['PKG_CONFIG_PATH'], pkgconfig_path])
 
-        # Add ccache path
-        for p in ('/usr/lib/ccache', '/usr/lib64/ccache'):
-            if os.path.isdir(p):
-                ccache_path = [p]
-                break
-        else:
-            ccache_path = []
-        env['PATH'] = ':'.join([pj(self.install_dir, 'bin')] +
-                               ccache_path +
-                               [env['PATH']])
+        env['PATH'] = ':'.join([pj(self.install_dir, 'bin'), env['PATH']])
 
         env['LD_LIBRARY_PATH'] = ':'.join([env['LD_LIBRARY_PATH'],
                                           pj(self.install_dir, 'lib'),
@@ -147,16 +136,10 @@ class BuildEnv:
                                    '-L'+pj(self.install_dir, self.libprefix),
                                    env['LDFLAGS']])
 
-        if cross_compile_env:
-            for k, v in self.cross_config.get('env', {}).items():
-                if k.startswith('_format_'):
-                    v = v.format(**self.cross_config)
-                    k = k[8:]
-                env[k] = v
-            self.platformInfo.set_env(env)
-        if cross_compile_compiler:
+        if cross_comp_flags:
+            self.platformInfo.set_comp_flags(env)
+        if cross_compilers:
             self.platformInfo.set_compiler(env)
-        if cross_compile_path:
-            bin_dirs = self.platformInfo.get_bind_dir()
-            env['PATH'] = ':'.join(bin_dirs + [env['PATH']])
+        if cross_path:
+            env['PATH'] = ':'.join(self.platformInfo.get_bin_dir() + [env['PATH']])
         return env

@@ -1,6 +1,5 @@
 from .base import PlatformInfo
 from kiwixbuild._global import option, neutralEnv
-from kiwixbuild.utils import run_command
 
 class FlatpakPlatformInfo(PlatformInfo):
     name = 'flatpak'
@@ -12,6 +11,8 @@ class FlatpakPlatformInfo(PlatformInfo):
     def __str__(self):
         return "flatpak"
 
-    def set_env(self, env):
+    def get_env(self):
+        env = super().get_env()
         env['FLATPAK_USER_DIR'] = self.buildEnv.build_dir
+        return env
 

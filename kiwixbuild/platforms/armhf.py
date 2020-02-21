@@ -70,16 +70,21 @@ class ArmhfPlatformInfo(PlatformInfo):
     def get_bin_dir(self):
         return [pj(self.root_path, 'bin')]
 
-    def set_env(self, env):
+    def get_env(self):
+        env = super().get_env()
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['CFLAGS'] = " -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
-        env['CXXFLAGS'] = " -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
         env['QEMU_LD_PREFIX'] = pj(self.root_path, "arm-linux-gnueabihf", "libc")
         env['QEMU_SET_ENV'] = "LD_LIBRARY_PATH={}".format(
             ':'.join([
                 pj(self.root_path, self.arch_full, "lib"),
                 env['LD_LIBRARY_PATH']
         ]))
+        return env
+
+    def set_comp_flags(self, env):
+        super().set_comp_flags(env)
+        env['CFLAGS'] = " -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
+        env['CXXFLAGS'] = " -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
 
     def set_compiler(self, env):
         for k, v in self.binaries.items():

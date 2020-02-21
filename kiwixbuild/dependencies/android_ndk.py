@@ -52,8 +52,8 @@ class android_ndk(Dependency):
                 api=self.api,
                 install_dir=self.install_path
             )
-            context.force_native_build = True
-            run_command(command, self.build_path, context, buildEnv=self.buildEnv)
+            env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=False)
+            run_command(command, self.build_path, context, env=env)
 
         def _fix_permission_right(self, context):
             context.try_skip(self.build_path)

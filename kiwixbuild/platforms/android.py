@@ -56,24 +56,25 @@ class AndroidPlatformInfo(PlatformInfo):
                 'cpu': self.cpu,
                 'endian': 'little',
                 'abi': self.abi
-            },
+            }
         }
+
+    def get_env(self):
+        env = super().get_env()
+        root_path = pj(self.install_path, 'sysroot')
+        env['PKG_CONFIG_LIBDIR'] = pj(root_path, 'lib', 'pkgconfig')
+        env['NDK_DEBUG'] = '0'
+        return env
 
     def get_bin_dir(self):
         return [pj(self.install_path, 'bin')]
 
-    def set_env(self, env):
+    def set_comp_flags(self, env):
+        super().set_comp_flags(env)
         root_path = pj(self.install_path, 'sysroot')
-        env['PKG_CONFIG_LIBDIR'] = pj(root_path, 'lib', 'pkgconfig')
         env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CFLAGS']
         env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CXXFLAGS']
         env['LDFLAGS'] = '--sysroot={} '.format(root_path) + env['LDFLAGS']
-        #env['CFLAGS'] = ' -fPIC -D_FILE_OFFSET_BITS=64 -O3 '+env['CFLAGS']
-        #env['CXXFLAGS'] = (' -D__OPTIMIZE__ -fno-strict-aliasing '
-        #                   ' -DU_HAVE_NL_LANGINFO_CODESET=0 '
-        #                   '-DU_STATIC_IMPLEMENTATION -O3 '
-        #                   '-DU_HAVE_STD_STRING -DU_TIMEZONE=0 ')+env['CXXFLAGS']
-        env['NDK_DEBUG'] = '0'
 
     def set_compiler(self, env):
         binaries = self.binaries()
@@ -140,5 +141,7 @@ class Android(MetaPlatformInfo):
     def sdk_builder(self):
         return get_target_step('android-sdk', 'neutral')
 
-    def set_env(self, env):
+    def get_env(self):
+        env = super().get_env()
         env['ANDROID_HOME'] = self.sdk_builder.install_path
+        return env

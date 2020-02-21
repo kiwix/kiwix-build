@@ -41,7 +41,8 @@ class I586PlatformInfo(PlatformInfo):
                              ('PKGCONFIG', 'pkg-config'))
                }
 
-    def set_env(self, env):
+    def set_comp_flags(self, env):
+        super().set_comp_flags(env)
         env['CFLAGS'] = "-m32 -march=i586 -mno-sse "+env['CFLAGS']
         env['CXXFLAGS'] = "-m32 -march=i586 -mno-sse "+env['CXXFLAGS']
         env['LDFLAGS'] = "-m32 -march=i586 -mno-sse "+env['LDFLAGS']
