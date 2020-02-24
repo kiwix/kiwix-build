@@ -315,12 +315,12 @@ class MakeBuilder(Builder):
         dep_conf_env = self.configure_env
         if not dep_conf_env:
             return
-        for k in list(dep_conf_env):
+        for k, v in dep_conf_env.items():
             if k.startswith('_format_'):
-                v = dep_conf_env.pop(k)
                 v = v.format(buildEnv=self.buildEnv, env=env)
-                dep_conf_env[k[8:]] = v
-        env.update(dep_conf_env)
+                env[k[8:]] = v
+            else:
+                env[k] = v
 
 
     def _configure(self, context):
