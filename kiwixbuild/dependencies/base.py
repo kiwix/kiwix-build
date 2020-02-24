@@ -524,5 +524,5 @@ class GradleBuilder(Builder):
         command = command.format(
             gradle_target=self.gradle_target,
             gradle_option=self.gradle_option)
-        env = self.buildEnv.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
+        env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=True, cross_path=True)
         run_command(command, self.build_path, context, env=env)

@@ -145,3 +145,6 @@ class Android(MetaPlatformInfo):
         env = super().get_env()
         env['ANDROID_HOME'] = self.sdk_builder.install_path
         return env
+
+    def set_comp_flags(self, env):
+        pass
