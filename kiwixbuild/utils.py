@@ -15,6 +15,16 @@ from kiwixbuild._global import neutralEnv, option
 pj = os.path.join
 
 
+COLORS = {
+    'OK': '\033[92m',
+    'WARNING': '\033[93m',
+    'NEEDED': '\033[93m',
+    'SKIP': '\033[34m',
+    'ERROR': '\033[91m',
+    '': '\033[0m',
+}
+
+
 REMOTE_PREFIX = 'http://download.kiwix.org/dev/'
 
 
@@ -64,6 +74,12 @@ def get_sha256(path):
             print_progress(progress_chars[current])
             current = (current+1)%4
     return sha256.hexdigest()
+
+
+def colorize(text, color=None):
+    if color is None:
+        color = text
+    return "{}{}{}".format(COLORS[color], text, COLORS[''])
 
 
 def print_progress(progress):
@@ -134,16 +150,28 @@ def download_remote(what, where):
         raise StopBuild("Sha 256 doesn't correspond")
 
 
-class SkipCommand(Exception):
-    pass
-
-
-class StopBuild(Exception):
+class BaseCommandResult(Exception):
     def __init__(self, msg=""):
         self.msg = msg
 
     def __str__(self):
         return self.msg
+
+
+class SkipCommand(BaseCommandResult):
+    def __str__(self):
+        if self.msg:
+            return colorize("SKIP") + " : {}".format(self.msg)
+        return colorize("SKIP")
+
+
+class WarningMessage(BaseCommandResult):
+    def __str__(self):
+        return colorize("WARNING") + " : {}".format(self.msg)
+
+
+class StopBuild(BaseCommandResult):
+    pass
 
 
 class Remotefile(namedtuple('Remotefile', ('name', 'sha256', 'url'))):

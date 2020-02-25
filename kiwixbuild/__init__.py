@@ -48,6 +48,10 @@ def parse_args():
                           help=("Specify the architecture to build for ios application/libraries.\n"
                                 "Can be specified several times to build for several architectures.\n"
                                 "If not specified, all architectures will be build."))
+    subgroup.add_argument('--fast-clone', action='store_true',
+                          help=("Do not clone the whole repository.\n"
+                                "This is useful for one shot build but it is not recommended if you want "
+                                "to develop with the cloned sources."))
     options = parser.parse_args()
 
     if not options.android_arch:
