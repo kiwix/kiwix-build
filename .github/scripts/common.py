@@ -68,6 +68,7 @@ def run_kiwix_build(
     command = ["kiwix-build"]
     command.append(target)
     command.append("--hide-progress")
+    command.append("--fast-clone")
     if platform == "flatpak" or platform.startswith("win32_"):
         command.append("--assume-packages-installed")
     if target == "kiwix-lib-app" and platform.startswith("android_"):
