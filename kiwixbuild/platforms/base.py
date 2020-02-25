@@ -94,8 +94,10 @@ class PlatformInfo(metaclass=_MetaPlatform):
             env['CXXFLAGS'] = env['CXXFLAGS'] + ' -fPIC'
 
 
-    def _gen_crossfile(self, name):
-        crossfile = pj(self.buildEnv.build_dir, name)
+    def _gen_crossfile(self, name, outname=None):
+        if outname is None:
+            outname = name
+        crossfile = pj(self.buildEnv.build_dir, outname)
         template_file = pj(TEMPLATES_DIR, name)
         with open(template_file, 'r') as f:
             template = f.read()
