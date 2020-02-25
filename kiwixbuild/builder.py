@@ -4,7 +4,7 @@ from collections import OrderedDict
 from .buildenv import *
 
 from .platforms import PlatformInfo
-from .utils import remove_duplicates, StopBuild
+from .utils import remove_duplicates, StopBuild, colorize
 from .dependencies import Dependency
 from .packages import PACKAGE_NAME_MAPPERS
 from ._global import (
@@ -21,7 +21,7 @@ class Builder:
         target_platform = option('target_platform')
         platform = PlatformInfo.get_platform(target_platform, self._targets)
         if neutralEnv('distname') not in platform.compatible_hosts:
-            print(('ERROR: The target platform {} cannot be build on host {}.\n'
+            print((colorize('ERROR')+': The target platform {} cannot be build on host {}.\n'
                    'Select another target platform or change your host system.'
                   ).format(platform.name, neutralEnv('distname')))
         self.targetDefs = platform.add_targets(option('target'), self._targets)
@@ -97,7 +97,7 @@ class Builder:
 
     def prepare_sources(self):
         if option('skip_source_prepare'):
-            print("SKIP")
+            print(colorize("SKIP"))
             return
 
         sourceDefs = remove_duplicates(tDef for tDef in target_steps() if tDef[0]=='source')
@@ -149,7 +149,7 @@ class Builder:
         packages_to_have = remove_duplicates(packages_to_have)
 
         if option('assume_packages_installed'):
-            print("SKIP, Assume package installed")
+            print(colorize("SKIP") + ", Assume package installed")
             return
 
         distname = neutralEnv('distname')
@@ -170,23 +170,23 @@ class Builder:
             try:
                 subprocess.check_call(command, shell=True)
             except subprocess.CalledProcessError:
-                print("NEEDED")
+                print(colorize("NEEDED"))
                 packages_to_install.append(package)
             else:
-                print("SKIP")
+                print(colorize("SKIP"))
 
         if packages_to_install:
             command = package_installer.format(" ".join(packages_to_install))
             print(command)
             subprocess.check_call(command, shell=True)
         else:
-            print("SKIP, No package to install.")
+            print(colorize("SKIP")+ ", No package to install.")
 
     def run(self):
         try:
             print("[INSTALL PACKAGES]")
             if option('dont_install_packages'):
-                print("SKIP")
+                print(colorize("SKIP"))
             else:
                 self.install_packages()
             self.finalize_target_steps()
@@ -203,7 +203,7 @@ class Builder:
                 for platform in PlatformInfo.all_running_platforms.values():
                     platform.clean_intermediate_directories()
             else:
-                print("SKIP")
+                print(colorize("SKIP"))
         except StopBuild as e:
             print(e)
             sys.exit("Stopping build due to errors")

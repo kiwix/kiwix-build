@@ -3,7 +3,7 @@ import os
 import shutil
 import time
 
-from kiwixbuild.utils import pj, Context, SkipCommand, WarningMessage, extract_archive, Defaultdict, StopBuild, run_command
+from kiwixbuild.utils import pj, Context, SkipCommand, WarningMessage, extract_archive, Defaultdict, StopBuild, run_command, colorize
 from kiwixbuild.versions import main_project_versions, base_deps_versions
 from kiwixbuild._global import neutralEnv, option
 
@@ -76,14 +76,14 @@ class Source:
             ret = function(*args, context=context)
             context._finalise()
             duration = time.time() - start_time
-            print("OK ({:.1f}s)".format(duration))
+            print(colorize("OK"), "({:.1f}s)".format(duration))
             return ret
         except WarningMessage as e:
             print(e)
-        except SkipCommand:
-            print("SKIP")
+        except SkipCommand as e:
+            print(e)
         except subprocess.CalledProcessError:
-            print("ERROR")
+            print(colorize("ERROR"))
             try:
                 with open(log, 'r') as f:
                     print(f.read())
@@ -91,7 +91,7 @@ class Source:
                 pass
             raise StopBuild()
         except:
-            print("ERROR")
+            print(colorize("ERROR"))
             raise
 
 
@@ -245,14 +245,14 @@ class Builder:
             ret = function(*args, context=context)
             context._finalise()
             duration = time.time() - start_time
-            print("OK ({:.1f}s)".format(duration))
+            print(colorize("OK"), "({:.1f}s)".format(duration))
             return ret
-        except SkipCommand:
-            print("SKIP")
+        except SkipCommand as e:
+            print(e)
         except WarningMessage as e:
             print(e)
         except subprocess.CalledProcessError:
-            print("ERROR")
+            print(colorize("ERROR"))
             try:
                 with open(log, 'r') as f:
                     print(f.read())
@@ -260,7 +260,7 @@ class Builder:
                 pass
             raise StopBuild()
         except:
-            print("ERROR")
+            print(colorize("ERROR"))
             raise
 
     def build(self):
