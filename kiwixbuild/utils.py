@@ -134,16 +134,28 @@ def download_remote(what, where):
         raise StopBuild("Sha 256 doesn't correspond")
 
 
-class SkipCommand(Exception):
-    pass
-
-
-class StopBuild(Exception):
+class BaseCommandResult(Exception):
     def __init__(self, msg=""):
         self.msg = msg
 
     def __str__(self):
         return self.msg
+
+
+class SkipCommand(BaseCommandResult):
+    def __str__(self):
+        if self.msg:
+            return "SKIP : {}".format(self.msg)
+        return "SKIP"
+
+
+class WarningMessage(BaseCommandResult):
+    def __str__(self):
+        return "WARNING : {}".format(self.msg)
+
+
+class StopBuild(BaseCommandResult):
+    pass
 
 
 class Remotefile(namedtuple('Remotefile', ('name', 'sha256', 'url'))):

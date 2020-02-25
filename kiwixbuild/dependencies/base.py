@@ -3,7 +3,7 @@ import os
 import shutil
 import time
 
-from kiwixbuild.utils import pj, Context, SkipCommand, extract_archive, Defaultdict, StopBuild, run_command
+from kiwixbuild.utils import pj, Context, SkipCommand, WarningMessage, extract_archive, Defaultdict, StopBuild, run_command
 from kiwixbuild.versions import main_project_versions, base_deps_versions
 from kiwixbuild._global import neutralEnv, option
 
@@ -78,6 +78,8 @@ class Source:
             duration = time.time() - start_time
             print("OK ({:.1f}s)".format(duration))
             return ret
+        except WarningMessage as e:
+            print(e)
         except SkipCommand:
             print("SKIP")
         except subprocess.CalledProcessError:
@@ -152,22 +154,31 @@ class GitClone(Source):
         else:
             return self.base_git_ref
 
-    def _git_clone(self, context):
-        if os.path.exists(self.git_path):
-            raise SkipCommand()
-        command = "git clone --depth=1 --branch {} {} {}".format(
-            self.git_ref, self.git_remote, self.source_dir)
-        run_command(command, neutralEnv('source_dir'), context)
+    def _git_init(self, context):
+        if option('fast_clone'):
+            command = "git clone --depth=1 --branch {} {} {}".format(
+                self.git_ref, self.git_remote, self.source_dir)
+            run_command(command, neutralEnv('source_dir'), context)
+        else:
+            command = "git clone {} {}".format(self.git_remote, self.source_dir)
+            run_command(command, neutralEnv('source_dir'), context)
+            command = "git checkout {}".format(self.git_ref)
+            run_command(command, self.git_path, context)
 
     def _git_update(self, context):
-        command = "git fetch origin {}".format(
-            self.git_ref)
+        command = "git fetch origin {}".format(self.git_ref)
         run_command(command, self.git_path, context)
-        run_command("git checkout "+self.git_ref, self.git_path, context)
+        try:
+            command = "git merge --ff-only origin/{}".format(self.git_ref)
+            run_command(command, self.git_path, context)
+        except subprocess.CalledProcessError:
+            raise WarningMessage("Cannot update, please check log for information")
 
     def prepare(self):
-        self.command('gitclone', self._git_clone)
-        self.command('gitupdate', self._git_update)
+        if not os.path.exists(self.git_path):
+            self.command('gitinit', self._git_init)
+        else:
+            self.command('gitupdate', self._git_update)
         if hasattr(self, '_post_prepare_script'):
             self.command('post_prepare_script', self._post_prepare_script)
 
@@ -238,6 +249,8 @@ class Builder:
             return ret
         except SkipCommand:
             print("SKIP")
+        except WarningMessage as e:
+            print(e)
         except subprocess.CalledProcessError:
             print("ERROR")
             try:
