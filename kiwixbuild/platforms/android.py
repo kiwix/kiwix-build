@@ -42,6 +42,9 @@ class AndroidPlatformInfo(PlatformInfo):
     def get_cross_config(self):
         extra_libs = ['-llog']
         extra_cflags = ['-I{}'.format(pj(self.buildEnv.install_dir, 'include'))]
+        if hasattr(self, 'march'):
+            extra_libs.append('-march={}'.format(self.march))
+            extra_cflags.append('-march={}'.format(self.march))
         return {
             'exe_wrapper_def': '',
             'install_path': self.install_path,
@@ -72,9 +75,10 @@ class AndroidPlatformInfo(PlatformInfo):
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
         root_path = pj(self.install_path, 'sysroot')
-        env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CFLAGS']
-        env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} '.format(root_path) + env['CXXFLAGS']
-        env['LDFLAGS'] = '--sysroot={} '.format(root_path) + env['LDFLAGS']
+        march = '-march={}'.format(self.march) if hasattr(self,'march') else ''
+        env['CFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} {} '.format(root_path, march) + env['CFLAGS']
+        env['CXXFLAGS'] = '-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} {} '.format(root_path, march) + env['CXXFLAGS']
+        env['LDFLAGS'] = '--sysroot={} {} '.format(root_path, march) + env['LDFLAGS']
 
     def set_compiler(self, env):
         binaries = self.binaries()
@@ -96,6 +100,7 @@ class AndroidArm(AndroidPlatformInfo):
     arch = cpu = 'arm'
     arch_full = 'arm-linux-androideabi'
     abi = 'armeabi-v7a'
+    march = 'armv7-a'
 
 
 class AndroidArm64(AndroidPlatformInfo):
