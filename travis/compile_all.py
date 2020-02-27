@@ -444,7 +444,7 @@ for target in TARGETS:
     if target == 'kiwix-lib-app':
         extra_postfix = release_versions.get('kiwix-lib')
         if extra_postfix:
-            env['KIWIXLIB_BUILDVERSION'] = extra_postfix
+            environ['KIWIXLIB_BUILDVERSION'] = extra_postfix
 
     run_kiwix_build(target,
                     platform=PLATFORM,
