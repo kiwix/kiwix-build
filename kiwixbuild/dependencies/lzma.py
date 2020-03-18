@@ -16,4 +16,4 @@ class lzma(Dependency):
     class Builder(MakeBuilder):
         @property
         def configure_option(self):
-            return "--disable-assembler --disable-xz --disable-xzdec"
+            return "--disable-xz --disable-xzdec"
