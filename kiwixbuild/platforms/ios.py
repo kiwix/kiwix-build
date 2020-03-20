@@ -9,7 +9,7 @@ class iOSPlatformInfo(PlatformInfo):
     build = 'iOS'
     static = True
     compatible_hosts = ['Darwin']
-    min_iphoneos_version = '9.0'
+    min_iphoneos_version = '11.0'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -49,7 +49,7 @@ class iOSPlatformInfo(PlatformInfo):
 
     def get_env(self):
         env = super().get_env()
-        env['MACOSX_DEPLOYMENT_TARGET'] = '10.10'
+        env['MACOSX_DEPLOYMENT_TARGET'] = '10.13'
         return env
 
     def set_comp_flags(self, env):
