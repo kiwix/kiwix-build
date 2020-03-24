@@ -303,7 +303,10 @@ class MakeBuilder(Builder):
     make_option = ""
     install_option = ""
     configure_script = "configure"
-    configure_env = None
+    configure_env = {
+        '_format_CFLAGS' : '{env[CFLAGS]} -O3',
+        '_format_CXXFLAGS': '{env[CXXFLAGS]} -O3'
+    }
     make_target = ""
     flatpak_buildsystem = None
 
