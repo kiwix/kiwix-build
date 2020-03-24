@@ -13,6 +13,7 @@ class KiwixDesktop(Dependency):
     class Builder(QMakeBuilder):
         dependencies = ["qt", "qtwebengine", "kiwix-lib", "aria2", "kiwix-tools"]
         make_install_target = 'install'
+        configure_env = None
 
         @property
         def configure_option(self):

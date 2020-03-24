@@ -19,7 +19,7 @@ class UUID(Dependency):
     class Builder(MakeBuilder):
         configure_option = ("--enable-libuuid --disable-debugfs --disable-imager --disable-resizer --disable-defrag --enable-fsck"
                             " --disable-uuidd")
-        configure_env = {'_format_CFLAGS': "{env.CFLAGS} -fPIC"}
+        configure_env = {'_format_CFLAGS': "{env.CFLAGS} -O3 -fPIC"}
         static_configure_option = dynamic_configure_option = ""
         make_target = 'libs'
         make_install_target = 'install-libs'
