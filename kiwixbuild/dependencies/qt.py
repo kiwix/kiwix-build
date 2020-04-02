@@ -17,7 +17,7 @@ class Qt(Dependency):
         source_dir = "qt-5.10.1"
         archive = Remotefile('qt-everywhere-src-5.10.1.tar.xz',
                              '',
-                             'http://ftp1.nluug.nl/languages/qt/archive/qt/5.10/5.10.1/single/qt-everywhere-src-5.10.1.tar.xz')
+                             'http://ftp.oregonstate.edu/.1/blfs/conglomeration/qt5/qt-everywhere-src-5.10.1.tar.xz')
 
     class Builder(MakeBuilder):
         dependencies = ['icu4c', 'zlib']
