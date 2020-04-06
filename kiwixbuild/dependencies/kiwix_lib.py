@@ -10,6 +10,7 @@ from kiwixbuild._global import option, get_target_step, neutralEnv
 
 class Kiwixlib(Dependency):
     name = "kiwix-lib"
+    force_build = True
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-lib.git"
@@ -39,6 +40,7 @@ class Kiwixlib(Dependency):
 
 class KiwixlibApp(Dependency):
     name = "kiwix-lib-app"
+    force_build = True
 
     class Source(Kiwixlib.Source):
         name = "kiwix-lib"

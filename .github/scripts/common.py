@@ -148,12 +148,6 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += (HOME / "BUILD_native_static").glob("*/.*_ok")
         files_to_archive += HOME.glob("BUILD_android*/**/.*_ok")
         files_to_archive += SOURCE_DIR.glob("*/.*_ok")
-        files_to_archive += [
-            SOURCE_DIR / "pugixml-{}".format(base_deps_versions["pugixml"])
-        ]
-        files_to_archive += HOME.glob(
-            "BUILD_*/pugixml-{}".format(base_deps_versions["pugixml"])
-        )
         if PLATFORM_TARGET.startswith("armhf"):
             files_to_archive += (SOURCE_DIR / "armhf").glob("*")
         toolchains_subdirs = HOME.glob("BUILD_*/TOOLCHAINS/*/*")

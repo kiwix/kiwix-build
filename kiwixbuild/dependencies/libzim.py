@@ -6,6 +6,7 @@ from kiwixbuild._global import option
 
 class Libzim(Dependency):
     name = "libzim"
+    force_build = True
 
     class Source(GitClone):
         git_remote = "https://github.com/openzim/libzim.git"
