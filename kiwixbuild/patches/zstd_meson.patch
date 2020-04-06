@@ -1,0 +1,20 @@
+diff -ur zstd-1.4.4/build/meson/meson.build zstd-1.4.4.patched/build/meson/meson.build
+--- zstd-1.4.4/build/meson/meson.build  2019-11-04 21:54:32.000000000 +0400
++++ zstd-1.4.4.patched/build/meson/meson.build  2020-04-07 13:59:26.012106549 +0400
+@@ -68,6 +68,7 @@
+ # Built-in options
+ use_debug = get_option('debug')
+ buildtype = get_option('buildtype')
++default_library_type = get_option('default_library')
+
+ # Custom options
+ debug_level = get_option('debug_level')
+@@ -121,7 +122,7 @@
+   if use_multi_thread
+     msvc_compile_flags += '/MP'
+   endif
+-  if enable_static_runtime
++  if use_static_runtime
+     msvc_compile_flags += '/MT'
+   endif
+   add_project_arguments(msvc_compile_flags, language: ['c', 'cpp'])
