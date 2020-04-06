@@ -6,7 +6,7 @@ and libraries and deploy them. They have been tested on
 [Fedora](https://getfedora.org) 23+ & [Ubuntu](https://ubuntu.com)
 16.10+.
 
-[![Build Status](https://travis-ci.com/kiwix/kiwix-build.svg?branch=master)](https://travis-ci.com/kiwix/kiwix-build)
+[![Build Status](https://github.com/kiwix/kiwix-build/workflows/CI/badge.svg?query=branch%3Amaster)](https://github.com/kiwix/kiwix-build/actions?query=branch%3Amaster)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Prerequisites
