@@ -3,7 +3,7 @@ version: '0.1.{build}'
 environment:
   EXTRA_DIR: 'C:\extra'
   MINGW64_EXTRA_DIR: '/c/extra'
-  PATH: '%PATH%;%EXTRA_DIR%\bin;C:\\Python36\\Scripts;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\%platform%'
+  PATH: 'C:\\Python36\\Scripts;%PATH%;%EXTRA_DIR%\bin;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\%platform%'
   PKG_CONFIG_PATH: '%EXTRA_DIR%\lib\pkgconfig'
   MSYS2_PATH_TYPE: 'inherit'
   MSYS2_ARG_CONV_EXCL: '-Tp'
