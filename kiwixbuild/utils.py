@@ -187,8 +187,11 @@ class Context:
         self.log_file = log_file
         self.force_native_build = force_native_build
         self.autoskip_file = None
+        self.no_skip = False
 
     def try_skip(self, path, extra_name=""):
+        if self.no_skip:
+            return
         if extra_name:
             extra_name = "_{}".format(extra_name)
         self.autoskip_file = pj(path, ".{}{}_ok".format(self.command_name, extra_name))

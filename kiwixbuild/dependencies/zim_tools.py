@@ -5,6 +5,7 @@ from .base import (
 
 class ZimTools(Dependency):
     name = "zim-tools"
+    force_build = True
 
     class Source(GitClone):
         git_remote = "https://github.com/openzim/zim-tools.git"

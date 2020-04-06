@@ -5,6 +5,7 @@ from .base import (
 
 class Zimwriterfs(Dependency):
     name = "zimwriterfs"
+    force_build = True
 
     class Source(GitClone):
         git_remote = "https://github.com/openzim/zimwriterfs.git"

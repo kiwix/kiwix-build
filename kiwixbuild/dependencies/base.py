@@ -21,6 +21,7 @@ class _MetaDependency(type):
 
 class Dependency(metaclass=_MetaDependency):
     all_deps = {}
+    force_build = False
     force_native_build = False
 
     @classmethod
@@ -240,6 +241,8 @@ class Builder:
         print("  {} {} : ".format(name, self.name), end="", flush=True)
         log = pj(self._log_dir, 'cmd_{}_{}.log'.format(name, self.name))
         context = Context(name, log, self.target.force_native_build)
+        if self.target.force_build:
+            context.no_skip = True
         try:
             start_time = time.time()
             ret = function(*args, context=context)
@@ -493,11 +496,13 @@ class MesonBuilder(Builder):
         run_command(command, self.source_path, context, env=env)
 
     def _compile(self, context):
+        context.try_skip(self.build_path)
         command = "{} -v".format(neutralEnv('ninja_command'))
         env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 
     def _test(self, context):
+        context.try_skip(self.build_path)
         if ( self.buildEnv.platformInfo.build == 'android'
              or (self.buildEnv.platformInfo.build != 'native'
                  and not self.buildEnv.platformInfo.static)
@@ -508,6 +513,7 @@ class MesonBuilder(Builder):
         run_command(command, self.build_path, context, env=env)
 
     def _install(self, context):
+        context.try_skip(self.build_path)
         command = "{} -v install".format(neutralEnv('ninja_command'))
         env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
         run_command(command, self.build_path, context, env=env)
@@ -536,6 +542,7 @@ class GradleBuilder(Builder):
         shutil.copytree(self.source_path, self.build_path)
 
     def _compile(self, context):
+        context.try_skip(self.build_path)
         command = "./gradlew {gradle_target} {gradle_option}"
         command = command.format(
             gradle_target=self.gradle_target,

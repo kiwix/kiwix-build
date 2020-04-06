@@ -5,6 +5,7 @@ from .base import (
 
 class KiwixDesktop(Dependency):
     name = "kiwix-desktop"
+    force_build = True
 
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-desktop.git"
