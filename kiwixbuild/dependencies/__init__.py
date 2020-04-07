@@ -25,5 +25,6 @@ from . import (
     xapian,
     zim_tools,
     zimwriterfs,
-    zlib
+    zlib,
+    zstd
 )
