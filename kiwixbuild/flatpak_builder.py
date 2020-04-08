@@ -139,6 +139,8 @@ class FlatpakBuilder:
         steps = remove_duplicates(target_steps())
         modules = OrderedDict()
         for stepDef in steps:
+            if stepDef[1] == 'zstd':
+                continue
             module = modules.setdefault(stepDef[1], {})
             module['name'] = stepDef[1]
             if stepDef[0] == 'source':
