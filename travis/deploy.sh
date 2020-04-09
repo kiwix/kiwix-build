@@ -13,10 +13,13 @@ BINTRAY_ARCHIVES_DIR=${EXPORT_DIR}/BINTRAY_ARCHIVES
 
 if [[ "$TRAVIS_EVENT_TYPE" = "cron" ]]
 then
-  scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
+  echo "Publishing nightlies"
+  ls ${NIGHTLY_KIWIX_ARCHIVES_DIR}
+  scp -rp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
     ${NIGHTLY_KIWIX_ARCHIVES_DIR} \
     ci@download.kiwix.org:/data/download/nightly
-  scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
+  ls ${NIGHTLY_ZIM_ARCHIVES_DIR}
+  scp -rp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
     ${NIGHTLY_ZIM_ARCHIVES_DIR} \
     ci@download.openzim.org:/data/openzim/nightly
 
@@ -25,10 +28,11 @@ then
   RELEASE_ARCHIVES=$(find $RELEASE_KIWIX_ARCHIVES_DIR -type f)
   if [[ "x$RELEASE_ARCHIVES" != "x" ]]
   then
+    echo "Publishing kiwix archives $RELEASE_ARCHIVES"
     for archive in $RELEASE_ARCHIVES
     do
       subdir=$(basename $(dirname $archive))
-      scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
+      scp -rp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
         ci@download.kiwix.org:/data/download/release/${subdir}
     done
@@ -37,10 +41,11 @@ then
   RELEASE_ARCHIVES=$(find $RELEASE_ZIM_ARCHIVES_DIR -type f)
   if [[ "x$RELEASE_ARCHIVES" != "x" ]]
   then
+    echo "Publishing zim archives $RELEASE_ARCHIVES"
     for archive in $RELEASE_ARCHIVES
     do
       subdir=$(basename $(dirname $archive))
-      scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
+      scp -rp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
         ci@download.openzim.org:/data/openzim/release/${subdir}
     done
@@ -49,10 +54,11 @@ then
   DIST_KIWIX_ARCHIVES=$(find $DIST_KIWIX_ARCHIVES_DIR -type f)
   if [[ "x$DIST_KIWIX_ARCHIVES" != "x" ]]
   then
+    echo "Publishing dist kiwix archives $DIST_KIWIX_ARCHIVES"
     for archive in $DIST_KIWIX_ARCHIVES
     do
       subdir=$(basename $(dirname $archive))
-      scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
+      scp -rp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
         ci@download.kiwix.org:/data/download/release/${subdir}
     done
@@ -61,10 +67,11 @@ then
   DIST_ZIM_ARCHIVES=$(find $DIST_ZIM_ARCHIVES_DIR -type f)
   if [[ "x$DIST_ZIM_ARCHIVES" != "x" ]]
   then
+    echo "Publishing dist zim archives $DIST_ZIM_ARCHIVES"
     for archive in $DIST_ZIM_ARCHIVES
     do
       subdir=$(basename $(dirname $archive))
-      scp -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
+      scp -rp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
         ${archive} \
         ci@download.openzim.org:/data/openzim/release/${subdir}
     done
@@ -74,6 +81,7 @@ then
   GIT_REPOS=$(ls -l | awk '/^d/ { print $9 }')
   if [[ "x$GIT_REPOS" != "x" ]]
   then
+    echo "Pushing repositories $GIT_REPOS"
     for repo in $GIT_REPOS
     do
       (cd $repo;
@@ -87,6 +95,7 @@ then
   BINTRAY_ARCHIVES=$(find $BINTRAY_ARCHIVES_DIR -name "*_bintray_info.json" -type f)
   if [[ "x$BINTRAY_ARCHIVES" != "x" ]]
   then
+    echo "Publish bintray $BINTRAY_ARCHIVES"
     for archive_info in $BINTRAY_ARCHIVES
     do
       ${TRAVIS_BUILD_DIR}/scripts/upload_kiwix_lib_android_to_bintray.py $archive_info

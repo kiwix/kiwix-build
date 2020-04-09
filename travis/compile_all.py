@@ -111,6 +111,7 @@ def run_kiwix_build(target, platform,
     print_message("Build {} (deps={}, release={}, dist={})",
         target, build_deps_only, make_release, make_dist)
     subprocess.check_call(command, cwd=str(HOME))
+    print_message("{}", list(BASE_DIR.glob("{}*/**/*.tar.xz".format(target))))
     print_message("Build ended")
 
 
@@ -134,7 +135,7 @@ def create_desktop_image():
     if PLATFORM == 'flatpak':
         build_path = BASE_DIR/'org.kiwix.desktop.flatpak'
         app_name = 'org.kiwix.desktop.{}.flatpak'.format(postfix)
-        print_message("archive is ", build_path)
+        print_message("archive is {}", build_path)
     else:
         build_path = HOME/'Kiwix-{}-x86_64.AppImage'.format(postfix)
         app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
@@ -272,7 +273,7 @@ def update_flathub_git():
     env['GIT_AUTHOR_EMAIL'] = env['GIT_COMMITTER_EMAIL'] = "kiwixbot@kymeria.fr"
     def call(command, cwd=None):
         cwd = cwd or GIT_REPO_DIR
-        print_message("call ", command)
+        print_message("call {}", command)
         subprocess.check_call(command, env=env, cwd=str(cwd))
     command = ['git', 'clone', FLATPAK_HTTP_GIT_REMOTE]
     call(command, cwd=GIT_EXPORT_DIR)
@@ -445,7 +446,7 @@ for target in TARGETS:
     run_kiwix_build(target,
                     platform=PLATFORM,
                     make_release=make_release)
-    print_message("target is ", target)
+    print_message("target is {}", target)
     if target == 'kiwix-desktop':
         create_desktop_image()
     if make_release and PLATFORM == 'native_dyn' and release_versions.get(target) == 0:
@@ -478,7 +479,12 @@ if make_release and PLATFORM == 'native_dyn':
             else:
                 in_file = BASE_DIR/full_target_name/'{}.tar.gz'.format(full_target_name)
             if in_file.exists():
+                print_message("Copying {} to {}", in_file, out_dir/target)
                 shutil.copy(str(in_file), str(out_dir/target))
+            else:
+                print_message("No {} to copy.", in_file)
+                print_message("{}\n", list((BASE_DIR/full_target_name).iterdir()))
+                print_message("{}\n", list((BASE_DIR/full_target_name/'meson-dist').iterdir()))
 elif PLATFORM == 'native_mixed':
     make_archive('libzim', 'linux-x86_64')
 elif PLATFORM == 'native_static':
