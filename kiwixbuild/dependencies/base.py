@@ -466,6 +466,7 @@ class MesonBuilder(Builder):
         return 'static' if self.buildEnv.platformInfo.static else 'shared'
 
     def _configure(self, context):
+        context.no_skip = False
         context.try_skip(self.build_path)
         if os.path.exists(self.build_path):
             shutil.rmtree(self.build_path)
