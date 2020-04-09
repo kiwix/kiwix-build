@@ -321,6 +321,31 @@ def download_base_archive(base_name):
             file.write(batch)
     return file_path
 
+def export_dist(target):
+    if target in ('kiwix-lib', 'kiwix-tools', 'kiwix-desktop'):
+        out_dir = DIST_KIWIX_ARCHIVES_DIR
+    else:
+        out_dir = DIST_ZIM_ARCHIVES_DIR
+
+    if target in main_project_versions:
+        try:
+            (out_dir/target).mkdir(parents=True)
+        except FileExistsError:
+            pass
+
+        full_target_name = "{}-{}".format(target, main_project_versions[target])
+        if target != 'kiwix-desktop':
+            in_file = BASE_DIR/full_target_name/'meson-dist'/'{}.tar.xz'.format(
+                full_target_name)
+        else:
+            in_file = BASE_DIR/full_target_name/'{}.tar.gz'.format(full_target_name)
+        if in_file.exists():
+            print_message("Copying {} to {}", in_file, out_dir/target)
+            shutil.copy(str(in_file), str(out_dir/target))
+        else:
+            print_message("No {} to copy.", in_file)
+
+
 if PLATFORM != 'flatpak':
     # The first thing we need to do is to (potentially) download already compiled base dependencies.
     base_dep_archive_name = "base_deps_{os}_{platform}_{version}_{release}.tar.xz".format(
@@ -454,38 +479,10 @@ for target in TARGETS:
                         platform=PLATFORM,
                         make_release=True,
                         make_dist=True)
+        export_dist(target)
 
 # We have build everything. Now create archives for public deployement.
-if make_release and PLATFORM == 'native_dyn':
-    for target in TARGETS:
-        if release_versions.get(target) != 0:
-            # Do not release project not in release_versions
-            continue
-        if target in ('kiwix-lib', 'kiwix-tools', 'kiwix-desktop'):
-            out_dir = DIST_KIWIX_ARCHIVES_DIR
-        else:
-            out_dir = DIST_ZIM_ARCHIVES_DIR
-
-        if target in ('kiwix-lib', 'kiwix-tools', 'libzim', 'zim-tools', 'zimwriterfs', 'kiwix-desktop'):
-            try:
-                (out_dir/target).mkdir(parents=True)
-            except FileExistsError:
-                pass
-
-            full_target_name = "{}-{}".format(target, main_project_versions[target])
-            if target != 'kiwix-desktop':
-                in_file = BASE_DIR/full_target_name/'meson-dist'/'{}.tar.xz'.format(
-                    full_target_name)
-            else:
-                in_file = BASE_DIR/full_target_name/'{}.tar.gz'.format(full_target_name)
-            if in_file.exists():
-                print_message("Copying {} to {}", in_file, out_dir/target)
-                shutil.copy(str(in_file), str(out_dir/target))
-            else:
-                print_message("No {} to copy.", in_file)
-                print_message("{}\n", list((BASE_DIR/full_target_name).iterdir()))
-                print_message("{}\n", list((BASE_DIR/full_target_name/'meson-dist').iterdir()))
-elif PLATFORM == 'native_mixed':
+if PLATFORM == 'native_mixed':
     make_archive('libzim', 'linux-x86_64')
 elif PLATFORM == 'native_static':
     for target in ('kiwix-tools', 'zim-tools', 'zimwriterfs'):
