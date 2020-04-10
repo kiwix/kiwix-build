@@ -286,7 +286,11 @@ def update_flathub_git():
     call(command)
     command = ['git', 'commit', '-m',
                'Update to version {}'.format(main_project_versions['kiwix-desktop'])]
-    call(command)
+    try:
+        call(command)
+    except subprocess.CalledProcessError:
+        # This may fail if there is nothing to commit (a rebuild of the CI for exemple)
+        pass
     command = ['git', 'config', 'remote.origin.pushurl', FLATPAK_GIT_REMOTE]
     call(command)
 
