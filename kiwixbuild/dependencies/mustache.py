@@ -10,9 +10,9 @@ class Mustache(Dependency):
     name = "mustache"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('Mustache-3.2.1.tar.gz',
-                             '0d17298a81c08f12ebc446cdee387268a395d34bb724050fe67d5ce8c4e98b7a',
-                             'https://github.com/kainjow/Mustache/archive/v3.2.1.tar.gz')
+        archive = Remotefile('Mustache-4.1.tar.gz',
+                             'acd66359feb4318b421f9574cfc5a511133a77d916d0b13c7caa3783c0bfe167',
+                             'https://github.com/kainjow/Mustache/archive/v4.1.tar.gz')
         patches = ['mustache_virtual_destructor.patch']
 
     class Builder(BaseBuilder):
