@@ -279,7 +279,7 @@ def update_flathub_git():
     call(command, cwd=GIT_EXPORT_DIR)
     shutil.copy(str(BASE_DIR/'org.kiwix.desktop.json'), str(GIT_REPO_DIR))
     patch_dir = KBUILD_SOURCE_DIR/'kiwixbuild'/'patches'
-    for dep in ('libaria2', 'mustache', 'pugixml', 'xapian'):
+    for dep in ('libaria2', 'mustache', 'pugixml', 'xapian', 'zstd'):
         for f in patch_dir.glob('{}_*.patch'.format(dep)):
             shutil.copy(str(f), str(GIT_REPO_DIR/'patches'))
     command = ['git', 'add', '-A', '.']
