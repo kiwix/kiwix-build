@@ -286,6 +286,8 @@ class Builder:
     def set_flatpak_buildsystem(self, module):
         if getattr(self, 'flatpak_buildsystem', None):
             module['buildsystem'] = self.flatpak_buildsystem
+        if getattr(self, 'subsource_dir', None):
+            module['subdir'] = self.subsource_dir
         if getattr(self, 'configure_option', ''):
             module['config-opts'] = self.configure_option.split(' ')
 
