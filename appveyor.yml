@@ -9,8 +9,8 @@ environment:
   MSYS2_ARG_CONV_EXCL: '-Tp'
   MINGW64_RUN: 'C:\msys64\usr\bin\bash.exe --login -c'
   MSYSTEM: 'MINGW64'
-  KIWIX_DESKTOP_VERSION: '2.0'
-  KIWIX_DESKTOP_RELEASE: 0
+  KIWIX_DESKTOP_VERSION: '2.0.1'
+  KIWIX_DESKTOP_RELEASE: 1
 
 
 init:
