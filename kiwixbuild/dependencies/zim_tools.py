@@ -12,7 +12,7 @@ class ZimTools(Dependency):
         git_dir = "zim-tools"
 
     class Builder(MesonBuilder):
-        dependencies = ['libzim']
+        dependencies = ['libzim', 'docoptcpp']
 
         @property
         def configure_option(self):
