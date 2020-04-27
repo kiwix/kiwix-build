@@ -16,5 +16,9 @@ class AllBaseDependencies(Dependency):
             # zimwriterfs
             if platformInfo.build not in ('android', 'win32'):
                 base_deps += ['libmagic', 'gumbo']
+            
+            # zimtools
+            if platformInfo.build not in ('android','iOS'):
+                base_deps += ['docoptcpp']
 
             return base_deps
