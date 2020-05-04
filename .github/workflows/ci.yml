@@ -6,6 +6,56 @@ on:
    - cron: '0 1 * * *'
 
 jobs:
+  Windows:
+    strategy:
+      fail-fast: false
+    runs-on: windows-latest
+    env:
+      OS_NAME: windows
+      COMPILE_CONFIG: native_mixed
+      HOME: 'C:\\Users\\runneradmin'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Setup python 3.8
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.8'
+    - name: Install packages
+      run: |
+        choco.exe install pkgconfiglite ninja
+    - name: Install python modules
+      shell: bash
+      run: |
+        pip3 install meson pytest requests distro
+        pip3 install --no-deps $GITHUB_WORKSPACE
+    - name: Setup MSVC compiler
+      uses: bus1/cabuild/action/msdevshell@v1
+      with:
+        architecture: x64
+    - name: secret
+      shell: bash
+      run: |
+        echo "${{secrets.ssh_key}}" > $SSH_KEY
+      env:
+        SSH_KEY: ${{ runner.temp }}/id_rsa
+    - name: Ensure base deps
+      run: python .github\\scripts\\ensure_base_deps.py
+      env:
+        SSH_KEY: ${{ runner.temp }}/id_rsa
+    - name: Compile all deps
+      run: python .github\\scripts\\compile_all_deps.py
+      env:
+        SSH_KEY: ${{ runner.temp }}/id_rsa
+    - name: Build projects
+      run: python .github\\scripts\\build_projects.py
+      env:
+        SSH_KEY: ${{ runner.temp }}/id_rsa
+    - name: Upload failure logs
+      shell: bash
+      if: failure()
+      run: $GITHUB_WORKSPACE/.github/scripts/upload_failure_logs.sh
+
   Linux:
     strategy:
       fail-fast: false
@@ -75,7 +125,7 @@ jobs:
         kiwix-build/.github/scripts/ensure_base_deps.py
       env:
         COMPILE_CONFIG: ${{matrix.config}}
-    - name: Compile all deps
+     - name: Compile all deps
       shell: bash
       run: |
         cd $HOME
