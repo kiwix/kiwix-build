@@ -1,170 +1,16 @@
-name: CI
+name: Windows Test
 
 on:
  push:
- schedule:
-   - cron: '0 1 * * *'
-
-env:
-  DOCKER_VERSION: 32
 
 jobs:
-  Docker:
+  Windows:
     strategy:
       fail-fast: false
-      matrix:
-        variant: [bionic, f35, focal]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build docker image
-      shell: bash
-      run: |
-        TAGNAME=${{matrix.variant}}-${DOCKER_VERSION}
-        if [ ! $(curl -sflL https://hub.docker.com/v2/repositories/kiwix/kiwix-build_ci/tags/${TAGNAME}) ]
-        then
-          echo "${{secrets.docker_password}}" | docker login -u "${{secrets.docker_username}}" --password-stdin
-          FULLTAGNAME=kiwix/kiwix-build_ci:${TAGNAME}
-          docker build -t ${FULLTAGNAME} - < ${GITHUB_WORKSPACE}/.github/ci_images/${{matrix.variant}}_builder.dockerfile
-          docker push ${FULLTAGNAME}
-        fi
-
-  Linux:
-    strategy:
-      fail-fast: false
-      matrix:
-        target:
-          - native_static
-          - native_dyn
-          - native_mixed
-          - native_desktop
-          - armhf_static
-          - armhf_dyn
-          - i586_static
-          - i586_dyn
-          - android_arm
-          - android_arm64
-          - android_x86
-          - android_x86_64
-        image_variant: ['bionic']
-        lib_postfix: ['/x86_64-linux-gnu']
-        include:
-          - target: win32_static
-            image_variant: f35
-            lib_postfix: '64'
-          - target: win32_dyn
-            image_variant: f35
-            lib_postfix: '64'
+    runs-on: windows-latest
     env:
-      HOME: /home/runner
-      SSH_KEY: /tmp/id_rsa
-    runs-on: ubuntu-latest
-    needs: Docker
-    container:
-      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-32"
-      options: "--device /dev/fuse --privileged"
-    steps:
-    - name: Checkout code
-      shell: bash
-      run: |
-        cd $HOME
-        git clone https://github.com/${REP}
-        cd ./${REP##*/}
-        git checkout --force ${GITHUB_SHA}
-        pip3 install --user --no-deps .
-      env:
-        REP: ${{github.repository}}
-    - name: secret
-      shell: bash
-      run: |
-        echo "${{secrets.ssh_key}}" > $SSH_KEY
-        chmod 600 $SSH_KEY
-    - name: Ensure base deps
-      shell: bash
-      run: |
-        cd $HOME
-        kiwix-build/.github/scripts/ensure_base_deps.py
-      env:
-        PLATFORM_TARGET: ${{matrix.target}}
-    - name: Compile all deps
-      shell: bash
-      run: |
-        cd $HOME
-        kiwix-build/.github/scripts/compile_all_deps.py
-      env:
-        PLATFORM_TARGET: ${{matrix.target}}
-    - name: Build projects
-      shell: bash
-      run: |
-        cd $HOME
-        kiwix-build/.github/scripts/build_projects.py
-      env:
-        PLATFORM_TARGET: ${{matrix.target}}
-    - name: Upload failure logs
-      if: failure()
-      run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
-      env:
-        PLATFORM_TARGET: ${{matrix.target}}
-
-  Flatpak:
-    strategy:
-      fail-fast: false
-    env:
-      HOME: /home/runner
-      SSH_KEY: /tmp/id_rsa
-      PLATFORM_TARGET: flatpak
-      OS_NAME: focal
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      shell: bash
-      run: |
-        cd $HOME
-        git clone https://github.com/${REP}
-        cd ./${REP##*/}
-        git checkout --force ${GITHUB_SHA}
-        pip3 install --user --no-deps .
-      env:
-        REP: ${{github.repository}}
-    - name: Install flatpak tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install flatpak-builder ninja-build meson
-    - name: secret
-      shell: bash
-      run: |
-        echo "${{secrets.ssh_key}}" > $SSH_KEY
-        chmod 600 $SSH_KEY
-    - name: Ensure base deps
-      shell: bash
-      run: |
-        cd $HOME
-        kiwix-build/.github/scripts/ensure_base_deps.py
-    - name: Build projects
-      shell: bash
-      run: |
-        cd $HOME
-        kiwix-build/.github/scripts/build_projects.py
-    - name: Upload failure logs
-      if: failure()
-      run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
-
-  Macos:
-    strategy:
-      fail-fast: false
-      matrix:
-        target:
-          - native_dyn
-          - native_mixed
-          - iOS_arm64
-          - iOS_x86_64
-          - iOS_Mac_ABI
-          - macOS_arm64
-          - macOS_x86_64
-    runs-on: macos-latest
-    env:
-      SSH_KEY: /tmp/id_rsa
-      OS_NAME: osx
+      OS_NAME: windows
+      PLATFORM_TARGET: native_dyn
     steps:
     - name: Checkout code
       uses: actions/checkout@v1
@@ -173,40 +19,26 @@ jobs:
       with:
         python-version: '3.8'
     - name: Install packages
-      run:
-        brew install pkg-config ninja automake autoconf
-    - name: Install python modules
       run: |
-        pip3 install meson pytest requests distro
-        pip3 install --no-deps $GITHUB_WORKSPACE
-    - name: secret
+        choco.exe install pkgconfiglite ninja
+    - run: |
+        ls
+    - name: Install python modules
       shell: bash
       run: |
-        echo "${{secrets.ssh_key}}" > $SSH_KEY
-        chmod 600 $SSH_KEY
+        pip3 install meson==0.52.1 pytest requests distro
+        pip3 install --no-deps $GITHUB_WORKSPACE
     - name: Ensure base deps
       shell: bash
       run: |
         cd $HOME
         $GITHUB_WORKSPACE/.github/scripts/ensure_base_deps.py
-      env:
-        PLATFORM_TARGET: ${{matrix.target}}
     - name: Compile all deps
       shell: bash
       run: |
         cd $HOME
         $GITHUB_WORKSPACE/.github/scripts/compile_all_deps.py
-      env:
-        PLATFORM_TARGET: ${{matrix.target}}
-    - name: Build projects
-      shell: bash
-      run: |
-        cd $HOME
-        $GITHUB_WORKSPACE/.github/scripts/build_projects.py
-      env:
-        PLATFORM_TARGET: ${{matrix.target}}
     - name: Upload failure logs
+      shell: bash
       if: failure()
       run: $GITHUB_WORKSPACE/.github/scripts/upload_failure_logs.sh
-      env:
-        PLATFORM_TARGET: ${{matrix.target}}
