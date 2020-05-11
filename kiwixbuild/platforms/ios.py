@@ -9,7 +9,7 @@ class iOSPlatformInfo(PlatformInfo):
     build = 'iOS'
     static = True
     compatible_hosts = ['Darwin']
-    min_iphoneos_version = '9.0'
+    min_iphoneos_version = '11.0'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -49,7 +49,7 @@ class iOSPlatformInfo(PlatformInfo):
 
     def get_env(self):
         env = super().get_env()
-        env['MACOSX_DEPLOYMENT_TARGET'] = '10.10'
+        env['MACOSX_DEPLOYMENT_TARGET'] = '10.13'
         return env
 
     def set_comp_flags(self, env):
@@ -78,23 +78,11 @@ class iOSPlatformInfo(PlatformInfo):
     def configure_option(self):
         return '--host={}'.format(self.arch_full)
 
-class iOSArmv7(iOSPlatformInfo):
-    name = 'iOS_armv7'
-    arch = cpu = 'armv7'
-    arch_full =  'armv7-apple-darwin'
-    sdk_name = 'iphoneos'
-
 class iOSArm64(iOSPlatformInfo):
     name = 'iOS_arm64'
     arch = cpu = 'arm64'
     arch_full =  'arm-apple-darwin'
     sdk_name = 'iphoneos'
-
-class iOSi386(iOSPlatformInfo):
-    name = 'iOS_i386'
-    arch = cpu = 'i386'
-    arch_full =  'i386-apple-darwin'
-    sdk_name = 'iphonesimulator'
 
 class iOSx64(iOSPlatformInfo):
     name = 'iOS_x86_64'

@@ -45,8 +45,6 @@ jobs:
       os: osx
     - env: PLATFORM="iOS_arm64"
       os: osx
-    - env: PLATFORM="iOS_i386"
-      os: osx
 
 
 
