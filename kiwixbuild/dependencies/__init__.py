@@ -5,6 +5,7 @@ from . import (
     android_ndk,
     android_sdk,
     aria2,
+    vuejs,
     armhf,
     docoptcpp,
     flatpak,

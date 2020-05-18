@@ -12,7 +12,7 @@ class KiwixDesktop(Dependency):
         git_dir = "kiwix-desktop"
 
     class Builder(QMakeBuilder):
-        dependencies = ["qt", "qtwebengine", "kiwix-lib", "aria2", "kiwix-tools"]
+        dependencies = ["qt", "qtwebengine", "kiwix-lib", "aria2", "kiwix-tools", "vuejs"]
         make_install_target = 'install'
         configure_env = None
 
