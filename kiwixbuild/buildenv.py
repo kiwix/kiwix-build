@@ -2,7 +2,6 @@
 import os, sys, shutil
 import subprocess
 import platform
-import distro
 
 from .utils import pj, download_remote, Defaultdict
 from ._global import neutralEnv, option
@@ -39,7 +38,8 @@ class PlatformNeutralEnv:
             if cont.lower() != 'y':
                 sys.exit(0)
         if _platform == 'Linux':
-            self.distname = distro.id()
+            self.distname, _, _ = platform.linux_distribution()
+            self.distname = self.distname.lower()
             if self.distname == 'ubuntu':
                 self.distname = 'debian'
 

@@ -2,7 +2,6 @@ FROM ubuntu:focal
 
 ENV LANG C.UTF-8
 ENV OS_NAME focal
-ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt update -q \
   && apt install -q -y --no-install-recommends \
@@ -25,7 +24,7 @@ RUN apt update -q \
 #    vim less grep \
   && apt-get clean -y \
   && rm -rf /var/lib/apt/lists/* /usr/share/doc/* /var/cache/debconf/* \
-  && pip3 install meson==0.52.1 pytest gcovr distro
+  && pip3 install meson==0.52.1 pytest gcovr
 
 # Create user
 RUN useradd --create-home runner
