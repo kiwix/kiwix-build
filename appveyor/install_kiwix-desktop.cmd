@@ -2,7 +2,7 @@ REM ========================================================
 REM Install kiwix-desktop
 git clone https://github.com/kiwix/kiwix-desktop || exit /b 1
 cd kiwix-desktop
-git checkout fullscreen-menu-windows
+git checkout single-instance-application
 echo "Getting fix_desktop"
 curl -fsSL -O http://public.kymeria.fr/KIWIX/windows/fix_desktop_makefile.py_ || exit /b 1
 echo "Running qmake"
