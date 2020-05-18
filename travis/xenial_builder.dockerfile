@@ -22,7 +22,7 @@ RUN apt update -q && \
   apt-get clean -y && \
   rm -rf /var/lib/apt/lists/* /usr/share/doc/* /var/cache/debconf/* && \
   pip3 install --upgrade pip && \
-  pip3 install meson==0.52.1 pytest gcovr distro
+  pip3 install meson==0.52.1 pytest gcovr
 
 # Create user
 RUN useradd --create-home ci_builder
