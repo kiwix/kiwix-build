@@ -4,7 +4,7 @@ import os, sys
 import json
 import requests
 
-bintray_auth = (os.environ['BINTRAY_USER'], os.environ['BINTRAY_PASS'])
+bintray_auth = (os.environ.get('BINTRAY_USER'), os.environ.get('BINTRAY_PASS'))
 
 def create_version(version):
     url = "https://api.bintray.com/packages/kiwix/kiwix/kiwixlib/versions"
@@ -55,7 +55,7 @@ def upload(version, filepath, artefact):
 
 
 def upload_from_json(json_path):
-    basedir = os.path.dirname(json_path)
+    basedir = os.path.dirname(str(json_path))
     with open(str(json_path)) as f:
         options = json.load(f)
 
