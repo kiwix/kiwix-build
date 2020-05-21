@@ -15,7 +15,6 @@ from common import (
     HOME,
     PLATFORM_TARGET,
     OS_NAME,
-    MAKE_RELEASE,
 )
 
 def download_base_archive(base_name):
@@ -31,14 +30,16 @@ def download_base_archive(base_name):
             file.write(batch)
     return file_path
 
+ARCHIVE_NAME_TEMPLATE = "base_deps2_{os}_{platform}_{version}.tar.xz"
 
-ARCHIVE_NAME_TEMPLATE = "base_deps2_{os}_{platform}_{version}_{release}.tar.xz"
-base_dep_archive_name = ARCHIVE_NAME_TEMPLATE.format(
-    os=OS_NAME,
-    platform=PLATFORM_TARGET,
-    version=base_deps_meta_version,
-    release="release" if MAKE_RELEASE else "debug",
-)
+if PLATFORM_TARGET == 'flatpak':
+    base_dep_archive_name = "base_deps2_{}_flatpak.tar.xz".format(OS_NAME)
+else:
+    base_dep_archive_name = ARCHIVE_NAME_TEMPLATE.format(
+        os=OS_NAME,
+        platform=PLATFORM_TARGET,
+        version=base_deps_meta_version,
+    )
 
 print_message("Getting archive {}", base_dep_archive_name)
 try:
@@ -54,7 +55,6 @@ except URLError:
                 os=OS_NAME,
                 platform="android_{}".format(arch),
                 version=base_deps_meta_version,
-                release="release" if MAKE_RELEASE else "debug",
             )
             print_message("Getting archive {}", archive_name)
             try:
@@ -64,6 +64,8 @@ except URLError:
                 os.remove(str(local_filename))
             except URLError:
                 pass
+    elif PLATFORM_TARGET == "flatpak":
+        print_message("Cannot get archive. Move on")
     else:
         run_kiwix_build("alldependencies", platform=PLATFORM_TARGET)
         archive_file = make_deps_archive(name=base_dep_archive_name, full=True)

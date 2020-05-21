@@ -12,13 +12,13 @@ RUN dnf install -y --nodocs \
     mingw32-winpthreads-static mingw32-zlib-static mingw32-xz-libs-static \
     mingw32-libmicrohttpd \
 # python3
-    python-unversioned-command \
+    python3-pip python-unversioned-command \
 # Other tools (to remove)
 #    vim less grep
   && dnf remove -y "*-doc" \
   && dnf autoremove -y \
   && dnf clean all \
-  && pip3 install meson==0.52.1 pytest
+  && pip3 install meson==0.52.1 pytest requests
 
 # Create user
 RUN useradd --create-home runner
