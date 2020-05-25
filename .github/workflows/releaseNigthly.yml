@@ -3,7 +3,7 @@ name: Release&Nigthly
 on:
  push:
    tags:
-     - r_[0-9]+i
+     - r_[0-9]+
  schedule:
    - cron: '0 1 * * *'
 

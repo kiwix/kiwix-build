@@ -34,7 +34,7 @@ KBUILD_SOURCE_DIR = HOME / "kiwix-build"
 KIWIX_DESKTOP_ONLY = False
 
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
-MAKE_RELEASE = re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", _ref) is not None
+MAKE_RELEASE = re.fullmatch(r"r_[0-9]+", _ref) is not None
 
 PLATFORM_TO_RELEASE = {
     "native_mixed": "linux-x86_64",
