@@ -103,8 +103,10 @@ jobs:
       shell: bash
       run: |
         cd $HOME
-        git clone https://github.com/${REP} --depth=1 --branch ${GITHUB_REF##*heads/}
-        pip3 install --user --no-deps ./${REP##*/}
+        git clone https://github.com/${REP}
+        cd ./${REP##*/}
+        git checkout --force ${GITHUB_SHA}
+        pip3 install --user --no-deps .
       env:
         REP: ${{github.repository}}
     - name: secret
@@ -158,7 +160,7 @@ jobs:
         brew: pkg-config ninja
     - name: Install python modules
       run: |
-        pip3 install meson==0.52.1 pytest distro
+        pip3 install meson==0.52.1 pytest requests distro
         pip3 install --no-deps $GITHUB_WORKSPACE
     - name: secret
       shell: bash
