@@ -132,6 +132,7 @@ class ReleaseDownload(Source):
 
 class GitClone(Source):
     base_git_ref = "master"
+    force_full_clone = False
 
     @property
     def release_git_ref(self):
@@ -156,7 +157,7 @@ class GitClone(Source):
             return self.base_git_ref
 
     def _git_init(self, context):
-        if option('fast_clone'):
+        if option('fast_clone') and self.force_full_clone == False:
             command = "git clone --depth=1 --branch {} {} {}".format(
                 self.git_ref, self.git_remote, self.source_dir)
             run_command(command, neutralEnv('source_dir'), context)
