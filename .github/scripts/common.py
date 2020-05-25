@@ -254,7 +254,7 @@ def make_deps_archive(target=None, name=None, full=False):
 def get_postfix(project):
     postfix = main_project_versions[project]
     extra = release_versions.get(project)
-    if extra is not None:
+    if extra:
         postfix = "{}-{}".format(postfix, extra)
     return postfix
 
