@@ -66,7 +66,7 @@ for target in TARGETS:
 # We have few more things to do for release:
 if RELEASE:
     # Publish source archives
-    if PLATFORM_TARGET == "native_dyn" and OS_NAME != "osx":
+    if PLATFORM_TARGET in ("native_dyn", "native_mixed") and OS_NAME != "osx":
         for target in TARGETS:
             if release_versions.get(target) != 0:
                 continue
