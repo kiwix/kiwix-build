@@ -35,12 +35,6 @@ class PlatformNeutralEnv:
     def detect_platform(self):
         _platform = platform.system()
         self.distname = _platform
-        if _platform == 'Windows':
-            print('ERROR: kiwix-build is not intented to run on Windows platform.\n'
-                  'It should probably not work, but well, you still can have a try.')
-            cont = input('Do you want to continue ? [y/N]')
-            if cont.lower() != 'y':
-                sys.exit(0)
         if _platform == 'Linux':
             self.distname = distro.id()
             if self.distname == 'ubuntu':
