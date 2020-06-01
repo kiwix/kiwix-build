@@ -1,15 +1,19 @@
-
 import subprocess
 
-from .base import PlatformInfo, MetaPlatformInfo
-from kiwixbuild.utils import pj, xrun_find
 from kiwixbuild._global import option
+from kiwixbuild.utils import pj, xrun_find
+from .base import PlatformInfo, MetaPlatformInfo
+
 
 class iOSPlatformInfo(PlatformInfo):
     build = 'iOS'
     static = True
     compatible_hosts = ['Darwin']
     min_iphoneos_version = '11.0'
+    arch = None
+    arch_full = None
+    target = None
+    sdk_name = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -35,8 +39,23 @@ class iOSPlatformInfo(PlatformInfo):
             'root_path': self.root_path,
             'binaries': self.binaries,
             'exe_wrapper_def': '',
-            'extra_libs': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min={}'.format(self.min_iphoneos_version), '-stdlib=libc++'],
-            'extra_cflags': ['-fembed-bitcode', '-isysroot', self.root_path, '-arch', self.arch, '-miphoneos-version-min={}'.format(self.min_iphoneos_version), '-stdlib=libc++', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
+            'extra_libs': [
+                '-fembed-bitcode',
+                '-isysroot', self.root_path,
+                '-arch', self.arch,
+                '-target',  self.target,
+                '-miphoneos-version-min={}'.format(self.min_iphoneos_version),
+                '-stdlib=libc++'
+            ],
+            'extra_cflags': [
+                '-fembed-bitcode',
+                '-isysroot', self.root_path,
+                '-arch', self.arch,
+                '-target', self.target,
+                '-miphoneos-version-min={}'.format(self.min_iphoneos_version),
+                '-stdlib=libc++',
+                '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))
+            ],
             'host_machine': {
                 'system': 'Darwin',
                 'lsystem': 'darwin',
@@ -54,10 +73,24 @@ class iOSPlatformInfo(PlatformInfo):
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
-        env['CFLAGS'] = " -fembed-bitcode -isysroot {SDKROOT} -arch {arch} -miphoneos-version-min={min_iphoneos_version} ".format(SDKROOT=self.root_path, min_iphoneos_version=self.min_iphoneos_version, arch=self.arch) + env['CFLAGS']
-        env['CXXFLAGS'] = env['CFLAGS'] + " -stdlib=libc++ -std=c++11 "+env['CXXFLAGS']
-        env['LDFLAGS'] = " -arch {arch} -isysroot {SDKROOT} ".format(SDKROOT=self.root_path, arch=self.arch)
-
+        env['CFLAGS'] = ' '.join([
+            '-fembed-bitcode',
+            '-isysroot {}'.format(self.root_path),
+            '-arch {}'.format(self.arch),
+            '-miphoneos-version-min={}'.format(self.min_iphoneos_version),
+            '-target {}'.format(self.target),
+            env['CFLAGS'],
+        ])
+        env['CXXFLAGS'] = ' '.join([
+            env['CFLAGS'],
+            '-stdlib=libc++',
+            '-std=c++11',
+            env['CXXFLAGS'],
+        ])
+        env['LDFLAGS'] = ' '.join([
+            ' -arch {}'.format(self.arch),
+            '-isysroot {}'.format(self.root_path),
+        ])
 
     def get_bin_dir(self):
         return [pj(self.root_path, 'bin')]
@@ -78,17 +111,31 @@ class iOSPlatformInfo(PlatformInfo):
     def configure_option(self):
         return '--host={}'.format(self.arch_full)
 
+
 class iOSArm64(iOSPlatformInfo):
     name = 'iOS_arm64'
     arch = cpu = 'arm64'
-    arch_full =  'arm-apple-darwin'
+    arch_full = 'arm-apple-darwin'
+    target = 'aarch64-apple-ios'
     sdk_name = 'iphoneos'
+
 
 class iOSx64(iOSPlatformInfo):
     name = 'iOS_x86_64'
     arch = cpu = 'x86_64'
-    arch_full =  'x86_64-apple-darwin'
+    arch_full = 'x86_64-apple-darwin'
+    target = 'x86_64-apple-ios'
     sdk_name = 'iphonesimulator'
+
+
+class iOSMacABI(iOSPlatformInfo):
+    name = 'iOS_Mac_ABI'
+    arch = cpu = 'x86_64'
+    arch_full = 'x86_64-apple-darwin'
+    target = 'x86_64-apple-ios13.0-macabi'
+    sdk_name = 'macosx'
+    min_iphoneos_version = '13.0'
+
 
 class IOS(MetaPlatformInfo):
     name = "iOS_multi"
