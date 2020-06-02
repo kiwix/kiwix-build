@@ -335,7 +335,7 @@ def update_flathub_git():
     git_repo_dir = TMP_DIR / "org.kiwix.desktop"
     env = dict(os.environ)
     env["GIT_AUTHOR_NAME"] = env["GIT_COMMITTER_NAME"] = "KiwixBot"
-    env["GIT_AUTHOR_EMAIL"] = env["GIT_COMMITTER_EMAIL"] = "kiwixbot@kymeria.fr"
+    env["GIT_AUTHOR_EMAIL"] = env["GIT_COMMITTER_EMAIL"] = "release@kiwix.org"
 
     def call(command, cwd=None):
         cwd = cwd or git_repo_dir
