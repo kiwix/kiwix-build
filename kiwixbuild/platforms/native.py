@@ -21,7 +21,7 @@ class NativeStatic(NativePlatformInfo):
 class NativeMixed(NativePlatformInfo):
     name = 'native_mixed'
     static = False
-    compatible_hosts =  ['fedora', 'debian']
+    compatible_hosts = ['fedora', 'debian', 'Darwin']
 
     def add_targets(self, targetName, targets):
         print(targetName)
