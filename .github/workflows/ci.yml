@@ -6,7 +6,7 @@ on:
    - cron: '0 1 * * *'
 
 env:
-  DOCKER_VERSION: 29
+  DOCKER_VERSION: 30
 
 jobs:
   Docker:
@@ -40,64 +40,33 @@ jobs:
           - native_desktop
           - armhf_static
           - armhf_dyn
-          - win32_static
-          - win32_dyn
           - i586_static
           - i586_dyn
           - android_arm
           - android_arm64
           - android_x86
           - android_x86_64
+        image_variant: ['xenial', 'bionic']
+        lib_postfix: ['/x86_64-linux-gnu']
         include:
-          - target: native_static
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: native_dyn
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: native_mixed
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: native_desktop
-            image_variant: bionic
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: armhf_static
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: armhf_dyn
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
           - target: win32_static
             image_variant: f31
             lib_postfix: '64'
           - target: win32_dyn
             image_variant: f31
             lib_postfix: '64'
-          - target: i586_static
+        exclude:
+          - target: native_desktop
             image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: i586_dyn
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: android_arm
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: android_arm64
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: android_x86
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: android_x86_64
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
+          - target: native_static
+            image_variant: bionic
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
     runs-on: ubuntu-latest
     needs: Docker
     container:
-      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-29"
+      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-30"
     steps:
     - name: Checkout code
       shell: bash

@@ -8,7 +8,7 @@ on:
    - cron: '0 1 * * *'
 
 env:
-  DOCKER_VERSION: 29
+  DOCKER_VERSION: 30
 
 jobs:
   Docker:
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: Docker
     container:
-      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-29"
+      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-30"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
