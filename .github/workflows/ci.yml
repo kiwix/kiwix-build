@@ -58,6 +58,8 @@ jobs:
         exclude:
           - target: native_desktop
             image_variant: xenial
+          - target: native_static
+            image_variant: bionic
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
