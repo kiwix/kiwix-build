@@ -13,6 +13,7 @@ from common import (
     create_desktop_image,
     update_flathub_git,
     upload_archive,
+    fix_macos_rpath,
     BASE_DIR,
     TMP_DIR,
     HOME,
@@ -35,7 +36,7 @@ elif PLATFORM_TARGET.startswith("iOS"):
     TARGETS = ("libzim", "kiwix-lib")
 elif PLATFORM_TARGET.startswith("native_"):
     if OS_NAME == "osx":
-        TARGETS = ("libzim", "zimwriterfs", "zim-tools", "kiwix-lib")
+        TARGETS = ("libzim", ) if PLATFORM_TARGET == "native_mixed" else ("libzim", "zimwriterfs", "zim-tools", "kiwix-lib")
     else:
         if DESKTOP:
             TARGETS = ("kiwix-desktop",)
@@ -59,6 +60,8 @@ for target in TARGETS:
     if target == "kiwix-desktop":
         archive = create_desktop_image(make_release=RELEASE)
     else:
+        if PLATFORM_TARGET == "native_mixed" and OS_NAME == "osx":
+            fix_macos_rpath(target)
         archive = make_archive(target, make_release=RELEASE)
     if archive:
         upload_archive(archive, target, make_release=RELEASE)

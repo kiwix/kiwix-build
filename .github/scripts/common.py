@@ -36,12 +36,14 @@ KIWIX_DESKTOP_ONLY = False
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
 MAKE_RELEASE = re.fullmatch(r"r_[0-9]+", _ref) is not None
 
+RELEASE_OS_NAME = "macos" if OS_NAME == "osx" else "linux"
+
 PLATFORM_TO_RELEASE = {
-    "native_mixed": "linux-x86_64",
-    "native_static": "linux-x86_64",
+    "native_mixed": "{os}-x86_64".format(os=RELEASE_OS_NAME),
+    "native_static": "{os}-x86_64".format(os=RELEASE_OS_NAME),
     "win32_static": "win-i686",
-    "armhf_static": "linux-armhf",
-    "i586_static": "linux-i586",
+    "armhf_static": "{os}-armhf".format(os=RELEASE_OS_NAME),
+    "i586_static": "{os}-i586".format(os=RELEASE_OS_NAME),
 }
 
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
@@ -81,6 +83,10 @@ EXPORT_FILES = {
             "lib/x86_64-linux-gnu/libzim.so.{}".format(
                 main_project_versions["libzim"][0]
             ),
+            "lib/libzim.{}.dylib".format(
+                main_project_versions["libzim"][0]
+            ),
+            "lib/libzim.dylib",
             "include/zim/**/*.h",
         ),
     ),
@@ -369,3 +375,15 @@ def update_flathub_git():
         "SSH_KEY"
     )
     call(command)
+
+
+def fix_macos_rpath(project):
+
+    base_dir, export_files = EXPORT_FILES[project]
+    for file in filter(lambda f: f.endswith(".dylib"), export_files):
+        lib = base_dir / file
+        if lib.is_symlink():
+            continue
+        command = ["install_name_tool", "-id", lib.name, str(lib)]
+        print_message("call {}", " ".join(command))
+        subprocess.check_call(command, env=os.environ)
