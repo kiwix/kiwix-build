@@ -16,6 +16,9 @@ class ZimTools(Dependency):
 
         @property
         def configure_option(self):
+            base_option  = ""
+            if self.buildEnv.platformInfo.build not in ('android', 'win32'):
+                base_option += " -Dmagic-install-prefix={buildEnv.install_dir}"
             if self.buildEnv.platformInfo.static:
-                return "-Dstatic-linkage=true"
-            return ""
+                base_option += " -Dstatic-linkage=true"
+            return base_option

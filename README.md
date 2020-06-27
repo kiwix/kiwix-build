@@ -63,6 +63,15 @@ kiwix-build zim-tools # will build zim-tools and its dependencies
 
 By default, `kiwix-build` will build `kiwix-tools` .
 
+To see the whole list of available targets run with non existing target, ex:
+
+```bash
+kiwix-build not-existing-target
+...
+invalid choice: 'not-existing-target' (choose from 'alldependencies', 'android-ndk',
+...
+```
+
 #### Target platform
 
 If no target platform is specified, a default one will be infered from
