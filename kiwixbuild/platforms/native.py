@@ -1,11 +1,17 @@
 from .base import PlatformInfo
 
 from kiwixbuild.utils import pj
-from kiwixbuild._global import option
+from kiwixbuild._global import option, neutralEnv
 
 
 class NativePlatformInfo(PlatformInfo):
     build = 'native'
+
+    def get_env(self):
+        env = super().get_env()
+        if neutralEnv('distname') == 'fedora':
+            env['QT_SELECT'] = "5-64"
+        return env
 
 
 class NativeDyn(NativePlatformInfo):
