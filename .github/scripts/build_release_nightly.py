@@ -53,7 +53,11 @@ else:
 
 # Filter what to build if we are doing a release.
 if RELEASE:
-    TARGETS = tuple(filter(lambda t: release_versions.get(t) is not None, TARGETS))
+    def release_filter(project):
+        if project == "kiwix-lib-app":
+            project = "kiwix-lib"
+        return release_versions.get(project) is not None
+    TARGETS = tuple(filter(release_filter, TARGETS))
 
 for target in TARGETS:
     run_kiwix_build(target, platform=PLATFORM_TARGET, make_release=RELEASE)
