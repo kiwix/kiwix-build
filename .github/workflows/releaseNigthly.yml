@@ -111,6 +111,8 @@ jobs:
         kiwix-build/.github/scripts/build_release_nightly.py
       env:
         PLATFORM_TARGET: ${{matrix.target}}
+        BINTRAY_USER: kiwix
+        BINTRAY_PASS: ${{secrets.bintray_pass}}
     - name: Upload failure logs
       if: failure()
       run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
