@@ -6,7 +6,7 @@ main_project_versions = {
     'kiwix-tools': '3.1.2', # Also need to change this in appveyor/install_kiwix-tools.cmd
     'zim-tools': '1.2.1',
     'zimwriterfs': '1.3.10',
-    'kiwix-desktop': '2.0.2' # Also change KIWIX_DESKTOP_VERSION and KIWIX_DESKTOP_RELEASE in appveyor.yml
+    'kiwix-desktop': '2.0.3' # Also change KIWIX_DESKTOP_VERSION and KIWIX_DESKTOP_RELEASE in appveyor.yml
                                # You need to do the release process of kiwix-tools and kiwix-desktop in two separated process.
 }
 
@@ -32,11 +32,11 @@ main_project_versions = {
 
 release_versions = {
     'libzim': None, # Depends of base deps (was 0)
-    'kiwix-lib': 0, # Depends of libzim (was 1)
-    'kiwix-tools': 0, # Depends of kiwix-lib and libzim (was 6)
+    'kiwix-lib': 0, # Depends of libzim (was 0)
+    'kiwix-tools': None, # Depends of kiwix-lib and libzim (was 0)
     'zim-tools': None, # Depends of libzim (was 3)
     'zimwriterfs': None, # Depends of libzim (was 4)
-    'kiwix-desktop': None # Depends of kiwix-lib and libzim (was 0)
+    'kiwix-desktop': 0 # Depends of kiwix-lib and libzim (was 0)
 }
 
 
