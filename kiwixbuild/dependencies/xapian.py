@@ -12,8 +12,9 @@ class Xapian(Dependency):
     name = "xapian-core"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('xapian-core-1.4.14.tar.xz',
-                             '975a7ac018c9d34a15cc94a3ecc883204403469f748907e5c4c64d0aec2e4949')
+        archive = Remotefile('xapian-core-1.4.16.tar.xz',
+                             '4937f2f49ff27e39a42150e928c8b45877b0bf456510f0785f50159a5cb6bf70',
+                             'https://oligarchy.co.uk/xapian/1.4.16/xapian-core-1.4.16.tar.xz')
         patches = [
             'xapian_sys_types.patch',
             'xapian_fix_include_errno.patch',
