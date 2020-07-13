@@ -2,6 +2,7 @@ REM ========================================================
 REM Install libzim
 git clone https://github.com/openzim/libzim.git || exit /b 1
 cd libzim
+git checkout fix_win_compilation
 meson . build --prefix %EXTRA_DIR% --default-library static --buildtype release || exit /b 1
 cd build
 ninja || exit /b 1
