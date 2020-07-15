@@ -72,10 +72,10 @@ EXPORT_FILES = {
                 "zimdiff",
                 "zimpatch",
                 "zimsplit",
+                "zimwriterfs",
             )
         ],
     ),
-    "zimwriterfs": (INSTALL_DIR / "bin", ["zimwriterfs" + BIN_EXT]),
     "libzim": (
         INSTALL_DIR,
         (

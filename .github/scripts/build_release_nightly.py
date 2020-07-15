@@ -36,14 +36,14 @@ elif PLATFORM_TARGET.startswith("iOS"):
     TARGETS = ("libzim", "kiwix-lib")
 elif PLATFORM_TARGET.startswith("native_"):
     if OS_NAME == "osx":
-        TARGETS = ("libzim", ) if PLATFORM_TARGET == "native_mixed" else ("libzim", "zimwriterfs", "zim-tools", "kiwix-lib")
+        TARGETS = ("libzim", ) if PLATFORM_TARGET == "native_mixed" else ("libzim", "zim-tools", "kiwix-lib")
     else:
         if DESKTOP:
             TARGETS = ("kiwix-desktop",)
         elif PLATFORM_TARGET == "native_mixed":
             TARGETS = ("libzim",)
         else:
-            TARGETS = ("zimwriterfs", "zim-tools", "kiwix-tools")
+            TARGETS = ("zim-tools", "kiwix-tools")
 elif PLATFORM_TARGET in ("win32_static", "armhf_static", "i586_static"):
     TARGETS = ("kiwix-tools",)
 elif PLATFORM_TARGET == "flatpak":
