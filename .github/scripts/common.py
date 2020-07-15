@@ -272,7 +272,11 @@ def make_archive(project, make_release):
         # We don't know how to name the release.
         return None
 
-    base_dir, export_files = EXPORT_FILES[project]
+    try:
+        base_dir, export_files = EXPORT_FILES[project]
+    except KeyError:
+        # No binary files to export
+        return None
 
     if make_release:
         postfix = get_postfix(project)
