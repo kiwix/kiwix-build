@@ -59,6 +59,12 @@ if RELEASE:
         return release_versions.get(project) is not None
     TARGETS = tuple(filter(release_filter, TARGETS))
 
+if RELEASE and PLATFORM_TARGET == "android":
+    # Kiwix-lib need to know the extrapostfix version to correctly generate the pom.xml file.
+    extra_postfix = release_versions.get('kiwix-lib')
+    if extra_postfix:
+        os.environ['KIWIXLIB_BUILDVERSION'] = str(extra_postfix)
+
 for target in TARGETS:
     run_kiwix_build(target, platform=PLATFORM_TARGET, make_release=RELEASE)
     if target == "kiwix-desktop":
