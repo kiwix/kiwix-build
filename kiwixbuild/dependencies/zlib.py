@@ -1,63 +1,27 @@
 import shutil
 
-from .base import Dependency, ReleaseDownload, MakeBuilder
+from .base import (
+    Dependency,
+    ReleaseDownload,
+    MesonBuilder)
 
 from kiwixbuild.utils import Remotefile, pj, SkipCommand
+from kiwixbuild._global import neutralEnv
 
 
 class zlib(Dependency):
     name = "zlib"
 
     class Source(ReleaseDownload):
-        archive = Remotefile(
+        src_archive = Remotefile(
             "zlib-1.2.12.tar.gz",
-            "91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9",
+            "91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9"
         )
-        patches = ["zlib_std_libname.patch"]
+        meson_patch = Remotefile(
+            "zlib_1.2.12-1_patch.zip",
+            "8ec8344f3fe7b06ad4be768fd416694bc56cb4545ce78b0f1c18b3e72b3ec936",
+            "https://wrapdb.mesonbuild.com/v2/zlib_1.2.12-1/get_patch")
+        archives = [src_archive, meson_patch]
+        #patches = ['zlib_std_libname.patch']
 
-    class Builder(MakeBuilder):
-        dynamic_configure_options = ["--shared"]
-        static_configure_options = ["--static"]
-        make_install_targets = ["install"]
-
-        def _pre_build_script(self, context):
-            context.try_skip(self.build_path)
-            shutil.copytree(self.source_path, self.build_path)
-
-        def _configure(self, context):
-            if self.buildEnv.configInfo.build == "win32":
-                raise SkipCommand()
-            return super()._configure(context)
-
-        @property
-        def all_configure_options(self):
-            yield from self.configure_options
-            yield from self.static_configure_options if self.buildEnv.configInfo.static else self.dynamic_configure_options
-            yield from ("--prefix", self.buildEnv.install_dir)
-            yield from (
-                "--libdir",
-                pj(self.buildEnv.install_dir, self.buildEnv.libprefix),
-            )
-
-        @property
-        def make_options(self):
-            if self.buildEnv.configInfo.build != "win32":
-                return
-            yield "--makefile"
-            yield "win32/Makefile.gcc"
-            yield "PREFIX=i686-w64-mingw32-",
-            yield "SHARED_MODE={}".format(
-                "0" if self.buildEnv.configInfo.static else "1"
-            ),
-            yield "INCLUDE_PATH={}".format(pj(self.buildEnv.install_dir, "include")),
-            yield "LIBRARY_PATH={}".format(
-                pj(self.buildEnv.install_dir, self.buildEnv.libprefix)
-            ),
-            yield "BINARY_PATH={}".format(pj(self.buildEnv.install_dir, "bin"))
-
-        @property
-        def make_targets(self):
-            if self.buildEnv.configInfo.static:
-                return ["static"]
-            else:
-                return ["shared"]
+    Builder = MesonBuilder
