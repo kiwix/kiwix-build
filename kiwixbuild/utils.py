@@ -267,8 +267,16 @@ def run_command(command, cwd, context, *, env=None, input=None):
     try:
         if not option('verbose'):
             log = open(context.log_file, 'w')
+
+        runShell = True
+        if neutralEnv('distname') == 'Windows':
+            runShell = False
+            command = command.replace('\\', '\\\\')
+            cwd = cwd.replace('\\', '\\\\')
+
         print("run command '{}'".format(command), file=log)
         print("current directory is '{}'".format(cwd), file=log)
+        print("runShell '{}'".format(runShell), file=log)
         print("env is :", file=log)
         for k, v in env.items():
             print("  {} : {!r}".format(k, v), file=log)
@@ -278,7 +286,7 @@ def run_command(command, cwd, context, *, env=None, input=None):
         kwargs = dict()
         if input:
             kwargs['stdin'] = subprocess.PIPE
-        process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+        process = subprocess.Popen(command, shell=runShell, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
         if input:
             input = input.encode()
         while True:
