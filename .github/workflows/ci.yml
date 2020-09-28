@@ -29,6 +29,10 @@ jobs:
         choco.exe install pkgconfiglite ninja
     - run: |
         ls
+        libtoolize
+        aclocal
+        autoconf
+        automake
     - name: Install python modules
       shell: bash
       run: |
