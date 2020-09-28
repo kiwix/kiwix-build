@@ -6,7 +6,7 @@ from .base import (
     MakeBuilder)
 
 from kiwixbuild.utils import Remotefile, pj, SkipCommand
-
+from kiwixbuild._global import neutralEnv
 
 
 class zlib(Dependency):
@@ -29,13 +29,13 @@ class zlib(Dependency):
 
 
         def _configure(self, context):
-            if self.buildEnv.platformInfo.build == 'win32':
+            if self.buildEnv.platformInfo.build == 'win32' or neutralEnv('distname') == 'Windows':
                 raise SkipCommand()
             return super()._configure(context)
 
         @property
         def make_option(self):
-            if self.buildEnv.platformInfo.build == 'win32':
+            if self.buildEnv.platformInfo.build == 'win32' or neutralEnv('distname') == 'Windows':
                 return "--makefile win32/Makefile.gcc PREFIX={host}- SHARED_MODE={static} INCLUDE_PATH={include_path} LIBRARY_PATH={library_path} BINARY_PATH={binary_path}".format(
                     host='i686-w64-mingw32',
                     static="0" if self.buildEnv.platformInfo.static else "1",
