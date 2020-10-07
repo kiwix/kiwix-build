@@ -1,4 +1,4 @@
-image: Visual Studio 2017
+image: Visual Studio 2019
 version: '0.1.{build}'
 environment:
   EXTRA_DIR: 'C:\extra'
@@ -16,8 +16,8 @@ environment:
 init:
   - cmd: |
      echo %TEST_VAR%
-     REM Set VC 2017
-     "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+     REM Set VC 2019
+     "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
      mkdir C:\extra\bin
 
 install:
