@@ -3,10 +3,9 @@
 main_project_versions = {
     'libzim': '6.2.2',
     'kiwix-lib': '9.4.0',
-    'kiwix-tools': '3.1.2', # Also need to change this in appveyor/install_kiwix-tools.cmd
+    'kiwix-tools': '3.1.2',
     'zim-tools': '2.0.0',
     'kiwix-desktop': '2.0.4' # Also change KIWIX_DESKTOP_VERSION and KIWIX_DESKTOP_RELEASE in appveyor.yml
-                               # You need to do the release process of kiwix-tools and kiwix-desktop in two separated process.
 }
 
 # This dictionnary specify what we need to build at each release process.

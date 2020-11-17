@@ -35,9 +35,6 @@ wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.34.0/aria
 mkdir -p $APPDIR/usr/bin/ && tar -C $APPDIR/usr/bin/ -xf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.34.0-linux-gnu-64bit-build1/aria2c --strip-components=1
 mkdir -p $APPDIR/etc/ssl/certs/ && tar -C $APPDIR/etc/ssl/certs/ -xf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.34.0-linux-gnu-64bit-build1/ca-certificates.crt --strip-components=1
 
-# copy kiwix-serve
-cp $INSTALLDIR/bin/kiwix-serve $APPDIR/usr/bin
-
 # Get linuxdeployqt
 wget https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage
 chmod a+x linuxdeployqt-6-x86_64.AppImage
@@ -46,6 +43,5 @@ chmod a+x linuxdeployqt-6-x86_64.AppImage
 ./linuxdeployqt-6-x86_64.AppImage $APPDIR/usr/bin/kiwix-desktop -unsupported-allow-new-glibc -bundle-non-qt-libs -extra-plugins=imageformats,iconengines
 # Fix the RPATH of QtWebEngineProcess [TODO] Fill a issue ?
 patchelf --set-rpath '$ORIGIN/../lib' $APPDIR/usr/libexec/QtWebEngineProcess
-patchelf --set-rpath '$ORIGIN/../lib' $APPDIR/usr/bin/kiwix-serve
 # Build the image.
 ./linuxdeployqt-6-x86_64.AppImage $APPDIR/usr/share/applications/kiwix-desktop.desktop -unsupported-allow-new-glibc -bundle-non-qt-libs -extra-plugins=imageformats,iconengines -appimage
