@@ -10,8 +10,7 @@ SYSTEMLIBDIR=lib/x86_64-linux-gnu
 # Uncoment if needed
 #SYSTEMLIBDIR=lib64
 
-#TODO We should have our icon
-ICONFILE=$SOURCEDIR/resources/icons/kiwix/app_icon.svg
+ICONFILE=$SOURCEDIR/resources/icons/kiwix/scalable/kiwix-desktop.svg
 DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop.desktop
 
 # Create structure
