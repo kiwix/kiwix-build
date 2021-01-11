@@ -8,6 +8,8 @@ import subprocess
 import re
 import shutil
 
+import requests
+
 from kiwixbuild.versions import (
     main_project_versions,
     release_versions,
@@ -391,3 +393,47 @@ def fix_macos_rpath(project):
         command = ["install_name_tool", "-id", lib.name, str(lib)]
         print_message("call {}", " ".join(command))
         subprocess.check_call(command, env=os.environ)
+
+
+def trigger_workflow(repo, workflow="docker.yml", ref="master", inputs=None):
+    """triggers a `workflow_dispatch` event to the specified workflow on its repo
+
+    repo: {user}/{repo} format
+    workflow: workflow ID or workflow file name
+    ref: branch or tag name
+    inputs: dict of inputs to pass to the workflow"""
+    print_message(
+        "triggering workflow `{workflow}` on {repo}@{ref} "
+        "with inputs={inputs}", workflow=workflow, repo=repo, ref=ref, inputs=inputs)
+
+    url = "{base_url}/repos/{repo}/actions/workflows/{workflow}/dispatches".format(
+        base_url=os.getenv("GITHUB_API_URL", "https://api.github.com"),
+        repo=repo, workflow=workflow)
+
+    resp = requests.post(url, headers={
+            "Content-Type": "application/json",
+            "Authorization": "token {token}".format(
+                token=os.getenv('GITHUB_PAT', '')),
+            "Accept": "application/vnd.github.v3+json",
+        }, json={"ref": ref, "inputs": inputs}, timeout=5)
+    if resp.status_code != 204:
+        raise ValueError("Unexpected HTTP {code}: {reason}".format(
+                         code=resp.status_code, reason=resp.reason))
+
+
+def trigger_docker_publish(target):
+    if target not in ("zim-tools", "kiwix-tools"):
+        return
+
+    version = get_postfix(target)
+    repo = {
+        "zim-tools": "openzim/zim-tools",
+        "kiwix-tools": "kiwix/kiwix-tools"}.get(target)
+
+    try:
+        trigger_workflow(repo, workflow="docker.yml", ref="master",
+                         inputs={"version": version})
+        print_message("triggered docker workflow on {repo}", repo=repo)
+    except Exception as exc:
+        print_message("Error triggering workflow: {exc}", exc=exc)
+        raise exc
