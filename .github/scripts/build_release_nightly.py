@@ -14,6 +14,7 @@ from common import (
     update_flathub_git,
     upload_archive,
     fix_macos_rpath,
+    trigger_docker_publish,
     BASE_DIR,
     TMP_DIR,
     HOME,
@@ -75,6 +76,8 @@ for target in TARGETS:
         archive = make_archive(target, make_release=RELEASE)
     if archive:
         upload_archive(archive, target, make_release=RELEASE)
+        if RELEASE and target in ("zim-tools", "kiwix-tools"):
+            trigger_docker_publish(target)
 
 # We have few more things to do for release:
 if RELEASE:
