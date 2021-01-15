@@ -161,7 +161,7 @@ class Builder:
             package_checker = 'LANG=C dpkg -s {} 2>&1 | grep Status | grep "ok installed" 1>/dev/null 2>&1'
         elif distname == 'Darwin':
             package_installer = 'brew install {}'
-            package_checker = 'brew list -1 | grep -q {}'
+            package_checker = 'brew ls --version {} > /dev/null'
 
         packages_to_install = []
         for package in packages_to_have:
