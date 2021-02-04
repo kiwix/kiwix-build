@@ -14,7 +14,7 @@ class ZimTools(Dependency):
     class Builder(MesonBuilder):
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
-            base_deps = ['libzim', 'docoptcpp']
+            base_deps = ['libzim', 'docoptcpp', 'mustache']
             if platformInfo.build != 'win32':
                 base_deps += ['libmagic', 'gumbo']
             return base_deps
