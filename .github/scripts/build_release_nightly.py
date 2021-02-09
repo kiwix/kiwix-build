@@ -21,6 +21,7 @@ from common import (
     OS_NAME,
     PLATFORM_TARGET,
     DESKTOP,
+    notarize_macos_build,
 )
 
 from upload_to_bintray import upload_from_json
@@ -73,6 +74,7 @@ for target in TARGETS:
     else:
         if PLATFORM_TARGET == "native_mixed" and OS_NAME == "osx":
             fix_macos_rpath(target)
+            notarize_macos_build(target)
         archive = make_archive(target, make_release=RELEASE)
     if archive:
         upload_archive(archive, target, make_release=RELEASE)
