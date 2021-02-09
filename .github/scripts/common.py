@@ -437,3 +437,49 @@ def trigger_docker_publish(target):
     except Exception as exc:
         print_message("Error triggering workflow: {exc}", exc=exc)
         raise exc
+
+
+def notarize_macos_build(project):
+    """ sign and notarize files for macOS
+
+        Expects the following environment:
+        - Imported Mac/Apple Distribution certificate (with private key) in Keychain
+        - `SIGNING_IDENTITY` environ with Certificate name/identity
+        - `ALTOOL_USERNAME` with Apple ID of an account with perms on the certificate
+        - Keychain entry `ALTOOL_PASSWORD` with an app-specific password for the account
+        - `ASC_PROVIDER` environ with Team ID
+        """
+    if project != "libzim":
+        return
+
+    # currently only supports libzim use case: sign every dylib
+    base_dir, export_files = EXPORT_FILES[project]
+    filepaths = [base_dir.joinpath(file)
+                 for file in filter(lambda f: f.endswith(".dylib"), export_files)
+                 if not base_dir.joinpath(file).is_symlink()]
+
+    if not filepaths:
+        return
+
+    for filepath in filepaths:
+        subprocess.check_call(["/usr/bin/codesign", "--force", "--sign",
+                               os.getenv("SIGNING_IDENTITY", "no-signing-ident"),
+                               str(filepath), "--deep", "--timestamp"], env=os.environ)
+
+    # create a zip of the dylibs and upload for notarization
+    zip_name = "{}.zip".format(project)
+    subprocess.check_call(
+        ["/usr/bin/ditto", "-c", "-k", "--keepParent"]
+        + [str(f) for f in filepaths] + [zip_name],
+        env=os.environ)
+
+    subprocess.check_call(["/usr/bin/xcrun", "altool", "--notarize-app",
+                           "--file", str(zip_name),
+                           "--primary-bundle-id", "org.kiwix.build.{}".format(project),
+                           "--username", os.getenv("ALTOOL_USERNAME", "missing"),
+                           "--password", "@keychain:ALTOOL_PASSWORD",
+                           "--asc-provider", os.getenv("ASC_PROVIDER")], env=os.environ)
+
+    # check notarization of a file (should be in-progress atm and this != 0)
+    subprocess.call(["/usr/sbin/spctl", "-a", "-v", "-t", "install",
+                    filepaths[-1]], env=os.environ)

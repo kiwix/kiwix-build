@@ -132,6 +132,10 @@ jobs:
     env:
       SSH_KEY: /tmp/id_rsa
       OS_NAME: osx
+      CERTIFICATE: /tmp/wmch-devid.p12
+      SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+      ALTOOL_USERNAME: ${{ secrets.APPLE_SIGNING_ALTOOL_USERNAME }}
+      ASC_PROVIDER: ${{ secrets.APPLE_SIGNING_TEAM }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v1
@@ -151,6 +155,19 @@ jobs:
       run: |
         echo "${{secrets.ssh_key}}" > $SSH_KEY
         chmod 600 $SSH_KEY
+    - name: install Apple certificate
+      shell: bash
+      run: |
+        echo "${{ secrets.APPLE_SIGNING_CERTIFICATE }}" | base64 --decode -o $CERTIFICATE
+        security create-keychain -p mysecretpassword build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p mysecretpassword build.keychain
+        security import $CERTIFICATE -k build.keychain -P "${{ secrets.APPLE_SIGNING_P12_PASSWORD }}" -A
+        rm $CERTIFICATE
+        "security set-key-partition-list -S apple-tool:,apple: -s -k mysecretpassword build.keychain"
+        security find-identity -v
+        sntp -sS time.apple.com
+        xcrun altool --store-password-in-keychain-item "ALTOOL_PASSWORD" -u "$ALTOOL_USERNAME" -p "${{ secrets.APPLE_SIGNING_ALTOOL_PASSWORD }}"
     - name: Ensure base deps
       shell: bash
       run: |
