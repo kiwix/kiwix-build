@@ -166,7 +166,7 @@ jobs:
         rm $CERTIFICATE
         security set-key-partition-list -S "apple-tool:,apple:" -s -k mysecretpassword build.keychain
         security find-identity -v
-        sudo sntp -sS time.apple.com
+        sudo sntp -sS time.apple.com -t 60
         xcrun altool --store-password-in-keychain-item "ALTOOL_PASSWORD" -u "$ALTOOL_USERNAME" -p "${{ secrets.APPLE_SIGNING_ALTOOL_PASSWORD }}"
     - name: Ensure base deps
       shell: bash
