@@ -12,13 +12,8 @@ class Xapian(Dependency):
     name = "xapian-core"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('xapian-core-1.4.14.tar.xz',
-                             '975a7ac018c9d34a15cc94a3ecc883204403469f748907e5c4c64d0aec2e4949')
-        patches = [
-            'xapian_sys_types.patch',
-            'xapian_fix_include_errno.patch',
-            'xapian_remote.patch'
-        ]
+        archive = Remotefile('xapian-core-1.4.18.tar.xz',
+                             '196ddbb4ad10450100f0991a599e4ed944cbad92e4a6fe813be6dce160244b77')
 
     class Builder(MakeBuilder):
         configure_option = "--disable-sse --disable-backend-chert --disable-backend-remote --disable-documentation"
