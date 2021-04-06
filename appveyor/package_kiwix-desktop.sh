@@ -27,7 +27,7 @@ then
   cp $MINGW64_EXTRA_DIR/aria2c.exe $KIWIX_DIR
   cp $MINGW64_EXTRA_DIR/bin/*.dll $KIWIX_DIR
 
-  signtool.exe sign -f appveyor/kiwix.pfx -p $win_certificate_password -t http://timestamp.verisign.com/scripts/timestamp.dll -d "Kiwix-desktop application" $KIWIX_DIR/kiwix-desktop.exe
+  signtool.exe sign -f appveyor/kiwix.pfx -p $win_certificate_password -t http://timestamp.digicert.com -d "Kiwix-desktop application" $KIWIX_DIR/kiwix-desktop.exe
 
   7z a -tzip $KIWIX_ARCHIVES_DIR/$KIWIX_ARCH_NAME $KIWIX_DIR
 fi
