@@ -23,6 +23,7 @@ class Dependency(metaclass=_MetaDependency):
     all_deps = {}
     force_build = False
     force_native_build = False
+    dont_skip = False
 
     @classmethod
     def version(cls):

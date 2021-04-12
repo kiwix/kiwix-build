@@ -2,6 +2,7 @@ from .base import Dependency, ReleaseDownload, NoopBuilder
 from kiwixbuild.utils import Remotefile
 
 class armhf_toolchain(Dependency):
+    dont_skip = True
     neutral = True
     name = 'armhf'
 

@@ -7,6 +7,7 @@ from kiwixbuild.utils import Remotefile, run_command
 pj = os.path.join
 
 class android_sdk(Dependency):
+    dont_skip = True
     neutral = True
     name = 'android-sdk'
 
