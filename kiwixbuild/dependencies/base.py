@@ -5,7 +5,7 @@ import time
 
 from kiwixbuild.utils import pj, Context, SkipCommand, WarningMessage, extract_archive, Defaultdict, StopBuild, run_command, colorize
 from kiwixbuild.versions import main_project_versions, base_deps_versions
-from kiwixbuild._global import neutralEnv, option
+from kiwixbuild._global import neutralEnv, option, get_target_step
 
 SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
@@ -294,7 +294,18 @@ class Builder:
             module['config-opts'] = self.configure_option.split(' ')
 
     def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
-        return self.buildEnv.get_env(cross_comp_flags=cross_comp_flags, cross_compilers=cross_compilers, cross_path=cross_path)
+        env = self.buildEnv.get_env(cross_comp_flags=cross_comp_flags, cross_compilers=cross_compilers, cross_path=cross_path)
+        for dep in self.get_dependencies(self.buildEnv.platformInfo, False):
+            try:
+                builder = get_target_step(dep, self.buildEnv.platformInfo.name)
+                builder.set_env(env)
+            except KeyError:
+                # Some target may be missing (installed by a package, ...)
+                pass
+        return env
+
+    def set_env(self, env):
+        pass
 
 
 class NoopBuilder(Builder):
