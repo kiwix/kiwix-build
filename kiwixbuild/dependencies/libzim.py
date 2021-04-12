@@ -14,7 +14,7 @@ class Libzim(Dependency):
 
     class Builder(MesonBuilder):
         test_option = "-t 8"
-        dependencies = ['lzma', 'zstd', 'xapian-core', 'icu4c']
+        dependencies = ['lzma', 'zstd', 'xapian-core', 'icu4c', 'zim-testing-suite']
         strip_option = ''
 
         @property

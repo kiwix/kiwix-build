@@ -25,6 +25,7 @@ from . import (
     uuid,
     xapian,
     zim_tools,
+    zim_testing_suite,
     zlib,
     zstd
 )
