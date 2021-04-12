@@ -293,6 +293,9 @@ class Builder:
         if getattr(self, 'configure_option', ''):
             module['config-opts'] = self.configure_option.split(' ')
 
+    def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
+        return self.buildEnv.get_env(cross_comp_flags=cross_comp_flags, cross_compilers=cross_compilers, cross_path=cross_path)
+
 
 class NoopBuilder(Builder):
     def build(self):
@@ -353,7 +356,7 @@ class MakeBuilder(Builder):
             configure_script=pj(self.source_path, self.configure_script),
             configure_option=self.all_configure_option
         )
-        env = self.buildEnv.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
+        env = self.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
         self.set_configure_env(env)
         run_command(command, self.build_path, context, env=env)
 
@@ -363,7 +366,7 @@ class MakeBuilder(Builder):
             make_target=self.make_target,
             make_option=self.make_option
         )
-        env = self.buildEnv.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
+        env = self.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 
     def _install(self, context):
@@ -372,13 +375,13 @@ class MakeBuilder(Builder):
             make_install_target=self.make_install_target,
             make_option=self.make_option
         )
-        env = self.buildEnv.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
+        env = self.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 
     def _make_dist(self, context):
         context.try_skip(self.build_path)
         command = "make dist"
-        env = self.buildEnv.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
+        env = self.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 
 
@@ -403,7 +406,7 @@ class CMakeBuilder(MakeBuilder):
             source_path=self.source_path,
             cross_option=cross_option
         )
-        env = self.buildEnv.get_env(cross_comp_flags=True, cross_compilers=False, cross_path=True)
+        env = self.get_env(cross_comp_flags=True, cross_compilers=False, cross_path=True)
         self.set_configure_env(env)
         run_command(command, self.build_path, context, env=env)
 
@@ -438,7 +441,7 @@ class QMakeBuilder(MakeBuilder):
             source_path=self.source_path,
             cross_option=cross_option
         )
-        env = self.buildEnv.get_env(cross_comp_flags=True, cross_compilers=False, cross_path=True)
+        env = self.get_env(cross_comp_flags=True, cross_compilers=False, cross_path=True)
         self.set_configure_env(env)
         run_command(command, self.build_path, context, env=env)
 
@@ -497,13 +500,13 @@ class MesonBuilder(Builder):
             buildEnv=self.buildEnv,
             cross_option=cross_option
         )
-        env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
+        env = self.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
         run_command(command, self.source_path, context, env=env)
 
     def _compile(self, context):
         context.try_skip(self.build_path)
         command = "{} -v".format(neutralEnv('ninja_command'))
-        env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
+        env = self.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 
     def _test(self, context):
@@ -514,18 +517,18 @@ class MesonBuilder(Builder):
            ):
             raise SkipCommand()
         command = "{} --verbose {}".format(neutralEnv('mesontest_command'), self.test_option)
-        env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
+        env = self.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 
     def _install(self, context):
         context.try_skip(self.build_path)
         command = "{} -v install".format(neutralEnv('ninja_command'))
-        env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
+        env = self.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 
     def _make_dist(self, context):
         command = "{} -v dist".format(neutralEnv('ninja_command'))
-        env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
+        env = self.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 
 
@@ -552,5 +555,5 @@ class GradleBuilder(Builder):
         command = command.format(
             gradle_target=self.gradle_target,
             gradle_option=self.gradle_option)
-        env = self.buildEnv.get_env(cross_comp_flags=False, cross_compilers=True, cross_path=True)
+        env = self.get_env(cross_comp_flags=False, cross_compilers=True, cross_path=True)
         run_command(command, self.build_path, context, env=env)
