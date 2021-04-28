@@ -52,6 +52,10 @@ class Source:
         return self.target.name
 
     @property
+    def full_name(self):
+        return self.target.full_name()
+
+    @property
     def source_dir(self):
         return self.target.full_name()
 
@@ -110,7 +114,7 @@ class ReleaseDownload(Source):
         return pj(neutralEnv('source_dir'), self.source_dir)
 
     def _download(self, context):
-        context.try_skip(neutralEnv('archive_dir'), self.name)
+        context.try_skip(neutralEnv('archive_dir'), self.full_name)
         neutralEnv('download')(self.archive)
 
     def _extract(self, context):
