@@ -34,14 +34,10 @@ class Builder:
 
         if option('build_nodeps'):
             # add all platform steps
-            for pltName in PlatformInfo.all_running_platforms:
-                plt = PlatformInfo.all_platforms[pltName]
-                for tlcName in plt.toolchain_names:
-                    tlc = Dependency.all_deps[tlcName]
-                    src_plt_step = ('source', tlcName)
-                    add_target_step(src_plt_step, self._targets[src_plt_step])
-                    blt_plt_step = ('neutral' if tlc.neutral else pltName, tlcName)
-                    add_target_step(blt_plt_step, self._targets[blt_plt_step])
+            for dep in steps:
+                stepClass = Dependency.all_deps[dep[1]]
+                if stepClass.dont_skip:
+                    add_target_step(dep, self._targets[dep])
 
             src_targetDef = ('source', targetDef[1])
             add_target_step(src_targetDef, self._targets[src_targetDef])

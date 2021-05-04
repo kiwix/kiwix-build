@@ -6,6 +6,7 @@ from kiwixbuild.utils import Remotefile, add_execution_right, run_command
 pj = os.path.join
 
 class android_ndk(Dependency):
+    dont_skip = True
     neutral = False
     name = 'android-ndk'
     gccver = '4.9.x'

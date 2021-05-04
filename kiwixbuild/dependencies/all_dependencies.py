@@ -12,7 +12,7 @@ class AllBaseDependencies(Dependency):
     class Builder(NoopBuilder):
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
-            base_deps = ['zlib', 'lzma', 'zstd', 'xapian-core', 'pugixml', 'libcurl', 'icu4c', 'mustache', 'libmicrohttpd']
+            base_deps = ['zlib', 'lzma', 'zstd', 'xapian-core', 'pugixml', 'libcurl', 'icu4c', 'mustache', 'libmicrohttpd', 'zim-testing-suite']
             # zimtools
             # We do not build zimtools at all on "android" and "iOS"
             if platformInfo.build not in ('android', 'iOS'):
