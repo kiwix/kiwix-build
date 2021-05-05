@@ -14,14 +14,19 @@ class Libzim(Dependency):
 
     class Builder(MesonBuilder):
         test_option = "-t 8"
-        dependencies = ['lzma', 'zstd', 'xapian-core', 'icu4c', 'zim-testing-suite']
         strip_option = ''
+
+        @classmethod
+        def get_dependencies(cls, platformInfo, allDeps):
+            deps = ['lzma', 'zstd', 'xapian-core', 'icu4c']
+            if platformInfo.build != 'flatpak':
+                deps.append('zim-testing-suite')
+            return deps
 
         @property
         def configure_option(self):
             platformInfo = self.buildEnv.platformInfo
-            zim_testing_suite = get_target_step('zim-testing-suite', 'source')
-            config_options = ['-Dtest_data_dir={}'.format(zim_testing_suite.source_path)]
+            config_options = []
             if platformInfo.build == 'android':
                 config_options.append("-DUSE_BUFFER_HEADER=false")
             if platformInfo.build == 'iOS':
@@ -30,4 +35,8 @@ class Libzim(Dependency):
                 config_options.append("-Dstatic-linkage=true")
             if platformInfo.name == "flatpak":
                 config_options.append("--wrap-mode=nodownload")
+                config_options.append("-Dtest_data_dir=none")
+            else:
+                zim_testing_suite = get_target_step('zim-testing-suite', 'source')
+                config_options.append('-Dtest_data_dir={}'.format(zim_testing_suite.source_path))
             return " ".join(config_options)
