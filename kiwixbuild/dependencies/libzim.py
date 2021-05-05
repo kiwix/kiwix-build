@@ -20,7 +20,7 @@ class Libzim(Dependency):
         @property
         def configure_option(self):
             platformInfo = self.buildEnv.platformInfo
-            zim_testing_suite = get_target_step('zim-testing-suite', platformInfo.name)
+            zim_testing_suite = get_target_step('zim-testing-suite', 'source')
             config_options = ['-Dtest_data_dir={}'.format(zim_testing_suite.source_path)]
             if platformInfo.build == 'android':
                 config_options.append("-DUSE_BUFFER_HEADER=false")
