@@ -1,7 +1,7 @@
 # This file reference all the versions of the depedencies we use in kiwix-build.
 
 main_project_versions = {
-    'libzim': '6.3.1',
+    'libzim': '6.3.2',
     'kiwix-lib': '9.4.1',
     'kiwix-tools': '3.1.2',
     'zim-tools': '2.1.0',
