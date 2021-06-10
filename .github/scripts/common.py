@@ -73,6 +73,7 @@ EXPORT_FILES = {
                 "zimpatch",
                 "zimsplit",
                 "zimwriterfs",
+                "zimrecreate"
             )
         ],
     ),
