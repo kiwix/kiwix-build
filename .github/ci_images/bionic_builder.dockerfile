@@ -5,18 +5,21 @@ ENV OS_NAME bionic
 
 RUN apt update -q \
   && dpkg --add-architecture i386 \
+  && apt install -q -y --no-install-recommends software-properties-common \
+  && add-apt-repository ppa:beineri/opt-qt-5.15.2-bionic \
+  && apt-get update \
   && apt install -q -y --no-install-recommends \
 # Base build tools
     build-essential automake libtool cmake ccache pkg-config autopoint patch \
     python3-pip python3-setuptools python3-wheel git subversion wget unzip \
-    ninja-build openssh-client curl \
+    ninja-build openssh-client curl libgl-dev \
 # Python (2) is needed to install android-ndk
     python \
 # Packaged dependencies
     libbz2-dev libmagic-dev uuid-dev zlib1g-dev default-jdk \
-    libmicrohttpd-dev aria2 libgtest-dev \
+    libmicrohttpd-dev aria2 libgtest-dev libgl-dev \
 # Qt packages
-    libqt5gui5 qtbase5-dev qtwebengine5-dev libqt5svg5-dev qt5-image-formats-plugins qt5-default \
+    qt515base qt515webengine qt515svg qt515imageformats qt515wayland \
 # To create the appimage of kiwix-desktop
     libfuse2 fuse patchelf \
 # Flatpak tools
@@ -34,3 +37,5 @@ RUN useradd --create-home runner
 USER runner
 WORKDIR /home/runner
 ENV PATH /home/runner/.local/bin:$PATH
+
+RUN echo "source /opt/qt515/bin/qt515-env.sh" >> /home/runner/.bashrc

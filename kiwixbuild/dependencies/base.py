@@ -294,6 +294,8 @@ class Builder:
             module['buildsystem'] = self.flatpak_buildsystem
         if getattr(self, 'subsource_dir', None):
             module['subdir'] = self.subsource_dir
+        if getattr(self, 'flatpack_build_options', None):
+            module['build-options'] = self.flatpack_build_options
         if getattr(self, 'configure_option', ''):
             module['config-opts'] = self.configure_option.split(' ')
 

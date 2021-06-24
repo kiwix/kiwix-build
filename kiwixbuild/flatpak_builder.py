@@ -33,6 +33,8 @@ MANIFEST = {
     'app-id': 'org.kiwix.desktop',
     'runtime': 'org.kde.Platform',
     'runtime-version': base_deps_versions['org.kde'],
+    'base': 'io.qt.qtwebengine.BaseApp',
+    'base-version': base_deps_versions['org.kde'], # keep BaseApp (qwebengine) in sync with org.kde
     'sdk': 'org.kde.Sdk',
     'command': 'kiwix-desktop',
     'rename-icon': 'kiwix-desktop',
