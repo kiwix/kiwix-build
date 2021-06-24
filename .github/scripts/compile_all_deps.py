@@ -13,21 +13,21 @@ from common import (
 )
 
 if PLATFORM_TARGET.startswith("android_"):
-    TARGETS = ("libzim", "kiwix-lib")
+    TARGETS = ("libzim", "libkiwix")
 elif PLATFORM_TARGET.startswith("iOS"):
-    TARGETS = ("libzim", "kiwix-lib")
+    TARGETS = ("libzim", "libkiwix")
 elif PLATFORM_TARGET.startswith("native_"):
     if OS_NAME == "osx":
-        TARGETS = ("libzim", "zim-tools", "kiwix-lib")
+        TARGETS = ("libzim", "zim-tools", "libkiwix")
     else:
         if DESKTOP:
             TARGETS = ("kiwix-desktop",)
         elif PLATFORM_TARGET == "native_mixed":
             TARGETS = ("libzim",)
         else:
-            TARGETS = ("libzim", "zim-tools", "kiwix-lib", "kiwix-tools")
+            TARGETS = ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
 else:
-    TARGETS = ("libzim", "zim-tools", "kiwix-lib", "kiwix-tools")
+    TARGETS = ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
 
 for target in TARGETS:
     run_kiwix_build(target, platform=PLATFORM_TARGET, build_deps_only=True)

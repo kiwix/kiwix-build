@@ -8,13 +8,13 @@ from .base import (
 from kiwixbuild.utils import pj, copy_tree
 from kiwixbuild._global import option, get_target_step, neutralEnv
 
-class Kiwixlib(Dependency):
-    name = "kiwix-lib"
+class Libkiwix(Dependency):
+    name = "libkiwix"
     force_build = True
 
     class Source(GitClone):
-        git_remote = "https://github.com/kiwix/kiwix-lib.git"
-        git_dir = "kiwix-lib"
+        git_remote = "https://github.com/kiwix/libkiwix.git"
+        git_dir = "libkiwix"
 
     class Builder(MesonBuilder):
         dependencies = ["pugixml", "libzim", "zlib", "lzma", "libcurl", "libmicrohttpd", "icu4c", "mustache", "xapian-core"]
@@ -38,15 +38,15 @@ class Kiwixlib(Dependency):
             return super().library_type
 
 
-class KiwixlibApp(Dependency):
-    name = "kiwix-lib-app"
+class LibkiwixApp(Dependency):
+    name = "libkiwix-app"
     force_build = True
 
-    class Source(Kiwixlib.Source):
-        name = "kiwix-lib"
+    class Source(Libkiwix.Source):
+        name = "libkiwix"
 
     class Builder(GradleBuilder):
-        dependencies = ["kiwix-lib"]
+        dependencies = ["libkiwix"]
         gradle_target = "assembleRelease writePom"
 
         @classmethod
@@ -54,7 +54,7 @@ class KiwixlibApp(Dependency):
             if not allDeps:
                 return super().get_dependencies(platformInfo, allDeps)
             else:
-                deps = [('android_{}'.format(arch), 'kiwix-lib')
+                deps = [('android_{}'.format(arch), 'libkiwix')
                     for arch in option('android_arch')]
                 return deps
 
@@ -64,17 +64,17 @@ class KiwixlibApp(Dependency):
             except FileNotFoundError:
                 pass
             if not os.path.exists(self.build_path):
-                shutil.copytree(pj(self.source_path, 'android-kiwix-lib-publisher'), self.build_path, symlinks=True)
+                shutil.copytree(pj(self.source_path, 'android-libkiwix-publisher'), self.build_path, symlinks=True)
             for arch in option('android_arch'):
                 try:
-                    kiwix_builder = get_target_step('kiwix-lib', 'android_{}'.format(arch))
+                    kiwix_builder = get_target_step('libkiwix', 'android_{}'.format(arch))
                 except KeyError:
                     pass
                 else:
-                    copy_tree(pj(kiwix_builder.buildEnv.install_dir, 'kiwix-lib'),
+                    copy_tree(pj(kiwix_builder.buildEnv.install_dir, 'libkiwix'),
                               pj(self.build_path, 'kiwixLibAndroid', 'src', 'main'))
 
-#            The ICU dat file should be embedded with the kiwix-lib application
+#            The ICU dat file should be embedded with the libkiwix application
 #            but for now it is package with kiwix-android app and use there.
 #            We must fix this at a time (before we update the icu version).
 #            os.makedirs(
@@ -82,7 +82,7 @@ class KiwixlibApp(Dependency):
 #                exist_ok=True)
 #            for arch in option('android_arch'):
 #                try:
-#                    kiwix_builder = get_target_step('kiwix-lib', 'android_{}'.format(arch))
+#                    kiwix_builder = get_target_step('libkiwix', 'android_{}'.format(arch))
 #                except KeyError:
 #                    pass
 #                else:

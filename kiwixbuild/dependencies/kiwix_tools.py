@@ -12,7 +12,7 @@ class KiwixTools(Dependency):
         git_dir = "kiwix-tools"
 
     class Builder(MesonBuilder):
-        dependencies = ["kiwix-lib"]
+        dependencies = ["libkiwix"]
 
         @property
         def configure_option(self):
