@@ -22,7 +22,7 @@ then
   mkdir -p KIWIX_ARCHIVES_DIR
 
   cp /c/projects/kiwix-build/kiwix-desktop/Release/kiwix-desktop.exe $KIWIX_DIR
-/c/Qt/5.12/msvc2017_64/bin/windeployqt --compiler-runtime $KIWIX_DIR
+/c/Qt/5.15/msvc2019_64/bin/windeployqt --compiler-runtime $KIWIX_DIR
 
   cp $MINGW64_EXTRA_DIR/aria2c.exe $KIWIX_DIR
   cp $MINGW64_EXTRA_DIR/bin/*.dll $KIWIX_DIR
