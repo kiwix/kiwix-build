@@ -5,7 +5,7 @@ class FlatpakPlatformInfo(PlatformInfo):
     name = 'flatpak'
     build = 'flatpak'
     static = ''
-    toolchain_names = ['org.kde']
+    toolchain_names = ['org.kde', 'io.qt.qtwebengine']
     compatible_hosts = ['debian', 'fedora']
 
     def __str__(self):
