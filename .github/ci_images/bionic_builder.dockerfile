@@ -38,4 +38,8 @@ USER runner
 WORKDIR /home/runner
 ENV PATH /home/runner/.local/bin:$PATH
 
-RUN echo "source /opt/qt515/bin/qt515-env.sh" >> /home/runner/.bashrc
+# Set qt515 environment (the equivalent of "source /opt/qt515/bin/qt515-env.sh")
+# RUN echo "source /opt/qt515/bin/qt515-env.sh" >> /home/runner/.bashrc
+ENV PATH=/opt/qt515/bin:$PATH \
+    LD_LIBRARY_PATH=/opt/qt515/lib/x86_64-linux-gnu:/opt/qt515/lib:$LD_LIBRARY_PATH \
+    PKG_CONFIG_PATH=/opt/qt515/lib/pkgconfig:$PKG_CONFIG_PATH
