@@ -33,37 +33,37 @@ else:
     RELEASE = True
 
 if PLATFORM_TARGET == "android":
-    TARGETS = ("kiwix-lib-app",)
+    TARGETS = ("libkiwix-app",)
 elif PLATFORM_TARGET.startswith("iOS"):
-    TARGETS = ("libzim", "kiwix-lib")
+    TARGETS = ("libzim", "libkiwix")
 elif PLATFORM_TARGET.startswith("native_"):
     if OS_NAME == "osx":
-        TARGETS = ("libzim", ) if PLATFORM_TARGET == "native_mixed" else ("libzim", "zim-tools", "kiwix-lib")
+        TARGETS = ("libzim", ) if PLATFORM_TARGET == "native_mixed" else ("libzim", "zim-tools", "libkiwix")
     else:
         if DESKTOP:
             TARGETS = ("kiwix-desktop",)
         elif PLATFORM_TARGET == "native_mixed":
             TARGETS = ("libzim",)
         else:
-            TARGETS = ("zim-tools", "kiwix-lib", "kiwix-tools")
+            TARGETS = ("zim-tools", "libkiwix", "kiwix-tools")
 elif PLATFORM_TARGET in ("win32_static", "armhf_static", "i586_static"):
     TARGETS = ("kiwix-tools",)
 elif PLATFORM_TARGET == "flatpak":
     TARGETS = ("kiwix-desktop",)
 else:
-    TARGETS = ("libzim", "zim-tools", "kiwix-lib", "kiwix-tools")
+    TARGETS = ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
 
 # Filter what to build if we are doing a release.
 if RELEASE:
     def release_filter(project):
-        if project == "kiwix-lib-app":
-            project = "kiwix-lib"
+        if project == "libkiwix-app":
+            project = "libkiwix"
         return release_versions.get(project) is not None
     TARGETS = tuple(filter(release_filter, TARGETS))
 
 if RELEASE and PLATFORM_TARGET == "android":
-    # Kiwix-lib need to know the extrapostfix version to correctly generate the pom.xml file.
-    extra_postfix = release_versions.get('kiwix-lib')
+    # libkiwix need to know the extrapostfix version to correctly generate the pom.xml file.
+    extra_postfix = release_versions.get('libkiwix')
     if extra_postfix:
         os.environ['KIWIXLIB_BUILDVERSION'] = str(extra_postfix)
 
@@ -109,12 +109,12 @@ if RELEASE:
     if PLATFORM_TARGET == "flatpak" and "kiwix-desktop" in TARGETS:
         update_flathub_git()
 
-    if PLATFORM_TARGET == "android" and "kiwix-lib-app" in TARGETS:
-        postfix = get_postfix("kiwix-lib")
+    if PLATFORM_TARGET == "android" and "libkiwix-app" in TARGETS:
+        postfix = get_postfix("libkiwix")
         basename = "kiwixlib-{}".format(postfix)
 
         output_release_dir = (
-            HOME / "BUILD_android" / "kiwix-lib-app" / "kiwixLibAndroid" / "build"
+            HOME / "BUILD_android" / "libkiwix-app" / "kiwixLibAndroid" / "build"
         )
         shutil.copy(
             str(output_release_dir / "outputs" / "aar" / "kiwixLibAndroid-release.aar"),

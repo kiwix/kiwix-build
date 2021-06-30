@@ -134,7 +134,7 @@ def run_kiwix_build(
     command.append("--hide-progress")
     command.append("--fast-clone")
     command.append("--assume-packages-installed")
-    if target == "kiwix-lib-app" and platform.startswith("android_"):
+    if target == "libkiwix-app" and platform.startswith("android_"):
         command.extend(["--target-platform", "android", "--android-arch", platform[8:]])
     elif platform == "android":
         command.extend(["--target-platform", "android"])

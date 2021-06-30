@@ -2,7 +2,7 @@
 
 main_project_versions = {
     'libzim': '7.0.0', # Because of bump of version in libzim. No release made for now.
-    'kiwix-lib': '9.4.1',
+    'libkiwix': '9.4.1',
     'kiwix-tools': '3.1.2',
     'zim-tools': '2.1.0',
     'kiwix-desktop': '2.0.5' # Also change KIWIX_DESKTOP_VERSION and KIWIX_DESKTOP_RELEASE in appveyor.yml
@@ -30,10 +30,10 @@ main_project_versions = {
 
 release_versions = {
     'libzim': 0, # Depends of base deps (was 0)
-    'kiwix-lib': 0, # Depends of libzim (was 0)
-    'kiwix-tools': 4, # Depends of kiwix-lib and libzim (was 3)
+    'libkiwix': 0, # Depends of libzim (was 0)
+    'kiwix-tools': 4, # Depends of libkiwix and libzim (was 3)
     'zim-tools': 0, # Depends of libzim (was 2)
-    'kiwix-desktop': 0 # Depends of kiwix-lib and libzim (was 0)
+    'kiwix-desktop': 0 # Depends of libkiwix and libzim (was 0)
 }
 
 

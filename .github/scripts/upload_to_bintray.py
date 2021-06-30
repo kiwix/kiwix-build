@@ -10,7 +10,7 @@ def create_version(version):
     url = "https://api.bintray.com/packages/kiwix/kiwix/kiwixlib/versions"
     payload = {
         'name': version,
-        'desc': 'Release of kiwix-lib'
+        'desc': 'Release of libkiwix'
     }
     headers = {
         'Content-Type': 'application/json'
