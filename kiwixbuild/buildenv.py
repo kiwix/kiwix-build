@@ -26,7 +26,10 @@ class PlatformNeutralEnv:
             sys.exit("ERROR: ninja command not found.")
         self.meson_command = self._detect_meson()
         if not self.meson_command:
-            sys.exit("ERROR: meson command not found")
+            sys.exit("ERROR: meson command not found.")
+        self.qmake_command = self._detect_qmake()
+        if not self.qmake_command:
+            print("WARNING: qmake command not found.", file=sys.stderr)
         self.mesontest_command = "{} test".format(self.meson_command)
 
     def detect_platform(self):
@@ -64,6 +67,9 @@ class PlatformNeutralEnv:
 
     def _detect_meson(self):
         return self._detect_binary('meson.py', 'meson')
+
+    def _detect_qmake(self):
+        return self._detect_binary('qmake-qt5', 'qmake')
 
 
 class BuildEnv:
