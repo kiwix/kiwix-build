@@ -23,7 +23,7 @@ class PlatformNeutralEnv:
         self.detect_platform()
         self.ninja_command = self._detect_ninja()
         if not self.ninja_command:
-            sys.exit("ERROR: ninja command not found")
+            sys.exit("ERROR: ninja command not found.")
         self.meson_command = self._detect_meson()
         if not self.meson_command:
             sys.exit("ERROR: meson command not found")
@@ -47,8 +47,8 @@ class PlatformNeutralEnv:
         where = where or self.archive_dir
         download_remote(what, where)
 
-    def _detect_ninja(self):
-        for n in ['ninja', 'ninja-build']:
+    def _detect_binary(self, *bin_variants):
+        for n in bin_variants:
             try:
                 retcode = subprocess.check_call([n, '--version'],
                                                 stdout=subprocess.DEVNULL)
@@ -58,16 +58,12 @@ class PlatformNeutralEnv:
             if retcode == 0:
                 return n
 
+
+    def _detect_ninja(self):
+        return self._detect_binary('ninja', 'ninja-build')
+
     def _detect_meson(self):
-        for n in ['meson.py', 'meson']:
-            try:
-                retcode = subprocess.check_call([n, '--version'],
-                                                stdout=subprocess.DEVNULL)
-            except (FileNotFoundError, PermissionError):
-                # Doesn't exist in PATH or isn't executable
-                continue
-            if retcode == 0:
-                return n
+        return self._detect_binary('meson.py', 'meson')
 
 
 class BuildEnv:
