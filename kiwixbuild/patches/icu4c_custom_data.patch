@@ -34,13 +34,12 @@ diff -ur icu4c/source/data/Makefile.in icu4c.patched/source/data/Makefile.in
  ## RES files
 --include $(LOCSRCDIR)/resfiles.mk
 --include $(CURRSRCDIR)/resfiles.mk
---include $(LANGSRCDIR)/resfiles.mk
++#-include $(LOCSRCDIR)/resfiles.mk
++#-include $(CURRSRCDIR)/resfiles.mk
+ -include $(LANGSRCDIR)/resfiles.mk
 --include $(REGIONSRCDIR)/resfiles.mk
 --include $(ZONESRCDIR)/resfiles.mk
 --include $(UNITSRCDIR)/resfiles.mk
-+#-include $(LOCSRCDIR)/resfiles.mk
-+#-include $(CURRSRCDIR)/resfiles.mk
-+#-include $(LANGSRCDIR)/resfiles.mk
 +#-include $(REGIONSRCDIR)/resfiles.mk
 +#-include $(ZONESRCDIR)/resfiles.mk
 +#-include $(UNITSRCDIR)/resfiles.mk
