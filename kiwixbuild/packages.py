@@ -1,6 +1,6 @@
 
 
-_fedora_common = ['automake', 'libtool', 'cmake', 'git', 'subversion', 'ccache', 'pkg-config', 'gcc-c++', 'gettext-devel']
+_fedora_common = ['automake', 'libtool', 'cmake', 'git', 'subversion', 'ccache', 'pkgconf-pkg-config', 'gcc-c++', 'gettext-devel']
 _debian_common = ['automake', 'libtool', 'cmake', 'git', 'subversion', 'ccache', 'pkg-config', 'gcc', 'autopoint']
 PACKAGE_NAME_MAPPERS = {
     'flatpak': {
@@ -27,7 +27,7 @@ PACKAGE_NAME_MAPPERS = {
         'file' : ['file-devel'],
         'gumbo' : ['gumbo-parser-devel'],
         'aria2': ['aria2'],
-        'qt': ['qt5-qtbase-devel', 'qt5-devel', 'qt5-qtsvg'],
+        'qt': ['qt5-qtbase-devel', 'qt5-qtsvg'],
         'qtwebengine': ['qt5-qtwebengine-devel']
     },
     'fedora_native_static': {

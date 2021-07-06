@@ -9,7 +9,7 @@ class Win32PlatformInfo(PlatformInfo):
     build = 'win32'
     compatible_hosts = ['fedora', 'debian']
     arch_full = 'i686-w64-mingw32'
-    extra_libs = ['-lwinmm', '-lshlwapi', '-lws2_32']
+    extra_libs = ['-lwinmm', '-lshlwapi', '-lws2_32', '-lssp']
 
     def get_cross_config(self):
         return {

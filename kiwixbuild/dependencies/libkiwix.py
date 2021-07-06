@@ -64,7 +64,7 @@ class LibkiwixApp(Dependency):
             except FileNotFoundError:
                 pass
             if not os.path.exists(self.build_path):
-                shutil.copytree(pj(self.source_path, 'android-libkiwix-publisher'), self.build_path, symlinks=True)
+                shutil.copytree(pj(self.source_path, 'android-kiwix-lib-publisher'), self.build_path, symlinks=True)
             for arch in option('android_arch'):
                 try:
                     kiwix_builder = get_target_step('libkiwix', 'android_{}'.format(arch))

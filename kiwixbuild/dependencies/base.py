@@ -448,11 +448,12 @@ class QMakeBuilder(MakeBuilder):
     def _configure(self, context):
         context.try_skip(self.build_path)
         cross_option = ""
-        command = ("qmake {configure_option}"
+        command = ("{command} {configure_option}"
                    " {env_option}"
                    " {source_path}"
                    " {cross_option}")
         command = command.format(
+            command = neutralEnv('qmake_command'),
             configure_option=self.configure_option,
             env_option=self.env_option,
             source_path=self.source_path,

@@ -36,7 +36,7 @@ class org_kde(Dependency):
             self.command('install_sdk', self._install_sdk)
 
 
-class org_kde(Dependency):
+class io_qt_qtwebengine(Dependency):
     neutral = False
     name = 'io.qt.qtwebengine'
 
