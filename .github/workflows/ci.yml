@@ -127,7 +127,7 @@ jobs:
         python-version: '3.6'
     - name: Install packages
       run:
-        brew install pkg-config ninja
+        brew install pkg-config ninja automake autoconf
     - name: Install python modules
       run: |
         pip3 install meson==0.52.1 pytest requests distro
