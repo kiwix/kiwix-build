@@ -5,15 +5,15 @@ from kiwixbuild.utils import pj, xrun_find
 from .base import PlatformInfo, MetaPlatformInfo
 
 
-class iOSPlatformInfo(PlatformInfo):
+class ApplePlatformInfo(PlatformInfo):
     build = 'iOS'
     static = True
     compatible_hosts = ['Darwin']
-    min_iphoneos_version = '11.0'
     arch = None
-    arch_full = None
+    host = None
     target = None
     sdk_name = None
+    min_iphoneos_version = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -35,7 +35,7 @@ class iOSPlatformInfo(PlatformInfo):
         self.buildEnv.meson_crossfile = self._gen_crossfile('meson_ios_cross_file.txt', 'meson_cross_file.txt')
 
     def get_cross_config(self):
-        return {
+        config = {
             'root_path': self.root_path,
             'binaries': self.binaries,
             'exe_wrapper_def': '',
@@ -44,7 +44,6 @@ class iOSPlatformInfo(PlatformInfo):
                 '-isysroot', self.root_path,
                 '-arch', self.arch,
                 '-target',  self.target,
-                '-miphoneos-version-min={}'.format(self.min_iphoneos_version),
                 '-stdlib=libc++'
             ],
             'extra_cflags': [
@@ -52,7 +51,6 @@ class iOSPlatformInfo(PlatformInfo):
                 '-isysroot', self.root_path,
                 '-arch', self.arch,
                 '-target', self.target,
-                '-miphoneos-version-min={}'.format(self.min_iphoneos_version),
                 '-stdlib=libc++',
                 '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))
             ],
@@ -65,22 +63,28 @@ class iOSPlatformInfo(PlatformInfo):
                 'abi': ''
             }
         }
+        if self.min_iphoneos_version:
+            config['extra_libs'].append('-miphoneos-version-min={}'.format(self.min_iphoneos_version))
+            config['extra_cflags'].append('-miphoneos-version-min={}'.format(self.min_iphoneos_version))
+        return config
 
     def get_env(self):
         env = super().get_env()
-        env['MACOSX_DEPLOYMENT_TARGET'] = '10.13'
+        env['MACOSX_DEPLOYMENT_TARGET'] = '10.15'
         return env
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
-        env['CFLAGS'] = ' '.join([
+        cflags = [
             '-fembed-bitcode',
             '-isysroot {}'.format(self.root_path),
             '-arch {}'.format(self.arch),
-            '-miphoneos-version-min={}'.format(self.min_iphoneos_version),
             '-target {}'.format(self.target),
             env['CFLAGS'],
-        ])
+        ]
+        if self.min_iphoneos_version:
+            cflags.append('-miphoneos-version-min={}'.format(self.min_iphoneos_version))
+        env['CFLAGS'] = ' '.join(cflags)
         env['CXXFLAGS'] = ' '.join([
             env['CFLAGS'],
             '-stdlib=libc++',
@@ -109,32 +113,52 @@ class iOSPlatformInfo(PlatformInfo):
 
     @property
     def configure_option(self):
-        return '--host={}'.format(self.arch_full)
+        return '--host={}'.format(self.host)
 
 
-class iOSArm64(iOSPlatformInfo):
+class iOSArm64(ApplePlatformInfo):
     name = 'iOS_arm64'
     arch = cpu = 'arm64'
-    arch_full = 'arm-apple-darwin'
+    host = 'arm-apple-darwin'
     target = 'aarch64-apple-ios'
     sdk_name = 'iphoneos'
+    min_iphoneos_version = '13.0'
 
 
-class iOSx64(iOSPlatformInfo):
+class iOSx64(ApplePlatformInfo):
     name = 'iOS_x86_64'
     arch = cpu = 'x86_64'
-    arch_full = 'x86_64-apple-darwin'
+    host = 'x86_64-apple-darwin'
     target = 'x86_64-apple-ios'
     sdk_name = 'iphonesimulator'
+    min_iphoneos_version = '13.0'
 
 
-class iOSMacABI(iOSPlatformInfo):
+class iOSMacABI(ApplePlatformInfo):
     name = 'iOS_Mac_ABI'
     arch = cpu = 'x86_64'
-    arch_full = 'x86_64-apple-darwin'
+    host = 'x86_64-apple-darwin'
     target = 'x86_64-apple-ios13.0-macabi'
     sdk_name = 'macosx'
     min_iphoneos_version = '13.0'
+
+
+class macOSArm64(ApplePlatformInfo):
+    name = 'macOS_arm64'
+    arch = cpu = 'arm64'
+    host = 'aarch64-apple-darwin'
+    target = 'arm64-apple-macos11'
+    sdk_name = 'macosx'
+    min_iphoneos_version = None
+
+
+class macOSx64(ApplePlatformInfo):
+    name = 'macOS_x86_64'
+    arch = cpu = 'x86_64'
+    host = 'x86_64-apple-darwin'
+    target = 'x86_64-apple-macos10.12'
+    sdk_name = 'macosx'
+    min_iphoneos_version = None
 
 
 class IOS(MetaPlatformInfo):
