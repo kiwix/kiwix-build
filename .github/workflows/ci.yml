@@ -48,6 +48,10 @@ jobs:
         kiwix-build/.github/scripts/ensure_base_deps.py
       env:
         PLATFORM_TARGET: ${{matrix.target}}
+    - name: Try dl
+      shell: bash
+      run: |
+        wget https://flathub.org/repo/flathub.flatpakrepo
     - name: Build release
       shell: bash
       run: |
