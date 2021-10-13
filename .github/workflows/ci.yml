@@ -14,10 +14,11 @@ jobs:
       fail-fast: false
       matrix:
         target:
-          - native_static
           - flatpak
-        image_variant: ['bionic']
-        lib_postfix: ['/x86_64-linux-gnu']
+        include:
+          - target: flatpak
+            image_variant: bionic
+            lib_postfix: '/x86_64-linux-gnu'
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
