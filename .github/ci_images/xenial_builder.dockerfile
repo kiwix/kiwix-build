@@ -21,7 +21,7 @@ RUN apt update -q \
 #    vim less grep \
   && apt-get clean -y \
   && rm -rf /var/lib/apt/lists/* /usr/share/doc/* /var/cache/debconf/* \
-  && pip3 install meson==0.52.1 pytest gcovr requests distro
+  && pip3 install meson==0.52.1 pytest 'markupsafe<2.0.0' 'jinja2<3.0.0' 'gcovr<5.0' requests distro
 
 # Create user
 RUN useradd --create-home runner
