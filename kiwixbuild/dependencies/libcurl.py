@@ -22,7 +22,8 @@ class LibCurl(Dependency):
         dependencies = ['zlib']
         configure_option = " ".join(
             ["--without-{}".format(p)
-                for p in ('libssh2', 'ssl', 'libmetalink', 'librtmp')] +
+                for p in ('libssh2', 'ssl', 'libmetalink', 'librtmp',
+                          'nghttp2', 'libidn2', 'brotli')] +
             ["--disable-{}".format(p)
                 for p in ('ftp', 'file', 'ldap', 'ldaps', 'rtsp', 'dict',
                           'telnet', 'tftp', 'pop3', 'imap', 'smb', 'smtp',
