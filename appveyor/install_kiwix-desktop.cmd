@@ -5,11 +5,11 @@ cd kiwix-desktop
 echo "Running qmake"
 SET _WITH_CONSOLE=1
 IF %KIWIX_DESKTOP_RELEASE% EQU 1 (
-  IF %APPVEYOR_REPO_TAG%==true (
+  IF %APPVEYOR_REPO_TAG% == true (
     SET _WITH_CONSOLE=0
   )
 )
-IF %_WITH_CONSOLE% EQU 1 (
+IF %_WITH_CONSOLE% EQU 1 (
     C:\Qt\5.15\msvc2019_64\bin\qmake.exe "CONFIG+=static console" || exit /b 1
 ) else (
     C:\Qt\5.15\msvc2019_64\bin\qmake.exe "CONFIG+=static" || exit /b 1
