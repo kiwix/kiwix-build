@@ -167,6 +167,35 @@ Kiwix-build.py will create several directories:
 If you want to install all those directories elsewhere, you can pass the
 `--working-dir` option to `kiwix-build`:
 
+
+Building an AppImage on Linux
+-----------------------------
+Compile locally kiwix-desktop on native_dyn platform, then run the script create_kiwix-desktop_appImage.sh
+
+<details>
+  <summary>Exact commands for Fedora 34x64</summary>
+
+```
+Here are the exact commands (tested on clean Fedora 34x64):
+
+sudo dnf install virtualenv ninja-build meson patch qmake-qt5 patchelf
+cd ~
+wget https://github.com/kiwix/kiwix-build/archive/refs/heads/master.zip
+unzip master.zip
+cd kiwix-build-master
+virtualenv -p python3 ./
+source bin/activate
+pip install .
+hash -r
+export SKIP_BIG_MEMORY_TEST=1
+kiwix-build --target-platform native_dyn kiwix-desktop
+./scripts/create_kiwix-desktop_appImage.sh
+
+The result: ~/kiwix-build-master/Kiwix--x86_64.AppImage
+```
+
+</details>
+
 Troubleshooting
 ---------------
 
