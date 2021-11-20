@@ -7,8 +7,9 @@ SOURCEDIR=${2:-$PWD/SOURCE/kiwix-desktop}
 APPDIR=${3:-$PWD/AppDir}
 
 SYSTEMLIBDIR=lib/x86_64-linux-gnu
-# Uncoment if needed
-#SYSTEMLIBDIR=lib64
+if [ ! -e "$APPDIR/lib" ] ; then
+  SYSTEMLIBDIR=lib64
+fi
 
 ICONFILE=$SOURCEDIR/resources/icons/kiwix/scalable/kiwix-desktop.svg
 DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop.desktop
@@ -19,7 +20,7 @@ mkdir -p $APPDIR/usr/{bin,lib,share} $APPDIR/usr/share/applications $APPDIR/usr/
 cp $INSTALLDIR/bin/kiwix-desktop $APPDIR/usr/bin/
 cp $INSTALLDIR/$SYSTEMLIBDIR/*.so* $APPDIR/usr/lib
 # Remove it as it break with linuxdeployqt (should we compile without it) ?
-rm $APPDIR/usr/lib/libmagic.so*
+rm -f $APPDIR/usr/lib/libmagic.so*
 # Copy nss lib (to not conflict with host's ones)
 cp -a /usr/$SYSTEMLIBDIR/nss $APPDIR/usr/lib
 cp -a /usr/$SYSTEMLIBDIR/libstdc++.so* $APPDIR/usr/lib
@@ -30,12 +31,12 @@ mkdir -p $APPDIR/usr/share/applications
 cp $DESKTOPFILE $APPDIR/usr/share/applications/kiwix-desktop.desktop
 
 # get the aria2
-wget https://github.com/q3aql/aria2-static-builds/releases/download/v1.34.0/aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2
+wget --continue https://github.com/q3aql/aria2-static-builds/releases/download/v1.34.0/aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2
 mkdir -p $APPDIR/usr/bin/ && tar -C $APPDIR/usr/bin/ -xf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.34.0-linux-gnu-64bit-build1/aria2c --strip-components=1
 mkdir -p $APPDIR/etc/ssl/certs/ && tar -C $APPDIR/etc/ssl/certs/ -xf aria2-1.34.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.34.0-linux-gnu-64bit-build1/ca-certificates.crt --strip-components=1
 
 # Get linuxdeployqt
-wget https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage
+wget --continue https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage
 chmod a+x linuxdeployqt-6-x86_64.AppImage
 
 # Fill with all deps libs and so
