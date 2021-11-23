@@ -7,7 +7,7 @@ SOURCEDIR=${2:-$PWD/SOURCE/kiwix-desktop}
 APPDIR=${3:-$PWD/AppDir}
 
 SYSTEMLIBDIR=lib/x86_64-linux-gnu
-if [ ! -e "$APPDIR/lib" ] ; then
+if [ ! -e "$INSTALLDIR/lib" ] ; then
   SYSTEMLIBDIR=lib64
 fi
 
