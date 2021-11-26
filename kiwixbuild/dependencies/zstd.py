@@ -11,9 +11,9 @@ class zstd(Dependency):
     name = 'zstd'
 
     class Source(ReleaseDownload):
-        archive = Remotefile('zstd-1.4.4.tar.gz',
-                             '59ef70ebb757ffe74a7b3fe9c305e2ba3350021a918d168a046c6300aeea9315',
-                             'https://github.com/facebook/zstd/releases/download/v1.4.4/zstd-1.4.4.tar.gz')
+        archive = Remotefile('zstd-1.5.0.tar.gz',
+                             '5194fbfa781fcf45b98c5e849651aa7b3b0a008c6b72d4a0db760f3002291e94',
+                             'https://github.com/facebook/zstd/releases/download/v1.5.0/zstd-1.5.0.tar.gz')
         patches = ['zstd_meson.patch']
 
     class Builder(MesonBuilder):
