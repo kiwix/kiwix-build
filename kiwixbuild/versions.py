@@ -53,7 +53,7 @@ base_deps_versions = {
   'libmicrohttpd' : '0.9.72',
   'gumbo' : '0.10.1',
   'icu4c' : '58.2',
-  'libaria2' : '1.33.1',
+  'libaria2' : '1.36.0',
   'libmagic' : '5.35',
   'android-sdk' : 'r25.2.3',
   'android-ndk' : 'r13b',

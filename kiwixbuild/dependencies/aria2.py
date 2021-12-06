@@ -10,10 +10,9 @@ class Aria2(Dependency):
     name = "aria2"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('aria2-1.34.0.tar.xz',
-                             '3a44a802631606e138a9e172a3e9f5bcbaac43ce2895c1d8e2b46f30487e77a3',
-                             'https://github.com/aria2/aria2/releases/download/release-1.34.0/aria2-1.34.0.tar.xz')
-
+        archive = Remotefile('aria2-1.36.0.tar.xz',
+                             '58d1e7608c12404f0229a3d9a4953d0d00c18040504498b483305bcb3de907a5',
+                             'https://github.com/aria2/aria2/releases/download/release-1.36.0/aria2-1.36.0.tar.xz')
         patches = ["libaria2_android.patch"]
 
         def _post_prepare_script(self, context):
