@@ -114,6 +114,8 @@ jobs:
           - iOS_arm64
           - iOS_x86_64
           - iOS_Mac_ABI
+          - macOS_arm64
+          - macOS_x86_64
     runs-on: macos-latest
     env:
       SSH_KEY: /tmp/id_rsa
