@@ -17,10 +17,11 @@ class AllBaseDependencies(Dependency):
             if platformInfo.build not in ('android', 'iOS'):
                 # For zimtools
                 base_deps += ['docoptcpp']
-                # For kiwix-desktop
-                base_deps += ['aria2']
                 if platformInfo.build != 'win32':
                     # zimwriterfs
                     base_deps += ['libmagic', 'gumbo']
-
+                if platformInfo.build == 'native' and neutralEnv('distname') != 'Darwin':
+                    # We compile kiwix-desktop only on native and not on `Darwin`
+                    # So we need aria2 only there
+                    base_deps += ['aria2']
             return base_deps
