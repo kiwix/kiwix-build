@@ -24,7 +24,7 @@ class Libkiwix(Dependency):
         def configure_option(self):
             platformInfo = self.buildEnv.platformInfo
             if platformInfo.build == 'android':
-                return '-Dwrapper=android'
+                return '-Dwrapper=android -Dwerror=false'
             if platformInfo.build == 'iOS':
                 return '-Db_bitcode=true'
             if platformInfo.name == 'flatpak':
