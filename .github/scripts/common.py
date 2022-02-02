@@ -194,7 +194,7 @@ def upload(file_to_upload, host, dest_path):
 
 
 def upload_archive(archive, project, make_release):
-    if project.startswith("kiwix-"):
+    if project.startswith("kiwix-") or project in ['libkiwix']:
         host = "ci@download.kiwix.org"
         dest_path = "/data/download/"
     else:
