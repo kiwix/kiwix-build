@@ -1,6 +1,7 @@
 REM ========================================================
 REM Install kiwix-desktop
 git clone https://github.com/kiwix/kiwix-desktop || exit /b 1
+git checkout 0bf67a99b8423d6243e68c15b04b51e09a653342
 cd kiwix-desktop
 echo "Running qmake"
 SET _WITH_CONSOLE=1
