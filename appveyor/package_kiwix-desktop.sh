@@ -26,6 +26,8 @@ then
 
   cp $MINGW64_EXTRA_DIR/aria2c.exe $KIWIX_DIR
   cp $MINGW64_EXTRA_DIR/bin/*.dll $KIWIX_DIR
+  cp /c/OpenSSL-v111-Win64/bin/libcrypto-1_1-x64.dll $KIWIX_DIR
+  cp /c/OpenSSL-v111-Win64/bin/libssl-1_1-x64.dll $KIWIX_DIR
 
   signtool.exe sign -f appveyor/kiwix.pfx -p $win_certificate_password -t http://timestamp.digicert.com -d "Kiwix-desktop application" -fd SHA256 $KIWIX_DIR/kiwix-desktop.exe
 
