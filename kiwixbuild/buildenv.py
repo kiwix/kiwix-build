@@ -21,6 +21,9 @@ class PlatformNeutralEnv:
                   self.log_dir):
             os.makedirs(d, exist_ok=True)
         self.detect_platform()
+        self.make_command = self._detect_make()
+        if not self.make_command:
+            sys.exit("ERROR: make command not found.")
         self.ninja_command = self._detect_ninja()
         if not self.ninja_command:
             sys.exit("ERROR: ninja command not found.")
@@ -55,6 +58,8 @@ class PlatformNeutralEnv:
             if retcode == 0:
                 return n
 
+    def _detect_make(self):
+        return self._detect_binary('make.exe', 'make')
 
     def _detect_ninja(self):
         return self._detect_binary('ninja', 'ninja-build')

@@ -26,7 +26,7 @@ jobs:
         chmod 600 $SSH_KEY
     - name: Install packages
       run: |
-        choco.exe install pkgconfiglite ninja
+        choco.exe install pkgconfiglite ninja make
         #- run: |
       #ls
         #libtoolize

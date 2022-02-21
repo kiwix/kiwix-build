@@ -379,7 +379,8 @@ class MakeBuilder(Builder):
 
     def _compile(self, context):
         context.try_skip(self.build_path)
-        command = "make -j4 {make_target} {make_option}".format(
+        command = "{command} -j4 {make_target} {make_option}".format(
+            command=neutralEnv('make_command'),
             make_target=self.make_target,
             make_option=self.make_option
         )
@@ -388,7 +389,8 @@ class MakeBuilder(Builder):
 
     def _install(self, context):
         context.try_skip(self.build_path)
-        command = "make {make_install_target} {make_option}".format(
+        command = "{command} {make_install_target} {make_option}".format(
+            command=neutralEnv('make_command'),
             make_install_target=self.make_install_target,
             make_option=self.make_option
         )
@@ -397,7 +399,9 @@ class MakeBuilder(Builder):
 
     def _make_dist(self, context):
         context.try_skip(self.build_path)
-        command = "make dist"
+        command = "{command} dist".format(
+            command=neutralEnv('make_command'),
+        )
         env = self.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 
