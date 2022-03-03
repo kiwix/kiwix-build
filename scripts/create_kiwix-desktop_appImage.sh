@@ -23,9 +23,6 @@ cp $INSTALLDIR/$SYSTEMLIBDIR/*.so* $APPDIR/usr/lib
 rm -f $APPDIR/usr/lib/libmagic.so*
 # Copy nss lib (to not conflict with host's ones)
 cp -a /usr/$SYSTEMLIBDIR/nss $APPDIR/usr/lib
-cp -a /usr/$SYSTEMLIBDIR/libstdc++.so* $APPDIR/usr/lib
-cp -a /usr/$SYSTEMLIBDIR/libc.so* $APPDIR/usr/lib
-cp -a /usr/$SYSTEMLIBDIR/libz.so* $APPDIR/usr/lib
 cp $ICONFILE $APPDIR/usr/share/icons/hicolor/48x48/apps/kiwix-desktop.svg
 mkdir -p $APPDIR/usr/share/applications
 cp $DESKTOPFILE $APPDIR/usr/share/applications/kiwix-desktop.desktop
