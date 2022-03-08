@@ -1,7 +1,7 @@
-FROM fedora:31
+FROM fedora:35
 
 ENV LANG C.UTF-8
-ENV OS_NAME f31
+ENV OS_NAME f35
 
 RUN dnf install -y --nodocs \
 # Base build tools

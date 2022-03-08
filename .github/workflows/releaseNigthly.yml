@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [xenial, bionic, f31, focal]
+        variant: [xenial, bionic, f35, focal]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -62,7 +62,7 @@ jobs:
             image_variant: xenial
             lib_postfix: '/x86_64-linux-gnu'
           - target: win32_static
-            image_variant: f31
+            image_variant: f35
             lib_postfix: '64'
           - target: i586_static
             image_variant: xenial
