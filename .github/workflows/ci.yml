@@ -67,6 +67,7 @@ jobs:
     needs: Docker
     container:
       image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-31"
+      options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
       shell: bash
@@ -95,6 +96,13 @@ jobs:
       run: |
         cd $HOME
         kiwix-build/.github/scripts/compile_all_deps.py
+      env:
+        PLATFORM_TARGET: ${{matrix.target}}
+    - name: Build projects
+      shell: bash
+      run: |
+        cd $HOME
+        kiwix-build/.github/scripts/build_projects.py
       env:
         PLATFORM_TARGET: ${{matrix.target}}
     - name: Upload failure logs
@@ -151,6 +159,13 @@ jobs:
       run: |
         cd $HOME
         $GITHUB_WORKSPACE/.github/scripts/compile_all_deps.py
+      env:
+        PLATFORM_TARGET: ${{matrix.target}}
+    - name: Build projects
+      shell: bash
+      run: |
+        cd $HOME
+        $GITHUB_WORKSPACE/.github/scripts/build_projects.py
       env:
         PLATFORM_TARGET: ${{matrix.target}}
     - name: Upload failure logs
