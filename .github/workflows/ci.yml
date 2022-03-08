@@ -111,6 +111,48 @@ jobs:
       env:
         PLATFORM_TARGET: ${{matrix.target}}
 
+  Flatpak:
+    strategy:
+      fail-fast: false
+    env:
+      HOME: /home/runner
+      SSH_KEY: /tmp/id_rsa
+      PLATFORM_TARGET: flatpak
+      OS_NAME: focal
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      shell: bash
+      run: |
+        cd $HOME
+        git clone https://github.com/${REP}
+        cd ./${REP##*/}
+        git checkout --force ${GITHUB_SHA}
+        pip3 install --user --no-deps .
+      env:
+        REP: ${{github.repository}}
+    - name: Install flatpak tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install flatpak-builder ninja-build meson
+    - name: secret
+      shell: bash
+      run: |
+        echo "${{secrets.ssh_key}}" > $SSH_KEY
+        chmod 600 $SSH_KEY
+    - name: Ensure base deps
+      shell: bash
+      run: |
+        cd $HOME
+        kiwix-build/.github/scripts/ensure_base_deps.py
+    - name: Build projects
+      shell: bash
+      run: |
+        cd $HOME
+        kiwix-build/.github/scripts/build_projects.py
+    - name: Upload failure logs
+      if: failure()
+      run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
 
   Macos:
     strategy:

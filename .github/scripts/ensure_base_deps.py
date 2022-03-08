@@ -33,7 +33,7 @@ def download_base_archive(base_name):
 ARCHIVE_NAME_TEMPLATE = "base_deps2_{os}_{platform}_{version}.tar.xz"
 
 if PLATFORM_TARGET == 'flatpak':
-    base_dep_archive_name = "base_deps2_{}_flatpak.tar.xz".format(OS_NAME)
+    base_dep_archive_name = "base_deps2_flatpak.tar.xz"
 else:
     base_dep_archive_name = ARCHIVE_NAME_TEMPLATE.format(
         os=OS_NAME,
