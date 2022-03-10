@@ -22,7 +22,7 @@ class org_kde(Dependency):
             run_command(command, self.buildEnv.build_dir, context, env=env)
 
         def _install_sdk(self, context):
-            command = "flatpak --user install -y {remote_name} {name}.Sdk//{version} {name}.Platform//{version}"
+            command = "flatpak --user install --noninteractive --verbose -y {remote_name} {name}.Sdk//{version} {name}.Platform//{version}"
             command = command.format(
                 remote_name = 'flathub',
                 name = self.target.name,
