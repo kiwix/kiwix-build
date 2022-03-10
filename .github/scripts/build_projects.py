@@ -14,7 +14,7 @@ from common import (
 
 if PLATFORM_TARGET.startswith("android_"):
     TARGETS = ("libkiwix",)
-elif PLATFORM_TARGET.startswith("iOS"):
+elif PLATFORM_TARGET.startswith("iOS") or PLATFORM_TARGET.startswith("macOS"):
     TARGETS = ("libzim", "libkiwix")
 elif PLATFORM_TARGET.startswith("native_"):
     if OS_NAME == "osx":
