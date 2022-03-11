@@ -33,12 +33,13 @@ mkdir -p $APPDIR/usr/bin/ && tar -C $APPDIR/usr/bin/ -xf aria2-1.36.0-linux-gnu-
 mkdir -p $APPDIR/etc/ssl/certs/ && tar -C $APPDIR/etc/ssl/certs/ -xf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.36.0-linux-gnu-64bit-build1/ca-certificates.crt --strip-components=1
 
 # Get linuxdeployqt
-wget --continue https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage
-chmod a+x linuxdeployqt-6-x86_64.AppImage
+# Dispite the 'continuous' in the file name, it IS release 8
+wget --continue https://github.com/probonopd/linuxdeployqt/releases/download/8/linuxdeployqt-continuous-x86_64.AppImage -O linuxdeployqt
+chmod u+x linuxdeployqt
 
 # Fill with all deps libs and so
-./linuxdeployqt-6-x86_64.AppImage $APPDIR/usr/bin/kiwix-desktop -unsupported-allow-new-glibc -bundle-non-qt-libs -extra-plugins=imageformats,iconengines
+./linuxdeployqt $APPDIR/usr/bin/kiwix-desktop -bundle-non-qt-libs -extra-plugins=imageformats,iconengines
 # Fix the RPATH of QtWebEngineProcess [TODO] Fill a issue ?
 patchelf --set-rpath '$ORIGIN/../lib' $APPDIR/usr/libexec/QtWebEngineProcess
 # Build the image.
-./linuxdeployqt-6-x86_64.AppImage $APPDIR/usr/share/applications/kiwix-desktop.desktop -unsupported-allow-new-glibc -bundle-non-qt-libs -extra-plugins=imageformats,iconengines -appimage
+./linuxdeployqt $APPDIR/usr/share/applications/kiwix-desktop.desktop -bundle-non-qt-libs -extra-plugins=imageformats,iconengines -appimage
