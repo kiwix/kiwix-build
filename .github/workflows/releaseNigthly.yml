@@ -8,14 +8,14 @@ on:
    - cron: '0 1 * * *'
 
 env:
-  DOCKER_VERSION: 31
+  DOCKER_VERSION: 32
 
 jobs:
   Docker:
     strategy:
       fail-fast: false
       matrix:
-        variant: [xenial, bionic, f31, focal]
+        variant: [bionic, f35, focal]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -44,33 +44,29 @@ jobs:
           - win32_static
           - i586_static
           - android
-          - flatpak
         include:
           - target: native_static
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: native_dyn
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: native_mixed
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: native_desktop
             image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: armhf_static
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: win32_static
-            image_variant: f31
+            image_variant: f35
             lib_postfix: '64'
           - target: i586_static
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: android
-            image_variant: xenial
-            lib_postfix: '/x86_64-linux-gnu'
-          - target: flatpak
             image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
     env:
@@ -79,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: Docker
     container:
-      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-31"
+      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-32"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
@@ -113,13 +109,56 @@ jobs:
         PLATFORM_TARGET: ${{matrix.target}}
         BINTRAY_USER: kiwix
         BINTRAY_PASS: ${{secrets.bintray_pass}}
-        GITHUB_PAT: ${{secrets.GHCR_TOKEN}}
     - name: Upload failure logs
       if: failure()
       run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
       env:
         PLATFORM_TARGET: ${{matrix.target}}
 
+  Flatpak:
+    strategy:
+      fail-fast: false
+    env:
+      HOME: /home/runner
+      SSH_KEY: /tmp/id_rsa
+      PLATFORM_TARGET: flatpak
+      OS_NAME: focal
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      shell: bash
+      run: |
+        cd $HOME
+        git clone https://github.com/${REP}
+        cd ./${REP##*/}
+        git checkout --force ${GITHUB_SHA}
+        pip3 install --user --no-deps .
+      env:
+        REP: ${{github.repository}}
+    - name: Install flatpak tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install flatpak-builder ninja-build meson
+    - name: secret
+      shell: bash
+      run: |
+        echo "${{secrets.ssh_key}}" > $SSH_KEY
+        chmod 600 $SSH_KEY
+    - name: Ensure base deps
+      shell: bash
+      run: |
+        cd $HOME
+        kiwix-build/.github/scripts/ensure_base_deps.py
+    - name: Build release
+      shell: bash
+      run: |
+        cd $HOME
+        kiwix-build/.github/scripts/build_release_nightly.py
+      env:
+        GITHUB_PAT: ${{secrets.GHCR_TOKEN}}
+    - name: Upload failure logs
+      if: failure()
+      run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
 
   Macos:
     strategy:
@@ -148,7 +187,7 @@ jobs:
         brew install pkg-config ninja automake autoconf
     - name: Install python modules
       run: |
-        pip3 install meson==0.52.1 pytest requests distro
+        pip3 install meson pytest requests distro
         pip3 install --no-deps $GITHUB_WORKSPACE
     - name: secret
       shell: bash

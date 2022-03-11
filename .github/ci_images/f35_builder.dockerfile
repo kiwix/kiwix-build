@@ -1,7 +1,7 @@
-FROM fedora:31
+FROM fedora:35
 
 ENV LANG C.UTF-8
-ENV OS_NAME f31
+ENV OS_NAME f35
 
 RUN dnf install -y --nodocs \
 # Base build tools
@@ -19,7 +19,7 @@ RUN dnf install -y --nodocs \
   && dnf remove -y "*-doc" \
   && dnf autoremove -y \
   && dnf clean all \
-  && pip3 install meson==0.52.1 pytest requests distro
+  && pip3 install meson pytest requests distro
 
 # Create user
 RUN useradd --create-home runner
