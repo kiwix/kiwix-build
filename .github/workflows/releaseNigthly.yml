@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [xenial, bionic, f35, focal]
+        variant: [bionic, f35, focal]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -46,28 +46,28 @@ jobs:
           - android
         include:
           - target: native_static
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: native_dyn
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: native_mixed
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: native_desktop
             image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: armhf_static
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: win32_static
             image_variant: f35
             lib_postfix: '64'
           - target: i586_static
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: android
-            image_variant: xenial
+            image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
     env:
       HOME: /home/runner
