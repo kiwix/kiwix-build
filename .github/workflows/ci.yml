@@ -6,7 +6,7 @@ on:
    - cron: '0 1 * * *'
 
 env:
-  DOCKER_VERSION: 31
+  DOCKER_VERSION: 32
 
 jobs:
   Docker:
@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: Docker
     container:
-      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-31"
+      image: "kiwix/kiwix-build_ci:${{matrix.image_variant}}-32"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
@@ -182,7 +182,7 @@ jobs:
         brew install pkg-config ninja automake autoconf
     - name: Install python modules
       run: |
-        pip3 install meson==0.52.1 pytest requests distro
+        pip3 install meson pytest requests distro
         pip3 install --no-deps $GITHUB_WORKSPACE
     - name: secret
       shell: bash
