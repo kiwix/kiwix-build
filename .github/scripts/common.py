@@ -173,22 +173,31 @@ def upload(file_to_upload, host, dest_path):
     else:
         port = "22"
 
+    # sending SFTP mkdir command to the sftp interactive mode and not batch (-b) mode
+    # as the latter would exit on any mkdir error while it is most likely
+    # the first parts of the destination is already present and thus can't be created
+    sftp_commands = "\n".join(
+        [
+            f"mkdir {part}"
+            for part in list(reversed(Path(dest_path).parents)) + [dest_path]
+        ]
+    )
     command = [
-        "ssh",
-        "-p",
-        port,
+        "sftp",
         "-i",
         _environ.get("SSH_KEY"),
+        "-P",
+        port,
         "-o",
         "StrictHostKeyChecking=no",
         host,
-        "mkdir -p {}".format(dest_path),
     ]
     print_message("Creating dest path {}", dest_path)
-    subprocess.check_call(command)
+    subprocess.run(command, input=sftp_commands.encode("utf-8"), check=True)
 
     command = [
         "scp",
+        "-r",
         "-P",
         port,
         "-i",
