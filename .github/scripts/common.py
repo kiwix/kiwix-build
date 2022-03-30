@@ -168,8 +168,15 @@ def upload(file_to_upload, host, dest_path):
         print_message("No {} to upload!", file_to_upload)
         return
 
+    if ":" in host:
+        host, port = host.split(":", 1)
+    else:
+        port = "22"
+
     command = [
         "ssh",
+        "-p",
+        port,
         "-i",
         _environ.get("SSH_KEY"),
         "-o",
@@ -182,6 +189,8 @@ def upload(file_to_upload, host, dest_path):
 
     command = [
         "scp",
+        "-P",
+        port,
         "-i",
         _environ.get("SSH_KEY"),
         "-o",
@@ -195,10 +204,10 @@ def upload(file_to_upload, host, dest_path):
 
 def upload_archive(archive, project, make_release):
     if project.startswith("kiwix-") or project in ['libkiwix']:
-        host = "ci@download.kiwix.org"
+        host = "ci@master.download.kiwix.org:30022"
         dest_path = "/data/download/"
     else:
-        host = "ci@download.openzim.org"
+        host = "ci@download.openzim.org:30022"
         dest_path = "/data/openzim/"
 
     if make_release:
