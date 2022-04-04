@@ -9,7 +9,7 @@ tar -czf ${ARCHIVE_NAME} $HOME/BUILD_* $HOME/SOURCE $HOME/LOGS $HOME/TOOLCHAINS
 
 echo "Uploading archive $ARCHIVE_NAME"
 
-scp -p -i ${SSH_KEY} \
+scp -P 30022 -p -i ${SSH_KEY} \
   -o PasswordAuthentication=no \
   -o StrictHostKeyChecking=no \
   $ARCHIVE_NAME \

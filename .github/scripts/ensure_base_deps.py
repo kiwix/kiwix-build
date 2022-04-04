@@ -69,5 +69,5 @@ except URLError:
     else:
         run_kiwix_build("alldependencies", platform=PLATFORM_TARGET)
         archive_file = make_deps_archive(name=base_dep_archive_name, full=True)
-        upload(archive_file, "ci@tmp.kiwix.org", "/data/tmp/ci")
+        upload(archive_file, "ci@tmp.kiwix.org:30022", "/data/tmp/ci")
         os.remove(str(archive_file))

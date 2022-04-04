@@ -32,5 +32,5 @@ else:
 for target in TARGETS:
     run_kiwix_build(target, platform=PLATFORM_TARGET, build_deps_only=True)
     archive_file = make_deps_archive(target=target)
-    upload(archive_file, "ci@tmp.kiwix.org", "/data/tmp/ci")
+    upload(archive_file, "ci@tmp.kiwix.org:30022", "/data/tmp/ci")
     os.remove(str(archive_file))
