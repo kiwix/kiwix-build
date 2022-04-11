@@ -44,7 +44,7 @@ base_deps_meta_version = '76'
 base_deps_versions = {
   'zlib' : '1.2.12',
   'lzma' : '5.2.4',
-  'zstd' : '1.5.1',
+  'zstd' : '1.5.2',
   'docoptcpp' : '0.6.2',
   'uuid' : '1.43.4',
   'xapian-core' : '1.4.18',
