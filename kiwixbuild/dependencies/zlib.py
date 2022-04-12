@@ -13,8 +13,8 @@ class zlib(Dependency):
     name = 'zlib'
 
     class Source(ReleaseDownload):
-        archive = Remotefile('zlib-1.2.8.tar.gz',
-                             '36658cb768a54c1d4dec43c3116c27ed893e88b02ecfcb44f2166f9c0b7f2a0d')
+        archive = Remotefile('zlib-1.2.12.tar.gz',
+                             '91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9')
         patches = ['zlib_std_libname.patch']
 
     class Builder(MakeBuilder):
