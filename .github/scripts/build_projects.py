@@ -9,7 +9,6 @@ from common import (
     OS_NAME,
     PLATFORM_TARGET,
     DESKTOP,
-    notarize_macos_build,
 )
 
 if PLATFORM_TARGET.startswith("android_"):
@@ -43,5 +42,4 @@ for target in TARGETS:
     else:
         if PLATFORM_TARGET == "native_mixed" and OS_NAME == "osx":
             fix_macos_rpath(target)
-            notarize_macos_build(target)
         make_archive(target, make_release=False)

@@ -483,6 +483,8 @@ def notarize_macos_build(project):
     for filepath in filepaths:
         subprocess.check_call(["/usr/bin/codesign", "--force", "--sign",
                                os.getenv("SIGNING_IDENTITY", "no-signing-ident"),
+                               "--keychain",
+                               os.getenv("KEYCHAIN", "no-keychain-path"),
                                str(filepath), "--deep", "--timestamp"], env=os.environ)
 
     # create a zip of the dylibs and upload for notarization
