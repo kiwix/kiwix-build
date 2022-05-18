@@ -1,7 +1,7 @@
 # This file reference all the versions of the depedencies we use in kiwix-build.
 
 main_project_versions = {
-    'libzim': '7.2.1',
+    'libzim': '7.2.2',
     'libkiwix': '10.1.1',
     'kiwix-tools': '3.2.0',
     'zim-tools': '3.1.1',
@@ -30,10 +30,10 @@ main_project_versions = {
 
 release_versions = {
     'libzim': 0, # Depends of base deps (was 0)
-    'libkiwix': 1, # Depends of libzim (was 0)
-    'kiwix-tools': 4, # Depends of libkiwix and libzim (was 3)
-    'zim-tools': 0, # Depends of libzim (was 0)
-    'kiwix-desktop': 3 # Depends of libkiwix and libzim (was 2)
+    'libkiwix': 2, # Depends of libzim (was 1)
+    'kiwix-tools': 5, # Depends of libkiwix and libzim (was 4)
+    'zim-tools': 1, # Depends of libzim (was 0)
+    'kiwix-desktop': 4 # Depends of libkiwix and libzim (was 3)
 }
 
 
