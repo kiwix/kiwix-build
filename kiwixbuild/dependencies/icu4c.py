@@ -18,7 +18,8 @@ class Icu(Dependency):
                    "icu4c_custom_data.patch",
                    "icu4c_noxlocale.patch",
                    "icu4c_rpath.patch",
-                   "icu4c_build_config.patch"]
+                   "icu4c_build_config.patch",
+                   "icu4c_run_tools_w_qemu_if_endianess_differs.patch"]
 
 
     class Builder(MakeBuilder):
@@ -40,8 +41,10 @@ class Icu(Dependency):
                 icu_native_builder = get_target_step(
                     'icu4c',
                     'native_static' if platformInfo.static else 'native_dyn')
-                options += " --with-cross-build={} --disable-tools".format(
+                options += " --with-cross-build={}".format(
                     icu_native_builder.build_path)
+                if platformInfo.build == 'iOS':
+                    options += " --disable-tools"
             if platformInfo.build == 'android':
                 options += " --with-data-packaging=archive"
             return options
