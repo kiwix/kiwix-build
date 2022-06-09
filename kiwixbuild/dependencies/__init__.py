@@ -3,7 +3,6 @@ from .base import *
 from . import (
     all_dependencies,
     android_ndk,
-    android_sdk,
     aria2,
     armhf,
     docoptcpp,

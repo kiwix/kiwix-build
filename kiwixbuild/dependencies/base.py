@@ -548,30 +548,3 @@ class MesonBuilder(Builder):
         command = "{} -v dist".format(neutralEnv('ninja_command'))
         env = self.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
         run_command(command, self.build_path, context, env=env)
-
-
-class GradleBuilder(Builder):
-    gradle_target = "assembleKiwixRelease assembleKiwixDebug"
-    gradle_option = "-i --no-daemon --build-cache"
-
-    def build(self):
-        self.command('configure', self._configure)
-        if hasattr(self, '_pre_compile_script'):
-            self.command('pre_compile_script', self._pre_compile_script)
-        self.command('compile', self._compile)
-
-    def _configure(self, context):
-        # We don't have a lot to configure by itself
-        context.try_skip(self.build_path)
-        if os.path.exists(self.build_path):
-            shutil.rmtree(self.build_path)
-        shutil.copytree(self.source_path, self.build_path)
-
-    def _compile(self, context):
-        context.try_skip(self.build_path)
-        command = "./gradlew {gradle_target} {gradle_option}"
-        command = command.format(
-            gradle_target=self.gradle_target,
-            gradle_option=self.gradle_option)
-        env = self.get_env(cross_comp_flags=False, cross_compilers=True, cross_path=True)
-        run_command(command, self.build_path, context, env=env)

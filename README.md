@@ -74,12 +74,9 @@ invalid choice: 'not-existing-target' (choose from 'alldependencies', 'android-n
 
 #### Target platform
 
-If no target platform is specified, a default one will be infered from
-the specified target:
-- `libkiwix-app` will be build using the platform `android`
-- Other targets will be build using the platform `native_dyn`
+If no target platform is specified, the default will be `native_dyn`.
 
-But you can select another target platform using the option
+You can select another target platform using the option
 `--target-platform`. For now, there is ten different supported
 platforms:
 

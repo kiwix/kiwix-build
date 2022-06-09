@@ -126,7 +126,6 @@ class AndroidX8664(AndroidPlatformInfo):
 
 class Android(MetaPlatformInfo):
     name = "android"
-    toolchain_names = ['android-sdk']
     compatible_hosts = ['fedora', 'debian']
 
     @property
@@ -134,22 +133,10 @@ class Android(MetaPlatformInfo):
         return ['android_{}'.format(arch) for arch in option('android_arch')]
 
     def add_targets(self, targetName, targets):
-        if targetName not in ('libkiwix-app',):
-            return super().add_targets(targetName, targets)
-        else:
-            return AndroidPlatformInfo.add_targets(self, targetName, targets)
+        return super().add_targets(targetName, targets)
 
     def __str__(self):
         return self.name
-
-    @property
-    def sdk_builder(self):
-        return get_target_step('android-sdk', 'neutral')
-
-    def get_env(self):
-        env = super().get_env()
-        env['ANDROID_HOME'] = self.sdk_builder.install_path
-        return env
 
     def set_comp_flags(self, env):
         pass

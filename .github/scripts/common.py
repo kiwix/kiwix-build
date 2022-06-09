@@ -46,6 +46,10 @@ PLATFORM_TO_RELEASE = {
     "win32_static": "win-i686",
     "armhf_static": "{os}-armhf".format(os=RELEASE_OS_NAME),
     "i586_static": "{os}-i586".format(os=RELEASE_OS_NAME),
+    "android_arm": "android-arm",
+    "android_arm64": "android-arm64",
+    "android_x86": "android-x86",
+    "android_x86_64": "android-x86_64",
 }
 
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
@@ -93,6 +97,13 @@ EXPORT_FILES = {
             "include/zim/**/*.h",
         ),
     ),
+    "libkiwix": (
+        INSTALL_DIR,
+        (
+            "lib/libkiwix.so",
+            "include/kiwix/**/*.h"
+        ),
+    ),
 }
 
 DATE = date.today().isoformat()
@@ -134,9 +145,7 @@ def run_kiwix_build(
     command.append("--hide-progress")
     command.append("--fast-clone")
     command.append("--assume-packages-installed")
-    if target == "libkiwix-app" and platform.startswith("android_"):
-        command.extend(["--target-platform", "android", "--android-arch", platform[8:]])
-    elif platform == "android":
+    if platform == "android":
         command.extend(["--target-platform", "android"])
         for arch in ("arm", "arm64", "x86", "x86_64"):
             command.extend(["--android-arch", arch])
@@ -245,7 +254,6 @@ def make_deps_archive(target=None, name=None, full=False):
             if (base_dir / "meson_cross_file.txt").exists():
                 files_to_archive.append(base_dir / "meson_cross_file.txt")
     files_to_archive += HOME.glob("BUILD_*/android-ndk*")
-    files_to_archive += HOME.glob("BUILD_*/android-sdk*")
     if (BASE_DIR / "meson_cross_file.txt").exists():
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")
 
