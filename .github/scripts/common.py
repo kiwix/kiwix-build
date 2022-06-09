@@ -46,6 +46,10 @@ PLATFORM_TO_RELEASE = {
     "win32_static": "win-i686",
     "armhf_static": "{os}-armhf".format(os=RELEASE_OS_NAME),
     "i586_static": "{os}-i586".format(os=RELEASE_OS_NAME),
+    "android_arm": "android-arm",
+    "android_arm64": "android-arm64",
+    "android_x86": "android-x86",
+    "android_x86_64": "android-x86_64",
 }
 
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
@@ -91,6 +95,13 @@ EXPORT_FILES = {
             ),
             "lib/libzim.dylib",
             "include/zim/**/*.h",
+        ),
+    ),
+    "libkiwix": (
+        INSTALL_DIR,
+        (
+            "lib/libkiwix.so",
+            "include/kiwix/**/*.h"
         ),
     ),
 }
