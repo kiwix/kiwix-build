@@ -134,9 +134,7 @@ def run_kiwix_build(
     command.append("--hide-progress")
     command.append("--fast-clone")
     command.append("--assume-packages-installed")
-    if target == "libkiwix-app" and platform.startswith("android_"):
-        command.extend(["--target-platform", "android", "--android-arch", platform[8:]])
-    elif platform == "android":
+    if platform == "android":
         command.extend(["--target-platform", "android"])
         for arch in ("arm", "arm64", "x86", "x86_64"):
             command.extend(["--android-arch", arch])
@@ -245,7 +243,6 @@ def make_deps_archive(target=None, name=None, full=False):
             if (base_dir / "meson_cross_file.txt").exists():
                 files_to_archive.append(base_dir / "meson_cross_file.txt")
     files_to_archive += HOME.glob("BUILD_*/android-ndk*")
-    files_to_archive += HOME.glob("BUILD_*/android-sdk*")
     if (BASE_DIR / "meson_cross_file.txt").exists():
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")
 

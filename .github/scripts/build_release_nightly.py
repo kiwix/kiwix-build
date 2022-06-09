@@ -33,7 +33,7 @@ else:
     RELEASE = True
 
 if PLATFORM_TARGET == "android":
-    TARGETS = ("libkiwix-app",)
+    TARGETS = ("libkiwix",)
 elif PLATFORM_TARGET.startswith("iOS"):
     TARGETS = ("libzim", "libkiwix")
 elif PLATFORM_TARGET.startswith("native_"):
@@ -56,8 +56,6 @@ else:
 # Filter what to build if we are doing a release.
 if RELEASE:
     def release_filter(project):
-        if project == "libkiwix-app":
-            project = "libkiwix"
         return release_versions.get(project) is not None
     TARGETS = tuple(filter(release_filter, TARGETS))
 
@@ -109,7 +107,7 @@ if RELEASE:
     if PLATFORM_TARGET == "flatpak" and "kiwix-desktop" in TARGETS:
         update_flathub_git()
 
-    if PLATFORM_TARGET == "android" and "libkiwix-app" in TARGETS:
+    if PLATFORM_TARGET == "android" and "libkiwix" in TARGETS:
         postfix = get_postfix("libkiwix")
         basename = "kiwixlib-{}".format(postfix)
 
