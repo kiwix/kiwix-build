@@ -145,12 +145,7 @@ def run_kiwix_build(
     command.append("--hide-progress")
     command.append("--fast-clone")
     command.append("--assume-packages-installed")
-    if platform == "android":
-        command.extend(["--target-platform", "android"])
-        for arch in ("arm", "arm64", "x86", "x86_64"):
-            command.extend(["--android-arch", arch])
-    else:
-        command.extend(["--target-platform", platform])
+    command.extend(["--target-platform", platform])
     if build_deps_only:
         command.append("--build-deps-only")
     if target_only:
@@ -245,14 +240,12 @@ def make_deps_archive(target=None, name=None, full=False):
     files_to_archive += HOME.glob("BUILD_*/LOGS")
     if PLATFORM_TARGET == "native_mixed":
         files_to_archive += [HOME / "BUILD_native_static" / "INSTALL"]
-    if PLATFORM_TARGET.startswith("android"):
+    if PLATFORM_TARGET.startswith("android_"):
         files_to_archive.append(HOME / "BUILD_neutral" / "INSTALL")
-    if PLATFORM_TARGET == "android":
-        for arch in ("arm", "arm64", "x86", "x86_64"):
-            base_dir = HOME / "BUILD_android_{}".format(arch)
-            files_to_archive.append(base_dir / "INSTALL")
-            if (base_dir / "meson_cross_file.txt").exists():
-                files_to_archive.append(base_dir / "meson_cross_file.txt")
+        base_dir = HOME / "BUILD_{}".format(PLATFORM_TARGET)
+        files_to_archive.append(base_dir / "INSTALL")
+        if (base_dir / "meson_cross_file.txt").exists():
+            files_to_archive.append(base_dir / "meson_cross_file.txt")
     files_to_archive += HOME.glob("BUILD_*/android-ndk*")
     if (BASE_DIR / "meson_cross_file.txt").exists():
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")

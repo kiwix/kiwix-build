@@ -43,7 +43,10 @@ jobs:
           - armhf_static
           - win32_static
           - i586_static
-          - android
+          - android_arm
+          - android_arm64
+          - android_x86
+          - android_x86_64
         include:
           - target: native_static
             image_variant: bionic
@@ -66,7 +69,16 @@ jobs:
           - target: i586_static
             image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
-          - target: android
+          - target: android_arm
+            image_variant: bionic
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: android_arm64
+            image_variant: bionic
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: android_x86
+            image_variant: bionic
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: android_x86_64
             image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
     env:

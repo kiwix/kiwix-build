@@ -48,25 +48,10 @@ try:
         f.extractall(str(HOME))
     os.remove(str(local_filename))
 except URLError:
-    print_message("Cannot get archive. Build dependencies")
-    if PLATFORM_TARGET == "android":
-        for arch in ("arm", "arm64", "x86", "x86_64"):
-            archive_name = ARCHIVE_NAME_TEMPLATE.format(
-                os=OS_NAME,
-                platform="android_{}".format(arch),
-                version=base_deps_meta_version,
-            )
-            print_message("Getting archive {}", archive_name)
-            try:
-                local_filename = download_base_archive(archive_name)
-                with tarfile.open(local_filename) as f:
-                    f.extractall(str(HOME))
-                os.remove(str(local_filename))
-            except URLError:
-                pass
-    elif PLATFORM_TARGET == "flatpak":
+    if PLATFORM_TARGET == "flatpak":
         print_message("Cannot get archive. Move on")
     else:
+        print_message("Cannot get archive. Build dependencies")
         run_kiwix_build("alldependencies", platform=PLATFORM_TARGET)
         archive_file = make_deps_archive(name=base_dep_archive_name, full=True)
         upload(archive_file, "ci@tmp.kiwix.org:30022", "/data/tmp/ci")

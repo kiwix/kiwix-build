@@ -27,7 +27,7 @@ if os.environ.get('GITHUB_EVENT_NAME') == 'schedule':
 else:
     RELEASE = True
 
-if PLATFORM_TARGET == "android":
+if PLATFORM_TARGET.startswith("android_"):
     TARGETS = ("libkiwix",)
 elif PLATFORM_TARGET.startswith("iOS"):
     TARGETS = ("libzim", "libkiwix")
@@ -53,12 +53,6 @@ if RELEASE:
     def release_filter(project):
         return release_versions.get(project) is not None
     TARGETS = tuple(filter(release_filter, TARGETS))
-
-if RELEASE and PLATFORM_TARGET == "android":
-    # libkiwix need to know the extrapostfix version to correctly generate the pom.xml file.
-    extra_postfix = release_versions.get('libkiwix')
-    if extra_postfix:
-        os.environ['KIWIXLIB_BUILDVERSION'] = str(extra_postfix)
 
 for target in TARGETS:
     run_kiwix_build(target, platform=PLATFORM_TARGET, make_release=RELEASE)
