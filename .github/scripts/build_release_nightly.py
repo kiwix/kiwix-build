@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 
 import os
-import json
-import shutil
 
 from common import (
     run_kiwix_build,
     main_project_versions,
     release_versions,
-    get_postfix,
     make_archive,
     create_desktop_image,
     update_flathub_git,
@@ -24,15 +21,13 @@ from common import (
     notarize_macos_build,
 )
 
-from upload_to_bintray import upload_from_json
-
 
 if os.environ.get('GITHUB_EVENT_NAME') == 'schedule':
     RELEASE = False
 else:
     RELEASE = True
 
-if PLATFORM_TARGET == "android":
+if PLATFORM_TARGET.startswith("android_"):
     TARGETS = ("libkiwix",)
 elif PLATFORM_TARGET.startswith("iOS"):
     TARGETS = ("libzim", "libkiwix")
@@ -58,12 +53,6 @@ if RELEASE:
     def release_filter(project):
         return release_versions.get(project) is not None
     TARGETS = tuple(filter(release_filter, TARGETS))
-
-if RELEASE and PLATFORM_TARGET == "android":
-    # libkiwix need to know the extrapostfix version to correctly generate the pom.xml file.
-    extra_postfix = release_versions.get('libkiwix')
-    if extra_postfix:
-        os.environ['KIWIXLIB_BUILDVERSION'] = str(extra_postfix)
 
 for target in TARGETS:
     run_kiwix_build(target, platform=PLATFORM_TARGET, make_release=RELEASE)
@@ -106,28 +95,3 @@ if RELEASE:
     # Publish flathub
     if PLATFORM_TARGET == "flatpak" and "kiwix-desktop" in TARGETS:
         update_flathub_git()
-
-    if PLATFORM_TARGET == "android" and "libkiwix" in TARGETS:
-        postfix = get_postfix("libkiwix")
-        basename = "kiwixlib-{}".format(postfix)
-
-        output_release_dir = (
-            HOME / "BUILD_android" / "libkiwix-app" / "kiwixLibAndroid" / "build"
-        )
-        shutil.copy(
-            str(output_release_dir / "outputs" / "aar" / "kiwixLibAndroid-release.aar"),
-            str(TMP_DIR / (basename + ".aar")),
-        )
-        shutil.copy(
-            str(output_release_dir / "pom.xml"), str(TMP_DIR / (basename + ".pom"))
-        )
-
-        json_filename = "{}_bintray_info.json".format(basename)
-        data = {
-            "version": postfix,
-            "files": [basename + ext for ext in (".aar", ".pom")],
-        }
-        with open(str(TMP_DIR / json_filename), "w") as f:
-            json.dump(data, f)
-
-        upload_from_json(TMP_DIR / json_filename)
