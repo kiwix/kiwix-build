@@ -1,6 +1,6 @@
 REM ========================================================
 REM Install xapian
-curl -fsSL -O http://mirror.download.kiwix.org/dev/xapian-core-1.4.18.zip || exit /b 1
+curl -fsSL -O http://mirror.download.kiwix.org/dev/kiwix-build/xapian-core-1.4.18.zip || exit /b 1
 7z x xapian-core-1.4.18.zip || exit /b 1
 cd xapian-core-1.4.18
 mkdir build
