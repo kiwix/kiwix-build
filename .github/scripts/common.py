@@ -52,6 +52,13 @@ PLATFORM_TO_RELEASE = {
     "android_x86_64": "android-x86_64",
 }
 
+LIB_PREFIX = {
+    "android_arm": "arm-linux-androideabi",
+    "android_arm64": "aarch64-linux-android",
+    "android_x86": "i686-linux-android",
+    "android_x86_64": "x86_64-linux-android",
+}
+
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
 
@@ -100,7 +107,17 @@ EXPORT_FILES = {
     "libkiwix": (
         INSTALL_DIR,
         (
-            "lib/libkiwix.so",
+            "lib/{libprefix}/libkiwix.so".format(
+                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            ),
+            "lib/{libprefix}/libkiwix.so.{version}".format(
+                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+                version=main_project_versions["libkiwix"]
+            ),
+            "lib/{libprefix}/libkiwix.so.{version}".format(
+                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+                version=main_project_versions["libkiwix"][0]
+            ),
             "include/kiwix/**/*.h"
         ),
     ),

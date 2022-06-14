@@ -13,6 +13,10 @@ class AndroidPlatformInfo(PlatformInfo):
         return "android"
 
     @property
+    def libdir(self):
+        return 'lib/{}'.format(self.arch_full)
+
+    @property
     def binaries_name(self):
         arch_full = self.arch_full
         return {
