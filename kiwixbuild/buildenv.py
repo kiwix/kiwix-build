@@ -102,6 +102,8 @@ class BuildEnv:
         return os.path.isfile('/etc/debian_version')
 
     def _detect_libdir(self):
+        if self.platformInfo.libdir is not None:
+            return self.platformInfo.libdir
         if self._is_debianlike():
             try:
                 pc = subprocess.Popen(['dpkg-architecture', '-qDEB_HOST_MULTIARCH'],

@@ -24,6 +24,7 @@ class PlatformInfo(metaclass=_MetaPlatform):
     all_running_platforms = {}
     toolchain_names = []
     configure_option = ""
+    libdir = None
 
     @classmethod
     def get_platform(cls, name, targets=None):
