@@ -70,7 +70,7 @@ EXPORT_FILES = {
         INSTALL_DIR / "bin",
         [
             f + BIN_EXT
-            for f in ("kiwix-manage", "kiwix-read", "kiwix-search", "kiwix-serve")
+            for f in ("kiwix-manage", "kiwix-search", "kiwix-serve")
         ],
     ),
     "zim-tools": (
