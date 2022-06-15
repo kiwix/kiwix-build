@@ -3,8 +3,8 @@
 Kiwix Build provides advanced tools to (cross-)compile easily
 [Kiwix](https://kiwix.org) & [openZIM](https://openzim.org) softwares
 and libraries and deploy them. They have been tested on
-[Fedora](https://getfedora.org) 23+ & [Ubuntu](https://ubuntu.com)
-16.10+.
+[Fedora](https://getfedora.org) 35+ & [Ubuntu](https://ubuntu.com)
+18.04+.
 
 [![Build Status](https://github.com/kiwix/kiwix-build/workflows/CI/badge.svg?query=branch%3Amaster)](https://github.com/kiwix/kiwix-build/actions?query=branch%3Amaster)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -35,7 +35,7 @@ Then, download and install kiwix-build and its dependencies:
 ```bash
 git clone https://github.com/kiwix/kiwix-build.git
 cd kiwix-build
-pip install .
+pip3 install .
 hash -r # Refresh bash paths
 ```
 
@@ -118,16 +118,16 @@ kiwix-build libkiwix --target-platform android_arm
 But, `libkiwix-app` is mainly multi arch.
 To compile `libkiwix-app`, you must use the `android` platform:
 ```bash
-$ kiwix-build --target-platform android libkiwix-app
-$ kiwix-build libkiwix-app # because `android` platform is the default for `libkiwix-app`
+kiwix-build --target-platform android libkiwix-app
+kiwix-build libkiwix-app # because `android` platform is the default for `libkiwix-app`
 ```
 
 By default, when using platform `android`, `libkiwix` will be build for
 all architectures. This can be changed by using the option `--android-arch`:
 ```bash
-$ kiwix-build libkiwix-app # aar with all architectures
-$ kiwix-build libkiwix-app --android-arch arm # aar with arm architecture
-$ kiwix-build libkiwix-app --android-arch arm --android-arch arm64 # aan with arm and arm64 architectures
+kiwix-build libkiwix-app # aar with all architectures
+kiwix-build libkiwix-app --android-arch arm # aar with arm architecture
+kiwix-build libkiwix-app --android-arch arm --android-arch arm64 # aan with arm and arm64 architectures
 ```
 
 To build `kiwix-android` itself, you should see the documentation of `kiwix-android`.
