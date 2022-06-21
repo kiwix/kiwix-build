@@ -21,6 +21,9 @@ class PlatformNeutralEnv:
                   self.log_dir):
             os.makedirs(d, exist_ok=True)
         self.detect_platform()
+        self.make_command = self._detect_make()
+        if not self.make_command:
+            sys.exit("ERROR: make command not found.")
         self.ninja_command = self._detect_ninja()
         if not self.ninja_command:
             sys.exit("ERROR: ninja command not found.")
@@ -35,12 +38,6 @@ class PlatformNeutralEnv:
     def detect_platform(self):
         _platform = platform.system()
         self.distname = _platform
-        if _platform == 'Windows':
-            print('ERROR: kiwix-build is not intented to run on Windows platform.\n'
-                  'It should probably not work, but well, you still can have a try.')
-            cont = input('Do you want to continue ? [y/N]')
-            if cont.lower() != 'y':
-                sys.exit(0)
         if _platform == 'Linux':
             self.distname = distro.id()
             if self.distname == 'ubuntu':
@@ -61,6 +58,8 @@ class PlatformNeutralEnv:
             if retcode == 0:
                 return n
 
+    def _detect_make(self):
+        return self._detect_binary('make.exe', 'make')
 
     def _detect_ninja(self):
         return self._detect_binary('ninja', 'ninja-build')

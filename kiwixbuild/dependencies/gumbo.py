@@ -15,9 +15,9 @@ class Gumbo(Dependency):
                              '28463053d44a5dfbc4b77bcf49c8cee119338ffa636cc17fc3378421d714efad',
                              'https://github.com/google/gumbo-parser/archive/v0.10.1.tar.gz')
 
-        def _post_prepare_script(self, context):
-            context.try_skip(self.extract_path)
-            command = "./autogen.sh"
-            run_command(command, self.extract_path, context)
+    #    def _post_prepare_script(self, context):
+    #        context.try_skip(self.extract_path)
+    #        command = "./autogen.sh"
+    #        run_command(command, self.extract_path, context)
 
     Builder = MakeBuilder
