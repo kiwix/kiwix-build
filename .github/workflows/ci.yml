@@ -18,7 +18,7 @@ jobs:
     - name: Setup python 3.8
       uses: actions/setup-python@v1
       with:
-        python-version: '3.6'
+        python-version: '3.8'
     - name: secret
       shell: bash
       run: |
@@ -26,7 +26,7 @@ jobs:
         chmod 600 $SSH_KEY
     - name: Install packages
       run: |
-        choco.exe install pkgconfiglite ninja make
+        choco.exe install make
         #- run: |
       #ls
         #libtoolize
@@ -36,7 +36,7 @@ jobs:
     - name: Install python modules
       shell: bash
       run: |
-        pip3 install meson==0.52.1 pytest requests distro
+        pip3 install meson==0.52.1 pytest requests distro ninja
         pip3 install --no-deps $GITHUB_WORKSPACE
     - name: Ensure base deps
       shell: bash
