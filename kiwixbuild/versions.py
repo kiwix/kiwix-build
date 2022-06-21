@@ -58,7 +58,7 @@ base_deps_versions = {
   'android-ndk' : 'r13b',
   'qt' : '5.10.1',
   'qtwebengine' : '5.10.1',
-  'org.kde' : '5.15',
-  'io.qt.qtwebengine' : '5.15',
+  'org.kde' : '5.15-21.08',
+  'io.qt.qtwebengine' : '5.15-21.08',
   'zim-testing-suite': '0.3',
 }
