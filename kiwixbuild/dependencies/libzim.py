@@ -29,6 +29,7 @@ class Libzim(Dependency):
             config_options = []
             if platformInfo.build == 'android':
                 config_options.append("-DUSE_BUFFER_HEADER=false")
+                config_options.append("-Dstatic-linkage=true")
             if platformInfo.build == 'iOS':
                 config_options.append("-Db_bitcode=true")
             if platformInfo.name == 'native_mixed' and option('target') == 'libzim':
@@ -40,3 +41,9 @@ class Libzim(Dependency):
                 zim_testing_suite = get_target_step('zim-testing-suite', 'source')
                 config_options.append('-Dtest_data_dir={}'.format(zim_testing_suite.source_path))
             return " ".join(config_options)
+
+        @property
+        def library_type(self):
+            if self.buildEnv.platformInfo.build == 'android':
+                return 'shared'
+            return super().library_type
