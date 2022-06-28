@@ -12,9 +12,7 @@ from common import (
     KIWIX_DESKTOP_ONLY,
 )
 
-if PLATFORM_TARGET.startswith("android_"):
-    TARGETS = ("libzim", "libkiwix")
-elif PLATFORM_TARGET.startswith("iOS"):
+if PLATFORM_TARGET.startswith("android_") or PLATFORM_TARGET.startswith("iOS"):
     TARGETS = ("libzim", "libkiwix")
 elif PLATFORM_TARGET.startswith("native_"):
     if OS_NAME == "osx":

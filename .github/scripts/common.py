@@ -93,9 +93,16 @@ EXPORT_FILES = {
     "libzim": (
         INSTALL_DIR,
         (
-            "lib/x86_64-linux-gnu/libzim.so.{}".format(main_project_versions["libzim"]),
-            "lib/x86_64-linux-gnu/libzim.so.{}".format(
-                main_project_versions["libzim"][0]
+            "lib/{libprefix}/libzim.so".format(
+                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            ),
+            "lib/{libprefix}/libzim.so.{version}".format(
+                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+                version=main_project_versions["libzim"]
+            ),
+            "lib/{libprefix}/libzim.so.{version}".format(
+                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+                version=main_project_versions["libzim"][0]
             ),
             "lib/libzim.{}.dylib".format(
                 main_project_versions["libzim"][0]
