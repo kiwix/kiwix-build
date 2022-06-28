@@ -16,7 +16,7 @@ RUN apt update -q \
 # Python (2) is needed to install android-ndk
     python \
 # Packaged dependencies
-    libbz2-dev libmagic-dev uuid-dev zlib1g-dev default-jdk \
+    libbz2-dev libmagic-dev uuid-dev zlib1g-dev \
     libmicrohttpd-dev aria2 libgtest-dev libgl-dev \
 # Qt packages
     qt515base qt515webengine qt515svg qt515imageformats qt515wayland \

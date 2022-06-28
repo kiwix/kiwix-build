@@ -27,9 +27,7 @@ if os.environ.get('GITHUB_EVENT_NAME') == 'schedule':
 else:
     RELEASE = True
 
-if PLATFORM_TARGET.startswith("android_"):
-    TARGETS = ("libkiwix",)
-elif PLATFORM_TARGET.startswith("iOS"):
+if PLATFORM_TARGET.startswith("android_") or PLATFORM_TARGET.startswith("iOS"):
     TARGETS = ("libzim", "libkiwix")
 elif PLATFORM_TARGET.startswith("native_"):
     if OS_NAME == "osx":

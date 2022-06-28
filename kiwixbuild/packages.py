@@ -61,7 +61,7 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON': _fedora_common
     },
     'fedora_android': {
-        'COMMON': _fedora_common + ['java-1.8.0-openjdk-devel']
+        'COMMON': _fedora_common
     },
     'debian_native_dyn': {
         'COMMON': _debian_common + ['libbz2-dev', 'libmagic-dev'],
@@ -94,7 +94,7 @@ PACKAGE_NAME_MAPPERS = {
         'COMMON': _debian_common,
     },
     'debian_android': {
-        'COMMON': _debian_common + ['default-jdk'],
+        'COMMON': _debian_common,
     },
     'Darwin_native_dyn': {
         'COMMON': ['autoconf', 'automake', 'libtool', 'cmake', 'pkg-config'],
