@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [bionic, f35, focal]
+        variant: [bionic, f35, focal, alpine]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
