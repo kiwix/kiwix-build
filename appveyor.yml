@@ -62,7 +62,7 @@ build_script:
   - appveyor\install_kiwix-desktop.cmd
 
 before_deploy:
-  - cmd: openssl enc -d -pbkdf2 -aes-256-cbc -md sha256 -pass pass:%win_certificate_secret% -in appveyor\kiwix.p12.enc -out appveyor\kiwix.pfx
+  - cmd: openssl enc -d -pbkdf2 -aes-256-cbc -md sha256 -pass pass:%win_certificate_secret% -in appveyor\kiwix.pfx.enc -out appveyor\kiwix.pfx
   - cmd: '%MINGW64_RUN% "cd /c/projects/kiwix-build && appveyor/package_kiwix-desktop.sh"'
 
 deploy_script:
