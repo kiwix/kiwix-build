@@ -184,9 +184,9 @@ jobs:
       OS_NAME: osx
       CERTIFICATE: /tmp/wmch-devid.p12
       SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-      ALTOOL_USERNAME: ${{ secrets.APPLE_SIGNING_ALTOOL_USERNAME }}
-      ASC_PROVIDER: ${{ secrets.APPLE_SIGNING_TEAM }}
       KEYCHAIN: /Users/runner/build.keychain-db
+      KEYCHAIN_PASSWORD: mysecretpassword
+      KEYCHAIN_PROFILE: build-profile
     steps:
     - name: Checkout code
       uses: actions/checkout@v1
@@ -210,16 +210,21 @@ jobs:
       shell: bash
       run: |
         echo "${{ secrets.APPLE_SIGNING_CERTIFICATE }}" | base64 --decode -o $CERTIFICATE
-        security create-keychain -p mysecretpassword $KEYCHAIN
+        security create-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN
         security default-keychain -s $KEYCHAIN
         security set-keychain-settings $KEYCHAIN
-        security unlock-keychain -p mysecretpassword $KEYCHAIN
+        security unlock-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN
         security import $CERTIFICATE -k $KEYCHAIN -P "${{ secrets.APPLE_SIGNING_P12_PASSWORD }}" -A -T "/usr/bin/codesign"
         rm $CERTIFICATE
-        security set-key-partition-list -S apple-tool:,apple: -s -k mysecretpassword $KEYCHAIN
+        security set-key-partition-list -S apple-tool:,apple: -s -k $KEYCHAIN_PASSWORD $KEYCHAIN
         security find-identity -v $KEYCHAIN
-        sudo sntp -sS -t 60 time4.google.com || true
-        xcrun altool --keychain $KEYCHAIN --store-password-in-keychain-item "ALTOOL_PASSWORD" -u "$ALTOOL_USERNAME" -p "${{ secrets.APPLE_SIGNING_ALTOOL_PASSWORD }}"
+        xcrun notarytool store-credentials \
+            --apple-id "${{ secrets.APPLE_SIGNING_ALTOOL_USERNAME }}" \
+            --password "${{ secrets.APPLE_SIGNING_ALTOOL_PASSWORD }}" \
+            --team-id "${{ secrets.APPLE_SIGNING_TEAM }}" \
+            --validate \
+            --keychain $KEYCHAIN \
+            $KEYCHAIN_PROFILE
     - name: Ensure base deps
       shell: bash
       run: |
