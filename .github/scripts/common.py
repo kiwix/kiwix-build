@@ -487,11 +487,10 @@ def notarize_macos_build(project):
     """ sign and notarize files for macOS
 
         Expects the following environment:
-        - Imported Mac/Apple Distribution certificate (with private key) in Keychain
         - `SIGNING_IDENTITY` environ with Certificate name/identity
-        - `ALTOOL_USERNAME` with Apple ID of an account with perms on the certificate
-        - Keychain entry `ALTOOL_PASSWORD` with an app-specific password for the account
-        - `ASC_PROVIDER` environ with Team ID
+        - `KEYCHAIN` environ with path to the keychain storing credentials
+        - `KEYCHAIN_PROFILE` environ with name of the profile in that keychain
+        - `KEYCHAIN_PASSWORD` environ with password to unlock the keychain
         """
     if project != "libzim":
         return
@@ -519,13 +518,35 @@ def notarize_macos_build(project):
         + [str(f) for f in filepaths] + [zip_name],
         env=os.environ)
 
-    subprocess.check_call(["/usr/bin/xcrun", "altool", "--notarize-app",
-                           "--file", str(zip_name),
-                           "--primary-bundle-id", "org.kiwix.build.{}".format(project),
-                           "--username", os.getenv("ALTOOL_USERNAME", "missing"),
-                           "--password", "@keychain:ALTOOL_PASSWORD",
-                           "--asc-provider", os.getenv("ASC_PROVIDER")], env=os.environ)
+    # make sure keychain is unlocked
+    subprocess.check_call(
+        [
+            "/usr/bin/security",
+            "unlock-keychain",
+            "-p",
+            os.getenv("KEYCHAIN_PASSWORD", "no-keychain-password"),
+            os.getenv("KEYCHAIN", "no-keychain-path"),
+        ],
+        env=os.environ,
+    )
+
+    subprocess.check_call(
+        [
+            "/usr/bin/xcrun",
+            "notarytool",
+            "submit",
+            "--keychain",
+            os.getenv("KEYCHAIN", "no-keychain-path"),
+            "--keychain-profile",
+            os.getenv("KEYCHAIN_PROFILE", "no-keychain-profile"),
+            "--wait",
+            str(zip_name),
+        ],
+        env=os.environ,
+    )
 
     # check notarization of a file (should be in-progress atm and this != 0)
-    subprocess.call(["/usr/sbin/spctl", "-a", "-v", "-t", "install",
-                    filepaths[-1]], env=os.environ)
+    subprocess.call(
+        ["/usr/sbin/spctl", "--assess", "-vv", "--type", "install", filepaths[-1]],
+        env=os.environ,
+    )
