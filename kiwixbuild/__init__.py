@@ -13,7 +13,13 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('target', default='kiwix-tools', nargs='?', metavar='TARGET',
                         choices=Dependency.all_deps.keys())
-    parser.add_argument('--working-dir', default=".")
+    parser.add_argument('--working-dir', default=".",
+                        help=("Directory where kiwix-build puts all its files "
+                              "(source, archive and build)\n"
+                              "working-dir can be absolute path or a relative (to cwd) one."))
+    parser.add_argument('--build-dir', default=".",
+                        help=("Directory where kiwix-build puts all build files.\n"
+                              "build-dir can be absolute path or a relative (to working-dir) one."))
     parser.add_argument('--libprefix', default=None)
     parser.add_argument('--target-platform', choices=PlatformInfo.all_platforms)
     parser.add_argument('--verbose', '-v', action="store_true",
