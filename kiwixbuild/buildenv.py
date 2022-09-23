@@ -76,7 +76,8 @@ class BuildEnv:
     def __init__(self, platformInfo):
         build_dir = "BUILD_{}".format(platformInfo.name)
         self.platformInfo = platformInfo
-        self.build_dir = pj(option('working_dir'), build_dir)
+        self.base_build_dir = pj(option('working_dir'), option('build_dir'))
+        self.build_dir = pj(self.base_build_dir, build_dir)
         self.install_dir = pj(self.build_dir, "INSTALL")
         self.toolchain_dir = pj(self.build_dir, "TOOLCHAINS")
         self.log_dir = pj(self.build_dir, 'LOGS')
