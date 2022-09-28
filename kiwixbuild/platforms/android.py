@@ -20,8 +20,8 @@ class AndroidPlatformInfo(PlatformInfo):
     def binaries_name(self):
         arch_full = self.arch_full
         return {
-          'CC': '{}-{}'.format(arch_full, 'gcc'),
-          'CXX': '{}-{}'.format(arch_full, 'g++'),
+          'CC': '{}-{}'.format(arch_full, 'clang'),
+          'CXX': '{}-{}'.format(arch_full, 'clang++'),
           'AR': '{}-{}'.format(arch_full, 'ar'),
           'STRIP': '{}-{}'.format(arch_full, 'strip'),
           'RANLIB': '{}-{}'.format(arch_full, 'ranlib'),

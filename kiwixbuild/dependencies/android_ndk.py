@@ -10,11 +10,12 @@ class android_ndk(Dependency):
     neutral = False
     name = 'android-ndk'
     gccver = '4.9.x'
+    api = '24'
 
     class Source(ReleaseDownload):
-        archive = Remotefile('android-ndk-r13b-linux-x86_64.zip',
-                             '3524d7f8fca6dc0d8e7073a7ab7f76888780a22841a6641927123146c3ffd29c',
-                             'https://dl.google.com/android/repository/android-ndk-r13b-linux-x86_64.zip')
+        archive = Remotefile('android-ndk-r21e-linux-x86_64.zip',
+                             'ad7ce5467e18d40050dc51b8e7affc3e635c85bd8c59be62de32352328ed467e',
+                             'https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip')
 
         @property
         def source_dir(self):
@@ -28,7 +29,7 @@ class android_ndk(Dependency):
 
         @property
         def api(self):
-            return '21' if self.arch in ('arm64', 'x86_64') else '14'
+            return self.target.api
 
         @property
         def platform(self):
