@@ -226,7 +226,7 @@ def upload(file_to_upload, host, dest_path):
 
     command = [
         "scp",
-        "-r",
+        "-rp",
         "-P",
         port,
         "-i",
@@ -241,6 +241,10 @@ def upload(file_to_upload, host, dest_path):
 
 
 def upload_archive(archive, project, make_release):
+    if not archive.exists():
+        print_message("No archive {} to upload!", archive)
+        return
+
     if project.startswith("kiwix-") or project in ['libkiwix']:
         host = "ci@master.download.kiwix.org:30022"
         dest_path = "/data/download/"
@@ -252,6 +256,10 @@ def upload_archive(archive, project, make_release):
         dest_path = dest_path + "release/" + project
     else:
         dest_path = dest_path + "nightly/" + DATE
+
+    # Make the archive read only. This way, scp will preserve rights.
+    # If somehow we try to upload twice the same archive, scp will fails.
+    archive.chmod(0o444)
 
     upload(archive, host, dest_path)
 
