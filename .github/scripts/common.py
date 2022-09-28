@@ -37,6 +37,7 @@ KIWIX_DESKTOP_ONLY = False
 
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
 MAKE_RELEASE = re.fullmatch(r"r_[0-9]+", _ref) is not None
+MAKE_RELEASE = MAKE_RELEASE and (_environ.get('GITHUB_EVENT_NAME') != 'schedule')
 
 RELEASE_OS_NAME = "macos" if OS_NAME == "osx" else "linux"
 

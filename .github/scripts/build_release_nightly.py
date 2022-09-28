@@ -18,14 +18,9 @@ from common import (
     OS_NAME,
     PLATFORM_TARGET,
     DESKTOP,
+    MAKE_RELEASE,
     notarize_macos_build,
 )
-
-
-if os.environ.get('GITHUB_EVENT_NAME') == 'schedule':
-    RELEASE = False
-else:
-    RELEASE = True
 
 if PLATFORM_TARGET.startswith("android_") or PLATFORM_TARGET.startswith("iOS"):
     TARGETS = ("libzim", "libkiwix")
@@ -47,34 +42,34 @@ else:
     TARGETS = ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
 
 # Filter what to build if we are doing a release.
-if RELEASE:
+if MAKE_RELEASE:
     def release_filter(project):
         return release_versions.get(project) is not None
     TARGETS = tuple(filter(release_filter, TARGETS))
 
 for target in TARGETS:
-    run_kiwix_build(target, platform=PLATFORM_TARGET, make_release=RELEASE)
+    run_kiwix_build(target, platform=PLATFORM_TARGET, make_release=MAKE_RELEASE)
     if target == "kiwix-desktop":
-        archive = create_desktop_image(make_release=RELEASE)
+        archive = create_desktop_image(make_release=MAKE_RELEASE)
     else:
         if PLATFORM_TARGET == "native_mixed" and OS_NAME == "osx":
             fix_macos_rpath(target)
             notarize_macos_build(target)
-        archive = make_archive(target, make_release=RELEASE)
+        archive = make_archive(target, make_release=MAKE_RELEASE)
     if archive:
-        upload_archive(archive, target, make_release=RELEASE)
-        if RELEASE and target in ("zim-tools", "kiwix-tools"):
+        upload_archive(archive, target, make_release=MAKE_RELEASE)
+        if MAKE_RELEASE and target in ("zim-tools", "kiwix-tools"):
             trigger_docker_publish(target)
 
 # We have few more things to do for release:
-if RELEASE:
+if MAKE_RELEASE:
     # Publish source archives
     if PLATFORM_TARGET in ("native_dyn", "native_mixed") and OS_NAME != "osx":
         for target in TARGETS:
             if release_versions.get(target) != 0:
                 continue
             run_kiwix_build(
-                target, platform=PLATFORM_TARGET, make_release=RELEASE, make_dist=True
+                target, platform=PLATFORM_TARGET, make_release=MAKE_RELEASE, make_dist=True
             )
             full_target_name = "{}-{}".format(target, main_project_versions[target])
             if target == "kiwix-desktop":
@@ -88,7 +83,7 @@ if RELEASE:
                     / "meson-dist"
                     / "{}.tar.xz".format(full_target_name)
                 )
-            upload_archive(archive, target, make_release=RELEASE)
+            upload_archive(archive, target, make_release=MAKE_RELEASE)
 
     # Publish flathub
     if PLATFORM_TARGET == "flatpak" and "kiwix-desktop" in TARGETS:
