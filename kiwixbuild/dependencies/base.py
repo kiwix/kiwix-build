@@ -340,7 +340,7 @@ class MakeBuilder(Builder):
 
     @property
     def make_install_target(self):
-        if self.buildEnv.platformInfo.build == 'iOS':
+        if self.buildEnv.platformInfo.build in ('iOS', "wasm"):
             return 'install'
         return 'install-strip'
 

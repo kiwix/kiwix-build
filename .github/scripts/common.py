@@ -280,6 +280,7 @@ def make_deps_archive(target=None, name=None, full=False):
         if (base_dir / "meson_cross_file.txt").exists():
             files_to_archive.append(base_dir / "meson_cross_file.txt")
     files_to_archive += HOME.glob("BUILD_*/android-ndk*")
+    files_to_archive += HOME.glob("BUILD_*/emsdk*")
     if (BASE_DIR / "meson_cross_file.txt").exists():
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")
 

@@ -19,7 +19,7 @@ class Libzim(Dependency):
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
             deps = ['lzma', 'zstd', 'xapian-core', 'icu4c']
-            if platformInfo.build != 'flatpak':
+            if platformInfo.name not in ('flatpak', 'wasm'):
                 deps.append('zim-testing-suite')
             return deps
 
@@ -37,7 +37,9 @@ class Libzim(Dependency):
             if platformInfo.name == "flatpak":
                 config_options.append("--wrap-mode=nodownload")
                 config_options.append("-Dtest_data_dir=none")
-            else:
+            if platformInfo.name == "wasm":
+                config_options.append("-Dexamples=false")
+            if platformInfo.name not in ("flatpak", "wasm"):
                 zim_testing_suite = get_target_step('zim-testing-suite', 'source')
                 config_options.append('-Dtest_data_dir={}'.format(zim_testing_suite.source_path))
             return " ".join(config_options)
