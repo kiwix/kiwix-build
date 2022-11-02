@@ -43,7 +43,7 @@ base_deps_meta_version = '78'
 
 base_deps_versions = {
   'zlib' : '1.2.12',
-  'lzma' : '5.2.4',
+  'lzma' : '5.2.7',
   'zstd' : '1.5.2',
   'docoptcpp' : '0.6.2',
   'uuid' : '1.43.4',
