@@ -38,6 +38,7 @@ jobs:
           - native_dyn
           - native_mixed
           - native_desktop
+          - wasm
           - armhf_static
           - armhf_dyn
           - i586_static

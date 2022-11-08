@@ -51,6 +51,7 @@ PLATFORM_TO_RELEASE = {
     "android_arm64": "android-arm64",
     "android_x86": "android-x86",
     "android_x86_64": "android-x86_64",
+    "wasm": "wasm-emscripten",
 }
 
 LIB_PREFIX = {
