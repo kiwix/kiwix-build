@@ -9,9 +9,9 @@ class lzma(Dependency):
     name = 'lzma'
 
     class Source(ReleaseDownload):
-        archive = Remotefile('xz-5.2.7.tar.gz',
-                             '06327c2ddc81e126a6d9a78b0be5014b976a2c0832f492dcfc4755d7facf6d33',
-                             'https://altushost-swe.dl.sourceforge.net/project/lzmautils/xz-5.2.7.tar.gz'
+        archive = Remotefile('xz-5.2.6.tar.gz',
+                             'a2105abee17bcd2ebd15ced31b4f5eda6e17efd6b10f921a01cda4a44c91b3a0',
+                             'https://altushost-swe.dl.sourceforge.net/project/lzmautils/xz-5.2.6.tar.gz'
                             )
 
     class Builder(MakeBuilder):
@@ -24,4 +24,5 @@ class lzma(Dependency):
                     "--disable-lzma-links "
                     "--disable-scripts "
                     "--disable-doc "
-                    "--disable-symbol-versions ")
+#                    "--disable-symbol-versions "
+                  )
