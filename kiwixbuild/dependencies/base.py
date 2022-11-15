@@ -70,8 +70,9 @@ class Source:
     def _patch(self, context):
         context.try_skip(self.source_path)
         for p in self.patches:
-            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                run_command("patch -p1", self.source_path, context, input=patch_input.read())
+            patch_file_path = pj(SCRIPT_DIR, 'patches', p)
+            patch_command = "patch -p1 -i {patch}".format(patch=patch_file_path)
+            run_command(patch_command, self.source_path, context)
 
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
