@@ -39,6 +39,11 @@ _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
 MAKE_RELEASE = re.fullmatch(r"r_[0-9]+", _ref) is not None
 MAKE_RELEASE = MAKE_RELEASE and (_environ.get('GITHUB_EVENT_NAME') != 'schedule')
 
+if not MAKE_RELEASE and _ref != "master":
+    DEV_BRANCH = _ref
+else:
+    DEV_BRANCH = None
+
 RELEASE_OS_NAME = "macos" if OS_NAME == "osx" else "linux"
 
 PLATFORM_TO_RELEASE = {
@@ -227,7 +232,7 @@ def upload(file_to_upload, host, dest_path):
     subprocess.check_call(command)
 
 
-def upload_archive(archive, project, make_release):
+def upload_archive(archive, project, make_release, dev_branch=None):
     if not archive.exists():
         print_message("No archive {} to upload!", archive)
         return
@@ -244,9 +249,12 @@ def upload_archive(archive, project, make_release):
     else:
         dest_path = dest_path + "nightly/" + DATE
 
-    # Make the archive read only. This way, scp will preserve rights.
-    # If somehow we try to upload twice the same archive, scp will fails.
-    archive.chmod(0o444)
+    if dev_branch:
+        dest_path = "/data/tmp/ci/" + dev_branch
+    else:
+        # Make the archive read only. This way, scp will preserve rights.
+        # If somehow we try to upload twice the same archive, scp will fails.
+        archive.chmod(0o444)
 
     upload(archive, host, dest_path)
 

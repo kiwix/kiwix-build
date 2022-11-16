@@ -6,9 +6,11 @@ from common import (
     make_archive,
     create_desktop_image,
     fix_macos_rpath,
+    upload_archive,
     OS_NAME,
     PLATFORM_TARGET,
     DESKTOP,
+    DEV_BRANCH,
 )
 
 if (PLATFORM_TARGET.startswith("android_")
@@ -40,8 +42,10 @@ else:
 for target in TARGETS:
     run_kiwix_build(target, platform=PLATFORM_TARGET)
     if target == "kiwix-desktop":
-        create_desktop_image(make_release=False)
+        archive = create_desktop_image(make_release=False)
     else:
         if PLATFORM_TARGET == "native_mixed" and OS_NAME == "osx":
             fix_macos_rpath(target)
-        make_archive(target, make_release=False)
+        archive = make_archive(target, make_release=False)
+    if archive:
+        upload_archive(archive, target, make_release=False, dev_branch=DEV_BRANCH)
