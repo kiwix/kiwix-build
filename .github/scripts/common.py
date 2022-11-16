@@ -95,6 +95,9 @@ EXPORT_FILES = {
     "libzim": (
         INSTALL_DIR,
         (
+            "lib/{libprefix}/libzim.a".format(
+                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            ),
             "lib/{libprefix}/libzim.so".format(
                 libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
             ),
