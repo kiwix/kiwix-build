@@ -54,13 +54,6 @@ PLATFORM_TO_RELEASE = {
     "wasm": "wasm-emscripten",
 }
 
-LIB_PREFIX = {
-    "android_arm": "arm-linux-androideabi",
-    "android_arm64": "aarch64-linux-android",
-    "android_x86": "i686-linux-android",
-    "android_x86_64": "x86_64-linux-android",
-}
-
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
 
@@ -95,18 +88,12 @@ EXPORT_FILES = {
     "libzim": (
         INSTALL_DIR,
         (
-            "lib/{libprefix}/libzim.a".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
-            ),
-            "lib/{libprefix}/libzim.so".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
-            ),
-            "lib/{libprefix}/libzim.so.{version}".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            "lib/*/libzim.a",
+            "lib/*/libzim.so",
+            "lib/*/libzim.so.{version}".format(
                 version=main_project_versions["libzim"]
             ),
-            "lib/{libprefix}/libzim.so.{version}".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            "lib/*/libzim.so.{version}".format(
                 version=main_project_versions["libzim"][0]
             ),
             "lib/libzim.{}.dylib".format(
@@ -119,15 +106,11 @@ EXPORT_FILES = {
     "libkiwix": (
         INSTALL_DIR,
         (
-            "lib/{libprefix}/libkiwix.so".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
-            ),
-            "lib/{libprefix}/libkiwix.so.{version}".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            "lib/*/libkiwix.so",
+            "lib/*/libkiwix.so.{version}".format(
                 version=main_project_versions["libkiwix"]
             ),
-            "lib/{libprefix}/libkiwix.so.{version}".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            "lib/*/libkiwix.so.{version}".format(
                 version=main_project_versions["libkiwix"][0]
             ),
             "include/kiwix/**/*.h"
