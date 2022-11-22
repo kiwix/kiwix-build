@@ -10,6 +10,7 @@ class KiwixDesktop(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/kiwix-desktop.git"
         git_dir = "kiwix-desktop"
+        git_ref = "appimage-hack"
 
     class Builder(QMakeBuilder):
         dependencies = ["qt", "qtwebengine", "libkiwix", "aria2"]
