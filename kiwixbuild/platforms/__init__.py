@@ -9,5 +9,6 @@ from . import (
     ios,
     native,
     neutral,
-    win32
+    win32,
+    wasm
 )

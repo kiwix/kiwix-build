@@ -18,7 +18,9 @@ class Icu(Dependency):
                    "icu4c_custom_data.patch",
                    "icu4c_noxlocale.patch",
                    "icu4c_rpath.patch",
-                   "icu4c_build_config.patch"]
+                   "icu4c_build_config.patch",
+                   "icu4c_wasm.patch"
+                  ]
 
 
     class Builder(MakeBuilder):
@@ -42,6 +44,6 @@ class Icu(Dependency):
                     'native_static' if platformInfo.static else 'native_dyn')
                 options += " --with-cross-build={} --disable-tools".format(
                     icu_native_builder.build_path)
-            if platformInfo.build == 'android':
+            if platformInfo.build in ('android', 'wasm'):
                 options += " --with-data-packaging=archive"
             return options

@@ -12,6 +12,9 @@ class AllBaseDependencies(Dependency):
     class Builder(NoopBuilder):
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
+            if platformInfo.build == "wasm":
+                return ['zlib', 'lzma', 'zstd', 'icu4c', 'xapian-core']
+
             base_deps = ['zlib', 'lzma', 'zstd', 'xapian-core', 'pugixml', 'libcurl', 'icu4c', 'mustache', 'libmicrohttpd', 'zim-testing-suite']
             # Add specific dependencies depending of the platform
             if platformInfo.build not in ('android', 'iOS'):

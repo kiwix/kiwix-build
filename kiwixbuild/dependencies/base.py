@@ -70,8 +70,9 @@ class Source:
     def _patch(self, context):
         context.try_skip(self.source_path)
         for p in self.patches:
-            with open(pj(SCRIPT_DIR, 'patches', p), 'r') as patch_input:
-                run_command("patch -p1", self.source_path, context, input=patch_input.read())
+            patch_file_path = pj(SCRIPT_DIR, 'patches', p)
+            patch_command = "patch -p1 -i {patch}".format(patch=patch_file_path)
+            run_command(patch_command, self.source_path, context)
 
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
@@ -339,7 +340,7 @@ class MakeBuilder(Builder):
 
     @property
     def make_install_target(self):
-        if self.buildEnv.platformInfo.build == 'iOS':
+        if self.buildEnv.platformInfo.build in ('iOS', "wasm"):
             return 'install'
         return 'install-strip'
 
@@ -368,8 +369,9 @@ class MakeBuilder(Builder):
 
     def _configure(self, context):
         context.try_skip(self.build_path)
-        command = "{configure_script} {configure_option}"
+        command = "{configure_wrapper}{configure_script} {configure_option}"
         command = command.format(
+            configure_wrapper=self.buildEnv.configure_wrapper,
             configure_script=pj(self.source_path, self.configure_script),
             configure_option=self.all_configure_option
         )
@@ -379,7 +381,8 @@ class MakeBuilder(Builder):
 
     def _compile(self, context):
         context.try_skip(self.build_path)
-        command = "make -j4 {make_target} {make_option}".format(
+        command = "{make_wrapper}make -j4 {make_target} {make_option}".format(
+            make_wrapper=self.buildEnv.make_wrapper,
             make_target=self.make_target,
             make_option=self.make_option
         )
@@ -388,7 +391,8 @@ class MakeBuilder(Builder):
 
     def _install(self, context):
         context.try_skip(self.build_path)
-        command = "make {make_install_target} {make_option}".format(
+        command = "{make_wrapper}make {make_install_target} {make_option}".format(
+            make_wrapper=self.buildEnv.make_wrapper,
             make_install_target=self.make_install_target,
             make_option=self.make_option
         )
@@ -397,7 +401,9 @@ class MakeBuilder(Builder):
 
     def _make_dist(self, context):
         context.try_skip(self.build_path)
-        command = "make dist"
+        command = "{make_wrapper}make dist".format(
+            make_wrapper=self.buildEnv.make_wrapper
+        )
         env = self.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 

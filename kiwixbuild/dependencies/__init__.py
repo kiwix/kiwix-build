@@ -6,6 +6,7 @@ from . import (
     aria2,
     armhf,
     docoptcpp,
+    emsdk,
     flatpak,
     gumbo,
     icu4c,

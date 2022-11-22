@@ -148,3 +148,21 @@ class BuildEnv:
         if cross_path:
             env['PATH'] = ':'.join(self.platformInfo.get_bin_dir() + [env['PATH']])
         return env
+
+
+    @property
+    def configure_wrapper(self):
+        wrapper = getattr(self.platformInfo, "configure_wrapper", "")
+        if wrapper:
+            return "{} ".format(wrapper)
+        else:
+            return ""
+
+    @property
+    def make_wrapper(self):
+        wrapper = getattr(self.platformInfo, "make_wrapper", "")
+        if wrapper:
+            return "{} ".format(wrapper)
+        else:
+            return ""
+

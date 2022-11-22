@@ -39,6 +39,11 @@ _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
 MAKE_RELEASE = re.fullmatch(r"r_[0-9]+", _ref) is not None
 MAKE_RELEASE = MAKE_RELEASE and (_environ.get('GITHUB_EVENT_NAME') != 'schedule')
 
+if not MAKE_RELEASE and _ref != "master":
+    DEV_BRANCH = _ref
+else:
+    DEV_BRANCH = None
+
 RELEASE_OS_NAME = "macos" if OS_NAME == "osx" else "linux"
 
 PLATFORM_TO_RELEASE = {
@@ -51,13 +56,7 @@ PLATFORM_TO_RELEASE = {
     "android_arm64": "android-arm64",
     "android_x86": "android-x86",
     "android_x86_64": "android-x86_64",
-}
-
-LIB_PREFIX = {
-    "android_arm": "arm-linux-androideabi",
-    "android_arm64": "aarch64-linux-android",
-    "android_x86": "i686-linux-android",
-    "android_x86_64": "x86_64-linux-android",
+    "wasm": "wasm-emscripten",
 }
 
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
@@ -94,15 +93,12 @@ EXPORT_FILES = {
     "libzim": (
         INSTALL_DIR,
         (
-            "lib/{libprefix}/libzim.so".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
-            ),
-            "lib/{libprefix}/libzim.so.{version}".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            "lib/*/libzim.a",
+            "lib/*/libzim.so",
+            "lib/*/libzim.so.{version}".format(
                 version=main_project_versions["libzim"]
             ),
-            "lib/{libprefix}/libzim.so.{version}".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            "lib/*/libzim.so.{version}".format(
                 version=main_project_versions["libzim"][0]
             ),
             "lib/libzim.{}.dylib".format(
@@ -115,15 +111,11 @@ EXPORT_FILES = {
     "libkiwix": (
         INSTALL_DIR,
         (
-            "lib/{libprefix}/libkiwix.so".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
-            ),
-            "lib/{libprefix}/libkiwix.so.{version}".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            "lib/*/libkiwix.so",
+            "lib/*/libkiwix.so.{version}".format(
                 version=main_project_versions["libkiwix"]
             ),
-            "lib/{libprefix}/libkiwix.so.{version}".format(
-                libprefix=LIB_PREFIX.get(PLATFORM_TARGET, "x86_64-linux-gnu"),
+            "lib/*/libkiwix.so.{version}".format(
                 version=main_project_versions["libkiwix"][0]
             ),
             "include/kiwix/**/*.h"
@@ -240,7 +232,7 @@ def upload(file_to_upload, host, dest_path):
     subprocess.check_call(command)
 
 
-def upload_archive(archive, project, make_release):
+def upload_archive(archive, project, make_release, dev_branch=None):
     if not archive.exists():
         print_message("No archive {} to upload!", archive)
         return
@@ -257,9 +249,12 @@ def upload_archive(archive, project, make_release):
     else:
         dest_path = dest_path + "nightly/" + DATE
 
-    # Make the archive read only. This way, scp will preserve rights.
-    # If somehow we try to upload twice the same archive, scp will fails.
-    archive.chmod(0o444)
+    if dev_branch:
+        dest_path = "/data/tmp/ci/" + dev_branch
+    else:
+        # Make the archive read only. This way, scp will preserve rights.
+        # If somehow we try to upload twice the same archive, scp will fails.
+        archive.chmod(0o444)
 
     upload(archive, host, dest_path)
 
@@ -280,6 +275,7 @@ def make_deps_archive(target=None, name=None, full=False):
         if (base_dir / "meson_cross_file.txt").exists():
             files_to_archive.append(base_dir / "meson_cross_file.txt")
     files_to_archive += HOME.glob("BUILD_*/android-ndk*")
+    files_to_archive += HOME.glob("BUILD_*/emsdk*")
     if (BASE_DIR / "meson_cross_file.txt").exists():
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")
 

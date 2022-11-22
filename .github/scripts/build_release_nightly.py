@@ -38,6 +38,8 @@ elif PLATFORM_TARGET in ("win32_static", "armhf_static", "i586_static"):
     TARGETS = ("kiwix-tools",)
 elif PLATFORM_TARGET == "flatpak":
     TARGETS = ("kiwix-desktop",)
+elif PLATFORM_TARGET == "wasm":
+    TARGETS = ("libzim", )
 else:
     TARGETS = ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
 
