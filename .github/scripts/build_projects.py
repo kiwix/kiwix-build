@@ -47,5 +47,5 @@ for target in TARGETS:
         if PLATFORM_TARGET == "native_mixed" and OS_NAME == "osx":
             fix_macos_rpath(target)
         archive = make_archive(target, make_release=False)
-    if archive:
+    if archive and DEV_BRANCH:
         upload_archive(archive, target, make_release=False, dev_branch=DEV_BRANCH)
