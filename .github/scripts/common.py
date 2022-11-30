@@ -93,7 +93,8 @@ EXPORT_FILES = {
     "libzim": (
         INSTALL_DIR,
         (
-            "lib/*/libzim.a",
+            # We need to package all dependencies (`*.a`) on wasm
+            "lib/*/libzim.a" if PLATFORM_TARGET != "wasm" else "lib/*/*.a",
             "lib/*/libzim.so",
             "lib/*/libzim.so.{version}".format(
                 version=main_project_versions["libzim"]
