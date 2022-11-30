@@ -1,11 +1,11 @@
 # This file reference all the versions of the depedencies we use in kiwix-build.
 
 main_project_versions = {
-    'libzim': '8.0.1',
-    'libkiwix': '11.0.0',
-    'kiwix-tools': '3.3.0',
-    'zim-tools': '3.1.2',
-    'kiwix-desktop': '2.3.0' # Also change KIWIX_DESKTOP_VERSION and KIWIX_DESKTOP_RELEASE in appveyor.yml
+    'libzim': '8.1.0',
+    'libkiwix': '12.0.0',
+    'kiwix-tools': '3.4.0',
+    'zim-tools': '3.1.3',
+    'kiwix-desktop': '2.3.1' # Also change KIWIX_DESKTOP_VERSION and KIWIX_DESKTOP_RELEASE in appveyor.yml
 }
 
 # This dictionnary specify what we need to build at each release process.
@@ -29,9 +29,9 @@ main_project_versions = {
 # - set KIWIX_DESKTOP_RELEASE to 0
 
 release_versions = {
-    'libzim': None, # Depends of base deps (was 0)
-    'libkiwix': None, # Depends of libzim (was 1)
-    'kiwix-tools': None, # Depends of libkiwix and libzim (was 1#)
+    'libzim':0, # Depends of base deps (was 0)
+    'libkiwix': 0, # Depends of libzim (was 1)
+    'kiwix-tools': 0, # Depends of libkiwix and libzim (was 1#)
     'zim-tools': 0, # Depends of libzim (was 2)
     'kiwix-desktop': 0 # Depends of libkiwix and libzim (was 1)
 }
