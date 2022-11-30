@@ -28,6 +28,8 @@ class Libkiwix(Dependency):
                 return '-Db_bitcode=true'
             if platformInfo.name == 'flatpak':
                 return '--wrap-mode=nodownload'
+            if platformInfo.name == 'native_mixed' and option('target') == 'libkiwix':
+                return "-Dstatic-linkage=true"
             return ''
 
         @property
