@@ -30,10 +30,10 @@ main_project_versions = {
 
 release_versions = {
     'libzim':0, # Depends of base deps (was 0)
-    'libkiwix': 0, # Depends of libzim (was 1)
-    'kiwix-tools': 0, # Depends of libkiwix and libzim (was 1#)
-    'zim-tools': 0, # Depends of libzim (was 2)
-    'kiwix-desktop': 0 # Depends of libkiwix and libzim (was 1)
+    'libkiwix': None, # Depends of libzim (was 1)
+    'kiwix-tools': None, # Depends of libkiwix and libzim (was 1#)
+    'zim-tools': None, # Depends of libzim (was 2)
+    'kiwix-desktop': None # Depends of libkiwix and libzim (was 1)
 }
 
 
