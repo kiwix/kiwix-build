@@ -39,6 +39,7 @@ class Libzim(Dependency):
                 config_options.append("-Dtest_data_dir=none")
             if platformInfo.name == "wasm":
                 config_options.append("-Dexamples=false")
+                config_options.append("-DUSE_MMAP=false")
             if platformInfo.name not in ("flatpak", "wasm"):
                 zim_testing_suite = get_target_step('zim-testing-suite', 'source')
                 config_options.append('-Dtest_data_dir={}'.format(zim_testing_suite.source_path))
