@@ -142,7 +142,7 @@ class GitClone(Source):
 
     @property
     def release_git_ref(self):
-        return main_project_versions.get(self.name, "master")
+        return main_project_versions.get(self.name, self.base_git_ref)
 
     @property
     def source_dir(self):
