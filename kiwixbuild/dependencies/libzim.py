@@ -11,6 +11,7 @@ class Libzim(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/openzim/libzim.git"
         git_dir = "libzim"
+        base_git_ref = "main"
 
     class Builder(MesonBuilder):
         test_option = "-t 8"
