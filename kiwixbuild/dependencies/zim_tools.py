@@ -10,7 +10,6 @@ class ZimTools(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/openzim/zim-tools.git"
         git_dir = "zim-tools"
-        base_git_ref = "main"
 
     class Builder(MesonBuilder):
         @classmethod
