@@ -137,7 +137,7 @@ class ReleaseDownload(Source):
 
 
 class GitClone(Source):
-    base_git_ref = "master"
+    base_git_ref = "main"
     force_full_clone = False
 
     @property
