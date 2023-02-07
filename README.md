@@ -173,8 +173,8 @@ systems](.github/ci_images/) too.
 
 These prepared environments include: compilers, binary toolchains and
 any third-party tool necessary to run the compilation toolchain. They
-don't contain pre-compiled library dependence (like Xapian, Libicu,
-Libmicrohttps, ...), Qt being an exception, for any Kiwix solution.
+don't contain pre-compiled library dependences build by kiwix-build, (like Xapian, Libicu,
+Libmicrohttps, ...) but it contains dependencies installed with package manager.
 
 These container images are necessary and intended to be used by Kiwix
 itself in many of its CI. But they are free to download et can be
