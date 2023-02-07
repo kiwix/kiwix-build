@@ -164,6 +164,22 @@ Kiwix-build.py will create several directories:
 If you want to install all those directories elsewhere, you can pass the
 `--working-dir` option to `kiwix-build`:
 
+CI/CD containerised environments
+--------------------------------
+
+Beside the `kiwix-build` command line tool, Kiwix Build proposes
+[prepared compilation environments for multiple GNU/Linux
+systems](.github/ci_images/) too.
+
+These prepared environments include: compilers, binary toolchains and
+any third-party tool necessary to run the compilation toolchain. They
+don't contain pre-compiled library dependence (like Xapian, Libicu,
+Libmicrohttps, ...) for any Kiwix solution.
+
+These container images are mostly used by Kiwix itself in many of its
+CI. But they are free to download and reused, you can find them on
+[Docker Hub](https://hub.docker.com/r/kiwix/kiwix-build_ci).
+
 Troubleshooting
 ---------------
 
