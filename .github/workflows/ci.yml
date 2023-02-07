@@ -16,7 +16,7 @@ jobs:
         variant: [bionic, f35, focal, alpine]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build docker image
       shell: bash
       run: |
@@ -168,9 +168,9 @@ jobs:
       OS_NAME: osx
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v3
     - name: Setup python 3.8
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v3
       with:
         python-version: '3.8'
     - name: Install packages
