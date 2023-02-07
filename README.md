@@ -174,11 +174,13 @@ systems](.github/ci_images/) too.
 These prepared environments include: compilers, binary toolchains and
 any third-party tool necessary to run the compilation toolchain. They
 don't contain pre-compiled library dependence (like Xapian, Libicu,
-Libmicrohttps, ...) for any Kiwix solution.
+Libmicrohttps, ...), Qt being an exception, for any Kiwix solution.
 
-These container images are mostly used by Kiwix itself in many of its
-CI. But they are free to download and reused, you can find them on
-[Docker Hub](https://hub.docker.com/r/kiwix/kiwix-build_ci).
+These container images are necessary and intended to be used by Kiwix
+itself in many of its CI. But they are free to download et can be
+reused, although they can break anytime, therefore at your won risk.
+You can find them on [Docker
+Hub](https://hub.docker.com/r/kiwix/kiwix-build_ci).
 
 Troubleshooting
 ---------------
