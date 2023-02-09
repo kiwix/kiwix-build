@@ -3,7 +3,7 @@ name: CI Containers
 on:
   push:
     paths:
-      - '.github/ci_images/**'
+      - 'ci_images/**'
   release:
     types: [published]
 
@@ -24,17 +24,17 @@ jobs:
 
     - name: Build & upload dev container image
       env:
-        IMAGE_NAME: ${IMAGE_PREFIX}${{matrix.variant}}:dev
+        IMAGE_NAME: ${{ env.IMAGE_PREFIX }}${{ matrix.variant }}:dev
       run: |
-        docker build -t ${IMAGE_NAME} - < ${GITHUB_WORKSPACE}/.github/ci_images/${{matrix.variant}}_builder.dockerfile
+        docker build -t ${IMAGE_NAME} - < ${GITHUB_WORKSPACE}/ci_images/${{matrix.variant}}_builder.dockerfile
         echo "${{ secrets.GHCR_TOKEN }}" | docker login -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
         docker push ${IMAGE_NAME}
 
     - name: Build & upload release container image
       if: github.event.action == 'published'
       env:
-        IMAGE_NAME: ${IMAGE_PREFIX}${{matrix.variant}}:${GITHUB_REF_NAME}
+        IMAGE_NAME: ${{ env.IMAGE_PREFIX }}${{ matrix.variant }}:${{ env.GITHUB_REF_NAME }}
       run: |
-        docker build -t ${IMAGE_NAME} - < ${GITHUB_WORKSPACE}/.github/ci_images/${{matrix.variant}}_builder.dockerfile
+        docker build -t ${IMAGE_NAME} - < ${GITHUB_WORKSPACE}/ci_images/${{matrix.variant}}_builder.dockerfile
         echo "${{ secrets.GHCR_TOKEN }}" | docker login -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
         docker push --all-tags ${IMAGE_NAME}
