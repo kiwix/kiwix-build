@@ -7,30 +7,7 @@ on:
  schedule:
    - cron: '0 1 * * *'
 
-env:
-  DOCKER_VERSION: 32
-
 jobs:
-  Docker:
-    strategy:
-      fail-fast: false
-      matrix:
-        variant: [bionic, f35, focal, alpine]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Build docker image
-      shell: bash
-      run: |
-        TAGNAME=${{matrix.variant}}-${DOCKER_VERSION}
-        if [ ! $(curl -sflL https://hub.docker.com/v2/repositories/kiwix/kiwix-build_ci/tags/${TAGNAME}) ]
-        then
-          echo "${{secrets.docker_password}}" | docker login -u "${{secrets.docker_username}}" --password-stdin
-          FULLTAGNAME=kiwix/kiwix-build_ci:${TAGNAME}
-          docker build -t ${FULLTAGNAME} - < ${GITHUB_WORKSPACE}/.github/ci_images/${{matrix.variant}}_builder.dockerfile
-          docker push ${FULLTAGNAME}
-        fi
-
   Linux:
     strategy:
       fail-fast: false
