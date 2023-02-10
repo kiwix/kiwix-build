@@ -179,8 +179,8 @@ Libmicrohttps, ...) but it contains dependencies installed with package manager.
 These container images are necessary and intended to be used by Kiwix
 itself in many of its CI. But they are free to download et can be
 reused, although they can break anytime, therefore at your won risk.
-You can find them on [Docker
-Hub](https://hub.docker.com/r/kiwix/kiwix-build_ci).
+You can find them on
+[here](https://github.com/orgs/kiwix/packages?repo_name=kiwix-build).
 
 Troubleshooting
 ---------------
