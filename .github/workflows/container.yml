@@ -35,6 +35,7 @@ jobs:
       if: github.event.action == 'published'
       run: |
         docker tag ${{ steps.env.outputs.IMAGE_NAME }} ${{ env.GITHUB_REF_NAME }}
+        docker tag ${{ steps.env.outputs.IMAGE_NAME }} latest
 
     - name: Upload container image
       run: |
