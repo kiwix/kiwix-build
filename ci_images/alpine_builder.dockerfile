@@ -15,9 +15,9 @@ RUN apk update -q \
         gtest-dev
 
 # Create user
-RUN adduser -h /home/runner -D runner
+RUN addgroup --gid 121 runner
+RUN adduser -u 1001 -G runner -h /home/runner -D runner
 USER runner
-WORKDIR /home/runner
 ENV PATH /home/runner/.local/bin:$PATH
 RUN pip3 install meson ninja ; \
-    ln -s /usr/bin/python3 .local/bin/python
+    ln -s /usr/bin/python3 /home/runner/.local/bin/python

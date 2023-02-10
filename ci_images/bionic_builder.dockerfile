@@ -32,14 +32,14 @@ RUN apt update -q \
   && rm -rf /var/lib/apt/lists/* /usr/share/doc/* /var/cache/debconf/* \
   && pip3 install meson pytest gcovr requests distro
 
-# Create user
-RUN useradd --create-home runner
-USER runner
-WORKDIR /home/runner
-ENV PATH /home/runner/.local/bin:$PATH
-
 # Set qt515 environment (the equivalent of "source /opt/qt515/bin/qt515-env.sh")
 # RUN echo "source /opt/qt515/bin/qt515-env.sh" >> /home/runner/.bashrc
 ENV PATH=/opt/qt515/bin:$PATH \
     LD_LIBRARY_PATH=/opt/qt515/lib/x86_64-linux-gnu:/opt/qt515/lib:$LD_LIBRARY_PATH \
     PKG_CONFIG_PATH=/opt/qt515/lib/pkgconfig:$PKG_CONFIG_PATH
+
+# Create user
+RUN groupadd --gid 121 runner
+RUN useradd --uid 1001 --gid 121 --create-home runner
+USER runner
+ENV PATH /home/runner/.local/bin:$PATH
