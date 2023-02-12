@@ -138,9 +138,9 @@ class iOSMacABI(ApplePlatformInfo):
     name = 'iOS_Mac_ABI'
     arch = cpu = 'x86_64'
     host = 'x86_64-apple-darwin'
-    target = 'x86_64-apple-ios13.0-macabi'
+    target = 'x86_64-apple-ios14.0-macabi'
     sdk_name = 'macosx'
-    min_iphoneos_version = '13.0'
+    min_iphoneos_version = '14.0'
 
 
 class macOSArm64(ApplePlatformInfo):
