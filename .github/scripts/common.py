@@ -260,6 +260,17 @@ def upload_archive(archive, project, make_release, dev_branch=None):
     upload(archive, host, dest_path)
 
 
+# This remove "share/doc" and "share/man" from the thing to copy in the deps archive
+def filter_install_dir(path):
+    for dir in path.glob('*'):
+        if dir.name not in ['share']:
+            yield dir
+        else:
+            for sub_dir in dir.glob('*'):
+                if sub_dir.name not in ['doc', 'man']:
+                    yield sub_dir
+
+
 def make_deps_archive(target=None, name=None, full=False):
     archive_name = name or "deps2_{}_{}_{}.tar.xz".format(
         OS_NAME, PLATFORM_TARGET, target
@@ -268,11 +279,11 @@ def make_deps_archive(target=None, name=None, full=False):
     files_to_archive = [INSTALL_DIR]
     files_to_archive += HOME.glob("BUILD_*/LOGS")
     if PLATFORM_TARGET == "native_mixed":
-        files_to_archive += [HOME / "BUILD_native_static" / "INSTALL"]
+        files_to_archive += filter_install_dir(HOME / "BUILD_native_static" / "INSTALL")
     if PLATFORM_TARGET.startswith("android_"):
-        files_to_archive.append(HOME / "BUILD_neutral" / "INSTALL")
+        files_to_archive += filter_install_dir(HOME / "BUILD_neutral" / "INSTALL")
         base_dir = HOME / "BUILD_{}".format(PLATFORM_TARGET)
-        files_to_archive.append(base_dir / "INSTALL")
+        files_to_archive += filter_install_dir(base_dir / "INSTALL")
         if (base_dir / "meson_cross_file.txt").exists():
             files_to_archive.append(base_dir / "meson_cross_file.txt")
     files_to_archive += HOME.glob("BUILD_*/android-ndk*")
