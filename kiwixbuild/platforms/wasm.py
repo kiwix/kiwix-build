@@ -9,6 +9,7 @@ class WasmPlatformInfo(PlatformInfo):
     static = True
     build = 'wasm'
     arch_full = 'wasm64-emscripten'
+    libdir = "lib"
     #arch_full = 'wasm64-linux'
     toolchain_names = ['emsdk']
     compatible_hosts = ['fedora', 'debian']
