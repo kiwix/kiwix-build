@@ -18,6 +18,8 @@ RUN apt update -q \
 # Packaged dependencies
     libbz2-dev libmagic-dev uuid-dev zlib1g-dev \
     libmicrohttpd-dev aria2 libgtest-dev libgl-dev \
+# Devel package to compile python modules
+    libxml2-dev libxslt-dev python3-dev \
 # Qt packages
     qt515base qt515webengine qt515svg qt515imageformats qt515wayland \
 # To create the appimage of kiwix-desktop
