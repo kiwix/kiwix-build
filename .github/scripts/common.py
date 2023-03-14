@@ -276,14 +276,13 @@ def make_deps_archive(target=None, name=None, full=False):
         OS_NAME, PLATFORM_TARGET, target
     )
     print_message("Create archive {}.", archive_name)
-    files_to_archive = [INSTALL_DIR]
+    files_to_archive = list(filter_install_dir(INSTALL_DIR))
     files_to_archive += HOME.glob("BUILD_*/LOGS")
     if PLATFORM_TARGET == "native_mixed":
         files_to_archive += filter_install_dir(HOME / "BUILD_native_static" / "INSTALL")
     if PLATFORM_TARGET.startswith("android_"):
         files_to_archive += filter_install_dir(HOME / "BUILD_neutral" / "INSTALL")
         base_dir = HOME / "BUILD_{}".format(PLATFORM_TARGET)
-        files_to_archive += filter_install_dir(base_dir / "INSTALL")
         if (base_dir / "meson_cross_file.txt").exists():
             files_to_archive.append(base_dir / "meson_cross_file.txt")
     files_to_archive += HOME.glob("BUILD_*/android-ndk*")
