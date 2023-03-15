@@ -1,0 +1,43 @@
+name: CI Containers
+
+on:
+  push:
+    paths:
+      - 'ci_images/**'
+  release:
+    types: [published]
+
+env:
+  IMAGE_PREFIX: ghcr.io/kiwix/kiwix-build_ci_
+
+jobs:
+  Container:
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [bionic, f35, focal, alpine]
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Retrieve the code
+      uses: actions/checkout@v3
+
+    - name: Setup container image name
+      id: env
+      run: |
+        echo "IMAGE_NAME=${{ env.IMAGE_PREFIX }}${{ matrix.variant }}" >> $GITHUB_OUTPUT
+
+    - name: Build container image
+      run: |
+        docker build -t ${{ steps.env.outputs.IMAGE_NAME }}:dev - < ci_images/${{ matrix.variant }}_builder.dockerfile
+
+    - name: Tag release container image
+      if: github.event.action == 'published'
+      run: |
+        docker tag ${{ steps.env.outputs.IMAGE_NAME }} ${{ env.GITHUB_REF_NAME }}
+        docker tag ${{ steps.env.outputs.IMAGE_NAME }} latest
+
+    - name: Upload container image
+      run: |
+        echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+        docker push --all-tags ${{ steps.env.outputs.IMAGE_NAME }}

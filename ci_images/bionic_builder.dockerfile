@@ -18,6 +18,8 @@ RUN apt update -q \
 # Packaged dependencies
     libbz2-dev libmagic-dev uuid-dev zlib1g-dev \
     libmicrohttpd-dev aria2 libgtest-dev libgl-dev \
+# Devel package to compile python modules
+    libxml2-dev libxslt-dev python3-dev \
 # Qt packages
     qt515base qt515webengine qt515svg qt515imageformats qt515wayland \
 # To create the appimage of kiwix-desktop
@@ -32,14 +34,14 @@ RUN apt update -q \
   && rm -rf /var/lib/apt/lists/* /usr/share/doc/* /var/cache/debconf/* \
   && pip3 install meson pytest gcovr requests distro
 
-# Create user
-RUN useradd --create-home runner
-USER runner
-WORKDIR /home/runner
-ENV PATH /home/runner/.local/bin:$PATH
-
 # Set qt515 environment (the equivalent of "source /opt/qt515/bin/qt515-env.sh")
 # RUN echo "source /opt/qt515/bin/qt515-env.sh" >> /home/runner/.bashrc
 ENV PATH=/opt/qt515/bin:$PATH \
     LD_LIBRARY_PATH=/opt/qt515/lib/x86_64-linux-gnu:/opt/qt515/lib:$LD_LIBRARY_PATH \
     PKG_CONFIG_PATH=/opt/qt515/lib/pkgconfig:$PKG_CONFIG_PATH
+
+# Create user
+RUN groupadd --gid 121 runner
+RUN useradd --uid 1001 --gid 121 --create-home runner
+USER runner
+ENV PATH /home/runner/.local/bin:$PATH

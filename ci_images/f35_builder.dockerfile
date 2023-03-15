@@ -22,7 +22,7 @@ RUN dnf install -y --nodocs \
   && pip3 install meson pytest requests distro
 
 # Create user
-RUN useradd --create-home runner
+RUN groupadd --gid 121 runner
+RUN useradd --uid 1001 --gid 121 --create-home runner
 USER runner
-WORKDIR /home/runner
 ENV PATH /home/runner/.local/bin:$PATH
