@@ -38,7 +38,7 @@ jobs:
       SSH_KEY: /tmp/id_rsa
     runs-on: ubuntu-latest
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:dev"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:36"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
