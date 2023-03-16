@@ -1,4 +1,4 @@
-name: CI Containers
+name: Container images CD
 
 on:
   push:
