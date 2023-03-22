@@ -44,3 +44,10 @@ class zlib(Dependency):
                     binary_path=pj(self.buildEnv.install_dir, 'bin'),
                     )
             return ""
+
+        @property
+        def make_target(self):
+            if self.buildEnv.platformInfo.static:
+                return "static"
+            else:
+                return "shared"

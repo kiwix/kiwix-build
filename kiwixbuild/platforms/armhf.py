@@ -6,7 +6,7 @@ from kiwixbuild._global import get_target_step
 
 class ArmhfPlatformInfo(PlatformInfo):
     build = 'armhf'
-    arch_full = 'arm-linux-gnueabihf'
+    arch_full = 'aarch64-linux-gnu'
     toolchain_names = ['armhf']
     compatible_hosts = ['fedora', 'debian']
 
@@ -33,10 +33,7 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     @property
     def root_path(self):
-        return pj(self.tlc_source.source_path,
-                  'raspberrypi-tools',
-                  'arm-bcm2708',
-                  'gcc-linaro-{}-raspbian-x64'.format(self.arch_full))
+        return self.tlc_source.source_path
 
     @property
     def binaries(self):
@@ -47,7 +44,9 @@ class ArmhfPlatformInfo(PlatformInfo):
                              ('STRIP', 'strip'),
                              ('WINDRES', 'windres'),
                              ('RANLIB', 'ranlib'),
-                             ('LD', 'ld'))
+                             ('LD', 'ld'),
+                             ('LDSHARED', 'g++ -shared')
+                             )
                )
         binaries = {k:pj(self.root_path, 'bin', v)
                     for k,v in binaries}
@@ -72,8 +71,13 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     def get_env(self):
         env = super().get_env()
+        env['LD_LIBRARY_PATH'] = ':'.join([
+            pj(self.root_path, self.arch_full, 'lib64'),
+            pj(self.root_path, 'lib'),
+            env['LD_LIBRARY_PATH']
+        ])
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['QEMU_LD_PREFIX'] = pj(self.root_path, "arm-linux-gnueabihf", "libc")
+        env['QEMU_LD_PREFIX'] = pj(self.root_path, "aarch64-linux-gnu", "libc")
         env['QEMU_SET_ENV'] = "LD_LIBRARY_PATH={}".format(
             ':'.join([
                 pj(self.root_path, self.arch_full, "lib"),
@@ -83,8 +87,8 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
-        env['CFLAGS'] = " -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
-        env['CXXFLAGS'] = " -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
+        env['CFLAGS'] = " -fPIC -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
+        env['CXXFLAGS'] = " -fPIC -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
 
     def set_compiler(self, env):
         for k, v in self.binaries.items():
