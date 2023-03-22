@@ -29,7 +29,7 @@ main_project_versions = {
 # - set KIWIX_DESKTOP_RELEASE to 0
 
 release_versions = {
-    'libzim': 2, # Depends of base deps (was 1)
+    'libzim': 0, # Depends of base deps (was 1)
     'libkiwix': None, # Depends of libzim (was 1)
     'kiwix-tools': None, # Depends of libkiwix and libzim (was 1)
     'zim-tools': None, # Depends of libzim (was 2)
