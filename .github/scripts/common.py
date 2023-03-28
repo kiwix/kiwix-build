@@ -39,7 +39,7 @@ _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
 MAKE_RELEASE = re.fullmatch(r"r_[0-9]+", _ref) is not None
 MAKE_RELEASE = MAKE_RELEASE and (_environ.get('GITHUB_EVENT_NAME') != 'schedule')
 
-if not MAKE_RELEASE and _ref != "master":
+if not MAKE_RELEASE and _ref != "main":
     DEV_BRANCH = _ref
 else:
     DEV_BRANCH = None
