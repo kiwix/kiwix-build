@@ -32,7 +32,7 @@ class Libzim(Dependency):
                 config_options.append("-Dstatic-linkage=true")
             if platformInfo.build == 'iOS':
                 config_options.append("-Db_bitcode=true")
-            if platformInfo.name == 'native_mixed' and option('target') == 'libzim':
+            if platformInfo.mixed and option('target') == 'libzim':
                 config_options.append("-Dstatic-linkage=true")
             if platformInfo.name == "flatpak":
                 config_options.append("--wrap-mode=nodownload")
