@@ -18,6 +18,10 @@ jobs:
           - wasm
           - armhf_static
           - armhf_dyn
+          - armhf_mixed
+          - aarch64_static
+          - aarch64_dyn
+          - aarch64_mixed
           - i586_static
           - i586_dyn
           - android_arm

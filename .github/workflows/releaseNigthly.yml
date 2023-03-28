@@ -19,6 +19,9 @@ jobs:
           - native_desktop
           - wasm
           - armhf_static
+          - armhf_mixed
+          - aarch64_static
+          - aarch64_mixed
           - win32_static
           - i586_static
           - android_arm
@@ -42,6 +45,15 @@ jobs:
             image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: armhf_static
+            image_variant: bionic
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: armhf_mixed
+            image_variant: bionic
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: aarch64_static
+            image_variant: bionic
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: aarch64_mixed
             image_variant: bionic
             lib_postfix: '/x86_64-linux-gnu'
           - target: win32_static
