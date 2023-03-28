@@ -106,3 +106,17 @@ class ArmhfDyn(ArmhfPlatformInfo):
 class ArmhfStatic(ArmhfPlatformInfo):
     name = 'armhf_static'
     static = True
+
+
+class Aarch64(ArmhfPlatformInfo):
+    build = 'aarch64'
+    arch_full = 'aarch64-linux-gnu'
+    toolchain_names = ['aarch64']
+
+class Aarch64Dyn(Aarch64):
+    name = 'aarch64_dyn'
+    static = False
+
+class Aarch64Static(Aarch64):
+    name = 'aarch64_static'
+    static = True
