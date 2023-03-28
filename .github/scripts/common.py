@@ -455,7 +455,7 @@ def fix_macos_rpath(project):
         subprocess.check_call(command, env=os.environ)
 
 
-def trigger_workflow(repo, workflow="docker.yml", ref="master", inputs=None):
+def trigger_workflow(repo, workflow="docker.yml", ref="main", inputs=None):
     """triggers a `workflow_dispatch` event to the specified workflow on its repo
 
     repo: {user}/{repo} format
@@ -491,7 +491,7 @@ def trigger_docker_publish(target):
         "kiwix-tools": "kiwix/kiwix-tools"}.get(target)
 
     try:
-        trigger_workflow(repo, workflow="docker.yml", ref="master",
+        trigger_workflow(repo, workflow="docker.yml", ref="main",
                          inputs={"version": version})
         print_message("triggered docker workflow on {repo}", repo=repo)
     except Exception as exc:
