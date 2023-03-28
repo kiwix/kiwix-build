@@ -1,4 +1,4 @@
-from .base import PlatformInfo
+from .base import PlatformInfo, MixedMixin
 
 from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
@@ -99,6 +99,7 @@ class ArmhfPlatformInfo(PlatformInfo):
         self.buildEnv.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
         self.buildEnv.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
+
 class ArmhfDyn(ArmhfPlatformInfo):
     name = 'armhf_dyn'
     static = False
@@ -106,6 +107,10 @@ class ArmhfDyn(ArmhfPlatformInfo):
 class ArmhfStatic(ArmhfPlatformInfo):
     name = 'armhf_static'
     static = True
+
+class ArmhfMixed(MixedMixin('armhf_static'), ArmhfPlatformInfo):
+    name = 'armhf_mixed'
+    static = False
 
 
 class Aarch64(ArmhfPlatformInfo):
@@ -120,3 +125,8 @@ class Aarch64Dyn(Aarch64):
 class Aarch64Static(Aarch64):
     name = 'aarch64_static'
     static = True
+
+
+class Aarch64Mixed(MixedMixin('aarch64_static'), Aarch64):
+    name = 'aarch64_mixed'
+    static = False
