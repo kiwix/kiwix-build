@@ -6,7 +6,7 @@ from kiwixbuild._global import get_target_step
 
 class ArmhfPlatformInfo(PlatformInfo):
     build = 'armhf'
-    arch_full = 'aarch64-linux-gnu'
+    arch_full = 'arm-linux-gnueabihf'
     toolchain_names = ['armhf']
     compatible_hosts = ['fedora', 'debian']
 
@@ -29,7 +29,7 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     @property
     def tlc_source(self):
-        return get_target_step('armhf', 'source')
+        return get_target_step(self.build, 'source')
 
     @property
     def root_path(self):
@@ -77,7 +77,7 @@ class ArmhfPlatformInfo(PlatformInfo):
             env['LD_LIBRARY_PATH']
         ])
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['QEMU_LD_PREFIX'] = pj(self.root_path, "aarch64-linux-gnu", "libc")
+        env['QEMU_LD_PREFIX'] = pj(self.root_path, self.arch_full, "libc")
         env['QEMU_SET_ENV'] = "LD_LIBRARY_PATH={}".format(
             ':'.join([
                 pj(self.root_path, self.arch_full, "lib"),
