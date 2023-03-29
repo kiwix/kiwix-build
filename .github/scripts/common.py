@@ -314,6 +314,8 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
         if PLATFORM_TARGET.startswith("armhf"):
             files_to_archive += (SOURCE_DIR / "armhf").glob("*")
+        if PLATFORM_TARGET.startswith("aarch64"):
+            files_to_archive += (SOURCE_DIR / "aarch64").glob("*")
         toolchains_subdirs = HOME.glob("BUILD_*/TOOLCHAINS/*/*")
         for subdir in toolchains_subdirs:
             if not subdir.match("tools"):
