@@ -144,7 +144,7 @@ class iOSMacABI(ApplePlatformInfo):
 
 
 class macOSArm64(ApplePlatformInfo):
-    name = 'macOS_arm64'
+    name = 'macOS_arm64_static'
     arch = cpu = 'arm64'
     host = 'aarch64-apple-darwin'
     target = 'arm64-apple-macos11'
@@ -152,7 +152,7 @@ class macOSArm64(ApplePlatformInfo):
     min_iphoneos_version = None
 
 
-class macOSArm64Mixed(MixedMixin('macOS_arm64'), ApplePlatformInfo):
+class macOSArm64Mixed(MixedMixin('macOS_arm64_static'), ApplePlatformInfo):
     name = 'macOS_arm64_mixed'
     arch = cpu = 'arm64'
     host = 'aarch64-apple-darwin'
