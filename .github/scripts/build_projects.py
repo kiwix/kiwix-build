@@ -19,7 +19,7 @@ if (PLATFORM_TARGET.startswith("android_")
     TARGETS = ("libzim", "libkiwix")
 elif PLATFORM_TARGET.startswith("native_"):
     if OS_NAME == "osx":
-        if PLATFORM_TARGET == "native_mixed":
+        if PLATFORM_TARGET.endswith("_mixed"):
             TARGETS = ("libzim", "libkiwix")
         else:
             TARGETS = ("zim-tools", )
