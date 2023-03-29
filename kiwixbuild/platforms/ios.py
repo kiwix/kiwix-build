@@ -2,7 +2,7 @@ import subprocess
 
 from kiwixbuild._global import option
 from kiwixbuild.utils import pj, xrun_find
-from .base import PlatformInfo, MetaPlatformInfo
+from .base import PlatformInfo, MetaPlatformInfo, MixedMixin
 
 
 class ApplePlatformInfo(PlatformInfo):
@@ -145,6 +145,15 @@ class iOSMacABI(ApplePlatformInfo):
 
 class macOSArm64(ApplePlatformInfo):
     name = 'macOS_arm64'
+    arch = cpu = 'arm64'
+    host = 'aarch64-apple-darwin'
+    target = 'arm64-apple-macos11'
+    sdk_name = 'macosx'
+    min_iphoneos_version = None
+
+
+class macOSArm64Mixed(MixedMixin('macOS_arm64'), ApplePlatformInfo):
+    name = 'macOS_arm64_mixed'
     arch = cpu = 'arm64'
     host = 'aarch64-apple-darwin'
     target = 'arm64-apple-macos11'
