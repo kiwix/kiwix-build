@@ -52,7 +52,7 @@ class ApplePlatformInfo(PlatformInfo):
                 '-arch', self.arch,
                 '-target', self.target,
                 '-stdlib=libc++',
-                '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))
+                *('-I{}'.format(include_dir) for include_dir in self.get_include_dirs())
             ],
             'host_machine': {
                 'system': 'Darwin',
