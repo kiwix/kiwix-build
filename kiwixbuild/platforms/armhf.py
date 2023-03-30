@@ -1,4 +1,4 @@
-from .base import PlatformInfo
+from .base import PlatformInfo, MixedMixin
 
 from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
@@ -29,14 +29,11 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     @property
     def tlc_source(self):
-        return get_target_step('armhf', 'source')
+        return get_target_step(self.build, 'source')
 
     @property
     def root_path(self):
-        return pj(self.tlc_source.source_path,
-                  'raspberrypi-tools',
-                  'arm-bcm2708',
-                  'gcc-linaro-{}-raspbian-x64'.format(self.arch_full))
+        return self.tlc_source.source_path
 
     @property
     def binaries(self):
@@ -47,7 +44,9 @@ class ArmhfPlatformInfo(PlatformInfo):
                              ('STRIP', 'strip'),
                              ('WINDRES', 'windres'),
                              ('RANLIB', 'ranlib'),
-                             ('LD', 'ld'))
+                             ('LD', 'ld'),
+                             ('LDSHARED', 'g++ -shared')
+                             )
                )
         binaries = {k:pj(self.root_path, 'bin', v)
                     for k,v in binaries}
@@ -72,8 +71,13 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     def get_env(self):
         env = super().get_env()
+        env['LD_LIBRARY_PATH'] = ':'.join([
+            pj(self.root_path, self.arch_full, 'lib64'),
+            pj(self.root_path, 'lib'),
+            env['LD_LIBRARY_PATH']
+        ])
         env['PKG_CONFIG_LIBDIR'] = pj(self.root_path, 'lib', 'pkgconfig')
-        env['QEMU_LD_PREFIX'] = pj(self.root_path, "arm-linux-gnueabihf", "libc")
+        env['QEMU_LD_PREFIX'] = pj(self.root_path, self.arch_full, "libc")
         env['QEMU_SET_ENV'] = "LD_LIBRARY_PATH={}".format(
             ':'.join([
                 pj(self.root_path, self.arch_full, "lib"),
@@ -83,8 +87,8 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
-        env['CFLAGS'] = " -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
-        env['CXXFLAGS'] = " -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
+        env['CFLAGS'] = " -fPIC -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CFLAGS']
+        env['CXXFLAGS'] = " -fPIC -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "+env['CXXFLAGS']
 
     def set_compiler(self, env):
         for k, v in self.binaries.items():
@@ -95,6 +99,7 @@ class ArmhfPlatformInfo(PlatformInfo):
         self.buildEnv.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
         self.buildEnv.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
+
 class ArmhfDyn(ArmhfPlatformInfo):
     name = 'armhf_dyn'
     static = False
@@ -102,3 +107,26 @@ class ArmhfDyn(ArmhfPlatformInfo):
 class ArmhfStatic(ArmhfPlatformInfo):
     name = 'armhf_static'
     static = True
+
+class ArmhfMixed(MixedMixin('armhf_static'), ArmhfPlatformInfo):
+    name = 'armhf_mixed'
+    static = False
+
+
+class Aarch64(ArmhfPlatformInfo):
+    build = 'aarch64'
+    arch_full = 'aarch64-linux-gnu'
+    toolchain_names = ['aarch64']
+
+class Aarch64Dyn(Aarch64):
+    name = 'aarch64_dyn'
+    static = False
+
+class Aarch64Static(Aarch64):
+    name = 'aarch64_static'
+    static = True
+
+
+class Aarch64Mixed(MixedMixin('aarch64_static'), Aarch64):
+    name = 'aarch64_mixed'
+    static = False

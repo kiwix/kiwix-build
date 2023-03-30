@@ -51,6 +51,9 @@ PLATFORM_TO_RELEASE = {
     "native_static": "{os}-x86_64".format(os=RELEASE_OS_NAME),
     "win32_static": "win-i686",
     "armhf_static": "{os}-armhf".format(os=RELEASE_OS_NAME),
+    "armhf_mixed": "{os}-armhf".format(os=RELEASE_OS_NAME),
+    "aarch64_static": "{os}-aarch64".format(os=RELEASE_OS_NAME),
+    "aarch64_mixed": "{os}-aarch64".format(os=RELEASE_OS_NAME),
     "i586_static": "{os}-i586".format(os=RELEASE_OS_NAME),
     "android_arm": "android-arm",
     "android_arm64": "android-arm64",
@@ -278,8 +281,9 @@ def make_deps_archive(target=None, name=None, full=False):
     print_message("Create archive {}.", archive_name)
     files_to_archive = list(filter_install_dir(INSTALL_DIR))
     files_to_archive += HOME.glob("BUILD_*/LOGS")
-    if PLATFORM_TARGET == "native_mixed":
-        files_to_archive += filter_install_dir(HOME / "BUILD_native_static" / "INSTALL")
+    if PLATFORM_TARGET.endswith("_mixed"):
+        static_platform = PLATFORM_TARGET.replace("_mixed", "_static")
+        files_to_archive += filter_install_dir(HOME / ("BUILD_" + static_platform) / "INSTALL")
     if PLATFORM_TARGET.startswith("android_"):
         files_to_archive += filter_install_dir(HOME / "BUILD_neutral" / "INSTALL")
         base_dir = HOME / "BUILD_{}".format(PLATFORM_TARGET)
@@ -298,6 +302,11 @@ def make_deps_archive(target=None, name=None, full=False):
     if full:
         files_to_archive += ARCHIVE_DIR.glob(".*_ok")
         files_to_archive += BASE_DIR.glob("*/.*_ok")
+        # Add also static build for mixed target
+        if PLATFORM_TARGET.endswith("_mixed"):
+            static_platform = PLATFORM_TARGET.replace("_mixed", "_static")
+            files_to_archive += (HOME / ("BUILD_" + static_platform)).glob("*/.*_ok")
+        # Native dyn and static is needed for potential cross compilation that use native tools (icu)
         files_to_archive += (HOME / "BUILD_native_dyn").glob("*/.*_ok")
         files_to_archive += (HOME / "BUILD_native_static").glob("*/.*_ok")
         files_to_archive += HOME.glob("BUILD_android*/**/.*_ok")
@@ -305,6 +314,8 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
         if PLATFORM_TARGET.startswith("armhf"):
             files_to_archive += (SOURCE_DIR / "armhf").glob("*")
+        if PLATFORM_TARGET.startswith("aarch64"):
+            files_to_archive += (SOURCE_DIR / "aarch64").glob("*")
         toolchains_subdirs = HOME.glob("BUILD_*/TOOLCHAINS/*/*")
         for subdir in toolchains_subdirs:
             if not subdir.match("tools"):
