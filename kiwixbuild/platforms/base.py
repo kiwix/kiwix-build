@@ -137,6 +137,7 @@ class MetaPlatformInfo(PlatformInfo):
 def MixedMixin(static_name):
     class MixedMixinClass:
         mixed = True
+        static = False
 
         def add_targets(self, targetName, targets):
             print(targetName)
