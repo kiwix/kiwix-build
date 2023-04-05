@@ -28,7 +28,7 @@ jobs:
           - android_arm64
           - android_x86
           - android_x86_64
-        image_variant: ['bionic']
+        image_variant: ['focal']
         lib_postfix: ['/x86_64-linux-gnu']
         include:
           - target: win32_static
