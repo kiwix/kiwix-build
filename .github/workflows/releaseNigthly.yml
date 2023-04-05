@@ -169,6 +169,7 @@ jobs:
       matrix:
         target:
           - native_dyn
+          - native_static
           - native_mixed
           - macOs_arm64_mixed
     runs-on: macos-12

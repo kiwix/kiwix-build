@@ -136,6 +136,7 @@ jobs:
       matrix:
         target:
           - native_dyn
+          - native_static
           - native_mixed
           - iOS_arm64
           - iOS_x86_64
