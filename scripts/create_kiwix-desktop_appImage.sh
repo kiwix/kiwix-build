@@ -34,7 +34,7 @@ mkdir -p $APPDIR/etc/ssl/certs/ && tar -C $APPDIR/etc/ssl/certs/ -xf aria2-1.36.
 
 # Get linuxdeployqt
 # Dispite the 'continuous' in the file name, it IS release 8
-wget --continue https://github.com/probonopd/linuxdeployqt/releases/download/8/linuxdeployqt-continuous-x86_64.AppImage -O linuxdeployqt
+wget --continue https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage -O linuxdeployqt
 chmod u+x linuxdeployqt
 
 # Fill with all deps libs and so
