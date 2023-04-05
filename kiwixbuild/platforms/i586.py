@@ -14,7 +14,12 @@ class I586PlatformInfo(PlatformInfo):
             'binaries': self.binaries,
             'exe_wrapper_def': '',
             'extra_libs': ['-m32', '-march=i586', '-mno-sse'],
-            'extra_cflags': ['-m32', '-march=i586', '-mno-sse', '-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
+            'extra_cflags': [
+                '-m32',
+                '-march=i586',
+                '-mno-sse',
+                *('-I{}'.format(include_dir) for include_dir in self.get_include_dirs())
+            ],
             'host_machine': {
                 'system': 'linux',
                 'lsystem': 'linux',

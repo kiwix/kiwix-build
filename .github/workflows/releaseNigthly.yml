@@ -170,6 +170,7 @@ jobs:
         target:
           - native_dyn
           - native_mixed
+          - macOs_arm64_mixed
     runs-on: macos-12
     env:
       SSH_KEY: /tmp/id_rsa

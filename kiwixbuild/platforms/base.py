@@ -77,6 +77,8 @@ class PlatformInfo(metaclass=_MetaPlatform):
     def get_cross_config(self):
         return {}
 
+    def get_include_dirs(self):
+        return [pj(self.buildEnv.install_dir, 'include')]
 
     def get_env(self):
         return DefaultEnv()
@@ -135,6 +137,7 @@ class MetaPlatformInfo(PlatformInfo):
 def MixedMixin(static_name):
     class MixedMixinClass:
         mixed = True
+        static = False
 
         def add_targets(self, targetName, targets):
             print(targetName)
@@ -151,16 +154,23 @@ def MixedMixin(static_name):
                 return self.name, dep
             return static_name, dep
 
+        @property
+        def static_buildEnv(self):
+            static_platform = self.get_platform(static_name)
+            return static_platform.buildEnv
+
+        def get_include_dirs(self):
+            return [
+                pj(self.buildEnv.install_dir, 'include'),
+                pj(self.static_buildEnv.install_dir, 'include')
+            ]
 
         def get_env(self):
             env = super().get_env()
-            static_platform = self.get_platform(static_name)
-            static_buildEnv = static_platform.buildEnv
-            static_install_dir = static_buildEnv.install_dir
-            env['PATH'] = ':'.join([pj(static_install_dir, 'bin')] + [env['PATH']])
-            pkgconfig_path = pj(static_install_dir, static_buildEnv.libprefix, 'pkgconfig')
+            env['PATH'] = ':'.join([pj(self.static_buildEnv.install_dir, 'bin')] + [env['PATH']])
+            pkgconfig_path = pj(self.static_buildEnv.install_dir, self.static_buildEnv.libprefix, 'pkgconfig')
             env['PKG_CONFIG_PATH'] = ':'.join([env['PKG_CONFIG_PATH'], pkgconfig_path])
-            env['CPPFLAGS'] = " ".join(['-I'+pj(static_install_dir, 'include'), env['CPPFLAGS']])
+            env['CPPFLAGS'] = " ".join(['-I'+pj(self.static_buildEnv.install_dir, 'include'), env['CPPFLAGS']])
             return env
 
     return MixedMixinClass

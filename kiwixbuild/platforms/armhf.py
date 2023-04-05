@@ -16,7 +16,7 @@ class ArmhfPlatformInfo(PlatformInfo):
             'exe_wrapper_def': '',
             'root_path': self.root_path,
             'extra_libs': [],
-            'extra_cflags': ['-I{}'.format(pj(self.buildEnv.install_dir, 'include'))],
+            'extra_cflags': ['-I{}'.format(include_dir) for include_dir in self.get_include_dirs()],
             'host_machine': {
                 'system': 'linux',
                 'lsystem': 'linux',

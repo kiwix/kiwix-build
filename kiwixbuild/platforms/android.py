@@ -45,7 +45,7 @@ class AndroidPlatformInfo(PlatformInfo):
 
     def get_cross_config(self):
         extra_libs = ['-llog']
-        extra_cflags = ['-I{}'.format(pj(self.buildEnv.install_dir, 'include'))]
+        extra_cflags = ['-I{}'.format(include_dir) for include_dir in self.get_include_dirs()]
         if hasattr(self, 'march'):
             extra_libs.append('-march={}'.format(self.march))
             extra_cflags.append('-march={}'.format(self.march))

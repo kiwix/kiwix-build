@@ -26,7 +26,7 @@ if PLATFORM_TARGET.startswith("android_") or PLATFORM_TARGET.startswith("iOS"):
     TARGETS = ("libzim", "libkiwix")
 elif PLATFORM_TARGET.startswith("native_"):
     if OS_NAME == "osx":
-        if PLATFORM_TARGET == "native_mixed":
+        if PLATFORM_TARGET.endswith("_mixed"):
             TARGETS = ("libzim", "libkiwix")
         else:
             TARGETS = ("zim-tools", )
@@ -57,7 +57,7 @@ for target in TARGETS:
     if target == "kiwix-desktop":
         archive = create_desktop_image(make_release=MAKE_RELEASE)
     else:
-        if PLATFORM_TARGET == "native_mixed" and OS_NAME == "osx":
+        if OS_NAME == "osx" and PLATFORM_TARGET.endswith("_mixed"):
             fix_macos_rpath(target)
             notarize_macos_build(target)
         archive = make_archive(target, make_release=MAKE_RELEASE)
