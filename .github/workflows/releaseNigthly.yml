@@ -171,7 +171,7 @@ jobs:
           - native_dyn
           - native_static
           - native_mixed
-          - macOs_arm64_mixed
+          - macOS_arm64_mixed
     runs-on: macos-12
     env:
       SSH_KEY: /tmp/id_rsa
