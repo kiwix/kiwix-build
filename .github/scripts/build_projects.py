@@ -31,7 +31,7 @@ elif PLATFORM_TARGET.startswith("native_"):
         else:
             TARGETS = ("zim-tools", "kiwix-tools")
 elif PLATFORM_TARGET in ("win32_static", "armhf_static", "armhf_dyn", "aarch64_static", "aarch64_dyn", "i586_static"):
-    TARGETS = ("kiwix-tools",)
+    TARGETS = ("zim-tools", "kiwix-tools")
 elif PLATFORM_TARGET == "flatpak":
     TARGETS = ("kiwix-desktop",)
 elif PLATFORM_TARGET in ("wasm", "armhf_mixed", "aarch64_mixed"):

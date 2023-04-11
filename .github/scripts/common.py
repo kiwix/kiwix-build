@@ -55,6 +55,7 @@ PLATFORM_TO_RELEASE = {
     "aarch64_static": "{os}-aarch64".format(os=RELEASE_OS_NAME),
     "aarch64_mixed": "{os}-aarch64".format(os=RELEASE_OS_NAME),
     "i586_static": "{os}-i586".format(os=RELEASE_OS_NAME),
+    "macOS_arm64_static": "{os}-arm64".format(os=RELEASE_OS_NAME),
     "macOS_arm64_mixed": "{os}-arm64".format(os=RELEASE_OS_NAME),
     "android_arm": "android-arm",
     "android_arm64": "android-arm64",
