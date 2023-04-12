@@ -22,7 +22,9 @@ from common import (
     notarize_macos_build,
 )
 
-if PLATFORM_TARGET.startswith("android_") or PLATFORM_TARGET.startswith("iOS"):
+if (PLATFORM_TARGET.startswith("android_")
+ or PLATFORM_TARGET.startswith("iOS")
+ or PLATFORM_TARGET.startswith("macOS")):
     TARGETS = ("libzim", "libkiwix")
 elif PLATFORM_TARGET.startswith("native_"):
     if OS_NAME == "osx":
@@ -37,8 +39,8 @@ elif PLATFORM_TARGET.startswith("native_"):
             TARGETS = ("libzim", "libkiwix")
         else:
             TARGETS = ("zim-tools", "kiwix-tools")
-elif PLATFORM_TARGET in ("win32_static", "armhf_static", "aarch64_static", "i586_static"):
-    TARGETS = ("zim-tools", "kiwix-tools",)
+elif PLATFORM_TARGET in ("win32_static", "armhf_static", "armhf_dyn", "aarch64_static", "aarch64_dyn", "i586_static"):
+    TARGETS = ("zim-tools", "kiwix-tools")
 elif PLATFORM_TARGET == "flatpak":
     TARGETS = ("kiwix-desktop",)
 elif PLATFORM_TARGET in ("wasm", "armhf_mixed", "aarch64_mixed"):
