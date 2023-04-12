@@ -9,35 +9,43 @@ from common import (
     upload_archive,
     OS_NAME,
     PLATFORM_TARGET,
-    DESKTOP,
     DEV_BRANCH,
 )
 
-if (PLATFORM_TARGET.startswith("android_")
- or PLATFORM_TARGET.startswith("iOS")
- or PLATFORM_TARGET.startswith("macOS")):
-    TARGETS = ("libzim", "libkiwix")
-elif PLATFORM_TARGET.startswith("native_"):
-    if OS_NAME == "osx":
-        if PLATFORM_TARGET.endswith("_mixed"):
-            TARGETS = ("libzim", "libkiwix")
+
+def select_build_target():
+    from common import (
+        PLATFORM_TARGET,
+        DESKTOP,
+        OS_NAME
+    )
+    if (PLATFORM_TARGET.startswith("android_")
+     or PLATFORM_TARGET.startswith("iOS")
+     or PLATFORM_TARGET.startswith("macOS")):
+        return ("libzim", "libkiwix")
+    elif PLATFORM_TARGET.startswith("native_"):
+        if OS_NAME == "osx":
+            if PLATFORM_TARGET.endswith("_mixed"):
+                return ("libzim", "libkiwix")
+            else:
+                return ("zim-tools", )
         else:
-            TARGETS = ("zim-tools", )
+            if DESKTOP:
+                return ("kiwix-desktop",)
+            elif PLATFORM_TARGET == "native_mixed":
+                return ("libzim", "libkiwix")
+            else:
+                return ("zim-tools", "kiwix-tools")
+    elif PLATFORM_TARGET in ("win32_static", "armhf_static", "armhf_dyn", "aarch64_static", "aarch64_dyn", "i586_static"):
+        return ("zim-tools", "kiwix-tools")
+    elif PLATFORM_TARGET == "flatpak":
+        return ("kiwix-desktop",)
+    elif PLATFORM_TARGET in ("wasm", "armhf_mixed", "aarch64_mixed"):
+        return ("libzim", )
     else:
-        if DESKTOP:
-            TARGETS = ("kiwix-desktop",)
-        elif PLATFORM_TARGET == "native_mixed":
-            TARGETS = ("libzim", "libkiwix")
-        else:
-            TARGETS = ("zim-tools", "kiwix-tools")
-elif PLATFORM_TARGET in ("win32_static", "armhf_static", "armhf_dyn", "aarch64_static", "aarch64_dyn", "i586_static"):
-    TARGETS = ("zim-tools", "kiwix-tools")
-elif PLATFORM_TARGET == "flatpak":
-    TARGETS = ("kiwix-desktop",)
-elif PLATFORM_TARGET in ("wasm", "armhf_mixed", "aarch64_mixed"):
-    TARGETS = ("libzim", )
-else:
-    TARGETS = ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
+        return ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
+
+TARGETS = select_build_target()
 
 for target in TARGETS:
     run_kiwix_build(target, platform=PLATFORM_TARGET)

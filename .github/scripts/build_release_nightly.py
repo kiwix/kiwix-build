@@ -17,34 +17,13 @@ from common import (
     HOME,
     OS_NAME,
     PLATFORM_TARGET,
-    DESKTOP,
     MAKE_RELEASE,
     notarize_macos_build,
 )
 
-if PLATFORM_TARGET.startswith("android_") or PLATFORM_TARGET.startswith("iOS"):
-    TARGETS = ("libzim", "libkiwix")
-elif PLATFORM_TARGET.startswith("native_"):
-    if OS_NAME == "osx":
-        if PLATFORM_TARGET.endswith("_mixed"):
-            TARGETS = ("libzim", "libkiwix")
-        else:
-            TARGETS = ("zim-tools", )
-    else:
-        if DESKTOP:
-            TARGETS = ("kiwix-desktop",)
-        elif PLATFORM_TARGET == "native_mixed":
-            TARGETS = ("libzim", "libkiwix")
-        else:
-            TARGETS = ("zim-tools", "kiwix-tools")
-elif PLATFORM_TARGET in ("win32_static", "armhf_static", "aarch64_static", "i586_static"):
-    TARGETS = ("zim-tools", "kiwix-tools",)
-elif PLATFORM_TARGET == "flatpak":
-    TARGETS = ("kiwix-desktop",)
-elif PLATFORM_TARGET in ("wasm", "armhf_mixed", "aarch64_mixed"):
-    TARGETS = ("libzim", )
-else:
-    TARGETS = ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
+from build_projects import select_build_target
+
+TARGETS = select_build_target()
 
 # Filter what to build if we are doing a release.
 if MAKE_RELEASE:
