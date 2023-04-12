@@ -28,7 +28,7 @@ jobs:
           - android_arm64
           - android_x86
           - android_x86_64
-        image_variant: ['bionic']
+        image_variant: ['focal']
         lib_postfix: ['/x86_64-linux-gnu']
         include:
           - target: win32_static
@@ -42,7 +42,7 @@ jobs:
       SSH_KEY: /tmp/id_rsa
     runs-on: ubuntu-latest
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:36"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:dev"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code

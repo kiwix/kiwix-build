@@ -4,7 +4,7 @@ Kiwix Build provides advanced tools to (cross-)compile easily
 [Kiwix](https://kiwix.org) & [openZIM](https://openzim.org) softwares
 and libraries and deploy them. They have been tested on
 [Fedora](https://getfedora.org) 35+ & [Ubuntu](https://ubuntu.com)
-18.04+.
+20.04+.
 
 [![Build Status](https://github.com/kiwix/kiwix-build/workflows/CI/badge.svg?query=branch%3Amain)](https://github.com/kiwix/kiwix-build/actions?query=branch%3Amain)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)

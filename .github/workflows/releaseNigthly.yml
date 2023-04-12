@@ -30,49 +30,49 @@ jobs:
           - android_x86_64
         include:
           - target: native_static
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: native_dyn
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: native_mixed
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: native_desktop
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: wasm
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: armhf_static
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: armhf_mixed
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: aarch64_static
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: aarch64_mixed
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: win32_static
             image_variant: f35
             lib_postfix: '64'
           - target: i586_static
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: android_arm
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: android_arm64
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: android_x86
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: android_x86_64
-            image_variant: bionic
+            image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
     env:
       HOME: /home/runner
