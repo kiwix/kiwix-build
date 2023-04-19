@@ -275,7 +275,8 @@ def filter_install_dir(path):
                 if sub_dir.name not in ['doc', 'man']:
                     yield sub_dir
 
-
+# Full: True if we are creating a full archive to be used as cache by kiwix-build (base_deps2_{os}_{platform}_{base_deps_version}.tar.xz)
+# Full: False if we are creating a archive to be used as pre-cached dependencies for project's CI (deps2_{os}_{platform}_{target}.tar.xz)
 def make_deps_archive(target=None, name=None, full=False):
     archive_name = name or "deps2_{}_{}_{}.tar.xz".format(
         OS_NAME, PLATFORM_TARGET, target
@@ -291,8 +292,12 @@ def make_deps_archive(target=None, name=None, full=False):
         base_dir = HOME / "BUILD_{}".format(PLATFORM_TARGET)
         if (base_dir / "meson_cross_file.txt").exists():
             files_to_archive.append(base_dir / "meson_cross_file.txt")
+    # Add ndk/sdk/toolchains to allow project's CI to find them and compile
     files_to_archive += HOME.glob("BUILD_*/android-ndk*")
     files_to_archive += HOME.glob("BUILD_*/emsdk*")
+    if PLATFORM_TARGET.startswith("aarch64"):
+        files_to_archive += (SOURCE_DIR / "aarch64").glob("*")
+
     if (BASE_DIR / "meson_cross_file.txt").exists():
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")
 
@@ -316,8 +321,6 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
         if PLATFORM_TARGET.startswith("armhf"):
             files_to_archive += (SOURCE_DIR / "armhf").glob("*")
-        if PLATFORM_TARGET.startswith("aarch64"):
-            files_to_archive += (SOURCE_DIR / "aarch64").glob("*")
         toolchains_subdirs = HOME.glob("BUILD_*/TOOLCHAINS/*/*")
         for subdir in toolchains_subdirs:
             if not subdir.match("tools"):
