@@ -47,7 +47,7 @@ else:
 RELEASE_OS_NAME = "macos" if OS_NAME == "osx" else "linux"
 
 PLATFORM_TO_RELEASE = {
-    "native_mixed": "{os}-x86_64".format(os=RELEASE_OS_NAME),
+    "native_mixed": "{os}-x86_64{extra}".format(os=RELEASE_OS_NAME, extra = "-bionic" if OS_NAME == "bionic" else ""),
     "native_static": "{os}-x86_64".format(os=RELEASE_OS_NAME),
     "win32_static": "win-i686",
     "armhf_static": "{os}-armhf".format(os=RELEASE_OS_NAME),
