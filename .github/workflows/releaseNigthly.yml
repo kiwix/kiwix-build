@@ -38,6 +38,9 @@ jobs:
           - target: native_mixed
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
+          - target: native_mixed
+            image_variant: bionic
+            lib_postfix: '/x86_64-linux-gnu'
           - target: native_desktop
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'

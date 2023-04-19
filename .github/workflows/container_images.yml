@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        variant: [f35, focal, alpine]
+        variant: [f35, focal, bionic, alpine]
     runs-on: ubuntu-22.04
 
     steps:
