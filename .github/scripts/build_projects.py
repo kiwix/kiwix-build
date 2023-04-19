@@ -24,7 +24,10 @@ def select_build_target():
      or PLATFORM_TARGET.startswith("macOS")):
         return ("libzim", "libkiwix")
     elif PLATFORM_TARGET.startswith("native_"):
-        if OS_NAME == "osx":
+        if OS_NAME == "bionic":
+            # PLATFORM_TARGET should always be "native_mixed" from CI jobs
+            return ("libzim", )
+        elif OS_NAME == "osx":
             if PLATFORM_TARGET.endswith("_mixed"):
                 return ("libzim", "libkiwix")
             else:
