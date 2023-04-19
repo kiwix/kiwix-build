@@ -117,6 +117,7 @@ class Aarch64(ArmhfPlatformInfo):
     build = 'aarch64'
     arch_full = 'aarch64-linux-gnu'
     toolchain_names = ['aarch64']
+    libdir = "lib/aarch64-linux-gnu"
 
 class Aarch64Dyn(Aarch64):
     name = 'aarch64_dyn'
