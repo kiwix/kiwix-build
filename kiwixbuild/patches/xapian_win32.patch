@@ -1,0 +1,20 @@
+diff '--color=auto' -ur xapian-core-1.4.22/common/safesyssocket.h xapian-core-1.4.22.patched/common/safesyssocket.h
+--- xapian-core-1.4.22/common/safesyssocket.h	2023-02-02 02:00:40.000000000 +0100
++++ xapian-core-1.4.22.patched/common/safesyssocket.h	2023-04-25 15:46:52.228256033 +0200
+@@ -27,6 +27,7 @@
+ # include <sys/socket.h>
+ #else
+ # include "safewinsock2.h"
++# include <ws2tcpip.h>
+ #endif
+ 
+ #ifdef __WIN32__
+@@ -64,7 +65,7 @@
+ # endif
+ # define socket(D,T,P) socket_(D,T,P)
+ 
+-inline int accept_(int sockfd, struct sockaddr* addr, SOCKLEN_T* addrlen) {
++inline int accept_(int sockfd, struct sockaddr* addr, socklen_t* addrlen) {
+     // Winsock2's accept() returns the unsigned type SOCKET, which is a 32-bit
+     // type for WIN32 and a 64-bit type for WIN64.
+     //
