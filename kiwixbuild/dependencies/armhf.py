@@ -8,7 +8,7 @@ base_url = 'https://master.dl.sourceforge.net/project/raspberry-pi-cross-compile
 armhf_base_url = base_url + 'Raspberry%20Pi%20GCC%20Cross-Compiler%20Toolchains/Stretch/GCC%2010.3.0/Raspberry%20Pi%202%2C%203/'
 
 # This is Gcc 10.3.0 and ALL rapsberry Pi arch64
-aarch_base_url = base_url + 'Bonus%20Raspberry%20Pi%20GCC%2064-Bit%20Toolchains/Raspberry%20Pi%20GCC%2064-Bit%20Cross-Compiler%20Toolchains/Stretch/GCC%2010.3.0/'
+aarch_base_url = base_url + 'Bonus%20Raspberry%20Pi%20GCC%2064-Bit%20Toolchains/Raspberry%20Pi%20GCC%2064-Bit%20Cross-Compiler%20Toolchains/Stretch/GCC%206.3.0/'
 
 class armhf_toolchain(Dependency):
     dont_skip = True
@@ -29,8 +29,8 @@ class aarch64_toolchain(Dependency):
     name = "aarch64"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('cross-gcc-10.3.0-pi_64.tar.gz',
-                             '5b3fdb7ee8c496c377ab8b11d7ffd404b4d3041f4fdcfeebcbcb734d45a5f3e9',
-                             aarch_base_url + 'cross-gcc-10.3.0-pi_64.tar.gz')
+        archive = Remotefile('cross-gcc-6.3.0-pi_64.tar.gz',
+                             '1b048bb8886ad63d21797cd9129fc37b9ea0dfaac7e3c36f888aa16fbec1d320',
+                             aarch_base_url + 'cross-gcc-6.3.0-pi_64.tar.gz')
 
     Builder = NoopBuilder
