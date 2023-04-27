@@ -38,6 +38,9 @@ jobs:
           - target: native_mixed
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
+          - target: native_mixed
+            image_variant: bionic
+            lib_postfix: '/x86_64-linux-gnu'
           - target: native_desktop
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
@@ -56,6 +59,9 @@ jobs:
           - target: aarch64_mixed
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
+          - target: aarch64_mixed
+            image_variant: bionic
+            lib_postfix: '/aarch64-linux-gnu'
           - target: win32_static
             image_variant: f35
             lib_postfix: '64'

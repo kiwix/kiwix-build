@@ -45,15 +45,16 @@ else:
     DEV_BRANCH = None
 
 RELEASE_OS_NAME = "macos" if OS_NAME == "osx" else "linux"
+EXTRA_NAME = "-bionic" if OS_NAME == "bionic" else ""
 
 PLATFORM_TO_RELEASE = {
-    "native_mixed": "{os}-x86_64".format(os=RELEASE_OS_NAME),
+    "native_mixed": "{os}-x86_64{extra}".format(os=RELEASE_OS_NAME, extra=EXTRA_NAME),
     "native_static": "{os}-x86_64".format(os=RELEASE_OS_NAME),
     "win32_static": "win-i686",
     "armhf_static": "{os}-armhf".format(os=RELEASE_OS_NAME),
     "armhf_mixed": "{os}-armhf".format(os=RELEASE_OS_NAME),
     "aarch64_static": "{os}-aarch64".format(os=RELEASE_OS_NAME),
-    "aarch64_mixed": "{os}-aarch64".format(os=RELEASE_OS_NAME),
+    "aarch64_mixed": "{os}-aarch64{extra}".format(os=RELEASE_OS_NAME, extra=EXTRA_NAME),
     "i586_static": "{os}-i586".format(os=RELEASE_OS_NAME),
     "macOS_arm64_static": "{os}-arm64".format(os=RELEASE_OS_NAME),
     "macOS_arm64_mixed": "{os}-arm64".format(os=RELEASE_OS_NAME),

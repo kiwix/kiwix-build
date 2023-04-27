@@ -19,7 +19,9 @@ def select_build_target():
         DESKTOP,
         OS_NAME
     )
-    if (PLATFORM_TARGET.startswith("android_")
+    if OS_NAME == "bionic" and PLATFORM_TARGET.endswith("_mixed"):
+        return ("libzim", )
+    elif (PLATFORM_TARGET.startswith("android_")
      or PLATFORM_TARGET.startswith("iOS")
      or PLATFORM_TARGET.startswith("macOS")):
         return ("libzim", "libkiwix")
