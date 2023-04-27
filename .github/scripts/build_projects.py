@@ -30,7 +30,7 @@ def select_build_target():
             if PLATFORM_TARGET.endswith("_mixed"):
                 return ("libzim", "libkiwix")
             else:
-                return ("zim-tools", )
+                return ("zim-tools", "kiwix-tools")
         else:
             if DESKTOP:
                 return ("kiwix-desktop",)
