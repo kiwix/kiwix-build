@@ -22,15 +22,21 @@ def select_build_target():
     if OS_NAME == "bionic" and PLATFORM_TARGET.endswith("_mixed"):
         return ("libzim", )
     elif (PLATFORM_TARGET.startswith("android_")
-     or PLATFORM_TARGET.startswith("iOS")
-     or PLATFORM_TARGET.startswith("macOS")):
+     or PLATFORM_TARGET.startswith("iOS")):
         return ("libzim", "libkiwix")
+    elif PLATFORM_TARGET.startswith("macOS"):
+        if PLATFORM_TARGET.endswith("_mixed"):
+            return ("libzim", "libkiwix")
+        elif PLATFORM_TARGET.endswith("_dyn"):
+            return ("zim-tools", "kiwix-tools")
+        else:
+            return []
     elif PLATFORM_TARGET.startswith("native_"):
         if OS_NAME == "osx":
             if PLATFORM_TARGET.endswith("_mixed"):
                 return ("libzim", "libkiwix")
             else:
-                return ("zim-tools", )
+                return ("zim-tools", "kiwix-tools")
         else:
             if DESKTOP:
                 return ("kiwix-desktop",)
