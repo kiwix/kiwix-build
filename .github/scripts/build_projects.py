@@ -27,8 +27,10 @@ def select_build_target():
     elif PLATFORM_TARGET.startswith("macOS"):
         if PLATFORM_TARGET.endswith("_mixed"):
             return ("libzim", "libkiwix")
-        else:
+        elif PLATFORM_TARGET.endswith("_dyn"):
             return ("zim-tools", "kiwix-tools")
+        else:
+            return []
     elif PLATFORM_TARGET.startswith("native_"):
         if OS_NAME == "osx":
             if PLATFORM_TARGET.endswith("_mixed"):
