@@ -433,6 +433,10 @@ def update_flathub_git():
 
     command = ["git", "clone", FLATPAK_HTTP_GIT_REMOTE]
     call(command, cwd=TMP_DIR)
+
+    branch_name = "v_{}".format(get_postfix("kiwix-desktop"))
+    command = ["git", "checkout", "-b", branch_name]
+    call(command)
     shutil.copy(str(BASE_DIR / "org.kiwix.desktop.json"), str(git_repo_dir))
     patch_dir = KBUILD_SOURCE_DIR / "kiwixbuild" / "patches"
     for dep in ["pugixml"]:
@@ -444,7 +448,7 @@ def update_flathub_git():
         "git",
         "commit",
         "-m",
-        "Update to version {}".format(main_project_versions["kiwix-desktop"]),
+        "Update to version {}".format(get_postfix("kiwix-desktop")),
     ]
     try:
         call(command)
@@ -453,7 +457,7 @@ def update_flathub_git():
         return
     command = ["git", "config", "remote.origin.pushurl", FLATPAK_GIT_REMOTE]
     call(command)
-    command = ["git", "push"]
+    command = ["git", "push", "origin", branch_name]
     env["GIT_SSH_COMMAND"] = "ssh -o StrictHostKeyChecking=no -i " + _environ.get(
         "SSH_KEY"
     )
