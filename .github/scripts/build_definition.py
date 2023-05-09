@@ -14,7 +14,7 @@ class Range(NamedTuple):
         start = max(self.start, other.start)
         end = min(self.end, other.end)
         if start > end:
-            raise ValueError("Ranges doesn't intersect")
+            raise ValueError("Ranges don't intersect")
         return Range(start, end)
 
 
@@ -25,15 +25,15 @@ class Cell(NamedTuple):
 
 BUILD_DEF = """
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-DESKTOP          | eval'True    |                                                                                                                                                                                                                                                            |
-OS_NAME          |              | bionic      |  osx                                                           |                                                                                                                                                                             |
-PLATFORM_TARGET  |              | re'.*_mixed |  native_mixed  | native_static | macOS_dyn | ios | macOS_mixed | re'android_.* | native_mixed | armhf_mixed | aarch64_mixed | wasm | native_static | native_dyn | win32_static | re'armhf_.* | re'aarch64_.* | i586_static | flatpak | .*    |
+DESKTOP          | eval'True    |                                                                                                                                                                                                                                                                 |
+OS_NAME          |              | bionic      |  osx                                                                |                                                                                                                                                                             |
+PLATFORM_TARGET  |              | re'.*_mixed |  native_mixed  | native_static | macOS_dyn | re'iOS_* | macOS_mixed | re'android_.* | native_mixed | armhf_mixed | aarch64_mixed | wasm | native_static | native_dyn | win32_static | re'armhf_.* | re'aarch64_.* | i586_static | flatpak | .*    |
 =========================================================================================================================================================================================================================================================================================
-libzim           |              | x                            |                           | x                 | x                                                                 |                                                                                                 | x     |
-libkiwix         |                            |  x             |                           | x                 | x                            |                                                                                                                                      | x     |
-zim-tools        |                                             | x                         |                   |                                                                   | x                                                                                     |         | x     |
-kiwix-tools      |                                             | x                         |                   |                                                                   | x                                                                                     |         | x     |
-kiwix-desktop    | x            |                                                                                                                                                                                                                                          | x       |       |
+libzim           |              | x                            |                           | x                      | x                                                                 |                                                                                                 | x     |
+libkiwix         |                            |  x             |                           | x                      | x                            |                                                                                                                                      | x     |
+zim-tools        |                                             | x                         |                        |                                                                   | x                                                                                     |         | x     |
+kiwix-tools      |                                             | x                         |                        |                                                                   | x                                                                                     |         | x     |
+kiwix-desktop    | x            |                                                                                                                                                                                                                                               | x       |       |
 =========================================================================================================================================================================================================================================================================================
 """
 
