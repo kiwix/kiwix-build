@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from build_definition import select_build_target
 
 from common import (
     run_kiwix_build,
@@ -13,7 +14,7 @@ from common import (
 )
 
 
-def select_build_target():
+def select_build_target_():
     from common import (
         PLATFORM_TARGET,
         DESKTOP,
