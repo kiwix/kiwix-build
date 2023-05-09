@@ -46,7 +46,7 @@ jobs:
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container:
       image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:dev"
       options: "--device /dev/fuse --privileged"
@@ -101,7 +101,7 @@ jobs:
       SSH_KEY: /tmp/id_rsa
       PLATFORM_TARGET: flatpak
       OS_NAME: focal
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
       shell: bash
@@ -150,7 +150,7 @@ jobs:
           - macOS_arm64_static
           - macOS_arm64_mixed
           - macOS_x86_64
-    runs-on: macos-latest
+    runs-on: macos-12
     env:
       SSH_KEY: /tmp/id_rsa
       OS_NAME: osx
