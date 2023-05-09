@@ -24,17 +24,17 @@ class Cell(NamedTuple):
 
 
 BUILD_DEF = """
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-OS_NAME         | bionic |  osx                                           |                                                                                                                                      |
-DESKTOP         |                                                         | eval'True |                                                                                                                          |
-PLATFORM_TARGET |        |  native_mixed  | native_dyn | re'.*_static |   |           | flatpak | re'android_.* | native_mixed | re'*_mixed | wasm | re'native_* | re'*_static | re'armhf_.* | re'aarch64_.* |   |
-==================================================================================================================================================================================================================
-libzim          | x                       |                           | x |                     | x                                                |                                                         | x |
-libkiwix        |        |  x             |                           | x |                     | x                            |                                                                             | x |
-zim-tools       |                         | x                         |   |                                                                        | x                                                       | x |
-kiwix-tools     |                         | x                         |   |                                                                        | x                                                       | x |
-kiwix-desktop   |                                                         | x                   |                                                                                                            |   |
-==================================================================================================================================================================================================================
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+OS_NAME         | bionic |  osx                                        |                                                                                                                       |
+DESKTOP         |                                                      | eval'True |                                                                                                           |
+PLATFORM_TARGET |        |  native_mixed  | native_dyn | .*_static |   |           | flatpak | android_.* | native_mixed | .*_mixed | wasm | native_.* | .*_static | armhf_.* | aarch64_.* |   |
+================================================================================================================================================================================================
+libzim          | x                       |                        | x |                     | x                                           |                                               | x |
+libkiwix        |        |  x             |                        | x |                     | x                         |                                                                 | x |
+zim-tools       |                         | x                      |   |                                                                   | x                                             | x |
+kiwix-tools     |                         | x                      |   |                                                                   | x                                             | x |
+kiwix-desktop   |                                                      | x                   |                                                                                             |   |
+================================================================================================================================================================================================
 """
 
 
@@ -58,13 +58,12 @@ def parse_line(line: str):
 def selector_match(selector, value):
     if not selector:
         return True
-    if isinstance(selector, str):
-        if selector.startswith("re'"):
-            regex = selector[3:]
-            return re.fullmatch(regex, value) is not None
-        if selector.startswith("eval'"):
-            selector = eval(selector[5:])
-    return selector == value
+    if selector.startswith("eval'"):
+        selector = eval(selector[5:])
+        return selector == value
+    return re.fullmatch(selector, value) is not None
+
+
 
 def select_range(context):
     current_range = Range(0, 9999999999)
