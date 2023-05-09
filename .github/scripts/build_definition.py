@@ -1,16 +1,16 @@
-from typing import NamedTuple, Self
+from typing import NamedTuple
 import re
 
 class Range(NamedTuple):
     start: int
     end: int
 
-    def is_intersect(self, other: Self) -> bool :
+    def is_intersect(self, other: "Self") -> bool :
         if self.end <= other.start or self.start > other.end:
             return False
         return True
 
-    def intersect(self, other: Self) -> Self :
+    def intersect(self, other: "Self") -> "Self" :
         start = max(self.start, other.start)
         end = min(self.end, other.end)
         if start > end:
