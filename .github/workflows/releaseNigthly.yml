@@ -177,7 +177,6 @@ jobs:
           - native_dyn
           - native_static
           - native_mixed
-          - macOS_arm64_static
           - macOS_arm64_mixed
     runs-on: macos-12
     env:
