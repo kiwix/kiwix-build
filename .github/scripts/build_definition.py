@@ -45,6 +45,9 @@ BUILD_DEF = """
     |         | aarch64_static     |        |          | B         | B           |               |
     |         | aarch64_dyn        | d      |          | B         | B           |               |
     |         | aarch64_mixed      | B      |          |           |             |               |
+    |         | aarch64_musl_static|        |          | B         | B           |               |
+    |         | aarch64_musl_dyn   | d      |          | B         | B           |               |
+    |         | aarch64_musl_mixed | B      |          |           |             |               |
     |         | win32_static       | d      | dB       | dB        | dB          |               |
     |         | win32_dyn          | d      | dB       | dB        | dB          |               |
     |         | i586_static        |        |          | B         | B           |               |

@@ -22,6 +22,8 @@ jobs:
           - armv8_mixed
           - aarch64_static
           - aarch64_mixed
+          - aarch64_musl_static
+          - aarch64_musl_mixed
           - win32_static
           - i586_static
           - android_arm
@@ -53,6 +55,10 @@ jobs:
             image_variant: focal
           - target: aarch64_mixed
             image_variant: bionic
+          - target: aarch64_musl_static
+            image_variant: focal
+          - target: aarch64_musl_mixed
+            imagev_variant: focal
           - target: win32_static
             image_variant: f35
           - target: i586_static
