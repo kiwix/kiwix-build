@@ -49,6 +49,8 @@ PLATFORM_TO_RELEASE = {
     "armv8_mixed": "{os}-armv8".format(os=RELEASE_OS_NAME),
     "aarch64_static": "{os}-aarch64".format(os=RELEASE_OS_NAME),
     "aarch64_mixed": "{os}-aarch64{extra}".format(os=RELEASE_OS_NAME, extra=EXTRA_NAME),
+    "aarch64_musl_static": "{os}-aarch64-musl".format(os=RELEASE_OS_NAME),
+    "aarch64_musl_mixed": "{os}-aarch64-musl".format(os=RELEASE_OS_NAME),
     "i586_static": "{os}-i586".format(os=RELEASE_OS_NAME),
     "macOS_arm64_static": "{os}-arm64".format(os=RELEASE_OS_NAME),
     "macOS_arm64_mixed": "{os}-arm64".format(os=RELEASE_OS_NAME),
