@@ -78,6 +78,7 @@ def select_range(context):
             if cell.range.end <= current_range.start or cell.range.start >= current_range.end:
                 continue
             if selector_match(cell.data, context[key]):
+                print(f"{key} match with {cell}")
                 found = True
                 current_range = current_range.intersect(cell.range)
                 break
@@ -131,5 +132,7 @@ def select_build_target():
     range = select_range(context)
     build_orders = get_build_order_for_range(range)
 
-    return [project for (project, build) in build_orders.items() if build]
+    build_orders = [project for (project, build) in build_orders.items() if build]
+    print(f"Building: {build_orders}")
+    return build_orders
 
