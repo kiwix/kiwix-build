@@ -106,6 +106,7 @@ EXPORT_FILES = {
                 main_project_versions["libzim"][0]
             ),
             "lib/libzim.dylib",
+            "lib/*/libzim.pc",
             "include/zim/**/*.h",
         ),
     ),
@@ -119,6 +120,11 @@ EXPORT_FILES = {
             "lib/*/libkiwix.so.{version}".format(
                 version=main_project_versions["libkiwix"][0]
             ),
+            "lib/libkiwix.{}.dylib".format(
+                main_project_versions["libkiwix"][0]
+            ),
+            "lib/libkiwix.dylib",
+            "lib/*/libkiwix.pc",
             "include/kiwix/**/*.h"
         ),
     ),
