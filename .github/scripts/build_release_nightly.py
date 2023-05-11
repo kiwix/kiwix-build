@@ -21,7 +21,7 @@ from common import (
     notarize_macos_build,
 )
 
-from build_projects import select_build_target
+from build_definition import select_build_targets
 
 TARGETS = select_build_target()
 
