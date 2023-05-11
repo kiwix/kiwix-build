@@ -8,32 +8,47 @@ import csv, io, re
 # Once a line matches, other lines are not read, so put more specific combination first.
 # Lines composed of `-` , or `=`, or starting by `#` are ignored.
 BUILD_DEF = """
-    | OS_NAME | DESKTOP   | PLATFORM_TARGET | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop |
+    | OS_NAME | DESKTOP   | PLATFORM_TARGET    | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop |
     =======================================================================================================
 # Bionic is a special case as we need to compile libzim on old arch for python
-    | bionic  |           |                 | b      |          |           |             |               |
+    | bionic  |           |                    | b      |          |           |             |               |
     -------------------------------------------------------------------------------------------------------
-# Osx builds, build binaries on native_dyn and native_static. On any other things, build only the libraries
+# Osx builds, build binaries on native_dyn and native_static. On anyother things, build only the libraries
     | osx     |           | native_dyn      |        |          | b         | b           |               |
     | osx     |           | native_static   |        |          | b         | b           |               |
-    | osx     |           |                 | b      | b        |           |             |               |
+    | osx     |           | native_mixed       | b      | b        |           |             |               |
+    | osx     |           | iOS_arm64          | b      | b        |           |             |               |
+    | osx     |           | iOS_x86_64         | b      | b        |           |             |               |
+    | osx     |           | iOS_Mac_ABI        | b      | b        |           |             |               |
+    | osx     |           | macOS_arm64_static | b      | b        |           |             |               |
+    | osx     |           | macOS_arm64_mixed  | b      | b        |           |             |               |
+    | osx     |           | macOS_x86_64       | b      | b        |           |             |               |
     -------------------------------------------------------------------------------------------------------
 # Build kiwix-desktop only on specific targets
-    |         | eval'True |                 |        |          |           |             | b             |
-    |         |           | flatpak         |        |          |           |             | b             |
+    |         | eval'True |                    |        |          |           |             | b             |
+    |         |           | flatpak            |        |          |           |             | b             |
     -------------------------------------------------------------------------------------------------------
-# Library builds, on embedded archs or on all *_mixed targets
-    |         |           | android_.*      | b      | b        |           |             |               |
+    |         |           | native_static      |        |          | b         | b           |               |
+    |         |           | native_dyn         |        |          | b         | b           |               |
     |         |           | native_mixed    | b      | b        |           |             |               |
-    |         |           | .*_mixed        | b      |          |           |             |               |
+    |         |           | android_arm        | b      | b        |           |             |               |
+    |         |           | android_arm64      | b      | b        |           |             |               |
+    |         |           | android_x86        | b      | b        |           |             |               |
+    |         |           | android_x86_64     | b      | b        |           |             |               |
+    |         |           | armv6_static       |        |          | b         | b           |               |
+    |         |           | armv6_dyn          |        |          | b         | b           |               |
+    |         |           | armv6_mixed        | b      |          |           |             |               |
+    |         |           | armv8_static       |        |          | b         | b           |               |
+    |         |           | armv8_dyn          |        |          | b         | b           |               |
+    |         |           | armv8_mixed        | b      |          |           |             |               |
+    |         |           | aarch64_static     |        |          | b         | b           |               |
+    |         |           | aarch64_dyn        |        |          | b         | b           |               |
+    |         |           | aarch64_mixed      | b      |          |           |             |               |
+    |         |           | win32_static       |        |          | b         | b           |               |
+    |         |           | win32_dyn          |        |          | b         | b           |               |
+    |         |           | i586_static        |        |          | b         | b           |               |
+    |         |           | i586_dyn           |        |          | b         | b           |               |
     |         |           | wasm            | b      |          |           |             |               |
-# Build binaries on *_static targets or on all others "non mixed" targets (where we have already build libs)
-    |         |           | native_.*       |        |          | b         | b           |               |
-    |         |           | .*_static       |        |          | b         | b           |               |
-    |         |           | armv[68]_.*     |        |          | b         | b           |               |
-    |         |           | aarch64_.*      |        |          | b         | b           |               |
-# Else, let's build everything.
-    |         |           |                 | b      | b        | b         | b           |               |
 """
 
 
