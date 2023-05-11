@@ -7,48 +7,52 @@ import csv, io, re
 # Once a cell doesn't match, skip to the next line.
 # Once a line matches, other lines are not read, so put more specific combination first.
 # Lines composed of `-` , or `=`, or starting by `#` are ignored.
+# 'B' letter means that the project is build in the CI
+# 'd' letter means that the project's dependencies are build and published to be used by the project's CI.
+# If a cell contains both, both are done.
 BUILD_DEF = """
     | OS_NAME | DESKTOP   | PLATFORM_TARGET    | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop |
     =======================================================================================================
 # Bionic is a special case as we need to compile libzim on old arch for python
-    | bionic  |           |                    | b      |          |           |             |               |
+    | bionic  |           |                    | B      |          |           |             |               |
     -------------------------------------------------------------------------------------------------------
 # Osx builds, build binaries on native_dyn and native_static. On anyother things, build only the libraries
-    | osx     |           | native_dyn      |        |          | b         | b           |               |
-    | osx     |           | native_static   |        |          | b         | b           |               |
-    | osx     |           | native_mixed       | b      | b        |           |             |               |
-    | osx     |           | iOS_arm64          | b      | b        |           |             |               |
-    | osx     |           | iOS_x86_64         | b      | b        |           |             |               |
-    | osx     |           | iOS_Mac_ABI        | b      | b        |           |             |               |
-    | osx     |           | macOS_arm64_static | b      | b        |           |             |               |
-    | osx     |           | macOS_arm64_mixed  | b      | b        |           |             |               |
-    | osx     |           | macOS_x86_64       | b      | b        |           |             |               |
+    | osx     |           | native_dyn         | d      | d        | dB        | B           |               |
+    | osx     |           | native_static      |        |          | B         | B           |               |
+    | osx     |           | native_mixed       | B      | B        |           |             |               |
+    | osx     |           | iOS_arm64          | dB     | B        |           |             |               |
+    | osx     |           | iOS_x86_64         | dB     | B        |           |             |               |
+    | osx     |           | iOS_Mac_ABI        | B      | B        |           |             |               |
+    | osx     |           | macOS_arm64_static | B      | B        |           |             |               |
+    | osx     |           | macOS_arm64_mixed  | B      | B        |           |             |               |
+    | osx     |           | macOS_x86_64       | B      | B        |           |             |               |
     -------------------------------------------------------------------------------------------------------
 # Build kiwix-desktop only on specific targets
-    |         | eval'True |                    |        |          |           |             | b             |
-    |         |           | flatpak            |        |          |           |             | b             |
+    |         | eval'True |                    |        |          |           |             | B             |
+    |         |           | flatpak            |        |          |           |             | B             |
     -------------------------------------------------------------------------------------------------------
-    |         |           | native_static      |        |          | b         | b           |               |
-    |         |           | native_dyn         |        |          | b         | b           |               |
-    |         |           | native_mixed    | b      | b        |           |             |               |
-    |         |           | android_arm        | b      | b        |           |             |               |
-    |         |           | android_arm64      | b      | b        |           |             |               |
-    |         |           | android_x86        | b      | b        |           |             |               |
-    |         |           | android_x86_64     | b      | b        |           |             |               |
-    |         |           | armv6_static       |        |          | b         | b           |               |
-    |         |           | armv6_dyn          |        |          | b         | b           |               |
-    |         |           | armv6_mixed        | b      |          |           |             |               |
-    |         |           | armv8_static       |        |          | b         | b           |               |
-    |         |           | armv8_dyn          |        |          | b         | b           |               |
-    |         |           | armv8_mixed        | b      |          |           |             |               |
-    |         |           | aarch64_static     |        |          | b         | b           |               |
-    |         |           | aarch64_dyn        |        |          | b         | b           |               |
-    |         |           | aarch64_mixed      | b      |          |           |             |               |
-    |         |           | win32_static       |        |          | b         | b           |               |
-    |         |           | win32_dyn          |        |          | b         | b           |               |
-    |         |           | i586_static        |        |          | b         | b           |               |
-    |         |           | i586_dyn           |        |          | b         | b           |               |
-    |         |           | wasm            | b      |          |           |             |               |
+    |         |           | native_static      | d      | d        | dB        | dB          |               |
+    |         |           | native_dyn         | d      | d        | dB        | dB          |               |
+    |         |           | native_mixed       | B      | B        |           |             |               |
+# libzim CI is building alpine_dyn but not us
+    |         |           | android_arm        | dB     | dB       |           |             |               |
+    |         |           | android_arm64      | dB     | dB       |           |             |               |
+    |         |           | android_x86        | B      | B        |           |             |               |
+    |         |           | android_x86_64     | B      | B        |           |             |               |
+    |         |           | armv6_static       |        |          | B         | B           |               |
+    |         |           | armv6_dyn          |        |          | B         | B           |               |
+    |         |           | armv6_mixed        | B      |          |           |             |               |
+    |         |           | armv8_static       |        |          | B         | B           |               |
+    |         |           | armv8_dyn          |        |          | B         | B           |               |
+    |         |           | armv8_mixed        | B      |          |           |             |               |
+    |         |           | aarch64_static     |        |          | B         | B           |               |
+    |         |           | aarch64_dyn        | d      |          | B         | B           |               |
+    |         |           | aarch64_mixed      | B      |          |           |             |               |
+    |         |           | win32_static       | d      | dB       | dB        | dB          |               |
+    |         |           | win32_dyn          | d      | dB       | dB        | dB          |               |
+    |         |           | i586_static        |        |          | B         | B           |               |
+    |         |           | i586_dyn           |        |          | B         | B           |               |
+    |         |           | wasm               | dB     |          |           |             |               |
 """
 
 
@@ -95,7 +99,7 @@ class Context(NamedTuple):
         return True
 
 
-BUILD = "b"
+BUILD = "B"
 DEPS = "d"
 
 

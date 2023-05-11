@@ -11,25 +11,9 @@ from common import (
     DESKTOP,
     KIWIX_DESKTOP_ONLY,
 )
+from build_definition import select_build_targets, DEPS
 
-if PLATFORM_TARGET.startswith("android_") or PLATFORM_TARGET.startswith("iOS"):
-    TARGETS = ("libzim", "libkiwix")
-elif PLATFORM_TARGET == "wasm":
-    TARGETS = ("libzim", )
-elif PLATFORM_TARGET.startswith("native_"):
-    if OS_NAME == "osx":
-        TARGETS = ("libzim", "zim-tools", "libkiwix")
-    else:
-        if DESKTOP:
-            TARGETS = ("kiwix-desktop",)
-        elif PLATFORM_TARGET == "native_mixed":
-            TARGETS = ("libzim",)
-        else:
-            TARGETS = ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
-else:
-    TARGETS = ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
-
-for target in TARGETS:
+for target in select_build_targets(DEPS):
     run_kiwix_build(target, platform=PLATFORM_TARGET, build_deps_only=True)
     archive_file = make_deps_archive(target=target)
     upload(archive_file, "ci@tmp.kiwix.org:30022", "/data/tmp/ci")
