@@ -19,9 +19,9 @@ from common import (
     notarize_macos_build,
 )
 
-from build_definition import select_build_targets
+from build_definition import select_build_targets, BUILD
 
-TARGETS = select_build_target()
+TARGETS = select_build_target(BUILD)
 
 # Filter what to build if we are doing a release.
 if MAKE_RELEASE:

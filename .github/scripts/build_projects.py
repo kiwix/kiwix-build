@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from build_definition import select_build_targets
+from build_definition import select_build_targets, BUILD
 from common import (
     run_kiwix_build,
     make_archive,
@@ -12,7 +12,7 @@ from common import (
     DEV_BRANCH,
 )
 
-for target in select_build_targets():
+for target in select_build_targets(BUILD):
     run_kiwix_build(target, platform=PLATFORM_TARGET)
     if target == "kiwix-desktop":
         archive = create_desktop_image(make_release=False)

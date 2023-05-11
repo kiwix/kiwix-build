@@ -11,29 +11,29 @@ BUILD_DEF = """
     | OS_NAME | DESKTOP   | PLATFORM_TARGET | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop |
     =======================================================================================================
 # Bionic is a special case as we need to compile libzim on old arch for python
-    | bionic  |           |                 | x      |          |           |             |               |
+    | bionic  |           |                 | b      |          |           |             |               |
     -------------------------------------------------------------------------------------------------------
 # Osx builds, build binaries on native_dyn and native_static. On any other things, build only the libraries
-    | osx     |           | native_dyn      |        |          | x         | x           |               |
-    | osx     |           | native_static   |        |          | x         | x           |               |
-    | osx     |           |                 | x      | x        |           |             |               |
+    | osx     |           | native_dyn      |        |          | b         | b           |               |
+    | osx     |           | native_static   |        |          | b         | b           |               |
+    | osx     |           |                 | b      | b        |           |             |               |
     -------------------------------------------------------------------------------------------------------
 # Build kiwix-desktop only on specific targets
-    |         | eval'True |                 |        |          |           |             | x             |
-    |         |           | flatpak         |        |          |           |             | x             |
+    |         | eval'True |                 |        |          |           |             | b             |
+    |         |           | flatpak         |        |          |           |             | b             |
     -------------------------------------------------------------------------------------------------------
 # Library builds, on embedded archs or on all *_mixed targets
-    |         |           | android_.*      | x      | x        |           |             |               |
-    |         |           | native_mixed    | x      | x        |           |             |               |
-    |         |           | .*_mixed        | x      |          |           |             |               |
-    |         |           | wasm            | x      |          |           |             |               |
+    |         |           | android_.*      | b      | b        |           |             |               |
+    |         |           | native_mixed    | b      | b        |           |             |               |
+    |         |           | .*_mixed        | b      |          |           |             |               |
+    |         |           | wasm            | b      |          |           |             |               |
 # Build binaries on *_static targets or on all others "non mixed" targets (where we have already build libs)
-    |         |           | native_.*       |        |          | x         | x           |               |
-    |         |           | .*_static       |        |          | x         | x           |               |
-    |         |           | armv[68]_.*     |        |          | x         | x           |               |
-    |         |           | aarch64_.*      |        |          | x         | x           |               |
+    |         |           | native_.*       |        |          | b         | b           |               |
+    |         |           | .*_static       |        |          | b         | b           |               |
+    |         |           | armv[68]_.*     |        |          | b         | b           |               |
+    |         |           | aarch64_.*      |        |          | b         | b           |               |
 # Else, let's build everything.
-    |         |           |                 | x      | x        | x         | x           |               |
+    |         |           |                 | b      | b        | b         | b           |               |
 """
 
 
@@ -80,7 +80,11 @@ class Context(NamedTuple):
         return True
 
 
-def select_build_targets():
+BUILD = "b"
+DEPS = "d"
+
+
+def select_build_targets(criteria):
     from common import PLATFORM_TARGET, DESKTOP, OS_NAME
 
     context = Context(PLATFORM_TARGET=PLATFORM_TARGET, DESKTOP=DESKTOP, OS_NAME=OS_NAME)
@@ -97,7 +101,7 @@ def select_build_targets():
                     "kiwix-tools",
                     "kiwix-desktop",
                 )
-                if row[k] == "x"
+                if criteria in row[k]
             ]
             print(build_order)
             return build_order
