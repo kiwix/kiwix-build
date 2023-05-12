@@ -13,8 +13,6 @@ from common import (
     fix_macos_rpath,
     trigger_docker_publish,
     BASE_DIR,
-    TMP_DIR,
-    HOME,
     OS_NAME,
     PLATFORM_TARGET,
     MAKE_RELEASE,
