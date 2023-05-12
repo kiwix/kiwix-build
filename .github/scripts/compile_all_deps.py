@@ -8,8 +8,6 @@ from common import (
     upload,
     OS_NAME,
     PLATFORM_TARGET,
-    DESKTOP,
-    KIWIX_DESKTOP_ONLY,
 )
 from build_definition import select_build_targets, DEPS
 
