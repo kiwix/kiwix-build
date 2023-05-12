@@ -14,7 +14,6 @@ jobs:
           - native_static
           - native_dyn
           - native_mixed
-          - native_desktop
           - wasm
           - armv6_static
           - armv6_dyn

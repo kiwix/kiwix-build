@@ -32,7 +32,7 @@ BUILD_DEF = """
     |         |           | flatpak            |        |          |           |             | B             |
     -------------------------------------------------------------------------------------------------------
     |         |           | native_static      | d      | d        | dB        | dB          |               |
-    |         |           | native_dyn         | d      | d        | dB        | dB          |               |
+    |         |           | native_dyn         | d      | d        | dB        | dB          | B             |
     |         |           | native_mixed       | B      | B        |           |             |               |
 # libzim CI is building alpine_dyn but not us
     |         |           | android_arm        | dB     | dB       |           |             |               |

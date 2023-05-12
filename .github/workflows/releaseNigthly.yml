@@ -16,7 +16,6 @@ jobs:
           - native_static
           - native_dyn
           - native_mixed
-          - native_desktop
           - wasm
           - armv6_static
           - armv6_mixed
@@ -39,8 +38,6 @@ jobs:
             image_variant: focal
           - target: native_mixed
             image_variant: bionic
-          - target: native_desktop
-            image_variant: focal
           - target: wasm
             image_variant: focal
           - target: armv6_static
