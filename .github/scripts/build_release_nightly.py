@@ -34,7 +34,7 @@ for target in TARGETS:
     if target == "kiwix-desktop":
         archive = create_desktop_image(make_release=MAKE_RELEASE)
     else:
-        if OS_NAME == "osx" and PLATFORM_TARGET.endswith("_mixed"):
+        if OS_NAME == "macos" and PLATFORM_TARGET.endswith("_mixed"):
             fix_macos_rpath(target)
             notarize_macos_build(target)
         archive = make_archive(target, make_release=MAKE_RELEASE)
@@ -46,7 +46,7 @@ for target in TARGETS:
 # We have few more things to do for release:
 if MAKE_RELEASE:
     # Publish source archives
-    if PLATFORM_TARGET in ("native_dyn", "native_mixed") and OS_NAME != "osx":
+    if PLATFORM_TARGET in ("native_dyn", "native_mixed") and OS_NAME != "macos":
         for target in TARGETS:
             if release_versions.get(target) != 0:
                 continue

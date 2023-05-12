@@ -17,7 +17,7 @@ for target in select_build_targets(BUILD):
     if target == "kiwix-desktop":
         archive = create_desktop_image(make_release=False)
     else:
-        if PLATFORM_TARGET == "native_mixed" and OS_NAME == "osx":
+        if PLATFORM_TARGET == "native_mixed" and OS_NAME == "macos":
             fix_macos_rpath(target)
         archive = make_archive(target, make_release=False)
     if archive and DEV_BRANCH:

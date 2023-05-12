@@ -36,7 +36,7 @@ if not MAKE_RELEASE and _ref != "main":
 else:
     DEV_BRANCH = None
 
-RELEASE_OS_NAME = "macos" if OS_NAME == "osx" else "linux"
+RELEASE_OS_NAME = "macos" if OS_NAME == "macos" else "linux"
 EXTRA_NAME = "-bionic" if OS_NAME == "bionic" else ""
 
 PLATFORM_TO_RELEASE = {

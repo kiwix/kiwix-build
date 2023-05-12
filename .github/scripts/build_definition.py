@@ -17,15 +17,15 @@ BUILD_DEF = """
     | bionic  |                    | B      |          |           |             |               |
     ----------------------------------------------------------------------------------------------
 # Osx builds, build binaries on native_dyn and native_static. On anyother things, build only the libraries
-    | osx     | native_dyn         | d      | d        | dB        | B           |               |
-    | osx     | native_static      |        |          | B         | B           |               |
-    | osx     | native_mixed       | B      | B        |           |             |               |
-    | osx     | iOS_arm64          | dB     | B        |           |             |               |
-    | osx     | iOS_x86_64         | dB     | B        |           |             |               |
-    | osx     | iOS_Mac_ABI        | B      | B        |           |             |               |
-    | osx     | macOS_arm64_static | B      | B        |           |             |               |
-    | osx     | macOS_arm64_mixed  | B      | B        |           |             |               |
-    | osx     | macOS_x86_64       | B      | B        |           |             |               |
+    | macos   | native_dyn         | d      | d        | dB        | B           |               |
+    | macos   | native_static      |        |          | B         | B           |               |
+    | macos   | native_mixed       | B      | B        |           |             |               |
+    | macos   | iOS_arm64          | dB     | B        |           |             |               |
+    | macos   | iOS_x86_64         | dB     | B        |           |             |               |
+    | macos   | iOS_Mac_ABI        | B      | B        |           |             |               |
+    | macos   | macOS_arm64_static | B      | B        |           |             |               |
+    | macos   | macOS_arm64_mixed  | B      | B        |           |             |               |
+    | macos   | macOS_x86_64       | B      | B        |           |             |               |
     ----------------------------------------------------------------------------------------------
     |         | flatpak            |        |          |           |             | B             |
     |         | native_static      | d      | d        | dB        | dB          |               |

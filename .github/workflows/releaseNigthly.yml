@@ -168,7 +168,7 @@ jobs:
     runs-on: macos-11
     env:
       SSH_KEY: /tmp/id_rsa
-      OS_NAME: osx
+      OS_NAME: macos
       CERTIFICATE: /tmp/wmch-devid.p12
       SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
       KEYCHAIN: /Users/runner/build.keychain-db
