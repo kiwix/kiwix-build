@@ -257,7 +257,7 @@ def upload_archive(archive, project, make_release, dev_branch=None):
         dest_path = dest_path + "nightly/" + DATE
 
     if dev_branch:
-        dest_path = "/data/tmp/ci/" + dev_branch
+        dest_path = "/data/tmp/ci/dev_preview/" + dev_branch
     else:
         # Make the archive read only. This way, scp will preserve rights.
         # If somehow we try to upload twice the same archive, scp will fails.
