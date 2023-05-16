@@ -16,9 +16,12 @@ jobs:
           - native_mixed
           - native_desktop
           - wasm
-          - armhf_static
-          - armhf_dyn
-          - armhf_mixed
+          - armv6_static
+          - armv6_dyn
+          - armv6_mixed
+          - armv8_static
+          - armv8_dyn
+          - armv8_mixed
           - aarch64_static
           - aarch64_dyn
           - aarch64_mixed

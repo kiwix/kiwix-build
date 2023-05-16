@@ -18,8 +18,10 @@ jobs:
           - native_mixed
           - native_desktop
           - wasm
-          - armhf_static
-          - armhf_mixed
+          - armv6_static
+          - armv6_mixed
+          - armv8_static
+          - armv8_mixed
           - aarch64_static
           - aarch64_mixed
           - win32_static
@@ -47,10 +49,16 @@ jobs:
           - target: wasm
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
-          - target: armhf_static
+          - target: armv6_static
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
-          - target: armhf_mixed
+          - target: armv6_mixed
+            image_variant: focal
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: armv8_static
+            image_variant: focal
+            lib_postfix: '/x86_64-linux-gnu'
+          - target: armv8_mixed
             image_variant: focal
             lib_postfix: '/x86_64-linux-gnu'
           - target: aarch64_static
