@@ -15,9 +15,9 @@ class LibMagic(Dependency):
     class Source(ReleaseDownload):
         name = "libmagic"
         source_dir = "libmagic"
-        archive_top_dir = 'file-5.35'
-        archive = Remotefile('file-5.35.tar.gz',
-                             '30c45e817440779be7aac523a905b123cba2a6ed0bf4f5439e1e99ba940b5546')
+        archive_top_dir = 'file-5.44'
+        archive = Remotefile('file-5.44.tar.gz',
+                             '3751c7fba8dbc831cb8d7cc8aff21035459b8ce5155ef8b0880a27d028475f3b')
 
     class Builder(MakeBuilder):
 
