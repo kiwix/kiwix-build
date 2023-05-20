@@ -20,6 +20,13 @@ class LibMagic(Dependency):
                              '3751c7fba8dbc831cb8d7cc8aff21035459b8ce5155ef8b0880a27d028475f3b')
 
     class Builder(MakeBuilder):
+        @property
+        def configure_option(self):
+            return ("--disable-bzlib "
+                    "--disable-xzlib "
+                    "--disable-zstdlib "
+                    "--disable-lzlib "
+                  )
 
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
