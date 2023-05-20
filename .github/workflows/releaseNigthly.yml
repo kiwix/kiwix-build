@@ -179,7 +179,7 @@ jobs:
           - native_mixed
           - macOS_arm64_static
           - macOS_arm64_mixed
-    runs-on: macos-12
+    runs-on: macos-11
     env:
       SSH_KEY: /tmp/id_rsa
       OS_NAME: osx
