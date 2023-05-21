@@ -6,6 +6,11 @@ and libraries and deploy them. They have been tested on
 [Fedora](https://getfedora.org) 35+ & [Ubuntu](https://ubuntu.com)
 20.04+.
 
+Kiwix Build audience is:
+* Advanced users who don't want/can handle all the dependencies
+  compilations manually
+* Kiwix developer team for its own CI/CD
+
 [![Build Status](https://github.com/kiwix/kiwix-build/workflows/CI/badge.svg?query=branch%3Amain)](https://github.com/kiwix/kiwix-build/actions?query=branch%3Amain)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -163,24 +168,6 @@ Kiwix-build.py will create several directories:
 
 If you want to install all those directories elsewhere, you can pass the
 `--working-dir` option to `kiwix-build`:
-
-CI/CD containerised environments
---------------------------------
-
-Beside the `kiwix-build` command line tool, Kiwix Build proposes
-[prepared compilation environments for multiple GNU/Linux
-systems](.github/ci_images/) too.
-
-These prepared environments include: compilers, binary toolchains and
-any third-party tool necessary to run the compilation toolchain. They
-don't contain pre-compiled library dependences build by kiwix-build, (like Xapian, Libicu,
-Libmicrohttps, ...) but it contains dependencies installed with package manager.
-
-These container images are necessary and intended to be used by Kiwix
-itself in many of its CI. But they are free to download et can be
-reused, although they can break anytime, therefore at your won risk.
-You can find them on
-[here](https://github.com/orgs/kiwix/packages?repo_name=kiwix-build).
 
 Troubleshooting
 ---------------
