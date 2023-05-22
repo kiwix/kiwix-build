@@ -225,6 +225,8 @@ def upload(file_to_upload, host, dest_path):
 
     command = [
         "scp",
+        "-c",
+        "aes128-ctr",
         "-rp",
         "-P",
         port,
