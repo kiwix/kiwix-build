@@ -16,9 +16,12 @@ jobs:
           - native_mixed
           - native_desktop
           - wasm
-          - armhf_static
-          - armhf_dyn
-          - armhf_mixed
+          - armv6_static
+          - armv6_dyn
+          - armv6_mixed
+          - armv8_static
+          - armv8_dyn
+          - armv8_mixed
           - aarch64_static
           - aarch64_dyn
           - aarch64_mixed
@@ -29,20 +32,15 @@ jobs:
           - android_x86
           - android_x86_64
         image_variant: ['focal']
-        lib_postfix: ['/x86_64-linux-gnu']
         include:
           - target: native_mixed
             image_variant: bionic
-            lib_postfix: '/x86_64-linux-gnu'
           - target: aarch64_mixed
             image_variant: bionic
-            lib_postfix: '/aarch64-linux-gnu'
           - target: win32_static
             image_variant: f35
-            lib_postfix: '64'
           - target: win32_dyn
             image_variant: f35
-            lib_postfix: '64'
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa

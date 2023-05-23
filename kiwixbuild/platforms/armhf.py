@@ -4,10 +4,8 @@ from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
 
 
-class ArmhfPlatformInfo(PlatformInfo):
-    build = 'armhf'
-    arch_full = 'arm-linux-gnueabihf'
-    toolchain_names = ['armhf']
+# Base platform
+class ArmPlatformInfo(PlatformInfo):
     compatible_hosts = ['fedora', 'debian']
 
     def get_cross_config(self):
@@ -20,12 +18,16 @@ class ArmhfPlatformInfo(PlatformInfo):
             'host_machine': {
                 'system': 'linux',
                 'lsystem': 'linux',
-                'cpu_family': 'arm',
-                'cpu': 'armhf',
+                'cpu_family': self.cpu_family,
+                'cpu': self.cpu,
                 'endian': 'little',
                 'abi': ''
             }
         }
+
+    @property
+    def libdir(self):
+        return "lib/{}".format(self.arch_full)
 
     @property
     def tlc_source(self):
@@ -33,7 +35,7 @@ class ArmhfPlatformInfo(PlatformInfo):
 
     @property
     def root_path(self):
-        return self.tlc_source.source_path
+        return pj(self.tlc_source.source_path, self.arch_full)
 
     @property
     def binaries(self):
@@ -99,25 +101,52 @@ class ArmhfPlatformInfo(PlatformInfo):
         self.buildEnv.cmake_crossfile = self._gen_crossfile('cmake_cross_file.txt')
         self.buildEnv.meson_crossfile = self._gen_crossfile('meson_cross_file.txt')
 
+class Armv6(ArmPlatformInfo):
+    build = "armv6"
+    arch_full = "armv6-rpi-linux-gnueabihf"
+    toolchain_names = ['armv6']
+    cpu_family = 'arm'
+    cpu = 'armv6'
 
-class ArmhfDyn(ArmhfPlatformInfo):
-    name = 'armhf_dyn'
+class Armv6Dyn(Armv6):
+    name = 'armv6_dyn'
     static = False
 
-class ArmhfStatic(ArmhfPlatformInfo):
-    name = 'armhf_static'
+class Armv6Static(Armv6):
+    name = 'armv6_static'
     static = True
 
-class ArmhfMixed(MixedMixin('armhf_static'), ArmhfPlatformInfo):
-    name = 'armhf_mixed'
+class Armv6Mixed(MixedMixin('armv6_static'), Armv6):
+    name = 'armv6_mixed'
     static = False
 
 
-class Aarch64(ArmhfPlatformInfo):
+class Armv8(ArmPlatformInfo):
+    build = "armv8"
+    arch_full = "armv8-rpi3-linux-gnueabihf"
+    toolchain_names = ['armv8']
+    cpu_family = 'arm'
+    cpu = 'armv8'
+
+class Armv8Dyn(Armv8):
+    name = 'armv8_dyn'
+    static = False
+
+class Armv8Static(Armv8):
+    name = 'armv8_static'
+    static = True
+
+class Armv8Mixed(MixedMixin('armv8_static'), Armv8):
+    name = 'armv8_mixed'
+    static = False
+
+
+class Aarch64(ArmPlatformInfo):
     build = 'aarch64'
-    arch_full = 'aarch64-linux-gnu'
+    arch_full = 'aarch64-rpi3-linux-gnu'
     toolchain_names = ['aarch64']
-    libdir = "lib/aarch64-linux-gnu"
+    cpu_family = 'aarch64'
+    cpu = 'aarch64'
 
 class Aarch64Dyn(Aarch64):
     name = 'aarch64_dyn'

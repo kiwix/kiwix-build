@@ -51,8 +51,10 @@ PLATFORM_TO_RELEASE = {
     "native_mixed": "{os}-x86_64{extra}".format(os=RELEASE_OS_NAME, extra=EXTRA_NAME),
     "native_static": "{os}-x86_64".format(os=RELEASE_OS_NAME),
     "win32_static": "win-i686",
-    "armhf_static": "{os}-armhf".format(os=RELEASE_OS_NAME),
-    "armhf_mixed": "{os}-armhf".format(os=RELEASE_OS_NAME),
+    "armv6_static": "{os}-armv6".format(os=RELEASE_OS_NAME),
+    "armv6_mixed": "{os}-armv6".format(os=RELEASE_OS_NAME),
+    "armv8_static": "{os}-armv8".format(os=RELEASE_OS_NAME),
+    "armv8_mixed": "{os}-armv8".format(os=RELEASE_OS_NAME),
     "aarch64_static": "{os}-aarch64".format(os=RELEASE_OS_NAME),
     "aarch64_mixed": "{os}-aarch64{extra}".format(os=RELEASE_OS_NAME, extra=EXTRA_NAME),
     "i586_static": "{os}-i586".format(os=RELEASE_OS_NAME),
@@ -300,7 +302,8 @@ def make_deps_archive(target=None, name=None, full=False):
     files_to_archive += HOME.glob("BUILD_*/emsdk*")
     if PLATFORM_TARGET.startswith("aarch64"):
         files_to_archive += (SOURCE_DIR / "aarch64").glob("*")
-
+    if PLATFORM_TARGET.startswith("armv"):
+        files_to_archive += SOURCE_DIR.glob("armv*/*")
     if (BASE_DIR / "meson_cross_file.txt").exists():
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")
 
@@ -322,8 +325,7 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += HOME.glob("BUILD_android*/**/.*_ok")
         files_to_archive += SOURCE_DIR.glob("*/.*_ok")
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
-        if PLATFORM_TARGET.startswith("armhf"):
-            files_to_archive += (SOURCE_DIR / "armhf").glob("*")
+
         toolchains_subdirs = HOME.glob("BUILD_*/TOOLCHAINS/*/*")
         for subdir in toolchains_subdirs:
             if not subdir.match("tools"):

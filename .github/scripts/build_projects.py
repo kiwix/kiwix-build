@@ -44,11 +44,11 @@ def select_build_target():
                 return ("libzim", "libkiwix")
             else:
                 return ("zim-tools", "kiwix-tools")
-    elif PLATFORM_TARGET in ("win32_static", "armhf_static", "armhf_dyn", "aarch64_static", "aarch64_dyn", "i586_static"):
+    elif PLATFORM_TARGET in ("win32_static", "armv6_static", "armv6_dyn", "armv8_static", "armv8_dyn", "aarch64_static", "aarch64_dyn", "i586_static"):
         return ("zim-tools", "kiwix-tools")
     elif PLATFORM_TARGET == "flatpak":
         return ("kiwix-desktop",)
-    elif PLATFORM_TARGET in ("wasm", "armhf_mixed", "aarch64_mixed"):
+    elif PLATFORM_TARGET in ("wasm", "armv6_mixed", "armv8_mixed", "aarch64_mixed"):
         return ("libzim", )
     else:
         return ("libzim", "zim-tools", "libkiwix", "kiwix-tools")
