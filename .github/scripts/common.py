@@ -302,7 +302,8 @@ def make_deps_archive(target=None, name=None, full=False):
     files_to_archive += HOME.glob("BUILD_*/emsdk*")
     if PLATFORM_TARGET.startswith("aarch64"):
         files_to_archive += (SOURCE_DIR / "aarch64").glob("*")
-
+    if PLATFORM_TARGET.startswith("armv"):
+        files_to_archive += SOURCE_DIR.glob("armv*/*")
     if (BASE_DIR / "meson_cross_file.txt").exists():
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")
 
@@ -324,8 +325,7 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += HOME.glob("BUILD_android*/**/.*_ok")
         files_to_archive += SOURCE_DIR.glob("*/.*_ok")
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
-        if PLATFORM_TARGET.startswith("armhf"):
-            files_to_archive += (SOURCE_DIR / "armhf").glob("*")
+
         toolchains_subdirs = HOME.glob("BUILD_*/TOOLCHAINS/*/*")
         for subdir in toolchains_subdirs:
             if not subdir.match("tools"):
