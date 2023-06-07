@@ -64,6 +64,9 @@ FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
 
 BIN_EXT = ".exe" if PLATFORM_TARGET.startswith("win32_") else ""
 
+def major_version(version: str) -> str:
+    return version.split(".")[0]
+
 # We have build everything. Now create archives for public deployement.
 EXPORT_FILES = {
     "kiwix-tools": (
@@ -100,10 +103,10 @@ EXPORT_FILES = {
                 version=main_project_versions["libzim"]
             ),
             "lib/*/libzim.so.{version}".format(
-                version=main_project_versions["libzim"][0]
+                version=major_version(main_project_versions["libzim"])
             ),
             "lib/libzim.{}.dylib".format(
-                main_project_versions["libzim"][0]
+                major_version(main_project_versions["libzim"])
             ),
             "lib/libzim.dylib",
             "lib/*/libzim.pc",
@@ -118,10 +121,10 @@ EXPORT_FILES = {
                 version=main_project_versions["libkiwix"]
             ),
             "lib/*/libkiwix.so.{version}".format(
-                version=main_project_versions["libkiwix"][0]
+                version=major_version(main_project_versions["libkiwix"])
             ),
             "lib/libkiwix.{}.dylib".format(
-                main_project_versions["libkiwix"][0]
+                major_version(main_project_versions["libkiwix"])
             ),
             "lib/libkiwix.dylib",
             "lib/*/libkiwix.pc",
@@ -131,7 +134,6 @@ EXPORT_FILES = {
 }
 
 DATE = date.today().isoformat()
-
 
 def print_message(message, *args, **kwargs):
     message = message.format(*args, **kwargs)
