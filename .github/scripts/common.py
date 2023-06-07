@@ -303,7 +303,7 @@ def make_deps_archive(target=None, name=None, full=False):
     files_to_archive += HOME.glob("BUILD_*/android-ndk*")
     files_to_archive += HOME.glob("BUILD_*/emsdk*")
     if PLATFORM_TARGET.startswith("aarch64"):
-        files_to_archive += (SOURCE_DIR / "aarch64").glob("*")
+        files_to_archive += SOURCE_DIR.glob("aarch64*/*")
     if PLATFORM_TARGET.startswith("armv"):
         files_to_archive += SOURCE_DIR.glob("armv*/*")
     if (BASE_DIR / "meson_cross_file.txt").exists():
