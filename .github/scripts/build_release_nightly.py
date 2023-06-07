@@ -13,17 +13,15 @@ from common import (
     fix_macos_rpath,
     trigger_docker_publish,
     BASE_DIR,
-    TMP_DIR,
-    HOME,
     OS_NAME,
     PLATFORM_TARGET,
     MAKE_RELEASE,
     notarize_macos_build,
 )
 
-from build_projects import select_build_target
+from build_definition import select_build_targets, BUILD
 
-TARGETS = select_build_target()
+TARGETS = select_build_target(BUILD)
 
 # Filter what to build if we are doing a release.
 if MAKE_RELEASE:
@@ -36,7 +34,7 @@ for target in TARGETS:
     if target == "kiwix-desktop":
         archive = create_desktop_image(make_release=MAKE_RELEASE)
     else:
-        if OS_NAME == "osx" and PLATFORM_TARGET.endswith("_mixed"):
+        if OS_NAME == "macos" and PLATFORM_TARGET.endswith("_mixed"):
             fix_macos_rpath(target)
             notarize_macos_build(target)
         archive = make_archive(target, make_release=MAKE_RELEASE)
@@ -48,7 +46,7 @@ for target in TARGETS:
 # We have few more things to do for release:
 if MAKE_RELEASE:
     # Publish source archives
-    if PLATFORM_TARGET in ("native_dyn", "native_mixed") and OS_NAME != "osx":
+    if PLATFORM_TARGET in ("native_dyn", "native_mixed") and OS_NAME != "macos":
         for target in TARGETS:
             if release_versions.get(target) != 0:
                 continue

@@ -14,7 +14,6 @@ jobs:
           - native_static
           - native_dyn
           - native_mixed
-          - native_desktop
           - wasm
           - armv6_static
           - armv6_dyn
@@ -151,7 +150,7 @@ jobs:
     runs-on: macos-11
     env:
       SSH_KEY: /tmp/id_rsa
-      OS_NAME: osx
+      OS_NAME: macos
     steps:
     - name: Checkout code
       uses: actions/checkout@v3

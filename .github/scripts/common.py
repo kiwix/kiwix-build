@@ -17,11 +17,6 @@ from kiwixbuild.versions import (
 )
 
 PLATFORM_TARGET = _environ["PLATFORM_TARGET"]
-if PLATFORM_TARGET == "native_desktop":
-    PLATFORM_TARGET = "native_dyn"
-    DESKTOP = True
-else:
-    DESKTOP = False
 OS_NAME = _environ["OS_NAME"]
 HOME = Path(os.path.expanduser("~"))
 
@@ -32,9 +27,6 @@ INSTALL_DIR = BASE_DIR / "INSTALL"
 TMP_DIR = Path("/tmp")
 KBUILD_SOURCE_DIR = HOME / "kiwix-build"
 
-# [TODO]
-KIWIX_DESKTOP_ONLY = False
-
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
 MAKE_RELEASE = re.fullmatch(r"r_[0-9]+", _ref) is not None
 MAKE_RELEASE = MAKE_RELEASE and (_environ.get('GITHUB_EVENT_NAME') != 'schedule')
@@ -44,7 +36,7 @@ if not MAKE_RELEASE and _ref != "main":
 else:
     DEV_BRANCH = None
 
-RELEASE_OS_NAME = "macos" if OS_NAME == "osx" else "linux"
+RELEASE_OS_NAME = "macos" if OS_NAME == "macos" else "linux"
 EXTRA_NAME = "-bionic" if OS_NAME == "bionic" else ""
 
 PLATFORM_TO_RELEASE = {
