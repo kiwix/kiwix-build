@@ -21,7 +21,7 @@ from common import (
 
 from build_definition import select_build_targets, BUILD
 
-TARGETS = select_build_target(BUILD)
+TARGETS = select_build_targets(BUILD)
 
 # Filter what to build if we are doing a release.
 if MAKE_RELEASE:
