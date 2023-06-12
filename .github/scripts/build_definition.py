@@ -23,7 +23,7 @@ BUILD_DEF = """
     | macos   | iOS_arm64          | dB     | B        |           |             |               |
     | macos   | iOS_x86_64         | dB     | B        |           |             |               |
     | macos   | iOS_Mac_ABI        | B      | B        |           |             |               |
-    | macos   | macOS_arm64_static |        |          |           |             |               |
+    | macos   | macOS_arm64_static |        |          | B         |             |               |
     | macos   | macOS_arm64_mixed  | B      | B        |           |             |               |
     | macos   | macOS_x86_64       | B      | B        |           |             |               |
     ----------------------------------------------------------------------------------------------
