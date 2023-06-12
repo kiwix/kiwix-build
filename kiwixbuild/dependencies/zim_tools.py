@@ -27,4 +27,6 @@ class ZimTools(Dependency):
                 base_option += " -Dmagic-install-prefix={buildEnv.install_dir}"
             if self.buildEnv.platformInfo.static:
                 base_option += " -Dstatic-linkage=true"
+            if self.buildEnv.platformInfo.build == 'iOS':
+                base_option += " -Db_bitcode=true"
             return base_option
