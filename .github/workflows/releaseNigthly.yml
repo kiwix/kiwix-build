@@ -15,7 +15,6 @@ jobs:
         target:
           - native_static
           - native_dyn
-          - native_mixed
           - wasm
           - armv6_static
           - armv6_mixed
