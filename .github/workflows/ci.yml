@@ -24,6 +24,9 @@ jobs:
           - aarch64_static
           - aarch64_dyn
           - aarch64_mixed
+          - aarch64_musl_static
+          - aarch64_musl_dyn
+          - aarch64_musl_mixed
           - i586_static
           - i586_dyn
           - android_arm

@@ -5,6 +5,7 @@ from . import (
     android_ndk,
     aria2,
     armhf,
+    arm_musl,
     docoptcpp,
     emsdk,
     flatpak,
