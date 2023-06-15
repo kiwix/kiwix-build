@@ -58,7 +58,7 @@ jobs:
           - target: aarch64_musl_static
             image_variant: focal
           - target: aarch64_musl_mixed
-            imagev_variant: focal
+            image_variant: focal
           - target: win32_static
             image_variant: f35
           - target: i586_static
