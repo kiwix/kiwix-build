@@ -34,25 +34,25 @@ BUILD_DEF = """
     ----------------------------------------------------------------------------------------------
     |         | flatpak            |        |          |           |             | BP            |                      |
     |         | native_static      | d      | d        | dBPSD     | dBPSD       |               | linux-x86_64         |
-    |         | native_dyn         | d      | d        | dB        | dB          | BPS           |                      |
     |         | native_mixed       | BPS    | BPS      |           |             |               | linux-x86_64         |
-# libzim CI is building alpine_dyn but not us
+    |         | native_dyn         | d      | d        | dB        | dB          | BPS           |                      |
+    # libzim CI is building alpine_dyn but not us
     |         | android_arm        | dBP    | dBP      |           |             |               | android-arm          |
     |         | android_arm64      | dBP    | dBP      |           |             |               | android-arm64        |
     |         | android_x86        | BP     | BP       |           |             |               | android-x86          |
     |         | android_x86_64     | BP     | BP       |           |             |               | android-x86_64       |
     |         | armv6_static       |        |          | BP        | BP          |               | linux-armv6          |
-    |         | armv6_dyn          |        |          | B         | B           |               |                      |
     |         | armv6_mixed        | BP     |          |           |             |               | linux-armv6          |
+    |         | armv6_dyn          |        |          | B         | B           |               |                      |
     |         | armv8_static       |        |          | BP        | BP          |               | linux-armv8          |
-    |         | armv8_dyn          |        |          | B         | B           |               |                      |
     |         | armv8_mixed        | BP     |          |           |             |               | linux-armv8          |
+    |         | armv8_dyn          |        |          | B         | B           |               |                      |
     |         | aarch64_static     |        |          | BP        | BP          |               | linux-aarch64        |
-    |         | aarch64_dyn        | d      |          | B         | B           |               |                      |
     |         | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64        |
+    |         | aarch64_dyn        | d      |          | B         | B           |               |                      |
     |         | aarch64_musl_static|        |          | BP        | BP          |               | linux-aarch64-musl   |
-    |         | aarch64_musl_dyn   | d      |          | B         | B           |               |                      |
     |         | aarch64_musl_mixed | BP     |          |           |             |               | linux-aarch64-musl   |
+    |         | aarch64_musl_dyn   | d      |          | B         | B           |               |                      |
     |         | win32_static       | d      | dB       | dBP       | dBP         |               | win-i686             |
     |         | win32_dyn          | d      | dB       | dB        | dB          |               |                      |
     |         | i586_static        |        |          | BP        | BP          |               | linux-i586           |
