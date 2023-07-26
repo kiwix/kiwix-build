@@ -12,6 +12,7 @@ import csv, io, re
 # 'P' letter means that (build) project must be publish when we do a release.
 #     (This is used to avoid two publication of the same archive)
 # 'S' letter means that source code must be publish (almost by definition, S should be put only with a P)
+# 'D' letter means we trigger the docker forkflow to build the docker image.
 # If a cell contains several letters, all are done.
 BUILD_DEF = """
     | OS_NAME | PLATFORM_TARGET    | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop |
@@ -31,7 +32,7 @@ BUILD_DEF = """
     | macos   | macOS_x86_64       | B      | B        |           |             |               |
     ----------------------------------------------------------------------------------------------
     |         | flatpak            |        |          |           |             | BP            |
-    |         | native_static      | d      | d        | dBPS      | dBPS        |               |
+    |         | native_static      | d      | d        | dBPSD     | dBPSD       |               |
     |         | native_dyn         | d      | d        | dB        | dB          | BPS           |
     |         | native_mixed       | BPS    | BPS      |           |             |               |
 # libzim CI is building alpine_dyn but not us
@@ -102,6 +103,7 @@ BUILD = "B"
 PUBLISH = "P"
 SOURCE_PUBLISH = "S"
 DEPS = "d"
+DOCKER = "D"
 
 def select_build_targets(criteria):
     from common import PLATFORM_TARGET, OS_NAME

@@ -19,7 +19,7 @@ from common import (
     notarize_macos_build,
 )
 
-from build_definition import select_build_targets, BUILD, PUBLISH, SOURCE_PUBLISH
+from build_definition import select_build_targets, BUILD, PUBLISH, SOURCE_PUBLISH, DOCKER
 
 
 
@@ -30,8 +30,10 @@ if MAKE_RELEASE:
     def release_filter(project):
         return release_versions.get(project) is not None
     TARGETS = tuple(filter(release_filter, TARGETS))
+    docker_trigger = select_build_targets(DOCKER)
 else:
     TARGETS = select_build_targets(BUILD)
+    docker_trigger = []
 
 for target in TARGETS:
     run_kiwix_build(target, platform=PLATFORM_TARGET, make_release=MAKE_RELEASE)
@@ -44,7 +46,7 @@ for target in TARGETS:
         archive = make_archive(target, make_release=MAKE_RELEASE)
     if archive:
         upload_archive(archive, target, make_release=MAKE_RELEASE)
-        if MAKE_RELEASE and target in ("zim-tools", "kiwix-tools"):
+        if target in docker_trigger:
             trigger_docker_publish(target)
 
 # We have few more things to do for release:
