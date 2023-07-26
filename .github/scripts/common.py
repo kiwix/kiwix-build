@@ -10,11 +10,15 @@ import shutil
 
 import requests
 
+from build_definition import get_platform_name
+
 from kiwixbuild.versions import (
     main_project_versions,
     release_versions,
     base_deps_versions,
 )
+
+
 
 PLATFORM_TARGET = _environ["PLATFORM_TARGET"]
 OS_NAME = _environ["OS_NAME"]
@@ -35,31 +39,6 @@ if not MAKE_RELEASE and _ref != "main":
     DEV_BRANCH = _ref
 else:
     DEV_BRANCH = None
-
-RELEASE_OS_NAME = "macos" if OS_NAME == "macos" else "linux"
-EXTRA_NAME = "-bionic" if OS_NAME == "bionic" else ""
-
-PLATFORM_TO_RELEASE = {
-    "native_mixed": "{os}-x86_64{extra}".format(os=RELEASE_OS_NAME, extra=EXTRA_NAME),
-    "native_static": "{os}-x86_64".format(os=RELEASE_OS_NAME),
-    "win32_static": "win-i686",
-    "armv6_static": "{os}-armv6".format(os=RELEASE_OS_NAME),
-    "armv6_mixed": "{os}-armv6".format(os=RELEASE_OS_NAME),
-    "armv8_static": "{os}-armv8".format(os=RELEASE_OS_NAME),
-    "armv8_mixed": "{os}-armv8".format(os=RELEASE_OS_NAME),
-    "aarch64_static": "{os}-aarch64".format(os=RELEASE_OS_NAME),
-    "aarch64_mixed": "{os}-aarch64{extra}".format(os=RELEASE_OS_NAME, extra=EXTRA_NAME),
-    "aarch64_musl_static": "{os}-aarch64-musl".format(os=RELEASE_OS_NAME),
-    "aarch64_musl_mixed": "{os}-aarch64-musl".format(os=RELEASE_OS_NAME),
-    "i586_static": "{os}-i586".format(os=RELEASE_OS_NAME),
-    "macOS_arm64_static": "{os}-arm64".format(os=RELEASE_OS_NAME),
-    "macOS_arm64_mixed": "{os}-arm64".format(os=RELEASE_OS_NAME),
-    "android_arm": "android-arm",
-    "android_arm64": "android-arm64",
-    "android_x86": "android-x86",
-    "android_x86_64": "android-x86_64",
-    "wasm": "wasm-emscripten",
-}
 
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
@@ -351,10 +330,8 @@ def get_postfix(project):
 
 
 def make_archive(project, make_release):
-    try:
-        platform = PLATFORM_TO_RELEASE[PLATFORM_TARGET]
-    except KeyError:
-        # We don't know how to name the release.
+    platform_name = get_platform_name()
+    if not platform_name:
         return None
 
     try:
@@ -368,12 +345,12 @@ def make_archive(project, make_release):
     else:
         postfix = DATE
 
-    archive_name = "{}_{}-{}".format(project, platform, postfix)
+    archive_name = "{}_{}-{}".format(project, platform_name, postfix)
 
     files_to_archive = []
     for export_file in export_files:
         files_to_archive.extend(base_dir.glob(export_file))
-    if platform == "win-i686":
+    if platform_name == "win-i686":
         open_archive = lambda a: zipfile.ZipFile(
             str(a), "w", compression=zipfile.ZIP_DEFLATED
         )

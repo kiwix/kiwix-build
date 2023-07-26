@@ -15,48 +15,49 @@ import csv, io, re
 # 'D' letter means we trigger the docker forkflow to build the docker image.
 # If a cell contains several letters, all are done.
 BUILD_DEF = """
-    | OS_NAME | PLATFORM_TARGET    | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop |
-    ==============================================================================================
+    | OS_NAME | PLATFORM_TARGET    | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop | platform_name        |
+    =====================================================================================================================
 # Bionic is a special case as we need to compile libzim on old arch for python
-    | bionic  |                    | BP     |          |           |             |               |
-    ----------------------------------------------------------------------------------------------
+    | bionic  | native_mixed       | BP     |          |           |             |               | linux-x86_64-bionic  |
+    | bionic  | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64-bionic |
+    --------------------------------------------------------------------------------------------------------------------
 # Osx builds, build binaries on native_dyn and native_static. On anyother things, build only the libraries
-    | macos   | native_dyn         | d      | d        | dB        | B           |               |
-    | macos   | native_static      |        |          | BP        | BP          |               |
-    | macos   | native_mixed       | BP     | BP       |           |             |               |
-    | macos   | iOS_arm64          | dB     | B        |           |             |               |
-    | macos   | iOS_x86_64         | dB     | B        |           |             |               |
-    | macos   | iOS_Mac_ABI        | B      | B        |           |             |               |
-    | macos   | macOS_arm64_static |        |          |           |             |               |
-    | macos   | macOS_arm64_mixed  | BP     | BP       |           |             |               |
-    | macos   | macOS_x86_64       | B      | B        |           |             |               |
+    | macos   | native_dyn         | d      | d        | dB        | B           |               |                      |
+    | macos   | native_static      |        |          | BP        | BP          |               | macos-x86_64         |
+    | macos   | native_mixed       | BP     | BP       |           |             |               | macos-x86_64         |
+    | macos   | iOS_arm64          | dB     | B        |           |             |               |                      |
+    | macos   | iOS_x86_64         | dB     | B        |           |             |               |                      |
+    | macos   | iOS_Mac_ABI        | B      | B        |           |             |               |                      |
+    | macos   | macOS_arm64_static |        |          |           |             |               |                      |
+    | macos   | macOS_arm64_mixed  | BP     | BP       |           |             |               | macos-arm64          |
+    | macos   | macOS_x86_64       | B      | B        |           |             |               |                      |
     ----------------------------------------------------------------------------------------------
-    |         | flatpak            |        |          |           |             | BP            |
-    |         | native_static      | d      | d        | dBPSD     | dBPSD       |               |
-    |         | native_dyn         | d      | d        | dB        | dB          | BPS           |
-    |         | native_mixed       | BPS    | BPS      |           |             |               |
+    |         | flatpak            |        |          |           |             | BP            |                      |
+    |         | native_static      | d      | d        | dBPSD     | dBPSD       |               | linux-x86_64         |
+    |         | native_dyn         | d      | d        | dB        | dB          | BPS           |                      |
+    |         | native_mixed       | BPS    | BPS      |           |             |               | linux-x86_64         |
 # libzim CI is building alpine_dyn but not us
-    |         | android_arm        | dBP    | dBP      |           |             |               |
-    |         | android_arm64      | dBP    | dBP      |           |             |               |
-    |         | android_x86        | BP     | BP       |           |             |               |
-    |         | android_x86_64     | BP     | BP       |           |             |               |
-    |         | armv6_static       |        |          | BP        | BP          |               |
-    |         | armv6_dyn          |        |          | B         | B           |               |
-    |         | armv6_mixed        | BP     |          |           |             |               |
-    |         | armv8_static       |        |          | BP        | BP          |               |
-    |         | armv8_dyn          |        |          | B         | B           |               |
-    |         | armv8_mixed        | BP     |          |           |             |               |
-    |         | aarch64_static     |        |          | BP        | BP          |               |
-    |         | aarch64_dyn        | d      |          | B         | B           |               |
-    |         | aarch64_mixed      | BP     |          |           |             |               |
-    |         | aarch64_musl_static|        |          | BP        | BP          |               |
-    |         | aarch64_musl_dyn   | d      |          | B         | B           |               |
-    |         | aarch64_musl_mixed | BP     |          |           |             |               |
-    |         | win32_static       | d      | dB       | dBP       | dBP         |               |
-    |         | win32_dyn          | d      | dB       | dB        | dB          |               |
-    |         | i586_static        |        |          | BP        | BP          |               |
-    |         | i586_dyn           |        |          | B         | B           |               |
-    |         | wasm               | dBP    |          |           |             |               |
+    |         | android_arm        | dBP    | dBP      |           |             |               | android-arm          |
+    |         | android_arm64      | dBP    | dBP      |           |             |               | android-arm64        |
+    |         | android_x86        | BP     | BP       |           |             |               | android-x86          |
+    |         | android_x86_64     | BP     | BP       |           |             |               | android-x86_64       |
+    |         | armv6_static       |        |          | BP        | BP          |               | linux-armv6          |
+    |         | armv6_dyn          |        |          | B         | B           |               |                      |
+    |         | armv6_mixed        | BP     |          |           |             |               | linux-armv6          |
+    |         | armv8_static       |        |          | BP        | BP          |               | linux-armv8          |
+    |         | armv8_dyn          |        |          | B         | B           |               |                      |
+    |         | armv8_mixed        | BP     |          |           |             |               | linux-armv8          |
+    |         | aarch64_static     |        |          | BP        | BP          |               | linux-aarch64        |
+    |         | aarch64_dyn        | d      |          | B         | B           |               |                      |
+    |         | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64        |
+    |         | aarch64_musl_static|        |          | BP        | BP          |               | linux-aarch64-musl   |
+    |         | aarch64_musl_dyn   | d      |          | B         | B           |               |                      |
+    |         | aarch64_musl_mixed | BP     |          |           |             |               | linux-aarch64-musl   |
+    |         | win32_static       | d      | dB       | dBP       | dBP         |               | win-i686             |
+    |         | win32_dyn          | d      | dB       | dB        | dB          |               |                      |
+    |         | i586_static        |        |          | BP        | BP          |               | linux-i586           |
+    |         | i586_dyn           |        |          | B         | B           |               |                      |
+    |         | wasm               | dBP    |          |           |             |               | wasm-emscripten      |
 """
 
 
@@ -126,5 +127,18 @@ def select_build_targets(criteria):
             ]
             print(build_order)
             return build_order
+
+    raise "No definition match with current context."
+
+def get_platform_name():
+    from common import PLATFORM_TARGET, OS_NAME
+
+    context = Context(PLATFORM_TARGET=PLATFORM_TARGET, OS_NAME=OS_NAME)
+
+    reader = csv.DictReader(strip_array(BUILD_DEF), dialect=TableDialect())
+    for row in reader:
+        if context.match(row):
+            name = row["platform_name"]
+            return name or None
 
     raise "No definition match with current context."
