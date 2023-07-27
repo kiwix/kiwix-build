@@ -110,7 +110,6 @@ jobs:
         PLATFORM_TARGET: ${{matrix.target}}
         BINTRAY_USER: kiwix
         BINTRAY_PASS: ${{secrets.bintray_pass}}
-        GITHUB_PAT: ${{secrets.GHCR_TOKEN}}
     - name: Upload failure logs
       if: failure()
       run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
@@ -236,3 +235,21 @@ jobs:
       run: $GITHUB_WORKSPACE/.github/scripts/upload_failure_logs.sh
       env:
         PLATFORM_TARGET: ${{matrix.target}}
+
+
+  Trigger_Docker:
+    needs: [Linux]
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Install python modules
+      shell: bash
+      run: |
+        pip3 install --user --no-deps $GITHUB_WORKSPACE
+    - name: Trigger docker workflow
+      shell: bash
+      run: |
+        cd $HOME
+        $GITHUB_WORKSPACE/.github/scripts/trigger_docker_workflow.py
+      env:
+        GITHUB_PAT: ${{secrets.DOCKER_TRIGGER_GITHUB_PAT}}
