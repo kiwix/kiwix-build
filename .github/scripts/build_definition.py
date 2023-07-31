@@ -35,7 +35,7 @@ BUILD_DEF = """
     |         | flatpak            |        |          |           |             | BP            |                      |
     |         | native_static      | d      | d        | dBPSD     | dBPSD       |               | linux-x86_64         |
     |         | native_mixed       | BPS    | BPS      |           |             |               | linux-x86_64         |
-    |         | native_dyn         | d      | d        | dB        | dB          | BPS           |                      |
+    |         | native_dyn         | d      | d        | dB        | dB          | dBPS          |                      |
     # libzim CI is building alpine_dyn but not us
     |         | android_arm        | dBP    | dBP      |           |             |               | android-arm          |
     |         | android_arm64      | dBP    | dBP      |           |             |               | android-arm64        |
