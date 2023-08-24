@@ -143,10 +143,14 @@ class Armv8Mixed(MixedMixin('armv8_static'), Armv8):
 
 class Aarch64(ArmPlatformInfo):
     build = 'aarch64'
-    arch_full = 'aarch64-rpi3-linux-gnu'
+    arch_full = 'aarch64-linux-gnu'
     toolchain_names = ['aarch64']
     cpu_family = 'aarch64'
     cpu = 'aarch64'
+
+    @property
+    def root_path(self):
+        return self.tlc_source.source_path
 
 class Aarch64Dyn(Aarch64):
     name = 'aarch64_dyn'

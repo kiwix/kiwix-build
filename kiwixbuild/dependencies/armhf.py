@@ -6,6 +6,9 @@ from kiwixbuild.utils import Remotefile
 
 base_url = "https://github.com/tttapa/docker-arm-cross-toolchain/releases/download/0.1.0/"
 
+
+aarch_base_url = 'https://master.dl.sourceforge.net/project/raspberry-pi-cross-compilers/Bonus%20Raspberry%20Pi%20GCC%2064-Bit%20Toolchains/Raspberry%20Pi%20GCC%2064-Bit%20Cross-Compiler%20Toolchains/Stretch/GCC%206.3.0/'
+
 class armv6_toolchain(Dependency):
     dont_skip = True
     neutral = True
@@ -37,8 +40,8 @@ class aarch64_toolchain(Dependency):
     name = "aarch64"
 
     class Source(ReleaseDownload):
-        archive = Remotefile('x-tools-aarch64-rpi3-linux-gnu.tar.xz',
-                             '8be81d3fc47b1b280bf003646d2b623477badec4ec931944131bf412317b6332',
-                             base_url + 'x-tools-aarch64-rpi3-linux-gnu.tar.xz')
+        archive = Remotefile('cross-gcc-6.3.0-pi_64.tar.gz',
+                             '1b048bb8886ad63d21797cd9129fc37b9ea0dfaac7e3c36f888aa16fbec1d320',
+                             aarch_base_url + 'cross-gcc-6.3.0-pi_64.tar.gz')
 
     Builder = NoopBuilder
