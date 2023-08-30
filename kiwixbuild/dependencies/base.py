@@ -137,7 +137,7 @@ class ReleaseDownload(Source):
 
 
 class GitClone(Source):
-    base_git_ref = "main"
+    base_git_ref = "cpp17"
     force_full_clone = False
 
     @property
