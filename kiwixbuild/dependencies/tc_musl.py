@@ -12,3 +12,16 @@ class aarch64_musl_toolchain(Dependency):
                              'https://musl.cc/aarch64-linux-musl-cross.tgz')
 
     Builder = NoopBuilder
+
+
+class x86_64_musl_toolchain(Dependency):
+    dont_skip = True
+    neutral = True
+    name = "x86-64_musl"
+
+    class Source(ReleaseDownload):
+        archive = Remotefile('x86_64-linux-musl-cross.tgz',
+                             '',
+                             'https://musl.cc/x86_64-linux-musl-cross.tgz')
+
+    Builder = NoopBuilder
