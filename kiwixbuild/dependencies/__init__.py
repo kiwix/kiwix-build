@@ -5,7 +5,7 @@ from . import (
     tc_android_ndk,
     aria2,
     tc_armhf,
-    tc_arm_musl,
+    tc_musl,
     docoptcpp,
     tc_emsdk,
     tc_flatpak,
