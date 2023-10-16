@@ -8,8 +8,8 @@ class aarch64_musl_toolchain(Dependency):
 
     class Source(ReleaseDownload):
         archive = Remotefile('aarch64-linux-musl-cross.tgz',
-                             'c909817856d6ceda86aa510894fa3527eac7989f0ef6e87b5721c58737a06c38',
-                             'https://musl.cc/aarch64-linux-musl-cross.tgz')
+                             '0f18a885b161815520bbb5757a4b4ab40d0898c29bebee58d0cddd6112e59cc6',
+                             'https://more.musl.cc/10/x86_64-linux-musl/aarch64-linux-musl-cross.tgz')
 
     Builder = NoopBuilder
 
@@ -21,7 +21,7 @@ class x86_64_musl_toolchain(Dependency):
 
     class Source(ReleaseDownload):
         archive = Remotefile('x86_64-linux-musl-cross.tgz',
-                             '',
-                             'https://musl.cc/x86_64-linux-musl-cross.tgz')
+                             'a3d55de8105739fcfb8b10eaa72cdb5d779319726bacff24149388d7608d1ed8',
+                             'https://more.musl.cc/10/x86_64-linux-musl/x86_64-linux-musl-cross.tgz')
 
     Builder = NoopBuilder
