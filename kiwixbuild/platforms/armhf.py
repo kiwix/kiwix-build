@@ -35,7 +35,7 @@ class ArmPlatformInfo(PlatformInfo):
 
     @property
     def root_path(self):
-        return pj(self.toolchain.build_path, self.arch_full)
+        return self.toolchain.build_path
 
     @property
     def binaries(self):
