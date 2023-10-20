@@ -2,7 +2,7 @@
 
 main_project_versions = {
     'libzim': '8.2.1',
-    'libkiwix': '13.0.0',
+    'libkiwix': '12.1.1',
     'kiwix-tools': '3.5.0',
     'zim-tools': '3.2.0',
     'kiwix-desktop': '2.3.1' # Also change KIWIX_DESKTOP_VERSION and KIWIX_DESKTOP_RELEASE in appveyor.yml
