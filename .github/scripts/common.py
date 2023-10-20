@@ -281,6 +281,7 @@ def make_deps_archive(target=None, name=None, full=False):
             files_to_archive.append(base_dir / "meson_cross_file.txt")
     # Copy any toolchain
     files_to_archive += [TOOLCHAIN_DIR]
+    files_to_archive += HOME.glob("BUILD_neutral/TOOLCHAINS/*")
     if (BASE_DIR / "meson_cross_file.txt").exists():
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")
 
