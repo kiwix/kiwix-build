@@ -127,11 +127,6 @@ class BuildEnv:
 
         env['PATH'] = ':'.join([pj(self.install_dir, 'bin'), env['PATH']])
 
-        env['LD_LIBRARY_PATH'] = ':'.join([env['LD_LIBRARY_PATH'],
-                                          pj(self.install_dir, 'lib'),
-                                          pj(self.install_dir, self.libprefix)
-                                          ])
-
         env['QMAKE_CXXFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['QMAKE_CXXFLAGS']])
         env['CPPFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['CPPFLAGS']])
         env['QMAKE_LFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'),
@@ -142,6 +137,10 @@ class BuildEnv:
                                    env['LDFLAGS']])
 
         if cross_comp_flags:
+            env['LD_LIBRARY_PATH'] = ':'.join([env['LD_LIBRARY_PATH'],
+                pj(self.install_dir, 'lib'),
+                pj(self.install_dir, self.libprefix)
+            ])
             self.platformInfo.set_comp_flags(env)
         if cross_compilers:
             self.platformInfo.set_compiler(env)
