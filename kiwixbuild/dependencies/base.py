@@ -563,7 +563,7 @@ class MesonBuilder(Builder):
            ):
             raise SkipCommand()
         command = "{} --verbose {}".format(neutralEnv('mesontest_command'), self.test_option)
-        env = self.get_env(cross_comp_flags=False, cross_compilers=False, cross_path=True)
+        env = self.get_env(cross_comp_flags=True, cross_compilers=False, cross_path=True)
         run_command(command, self.build_path, context, env=env)
 
     def _install(self, context):
