@@ -30,12 +30,12 @@ class ArmPlatformInfo(PlatformInfo):
         return "lib/{}".format(self.arch_full)
 
     @property
-    def tlc_source(self):
-        return get_target_step(self.build, 'source')
+    def toolchain(self):
+        return get_target_step(self.build, 'neutral')
 
     @property
     def root_path(self):
-        return pj(self.tlc_source.source_path, self.arch_full)
+        return pj(self.toolchain.build_path, self.arch_full)
 
     @property
     def binaries(self):
@@ -150,7 +150,7 @@ class Aarch64(ArmPlatformInfo):
 
     @property
     def root_path(self):
-        return self.tlc_source.source_path
+        return self.toolchain.build_path
 
 class Aarch64Dyn(Aarch64):
     name = 'aarch64_dyn'

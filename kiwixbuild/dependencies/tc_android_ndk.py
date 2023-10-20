@@ -25,7 +25,7 @@ class android_ndk(Dependency):
     class Builder(Builder):
         @property
         def install_path(self):
-            return self.build_path
+            return pj(self.buildEnv.toolchain_dir, self.target.full_name())
 
         @property
         def api(self):

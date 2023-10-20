@@ -27,6 +27,7 @@ HOME = Path(os.path.expanduser("~"))
 BASE_DIR = HOME / "BUILD_{}".format(PLATFORM_TARGET)
 SOURCE_DIR = HOME / "SOURCE"
 ARCHIVE_DIR = HOME / "ARCHIVE"
+TOOLCHAIN_DIR = HOME / "TOOLCHAINS"
 INSTALL_DIR = BASE_DIR / "INSTALL"
 TMP_DIR = Path("/tmp")
 KBUILD_SOURCE_DIR = HOME / "kiwix-build"
@@ -278,13 +279,8 @@ def make_deps_archive(target=None, name=None, full=False):
         base_dir = HOME / "BUILD_{}".format(PLATFORM_TARGET)
         if (base_dir / "meson_cross_file.txt").exists():
             files_to_archive.append(base_dir / "meson_cross_file.txt")
-    # Add ndk/sdk/toolchains to allow project's CI to find them and compile
-    files_to_archive += HOME.glob("BUILD_*/android-ndk*")
-    files_to_archive += HOME.glob("BUILD_*/emsdk*")
-    if PLATFORM_TARGET.startswith("aarch64"):
-        files_to_archive += SOURCE_DIR.glob("aarch64*/*")
-    if PLATFORM_TARGET.startswith("armv"):
-        files_to_archive += SOURCE_DIR.glob("armv*/*")
+    # Copy any toolchain
+    files_to_archive += [TOOLCHAIN_DIR]
     if (BASE_DIR / "meson_cross_file.txt").exists():
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")
 
@@ -306,11 +302,6 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += HOME.glob("BUILD_android*/**/.*_ok")
         files_to_archive += SOURCE_DIR.glob("*/.*_ok")
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
-
-        toolchains_subdirs = HOME.glob("BUILD_*/TOOLCHAINS/*/*")
-        for subdir in toolchains_subdirs:
-            if not subdir.match("tools"):
-                files_to_archive.append(subdir)
 
     archive_file = TMP_DIR / archive_name
     with tarfile.open(str(archive_file), "w:xz") as tar:

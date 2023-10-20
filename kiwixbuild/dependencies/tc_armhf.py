@@ -1,4 +1,4 @@
-from .base import Dependency, ReleaseDownload, NoopBuilder
+from .base import Dependency, ReleaseDownload, TcCopyBuilder
 from kiwixbuild.utils import Remotefile
 
 # The arm toolchains
@@ -19,7 +19,9 @@ class armv6_toolchain(Dependency):
                              '4c371c4c5b55ebd1f3d7dd26b14703632d9ba47423f901bcd9303d83ad444434',
                              base_url + 'x-tools-armv6-rpi-linux-gnueabihf.tar.xz')
 
-    Builder = NoopBuilder
+
+    class Builder(TcCopyBuilder):
+        src_subdir = "armv6-rpi-linux-gnueabihf"
 
 
 class armv8_toolchain(Dependency):
@@ -32,7 +34,8 @@ class armv8_toolchain(Dependency):
                              'cc28f5c3f6a3e7d9985f98779c4e72224b4eb5a7e4dc2bcdefd90cb241fb94a5',
                              base_url + 'x-tools-armv8-rpi3-linux-gnueabihf.tar.xz')
 
-    Builder = NoopBuilder
+    class Builder(TcCopyBuilder):
+        src_subdir = "armv8-rpi3-linux-gnueabihf"
 
 class aarch64_toolchain(Dependency):
     dont_skip = True
@@ -44,4 +47,4 @@ class aarch64_toolchain(Dependency):
                              '1b048bb8886ad63d21797cd9129fc37b9ea0dfaac7e3c36f888aa16fbec1d320',
                              aarch_base_url + 'cross-gcc-6.3.0-pi_64.tar.gz')
 
-    Builder = NoopBuilder
+    Builder = TcCopyBuilder
