@@ -101,7 +101,7 @@ def copy_tree(src, dst, post_copy_function=None):
         os.makedirs(dstdir, exist_ok=True)
         for f in files:
             dstfile = pj(dstdir, f)
-            shutil.copy2(pj(root, f), dstfile)
+            shutil.copy2(pj(root, f), dstfile, follow_symlinks=False)
             if post_copy_function is not None:
                 post_copy_function(dstfile)
 
