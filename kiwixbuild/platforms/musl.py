@@ -25,12 +25,12 @@ class MuslPlatformInfo(PlatformInfo):
         }
 
     @property
-    def tlc_source(self):
-        return get_target_step(self.build, 'source')
+    def toolchain(self):
+        return get_target_step(self.build, 'neutral')
 
     @property
     def root_path(self):
-        return self.tlc_source.source_path
+        return self.toolchain.build_path
 
     @property
     def binaries(self):

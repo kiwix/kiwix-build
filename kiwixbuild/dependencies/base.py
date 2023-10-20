@@ -3,7 +3,7 @@ import os
 import shutil
 import time
 
-from kiwixbuild.utils import pj, Context, SkipCommand, WarningMessage, extract_archive, Defaultdict, StopBuild, run_command, colorize
+from kiwixbuild.utils import pj, Context, SkipCommand, WarningMessage, extract_archive, Defaultdict, StopBuild, run_command, colorize, copy_tree
 from kiwixbuild.versions import main_project_versions, base_deps_versions
 from kiwixbuild._global import neutralEnv, option, get_target_step
 
@@ -318,6 +318,28 @@ class Builder:
 class NoopBuilder(Builder):
     def build(self):
         pass
+
+    def make_dist(self):
+        pass
+
+
+class TcCopyBuilder(Builder):
+    src_subdir = None
+
+    @property
+    def build_path(self):
+        return pj(self.buildEnv.toolchain_dir, self.target.full_name())
+
+    def build(self):
+        self.command('copy', self._copy)
+
+    def _copy(self, context):
+        context.try_skip(self.build_path)
+        if self.src_subdir:
+            source_path = pj(self.source_path, self.src_subdir)
+        else:
+            source_path = self.source_path
+        copy_tree(source_path, self.build_path)
 
     def make_dist(self):
         pass

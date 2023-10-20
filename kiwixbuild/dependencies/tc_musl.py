@@ -1,4 +1,4 @@
-from .base import Dependency, ReleaseDownload, NoopBuilder
+from .base import Dependency, ReleaseDownload, TcCopyBuilder
 from kiwixbuild.utils import Remotefile
 
 class aarch64_musl_toolchain(Dependency):
@@ -11,7 +11,7 @@ class aarch64_musl_toolchain(Dependency):
                              '0f18a885b161815520bbb5757a4b4ab40d0898c29bebee58d0cddd6112e59cc6',
                              'https://more.musl.cc/10/x86_64-linux-musl/aarch64-linux-musl-cross.tgz')
 
-    Builder = NoopBuilder
+    Builder = TcCopyBuilder
 
 
 class x86_64_musl_toolchain(Dependency):
@@ -24,4 +24,4 @@ class x86_64_musl_toolchain(Dependency):
                              'a3d55de8105739fcfb8b10eaa72cdb5d779319726bacff24149388d7608d1ed8',
                              'https://more.musl.cc/10/x86_64-linux-musl/x86_64-linux-musl-cross.tgz')
 
-    Builder = NoopBuilder
+    Builder = TcCopyBuilder
