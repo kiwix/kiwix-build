@@ -28,7 +28,6 @@ jobs:
           - aarch64_musl_dyn
           - aarch64_musl_mixed
           - x86-64_musl_static
-          - x86-64_musl_dyn
           - x86-64_musl_mixed
           - i586_static
           - i586_dyn
