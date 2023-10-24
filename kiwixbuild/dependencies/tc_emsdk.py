@@ -23,21 +23,21 @@ class emsdk(Dependency):
     class Builder(Builder):
         @property
         def install_path(self):
-            return self.build_path
+            return pj(self.buildEnv.toolchain_dir, self.target.full_name())
 
         def _copy_source(self, context):
             context.try_skip(self.build_path)
-            copy_tree(self.source_path, self.build_path)
+            copy_tree(self.source_path, self.install_path)
 
         def _install(self, context):
             context.try_skip(self.build_path)
             command = "./emsdk install 3.1.24"
-            run_command(command, self.build_path, context)
+            run_command(command, self.install_path, context)
 
         def _activate(self, context):
             context.try_skip(self.build_path)
             command = "./emsdk activate 3.1.24"
-            run_command(command, self.build_path, context)
+            run_command(command, self.install_path, context)
 
 
         def build(self):

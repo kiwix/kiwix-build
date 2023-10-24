@@ -53,6 +53,8 @@ BUILD_DEF = """
     |         | aarch64_musl_static|        |          | BP        | BP          |               | linux-aarch64-musl   |
     |         | aarch64_musl_mixed | BP     |          |           |             |               | linux-aarch64-musl   |
     |         | aarch64_musl_dyn   | d      |          | B         | B           |               |                      |
+    |         | x86-64_musl_static |        |          | BP        | BP          |               | linux-x86-64-musl    |
+    |         | x86-64_musl_mixed  | BP     |          |           |             |               | linux-x86-64-musl    |
     |         | win32_static       | d      | dB       | dBP       | dBP         |               | win-i686             |
     |         | win32_dyn          | d      | dB       | dB        | dB          |               |                      |
     |         | i586_static        |        |          | BP        | BP          |               | linux-i586           |

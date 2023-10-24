@@ -2,13 +2,13 @@
 from .base import *
 from . import (
     all_dependencies,
-    android_ndk,
+    tc_android_ndk,
     aria2,
-    armhf,
-    arm_musl,
+    tc_armhf,
+    tc_musl,
     docoptcpp,
-    emsdk,
-    flatpak,
+    tc_emsdk,
+    tc_flatpak,
     gumbo,
     icu4c,
     ios_fat_lib,
