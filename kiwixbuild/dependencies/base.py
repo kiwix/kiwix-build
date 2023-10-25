@@ -111,21 +111,27 @@ class ReleaseDownload(Source):
     archive_top_dir = None
 
     @property
+    def archives(self):
+        return (self.archive, )
+
+    @property
     def extract_path(self):
         return pj(neutralEnv('source_dir'), self.source_dir)
 
     def _download(self, context):
         context.try_skip(neutralEnv('archive_dir'), self.full_name)
-        neutralEnv('download')(self.archive)
+        for archive in self.archives:
+            neutralEnv('download')(archive)
 
     def _extract(self, context):
         context.try_skip(self.extract_path)
         if os.path.exists(self.extract_path):
             shutil.rmtree(self.extract_path)
-        extract_archive(pj(neutralEnv('archive_dir'), self.archive.name),
-                        neutralEnv('source_dir'),
-                        topdir=self.archive_top_dir,
-                        name=self.source_dir)
+        for archive in self.archives:
+            extract_archive(pj(neutralEnv('archive_dir'), archive.name),
+                            neutralEnv('source_dir'),
+                            topdir=self.archive_top_dir,
+                            name=self.source_dir)
 
     def prepare(self):
         self.command('download', self._download)
