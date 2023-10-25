@@ -14,6 +14,7 @@ jobs:
       matrix:
         target:
           - native_static
+          - native_mixed
           - native_dyn
           - wasm
           - armv6_static
@@ -26,53 +27,19 @@ jobs:
           - aarch64_musl_mixed
           - x86-64_musl_static
           - x86-64_musl_mixed
-          - win32_static
           - i586_static
           - android_arm
           - android_arm64
           - android_x86
           - android_x86_64
+        image_variant: ['focal']
         include:
-          - target: native_static
-            image_variant: focal
-          - target: native_dyn
-            image_variant: focal
-          - target: native_mixed
-            image_variant: focal
           - target: native_mixed
             image_variant: bionic
-          - target: wasm
-            image_variant: focal
-          - target: armv6_static
-            image_variant: focal
-          - target: armv6_mixed
-            image_variant: focal
-          - target: armv8_static
-            image_variant: focal
-          - target: armv8_mixed
-            image_variant: focal
-          - target: aarch64_static
-            image_variant: focal
-          - target: aarch64_mixed
-            image_variant: focal
           - target: aarch64_mixed
             image_variant: bionic
-          - target: aarch64_musl_static
-            image_variant: focal
-          - target: aarch64_musl_mixed
-            image_variant: focal
           - target: win32_static
             image_variant: f35
-          - target: i586_static
-            image_variant: focal
-          - target: android_arm
-            image_variant: focal
-          - target: android_arm64
-            image_variant: focal
-          - target: android_x86
-            image_variant: focal
-          - target: android_x86_64
-            image_variant: focal
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
