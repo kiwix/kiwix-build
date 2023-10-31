@@ -52,7 +52,7 @@ base_deps_versions = {
   'pugixml' : '1.2',
   'libmicrohttpd' : '0.9.76',
   'gumbo' : '0.10.1',
-  'icu4c' : '58.2',
+  'icu4c' : '73.2',
   'libaria2' : '1.36.0',
   'libmagic' : '5.44',
   'android-ndk' : 'r21e',
