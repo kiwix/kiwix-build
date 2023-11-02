@@ -7,6 +7,7 @@ from .base import (
 from kiwixbuild.utils import pj, SkipCommand, Remotefile, extract_archive
 from kiwixbuild._global import get_target_step, neutralEnv
 import os, shutil
+import fileinput
 
 class Icu(Dependency):
     name = "icu4c"
@@ -77,3 +78,13 @@ class Icu(Dependency):
 
         def set_env(self, env):
             env['ICU_DATA_FILTER_FILE'] = pj(os.path.dirname(os.path.realpath(__file__)), "icu4c_data_filter.json")
+
+        def _post_configure_script(self, context):
+            if self.buildEnv.platformInfo.build != "wasm":
+                context.skip()
+            context.try_skip(self.build_path)
+            for line in fileinput.input(pj(self.build_path, 'Makefile'), inplace=True):
+                if line == "#DATASUBDIR = data\n":
+                    print("DATASUBDIR = data")
+                else:
+                    print(line, end="")

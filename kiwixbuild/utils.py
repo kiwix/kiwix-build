@@ -189,6 +189,9 @@ class Context:
         self.autoskip_file = None
         self.no_skip = False
 
+    def skip(self, msg=""):
+        raise SkipCommand(msg)
+
     def try_skip(self, path, extra_name=""):
         if self.no_skip:
             return

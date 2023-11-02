@@ -283,6 +283,8 @@ class Builder:
         if hasattr(self, '_pre_build_script'):
             self.command('pre_build_script', self._pre_build_script)
         self.command('configure', self._configure)
+        if hasattr(self, '_post_configure_script'):
+            self.command('post_configure_script', self._post_configure_script)
         self.command('compile', self._compile)
         if hasattr(self, '_test'):
             self.command('test', self._test)
