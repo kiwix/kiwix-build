@@ -93,6 +93,10 @@ EXPORT_FILES = {
             "lib/libzim.dylib",
             "lib/*/libzim.pc",
             "include/zim/**/*.h",
+            "share/icu/{}/icudt{}l.dat".format(
+                base_deps_versions["icu4c"],
+                major_version(base_deps_versions["icu4c"])
+            )
         ),
     ),
     "libkiwix": (
@@ -110,7 +114,11 @@ EXPORT_FILES = {
             ),
             "lib/libkiwix.dylib",
             "lib/*/libkiwix.pc",
-            "include/kiwix/**/*.h"
+            "include/kiwix/**/*.h",
+            "share/icu/{}/icudt{}l.dat".format(
+                base_deps_versions["icu4c"],
+                major_version(base_deps_versions["icu4c"])
+            )
         ),
     ),
 }

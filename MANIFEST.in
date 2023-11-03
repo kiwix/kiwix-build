@@ -1,2 +1,3 @@
 include kiwixbuild/templates/*_cross_file.txt
 include kiwixbuild/patches/*.patch
+include kiwixbuild/dependencies/icu4c_data_filter.json

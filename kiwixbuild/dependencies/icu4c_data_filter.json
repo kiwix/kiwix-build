@@ -1,0 +1,14 @@
+{
+    "strategy": "additive",
+    "featureFilters": {
+        "lang_tree": "include",
+        "locales_tree": "include",
+        "translit": "include",
+        "misc": {
+            "includelist": [
+               "likelySubtags",
+               "metadata"
+            ]
+        }
+    }
+}

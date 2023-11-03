@@ -39,7 +39,7 @@ release_versions = {
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = '93'
+base_deps_meta_version = '94'
 
 base_deps_versions = {
   'zlib' : '1.2.12',
@@ -52,7 +52,7 @@ base_deps_versions = {
   'pugixml' : '1.2',
   'libmicrohttpd' : '0.9.76',
   'gumbo' : '0.10.1',
-  'icu4c' : '58.2',
+  'icu4c' : '73.2',
   'libaria2' : '1.36.0',
   'libmagic' : '5.44',
   'android-ndk' : 'r21e',
