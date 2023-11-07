@@ -40,13 +40,11 @@ class ApplePlatformInfo(PlatformInfo):
             'binaries': self.binaries,
             'exe_wrapper_def': '',
             'extra_libs': [
-                '-fembed-bitcode',
                 '-isysroot', self.root_path,
                 '-arch', self.arch,
                 '-target',  self.target,
             ],
             'extra_cflags': [
-                '-fembed-bitcode',
                 '-isysroot', self.root_path,
                 '-arch', self.arch,
                 '-target', self.target,
@@ -74,7 +72,6 @@ class ApplePlatformInfo(PlatformInfo):
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
         cflags = [
-            '-fembed-bitcode',
             '-isysroot {}'.format(self.root_path),
             '-arch {}'.format(self.arch),
             '-target {}'.format(self.target),
