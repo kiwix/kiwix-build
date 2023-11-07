@@ -14,6 +14,7 @@ class ApplePlatformInfo(PlatformInfo):
     target = None
     sdk_name = None
     min_iphoneos_version = None
+    min_macos_version = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,11 +63,19 @@ class ApplePlatformInfo(PlatformInfo):
         if self.min_iphoneos_version:
             config['extra_libs'].append('-miphoneos-version-min={}'.format(self.min_iphoneos_version))
             config['extra_cflags'].append('-miphoneos-version-min={}'.format(self.min_iphoneos_version))
+        if self.min_macos_version:
+            config['extra_libs'].append('-mmacosx-version-min={}'.format(self.min_macos_version))
+            config['extra_cflags'].append('-mmacosx-version-min={}'.format(self.min_macos_version))
         return config
 
     def get_env(self):
         env = super().get_env()
-        env['MACOSX_DEPLOYMENT_TARGET'] = '10.15'
+        cflags = [env['CFLAGS']]
+        if self.min_iphoneos_version:
+            cflags.append('-miphoneos-version-min={}'.format(self.min_iphoneos_version))
+        if self.min_macos_version:
+            cflags.append('-mmacosx-version-min={}'.format(self.min_macos_version))
+        env['CFLAGS'] = ' '.join(cflags)
         return env
 
     def set_comp_flags(self, env):
@@ -116,7 +125,7 @@ class iOSArm64(ApplePlatformInfo):
     host = 'arm-apple-darwin'
     target = 'aarch64-apple-ios'
     sdk_name = 'iphoneos'
-    min_iphoneos_version = '13.0'
+    min_iphoneos_version = '15.0'
 
 
 class iOSx64(ApplePlatformInfo):
@@ -125,7 +134,7 @@ class iOSx64(ApplePlatformInfo):
     host = 'x86_64-apple-darwin'
     target = 'x86_64-apple-ios'
     sdk_name = 'iphonesimulator'
-    min_iphoneos_version = '13.0'
+    min_iphoneos_version = '15.0'
 
 
 class iOSMacABI(ApplePlatformInfo):
@@ -134,34 +143,37 @@ class iOSMacABI(ApplePlatformInfo):
     host = 'x86_64-apple-darwin'
     target = 'x86_64-apple-ios14.0-macabi'
     sdk_name = 'macosx'
-    min_iphoneos_version = '14.0'
+    min_iphoneos_version = '15.0'
 
 
 class macOSArm64(ApplePlatformInfo):
     name = 'macOS_arm64_static'
     arch = cpu = 'arm64'
     host = 'aarch64-apple-darwin'
-    target = 'arm64-apple-macos11'
+    target = 'arm64-apple-macos'
     sdk_name = 'macosx'
     min_iphoneos_version = None
+    min_macos_version = '12.0'
 
 
 class macOSArm64Mixed(MixedMixin('macOS_arm64_static'), ApplePlatformInfo):
     name = 'macOS_arm64_mixed'
     arch = cpu = 'arm64'
     host = 'aarch64-apple-darwin'
-    target = 'arm64-apple-macos11'
+    target = 'arm64-apple-macos'
     sdk_name = 'macosx'
     min_iphoneos_version = None
+    min_macos_version = '12.0'
 
 
 class macOSx64(ApplePlatformInfo):
     name = 'macOS_x86_64'
     arch = cpu = 'x86_64'
     host = 'x86_64-apple-darwin'
-    target = 'x86_64-apple-macos10.12'
+    target = 'x86_64-apple-macos'
     sdk_name = 'macosx'
     min_iphoneos_version = None
+    min_macos_version = '12.0'
 
 
 class IOS(MetaPlatformInfo):
