@@ -44,14 +44,12 @@ class ApplePlatformInfo(PlatformInfo):
                 '-isysroot', self.root_path,
                 '-arch', self.arch,
                 '-target',  self.target,
-                '-stdlib=libc++'
             ],
             'extra_cflags': [
                 '-fembed-bitcode',
                 '-isysroot', self.root_path,
                 '-arch', self.arch,
                 '-target', self.target,
-                '-stdlib=libc++',
                 *('-I{}'.format(include_dir) for include_dir in self.get_include_dirs())
             ],
             'host_machine': {
@@ -87,7 +85,6 @@ class ApplePlatformInfo(PlatformInfo):
         env['CFLAGS'] = ' '.join(cflags)
         env['CXXFLAGS'] = ' '.join([
             env['CFLAGS'],
-            '-stdlib=libc++',
             '-std=c++11',
             env['CXXFLAGS'],
         ])
