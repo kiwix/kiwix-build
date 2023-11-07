@@ -137,15 +137,6 @@ class iOSx64(ApplePlatformInfo):
     min_iphoneos_version = '15.0'
 
 
-class iOSMacABI(ApplePlatformInfo):
-    name = 'iOS_Mac_ABI'
-    arch = cpu = 'x86_64'
-    host = 'x86_64-apple-darwin'
-    target = 'x86_64-apple-ios14.0-macabi'
-    sdk_name = 'macosx'
-    min_iphoneos_version = '15.0'
-
-
 class macOSArm64(ApplePlatformInfo):
     name = 'macOS_arm64_static'
     arch = cpu = 'arm64'
