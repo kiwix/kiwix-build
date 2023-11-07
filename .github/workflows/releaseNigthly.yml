@@ -138,7 +138,7 @@ jobs:
           - native_mixed
           - macOS_arm64_static
           - macOS_arm64_mixed
-    runs-on: macos-11
+    runs-on: macos-13
     env:
       SSH_KEY: /tmp/id_rsa
       OS_NAME: macos
@@ -148,6 +148,9 @@ jobs:
       KEYCHAIN_PASSWORD: mysecretpassword
       KEYCHAIN_PROFILE: build-profile
     steps:
+    - name: Set Xcode version (15.0.1)
+      # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
+      run: sudo xcode-select -s /Applications/Xcode_15.0.1.app
     - name: Checkout code
       uses: actions/checkout@v3
     - name: Setup python 3.8
