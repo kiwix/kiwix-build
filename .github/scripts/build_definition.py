@@ -30,6 +30,7 @@ BUILD_DEF = """
     | macos   | macOS_arm64_static |        |          | BP        | BP          |               | macos-arm64          |
     | macos   | macOS_arm64_mixed  | BP     | BP       |           |             |               | macos-arm64          |
     | macos   | macOS_x86_64       | B      | B        |           |             |               |                      |
+    | macos   | apple_all_static   |        | BP       |           |             |               | xcframework          |
     ----------------------------------------------------------------------------------------------
     |         | flatpak            |        |          |           |             | BP            |                      |
     |         | native_static      | d      | d        | dBPSD     | dBPSD       |               | linux-x86_64         |

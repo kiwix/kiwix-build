@@ -151,6 +151,7 @@ jobs:
           - macOS_arm64_static
           - macOS_arm64_mixed
           - macOS_x86_64
+          - apple_all_static
     runs-on: macos-13
     env:
       SSH_KEY: /tmp/id_rsa

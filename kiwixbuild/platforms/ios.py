@@ -3,6 +3,7 @@ import subprocess
 from kiwixbuild._global import option
 from kiwixbuild.utils import pj, xrun_find
 from .base import PlatformInfo, MetaPlatformInfo, MixedMixin
+from kiwixbuild.dependencies.apple_xcframework import AppleXCFramework
 
 
 MIN_MACOS_VERSION = '12.0'
@@ -180,6 +181,21 @@ class IOS(MetaPlatformInfo):
     def add_targets(self, targetName, targets):
         super().add_targets(targetName, targets)
         return PlatformInfo.add_targets(self, '_ios_fat_lib', targets)
+
+    def __str__(self):
+        return self.name
+
+class AppleStaticAll(MetaPlatformInfo):
+    name = "apple_all_static"
+    compatible_hosts = ['Darwin']
+
+    @property
+    def subPlatformNames(self):
+        return AppleXCFramework.subPlatformNames
+
+    def add_targets(self, targetName, targets):
+        super().add_targets(targetName, targets)
+        return PlatformInfo.add_targets(self, 'apple_xcframework', targets)
 
     def __str__(self):
         return self.name
