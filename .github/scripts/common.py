@@ -29,7 +29,7 @@ SOURCE_DIR = HOME / "SOURCE"
 ARCHIVE_DIR = HOME / "ARCHIVE"
 TOOLCHAIN_DIR = BASE_DIR / "TOOLCHAINS"
 INSTALL_DIR = BASE_DIR / "INSTALL"
-TMP_DIR = Path("/tmp")
+TMP_DIR = Path(os.getenv("TMP_DIR", "/tmp"))
 KBUILD_SOURCE_DIR = HOME / "kiwix-build"
 
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
