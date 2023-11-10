@@ -2,7 +2,7 @@ from .base import PlatformInfo, MixedMixin
 
 from kiwixbuild.utils import pj
 from kiwixbuild._global import option, neutralEnv
-
+from kiwixbuild.platforms.ios import MIN_MACOS_VERSION
 
 class NativePlatformInfo(PlatformInfo):
     build = 'native'
@@ -11,6 +11,8 @@ class NativePlatformInfo(PlatformInfo):
         env = super().get_env()
         if neutralEnv('distname') == 'fedora':
             env['QT_SELECT'] = "5-64"
+        if neutralEnv('distname') == 'Darwin':
+            env['CFLAGS'] += f'-mmacosx-version-min={MIN_MACOS_VERSION}'
         return env
 
 

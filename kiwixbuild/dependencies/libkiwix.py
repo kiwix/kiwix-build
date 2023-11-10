@@ -24,8 +24,6 @@ class Libkiwix(Dependency):
             platformInfo = self.buildEnv.platformInfo
             if platformInfo.build == 'android':
                 return '-Dstatic-linkage=true -Dwerror=false'
-            if platformInfo.build == 'iOS':
-                return '-Db_bitcode=true'
             if platformInfo.name == 'flatpak':
                 return '--wrap-mode=nodownload'
             if platformInfo.mixed and option('target') == 'libkiwix':

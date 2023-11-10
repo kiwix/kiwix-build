@@ -30,8 +30,6 @@ class Libzim(Dependency):
             if platformInfo.build == 'android':
                 config_options.append("-DUSE_BUFFER_HEADER=false")
                 config_options.append("-Dstatic-linkage=true")
-            if platformInfo.build == 'iOS':
-                config_options.append("-Db_bitcode=true")
             if platformInfo.mixed and option('target') == 'libzim':
                 config_options.append("-Dstatic-linkage=true")
             if platformInfo.name == "flatpak":
