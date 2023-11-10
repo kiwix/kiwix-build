@@ -11,8 +11,8 @@ class NativePlatformInfo(PlatformInfo):
         env = super().get_env()
         if neutralEnv('distname') == 'fedora':
             env['QT_SELECT'] = "5-64"
-         if neutralEnv('distname') == 'Darwin':
-            env['CFLAGS'] += ' '.join([env['CFLAGS'], f'-mmacosx-version-min={MIN_MACOS_VERSION}'])
+        if neutralEnv('distname') == 'Darwin':
+            env['CFLAGS'] += f'-mmacosx-version-min={MIN_MACOS_VERSION}'
         return env
 
 
