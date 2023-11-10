@@ -5,6 +5,8 @@ from kiwixbuild.utils import pj, xrun_find
 from .base import PlatformInfo, MetaPlatformInfo, MixedMixin
 
 
+MIN_MACOS_VERSION = '12.0'
+
 class ApplePlatformInfo(PlatformInfo):
     build = 'iOS'
     static = True
@@ -144,7 +146,7 @@ class macOSArm64(ApplePlatformInfo):
     target = 'arm64-apple-macos'
     sdk_name = 'macosx'
     min_iphoneos_version = None
-    min_macos_version = '12.0'
+    min_macos_version = MIN_MACOS_VERSION
 
 
 class macOSArm64Mixed(MixedMixin('macOS_arm64_static'), ApplePlatformInfo):
@@ -154,7 +156,7 @@ class macOSArm64Mixed(MixedMixin('macOS_arm64_static'), ApplePlatformInfo):
     target = 'arm64-apple-macos'
     sdk_name = 'macosx'
     min_iphoneos_version = None
-    min_macos_version = '12.0'
+    min_macos_version = MIN_MACOS_VERSION
 
 
 class macOSx64(ApplePlatformInfo):
@@ -164,7 +166,7 @@ class macOSx64(ApplePlatformInfo):
     target = 'x86_64-apple-macos'
     sdk_name = 'macosx'
     min_iphoneos_version = None
-    min_macos_version = '12.0'
+    min_macos_version = MIN_MACOS_VERSION
 
 
 class IOS(MetaPlatformInfo):
