@@ -12,6 +12,7 @@ import requests
 
 from build_definition import get_platform_name
 
+from kiwixbuild.dependencies.apple_xcframework import AppleXCFramework
 from kiwixbuild.versions import (
     main_project_versions,
     release_versions,
@@ -29,7 +30,7 @@ SOURCE_DIR = HOME / "SOURCE"
 ARCHIVE_DIR = HOME / "ARCHIVE"
 TOOLCHAIN_DIR = BASE_DIR / "TOOLCHAINS"
 INSTALL_DIR = BASE_DIR / "INSTALL"
-TMP_DIR = Path("/tmp")
+TMP_DIR = Path(os.getenv("TMP_DIR", "/tmp"))
 KBUILD_SOURCE_DIR = HOME / "kiwix-build"
 
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
@@ -102,6 +103,7 @@ EXPORT_FILES = {
     "libkiwix": (
         INSTALL_DIR,
         (
+            "lib/CoreKiwix.xcframework/",
             "lib/*/libkiwix.so",
             "lib/*/libkiwix.so.{version}".format(
                 version=main_project_versions["libkiwix"]
@@ -279,6 +281,13 @@ def make_deps_archive(target=None, name=None, full=False):
     print_message("Create archive {}.", archive_name)
     files_to_archive = list(filter_install_dir(INSTALL_DIR))
     files_to_archive += HOME.glob("BUILD_*/LOGS")
+    if PLATFORM_TARGET == "apple_all_static":
+        for subplatform in AppleXCFramework.subPlatformNames:
+            base_dir = HOME / "BUILD_{}".format(subplatform)
+            files_to_archive += filter_install_dir(base_dir / "INSTALL")
+            if (base_dir / "meson_cross_file.txt").exists():
+                files_to_archive.append(base_dir / "meson_cross_file.txt")
+
     if PLATFORM_TARGET.endswith("_mixed"):
         static_platform = PLATFORM_TARGET.replace("_mixed", "_static")
         files_to_archive += filter_install_dir(HOME / ("BUILD_" + static_platform) / "INSTALL")
@@ -309,6 +318,8 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += (HOME / "BUILD_native_dyn").glob("*/.*_ok")
         files_to_archive += (HOME / "BUILD_native_static").glob("*/.*_ok")
         files_to_archive += HOME.glob("BUILD_android*/**/.*_ok")
+        files_to_archive += HOME.glob("BUILD_macOS*/**/.*_ok")
+        files_to_archive += HOME.glob("BUILD_iOS*/**/.*_ok")
         files_to_archive += SOURCE_DIR.glob("*/.*_ok")
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
 
