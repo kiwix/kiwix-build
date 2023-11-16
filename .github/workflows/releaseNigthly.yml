@@ -214,8 +214,7 @@ jobs:
     needs: [Linux]
     runs-on: ubuntu-22.04
     env:
-      PLATFORM_TARGET: LINUX_DOCKER_TRIGGER
-      OS_NAME: LINUX_DOCKER_TRIGGER
+      PLATFORM_TARGET: native_static
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
