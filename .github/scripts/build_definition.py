@@ -130,7 +130,7 @@ def select_build_targets(criteria):
             print(build_order)
             return build_order
 
-    raise "No definition match with current context."
+    raise ValueError("No definition match with current context.")
 
 def get_platform_name():
     from common import PLATFORM_TARGET, OS_NAME
@@ -143,4 +143,4 @@ def get_platform_name():
             name = row["platform_name"]
             return name or None
 
-    raise "No definition match with current context."
+    raise ValueError("No definition match with current context.")
