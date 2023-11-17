@@ -11,9 +11,9 @@ class emsdk(Dependency):
     name = 'emsdk'
 
     class Source(ReleaseDownload):
-        archive = Remotefile('emsdk-3.1.24.tar.gz',
-                             '1aa5365ccb2147701cc9d1e59a5a49577c1d6aea55da7c450df2d5ffa48b8a58',
-                             'https://codeload.github.com/emscripten-core/emsdk/tar.gz/refs/tags/3.1.24')
+        archive = Remotefile('emsdk-3.1.41.tar.gz',
+                             '147a2d72df34227bdb4ffedc587a8cb674a42269c40458f3f69ae37e8966cdc6',
+                             'https://codeload.github.com/emscripten-core/emsdk/tar.gz/refs/tags/3.1.41')
 
         @property
         def source_dir(self):

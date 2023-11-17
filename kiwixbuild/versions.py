@@ -62,4 +62,5 @@ base_deps_versions = {
   'org.kde' : '5.15-21.08',
   'io.qt.qtwebengine' : '5.15-21.08',
   'zim-testing-suite': '0.3',
+  'emsdk': '3.1.41',
 }
