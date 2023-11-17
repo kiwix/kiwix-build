@@ -1,3 +1,4 @@
+
 # This file reference all the versions of the depedencies we use in kiwix-build.
 
 main_project_versions = {
@@ -39,7 +40,7 @@ release_versions = {
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = '94'
+base_deps_meta_version = '95'
 
 base_deps_versions = {
   'zlib' : '1.2.12',
@@ -53,7 +54,7 @@ base_deps_versions = {
   'libmicrohttpd' : '0.9.76',
   'gumbo' : '0.10.1',
   'icu4c' : '73.2',
-  'libaria2' : '1.36.0',
+  'libaria2' : '1.37.0',
   'libmagic' : '5.44',
   'android-ndk' : 'r21e',
   'qt' : '5.10.1',
