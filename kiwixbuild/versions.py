@@ -4,7 +4,7 @@ main_project_versions = {
     'libzim': '9.0.0',
     'libkiwix': '12.1.1',
     'kiwix-tools': '3.5.0',
-    'zim-tools': '3.2.0',
+    'zim-tools': '3.3.0',
     'kiwix-desktop': '2.3.1' # Also change KIWIX_DESKTOP_VERSION and KIWIX_DESKTOP_RELEASE in appveyor.yml
 }
 
@@ -29,10 +29,10 @@ main_project_versions = {
 # - set KIWIX_DESKTOP_RELEASE to 0
 
 release_versions = {
-    'libzim': 0, # Depends of base deps (was None)
+    'libzim': None, # Depends of base deps (was None)
     'libkiwix': None, # Depends of libzim (was 0)
     'kiwix-tools': None, # Depends of libkiwix and libzim (was 2)
-    'zim-tools': None, # Depends of libzim (was 2)
+    'zim-tools': 0, # Depends of libzim (was None)
     'kiwix-desktop': None # Depends of libkiwix and libzim (was 4)
 }
 
