@@ -215,6 +215,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       PLATFORM_TARGET: native_static
+      OS_NAME: linux
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
