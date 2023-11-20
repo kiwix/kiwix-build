@@ -16,6 +16,12 @@ class Libzim(Dependency):
         test_option = "-t 8"
         strip_option = ''
 
+        @property
+        def build_type(self):
+            if self.buildEnv.platformInfo.build == "android":
+                return "debug"
+            return super().build_type
+
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
             deps = ['lzma', 'zstd', 'xapian-core', 'icu4c']
