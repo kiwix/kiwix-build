@@ -20,6 +20,12 @@ class Libkiwix(Dependency):
         strip_option = ''
 
         @property
+        def build_type(self):
+            if self.buildEnv.platformInfo.build == "android":
+                return "debug"
+            return super().build_type
+
+        @property
         def configure_option(self):
             platformInfo = self.buildEnv.platformInfo
             if platformInfo.build == 'android':
