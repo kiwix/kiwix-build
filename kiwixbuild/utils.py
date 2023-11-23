@@ -275,7 +275,12 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
                         perm = (member.external_attr >> 16) & 0x1FF
                         os.chmod(pj(tmpdir, getname(member)), perm)
                 name = name or topdir
-                os.rename(pj(tmpdir, topdir), pj(dest_dir, name))
+                shutil.copytree(pj(tmpdir, topdir), pj(dest_dir, name), symlinks=True, dirs_exist_ok=True)
+                # Be sure that all directory in tmpdir are writable to allow correct suppersion of it
+                for root, dirs, _files in os.walk(tmpdir):
+                    for d in dirs:
+                        os.chmod(pj(root, d), stat.S_IWRITE|stat.S_IREAD|stat.S_IEXEC)
+
         else:
             if name:
                 dest_dir = pj(dest_dir, name)
