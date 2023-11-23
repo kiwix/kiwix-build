@@ -30,7 +30,7 @@ class Xapian(Dependency):
             deps = ["zlib", "lzma"]
             if (
                 configInfo.build in ("win32", "wasm")
-                or neutralEnv("distname") == "Darwin"
+                or neutralEnv("distname") in ("Darwin", "Windows")
             ):
                 return deps
             return deps + ["uuid"]
