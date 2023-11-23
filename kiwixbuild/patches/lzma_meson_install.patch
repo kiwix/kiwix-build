@@ -1,0 +1,54 @@
+diff '--color=auto' -ur lzma-5.2.6_orig/src/liblzma/meson.build lzma-5.2.6/src/liblzma/meson.build
+--- lzma-5.2.6_orig/src/liblzma/meson.build	2023-11-23 14:31:26.110195070 +0100
++++ lzma-5.2.6/src/liblzma/meson.build	2023-12-06 17:04:49.325148650 +0100
+@@ -1,3 +1,5 @@
++pkg = import('pkgconfig')
++
+ lzma_sources = [
+   '../common/tuklib_physmem.c',
+   'common/common.c',
+@@ -121,12 +123,44 @@
+ lzmainc = include_directories('api', 'common',
+   'check', 'lz', 'rangecoder', 'lzma', 'delta', 'simple', '../common')
+ 
++
++install_headers(
++  'api/lzma.h',
++)
++
++install_headers(
++  'api/lzma/version.h',
++  'api/lzma/base.h',
++  'api/lzma/vli.h',
++  'api/lzma/check.h',
++  'api/lzma/filter.h',
++  'api/lzma/bcj.h',
++  'api/lzma/delta.h',
++  'api/lzma/lzma12.h',
++  'api/lzma/container.h',
++  'api/lzma/stream_flags.h',
++  'api/lzma/block.h',
++  'api/lzma/index.h',
++  'api/lzma/index_hash.h',
++  'api/lzma/hardware.h',
++  subdir: 'lzma'
++)
++
+ liblzma = library('lzma', lzma_sources,
+   main_dec_sources, main_enc_sources, check_sources,
+   simplefilter_sources, lzma1_sources,
+   lz_sources, delta_sources,
+   include_directories : [confinc, lzmainc],
+   c_args : ['-DHAVE_CONFIG_H', '-DTUKLIB_SYMBOL_PREFIX=lzma_'],
++  install: true
++)
++
++pkg.generate(liblzma,
++  name: 'liblzma',
++  filebase: 'liblzma',
++  description: 'The liblzma compression library',
++  version: meson.project_version(),
++  url: 'http://tukaani.org/xz/'
+ )
+ 
+ lzma_dep = declare_dependency(link_with : liblzma,
