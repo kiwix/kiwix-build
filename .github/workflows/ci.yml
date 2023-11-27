@@ -28,21 +28,16 @@ jobs:
       run: |
         pip3 install meson pytest requests distro
         pip3 install --no-deps $GITHUB_WORKSPACE
+    - name: Setup MSVC compiler
+      uses: bus1/cabuild/action/msdevshell@v1
+      with:
+        architecture: x64
     - name: Ensure base deps
-      shell: bash
-      run: |
-        cd $HOME
-        $GITHUB_WORKSPACE/.github/scripts/ensure_base_deps.py
-    - name: Compile all deps
-      shell: bash
-      run: |
-        cd $HOME
-        $GITHUB_WORKSPACE/.github/scripts/compile_all_deps.py
+      run: python .github\\scripts\\ensure_base_deps.py
+     - name: Compile all deps
+      run: python .github\\scripts\\compile_all_deps.py
     - name: Build projects
-      shell: bash
-      run: |
-        cd $HOME
-        kiwix-build/.github/scripts/build_projects.py
+      run: python .github\\scripts\\build_projects.py
     - name: Upload failure logs
       shell: bash
       if: failure()
