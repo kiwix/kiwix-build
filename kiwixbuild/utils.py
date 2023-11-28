@@ -295,7 +295,8 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
                         if isdir(member):
                             continue
                         perm = (member.external_attr >> 16) & 0x1FF
-                        os.chmod(pj(tmpdir, getname(member)), perm)
+                        if perm:
+                            os.chmod(pj(tmpdir, getname(member)), perm)
                 name = name or topdir
                 shutil.copytree(pj(tmpdir, topdir), pj(dest_dir, name), symlinks=True, dirs_exist_ok=True)
         else:
