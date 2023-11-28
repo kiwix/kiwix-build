@@ -76,8 +76,7 @@ class WasmPlatformInfo(PlatformInfo):
 
     def get_env(self):
         env = super().get_env()
-        env['PATH'] = ':'.join([
-            env['PATH'],
+        env['PATH'].extend([
             self.install_path,
             pj(self.install_path, 'upstream', 'emscripten'),
             pj(self.install_path, 'node', '14.18.2_64bit', 'bin')
