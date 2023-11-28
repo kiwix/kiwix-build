@@ -122,17 +122,14 @@ class BuildEnv:
     def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
         env = self.platformInfo.get_env()
         pkgconfig_path = pj(self.install_dir, self.libprefix, 'pkgconfig')
-        env['PKG_CONFIG_PATH'] = ':'.join([env['PKG_CONFIG_PATH'], pkgconfig_path])
+        env['PKG_CONFIG_PATH'].append(pkgconfig_path)
 
-        env['PATH'] = ':'.join([
-            escape_path(pj(self.install_dir, 'bin')),
-            env['PATH']
-        ])
+        env['PATH'].insert(0, pj(self.install_dir, 'bin'))
 
-        env['LD_LIBRARY_PATH'] = ':'.join([env['LD_LIBRARY_PATH'],
-                                          pj(self.install_dir, 'lib'),
-                                          pj(self.install_dir, self.libprefix)
-                                          ])
+        env['LD_LIBRARY_PATH'].extend([
+          pj(self.install_dir, 'lib'),
+          pj(self.install_dir, self.libprefix)
+      ])
 
         env['QMAKE_CXXFLAGS'] = " ".join([
             escape_path('-I'+pj(self.install_dir, 'include')),
@@ -158,7 +155,7 @@ class BuildEnv:
         if cross_compilers:
             self.platformInfo.set_compiler(env)
         if cross_path:
-            env['PATH'] = ':'.join(self.platformInfo.get_bin_dir() + [env['PATH']])
+            env['PATH'][0:0] = self.platformInfo.get_bin_dir()
         return env
 
 
