@@ -161,15 +161,13 @@ def MixedMixin(static_name):
 
         def get_env(self):
             env = super().get_env()
-            env["PATH"] = ":".join(
-                [pj(self.static_buildEnv.install_dir, "bin")] + [env["PATH"]]
-            )
+            env["PATH"].insert(0, pj(self.static_buildEnv.install_dir, "bin"))
             pkgconfig_path = pj(
                 self.static_buildEnv.install_dir,
                 self.static_buildEnv.libprefix,
                 "pkgconfig",
             )
-            env["PKG_CONFIG_PATH"] = ":".join([env["PKG_CONFIG_PATH"], pkgconfig_path])
+            env["PKG_CONFIG_PATH"].append(pkgconfig_path)
             env["CPPFLAGS"] = " ".join(
                 [
                     "-I" + pj(self.static_buildEnv.install_dir, "include"),

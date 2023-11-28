@@ -63,7 +63,29 @@ class DefaultEnv(Defaultdict):
     def __getitem__(self, name):
         if name == b"PATH":
             raise KeyError
+        if name in ['PATH', 'PKG_CONFIG_PATH', 'LD_LIBRARY_PATH']:
+            item = super().__getitem__(name)
+            if isinstance(item, PathArray):
+                return item
+            else:
+                item = PathArray(item)
+                self[name] = item
+                return item
         return super().__getitem__(name)
+
+def get_separator():
+    return ';' if neutralEnv('distname') == 'Windows' else ':'
+
+class PathArray(list):
+    def __init__(self, value):
+        self.separator = get_separator()
+        if not value:
+            super().__init__([])
+        else:
+            super().__init__(value.split(self.separator))
+
+    def __str__(self):
+        return self.separator.join(self)
 
 
 def remove_duplicates(iterable, key_function=None):
@@ -297,8 +319,10 @@ def run_command(command, cwd, context, *, env=None, input=None):
         print("run command '{}'".format(command), file=log)
         print("current directory is '{}'".format(cwd), file=log)
         print("env is :", file=log)
+        env = {k:str(v) for k,v in env.items()}
         for k, v in env.items():
             print("  {} : {!r}".format(k, v), file=log)
+
 
         if log:
             log.flush()

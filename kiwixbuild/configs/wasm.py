@@ -79,14 +79,11 @@ class WasmConfigInfo(ConfigInfo):
 
     def get_env(self):
         env = super().get_env()
-        env["PATH"] = ":".join(
-            [
-                env["PATH"],
-                self.install_path,
-                pj(self.install_path, "upstream", "emscripten"),
-                pj(self.install_path, "node", "14.18.2_64bit", "bin"),
-            ]
-        )
+        env["PATH"].extend([
+            self.install_path,
+            pj(self.install_path, "upstream", "emscripten"),
+            pj(self.install_path, "node", "14.18.2_64bit", "bin"),
+        ])
         env["EMSDK"] = self.install_path
         env["EMSDK_NODE"] = pj(
             self.install_path, "node", "14.18.2_64bit", "bin", "node"
