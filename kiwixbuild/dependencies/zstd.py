@@ -8,9 +8,9 @@ class zstd(Dependency):
 
     class Source(ReleaseDownload):
         archive = Remotefile(
-            "zstd-1.5.2.tar.gz",
-            "f7de13462f7a82c29ab865820149e778cbfe01087b3a55b5332707abf9db4a6e",
-            "https://github.com/facebook/zstd/archive/refs/tags/v1.5.2.tar.gz",
+            "zstd-1.5.5.tar.gz",
+            "98e9c3d949d1b924e28e01eccb7deed865eefebf25c2f21c702e5cd5b63b85e1",
+            "https://github.com/facebook/zstd/archive/refs/tags/v1.5.5.tar.gz",
         )
 
     class Builder(MesonBuilder):
