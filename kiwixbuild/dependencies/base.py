@@ -553,6 +553,7 @@ class MesonBuilder(Builder):
             cross_options += ["--cross-file", self.buildEnv.meson_crossfile]
         command = [
             *neutralEnv("meson_command"),
+            "setup",
             ".",
             self.build_path,
             f"--buildtype={self.build_type}",
