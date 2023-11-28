@@ -1,0 +1,103 @@
+diff '--color=auto' -ur xapian-core-1.4.23_orig/common/io_utils.cc xapian-core-1.4.23/common/io_utils.cc
+--- xapian-core-1.4.23_orig/common/io_utils.cc	2023-07-07 03:59:19.000000000 +0200
++++ xapian-core-1.4.23/common/io_utils.cc	2023-11-29 09:52:52.722516795 +0100
+@@ -124,7 +124,7 @@
+ {
+     size_t total = 0;
+     while (n) {
+-	ssize_t c = read(fd, p, n);
++	auto c = read(fd, p, n);
+ 	if (c <= 0) {
+ 	    if (c == 0) {
+ 		if (total >= min) break;
+@@ -145,7 +145,7 @@
+ io_write(int fd, const char * p, size_t n)
+ {
+     while (n) {
+-	ssize_t c = write(fd, p, n);
++	auto c = write(fd, p, n);
+ 	if (c < 0) {
+ 	    if (errno == EINTR) continue;
+ 	    throw Xapian::DatabaseError("Error writing to file", errno);
+@@ -185,9 +185,9 @@
+     // per block read.
+ #ifdef HAVE_PREAD
+     while (true) {
+-	ssize_t c = pread(fd, p, n, o);
++	auto c = pread(fd, p, n, o);
+ 	// We should get a full read most of the time, so streamline that case.
+-	if (usual(c == ssize_t(n)))
++	if (usual(c == decltype(c)(n)))
+ 	    return;
+ 	// -1 is error, 0 is EOF
+ 	if (c <= 0) {
+@@ -206,9 +206,9 @@
+     if (rare(lseek(fd, o, SEEK_SET) < 0))
+ 	throw_block_error("Error seeking to block ", b, errno);
+     while (true) {
+-	ssize_t c = read(fd, p, n);
++	auto c = read(fd, p, n);
+ 	// We should get a full read most of the time, so streamline that case.
+-	if (usual(c == ssize_t(n)))
++	if (usual(c == decltype(c)(n)))
+ 	    return;
+ 	if (c <= 0) {
+ 	    if (c == 0)
+@@ -233,9 +233,9 @@
+     // per block write.
+ #ifdef HAVE_PWRITE
+     while (true) {
+-	ssize_t c = pwrite(fd, p, n, o);
++	auto c = pwrite(fd, p, n, o);
+ 	// We should get a full write most of the time, so streamline that case.
+-	if (usual(c == ssize_t(n)))
++	if (usual(c == decltype(c)(n)))
+ 	    return;
+ 	if (c < 0) {
+ 	    // We get EINTR if the syscall was interrupted by a signal.
+@@ -251,9 +251,9 @@
+     if (rare(lseek(fd, o, SEEK_SET) < 0))
+ 	throw_block_error("Error seeking to block ", b, errno);
+     while (true) {
+-	ssize_t c = write(fd, p, n);
++	auto c = write(fd, p, n);
+ 	// We should get a full write most of the time, so streamline that case.
+-	if (usual(c == ssize_t(n)))
++	if (usual(c == decltype(c)(n)))
+ 	    return;
+ 	if (c < 0) {
+ 	    // We get EINTR if the syscall was interrupted by a signal.
+diff '--color=auto' -ur xapian-core-1.4.23_orig/common/safesysstat.h xapian-core-1.4.23/common/safesysstat.h
+--- xapian-core-1.4.23_orig/common/safesysstat.h	2023-07-07 03:59:19.000000000 +0200
++++ xapian-core-1.4.23/common/safesysstat.h	2023-11-28 17:53:49.353853669 +0100
+@@ -45,7 +45,7 @@
+ // to allow source code to just specify a mode argument unconditionally.
+ //
+ // The () around mkdir are in case it's defined as a macro.
+-inline int (mkdir)(const char *pathname, mode_t /*mode*/) {
++inline int (mkdir)(const char *pathname, int /*mode*/) {
+     return _mkdir(pathname);
+ }
+ 
+diff '--color=auto' -ur xapian-core-1.4.23_orig/include/xapian/visibility.h xapian-core-1.4.23/include/xapian/visibility.h
+--- xapian-core-1.4.23_orig/include/xapian/visibility.h	2023-07-07 03:59:19.000000000 +0200
++++ xapian-core-1.4.23/include/xapian/visibility.h	2023-11-29 11:24:24.392555665 +0100
+@@ -24,10 +24,15 @@
+ // symbol visibility support.
+ 
+ #include "xapian/version.h"
+-#ifdef XAPIAN_ENABLE_VISIBILITY
+-# define XAPIAN_VISIBILITY_DEFAULT __attribute__((visibility("default")))
+-#else
++
++#if defined _WIN32 || defined __CYGWIN__
+ # define XAPIAN_VISIBILITY_DEFAULT
++#else
++# ifdef XAPIAN_ENABLE_VISIBILITY
++#  define XAPIAN_VISIBILITY_DEFAULT __attribute__((visibility("default")))
++# else
++#  define XAPIAN_VISIBILITY_DEFAULT
++# endif
+ #endif
+ 
+ #endif

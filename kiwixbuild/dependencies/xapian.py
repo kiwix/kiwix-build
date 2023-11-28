@@ -18,6 +18,9 @@ class Xapian(Dependency):
                                  '',
                                  'https://public.kymeria.fr/KIWIX/xapian-core-1.4.23-1_patch.zip')
         archives = [src_archive, meson_patch]
+        patches = [
+            'xapian_mode_t_windows.patch'
+        ]
 
 #    class Builder(MakeBuilder):
 #        configure_options = [
