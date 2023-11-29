@@ -26,7 +26,7 @@ jobs:
     - name: Install python modules
       shell: bash
       run: |
-        pip3 install meson pytest requests distro
+        pip3 install meson pytest requests distro paramiko
         pip3 install --no-deps $GITHUB_WORKSPACE
     - name: Setup MSVC compiler
       uses: bus1/cabuild/action/msdevshell@v1
@@ -112,6 +112,10 @@ jobs:
         pip3 install --user --no-deps .
       env:
         REP: ${{github.repository}}
+    - name: Install paramiko
+      if: ${{matrix.image_variant != 'bionic' }}
+      shell: bash
+      run: pip3 install --user paramiko
     - name: secret
       shell: bash
       run: |
@@ -161,6 +165,7 @@ jobs:
         git clone https://github.com/${REP}
         cd ./${REP##*/}
         git checkout --force ${GITHUB_SHA}
+        pip3 install --user paramiko
         pip3 install --user --no-deps .
       env:
         REP: ${{github.repository}}
@@ -221,7 +226,7 @@ jobs:
         brew install pkg-config ninja automake autoconf
     - name: Install python modules
       run: |
-        pip3 install meson pytest requests distro
+        pip3 install meson pytest requests distro paramiko
         pip3 install --no-deps $GITHUB_WORKSPACE
     - name: secret
       shell: bash
