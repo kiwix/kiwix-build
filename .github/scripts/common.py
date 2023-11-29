@@ -1,6 +1,6 @@
 import os
 from os import environ as _environ
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from datetime import date
 import tarfile
 import zipfile
@@ -207,45 +207,48 @@ def upload(file_to_upload, host, dest_path):
         host, port = host.split(":", 1)
     else:
         port = "22"
+    if '@' in host:
+        user, host = host.split('@', 1)
+    else:
+        user = None
 
-    # sending SFTP mkdir command to the sftp interactive mode and not batch (-b) mode
-    # as the latter would exit on any mkdir error while it is most likely
-    # the first parts of the destination is already present and thus can't be created
-    sftp_commands = "\n".join(
-        [
-            f"mkdir {part}"
-            for part in list(reversed(Path(dest_path).parents)) + [dest_path]
-        ]
-    )
-    command = [
-        "sftp",
-        "-i",
-        _environ.get("SSH_KEY"),
-        "-P",
-        port,
-        "-o",
-        "StrictHostKeyChecking=no",
-        host,
-    ]
-    print_message("Creating dest path {}", dest_path)
-    subprocess.run(command, input=sftp_commands.encode("utf-8"), check=True)
+    from contextlib import contextmanager
 
-    command = [
-        "scp",
-        "-c",
-        "aes128-ctr",
-        "-rp",
-        "-P",
-        port,
-        "-i",
-        _environ.get("SSH_KEY"),
-        "-o",
-        "StrictHostKeyChecking=no",
-        str(file_to_upload),
-        "{}:{}".format(host, dest_path),
-    ]
-    print_message("Sending archive with command {}", command)
-    subprocess.check_call(command)
+    @contextmanager
+    def get_client():
+        import paramiko
+
+        client = paramiko.client.SSHClient()
+        client.set_missing_host_key_policy(paramiko.client.WarningPolicy)
+        print_message(f"Connect to {host}:{port}")
+        client.connect(host, port=port, username=user, key_filename=_environ.get("SSH_KEY"), look_for_keys=False, compress=True)
+        try:
+            yield client
+        finally:
+            client.close()
+
+    @contextmanager
+    def get_sftp():
+        with get_client() as client:
+            sftp = client.open_sftp()
+            try:
+                yield sftp
+            finally:
+                sftp.close()
+
+    dest_path = PurePosixPath(dest_path)
+    remote_file = dest_path.joinpath(file_to_upload.name)
+
+    with get_sftp() as sftp:
+        for part in list(reversed(dest_path.parents)) + [dest_path]:
+            part = str(part)
+            try:
+                sftp.stat(part)
+            except FileNotFoundError:
+                sftp.mkdir(part)
+
+        print_message(f"Sending archive {file_to_upload} to {remote_file}")
+        sftp.put(str(file_to_upload), str(remote_file), confirm=True)
 
 
 def upload_archive(archive, project, make_release, dev_branch=None):
