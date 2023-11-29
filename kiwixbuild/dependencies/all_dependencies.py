@@ -13,6 +13,8 @@ class AllBaseDependencies(Dependency):
     class Builder(NoopBuilder):
         @classmethod
         def get_dependencies(cls, configInfo, allDeps):
+            if neutralEnv("distname") == "Windows":
+                return ["zlib", "lzma", "zstd", "icu4c"]
             if configInfo.build == "wasm" or environ.get("OS_NAME") == "bionic":
                 return ["zlib", "lzma", "zstd", "icu4c", "xapian-core"]
 
