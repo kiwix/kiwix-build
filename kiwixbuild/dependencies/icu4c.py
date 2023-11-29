@@ -1,9 +1,10 @@
-from .base import Dependency, ReleaseDownload, MakeBuilder
+from .base import Dependency, ReleaseDownload, MakeBuilder, MesonBuilder
 
 from kiwixbuild.utils import pj, SkipCommand, Remotefile, extract_archive
 from kiwixbuild._global import get_target_step, neutralEnv
 import os, shutil
 import fileinput
+import platform
 
 
 class Icu(Dependency):
@@ -20,8 +21,13 @@ class Icu(Dependency):
             "ca1ee076163b438461e484421a7679fc33a64cd0a54f9d4b401893fa1eb42701",
             "https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-data.zip",
         )
+        meson_patch = Remotefile(
+            "icu_73.2-2_patch.zip",
+            "218a5f20b58b6b2372e636c2eb2d611a898fdc11be17d6c4f35a3cd54d472010",
+            "https://wrapdb.mesonbuild.com/v2/icu_73.2-2/get_patch",
+        )
 
-        archives = [archive_src, archive_data]
+        archives = [archive_src, archive_data, meson_patch]
 
         def _extract(self, context):
             context.try_skip(self.extract_path)
@@ -42,56 +48,72 @@ class Icu(Dependency):
                 topdir="data",
                 name="data",
             )
+            extract_archive(
+                pj(neutralEnv("archive_dir"), self.meson_patch.name),
+                neutralEnv("source_dir"),
+                topdir="icu",
+                name=self.source_dir,
+            )
 
         patches = [
             "icu4c_fix_static_lib_name_mingw.patch",
-            #           "icu4c_android_elf64_st_info.patch",
-            #           "icu4c_custom_data.patch",
-            #           "icu4c_noxlocale.patch",
             "icu4c_rpath.patch",
-            #           "icu4c_build_config.patch",
             "icu4c_wasm.patch",
         ]
 
-    class Builder(MakeBuilder):
-        subsource_dir = "source"
-        make_install_targets = ["install"]
+    if platform.system() == "Windows":
 
-        @classmethod
-        def get_dependencies(cls, configInfo, allDeps):
-            plt = "native_static" if configInfo.static else "native_dyn"
-            return [(plt, "icu4c")]
-
-        @property
-        def configure_options(self):
-            yield "--disable-samples"
-            yield "--disable-tests"
-            yield "--disable-extras"
-            yield "--disable-dyload"
-            yield "--enable-rpath"
-            yield "--disable-icuio"
-            yield "--disable-layoutex"
-            configInfo = self.buildEnv.configInfo
-            if configInfo.build != "native":
-                icu_native_builder = get_target_step(
-                    "icu4c", "native_static" if configInfo.static else "native_dyn"
+        class Builder(MesonBuilder):
+            def set_env(self, env):
+                env["ICU_DATA_FILTER_FILE"] = pj(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "icu4c_data_filter.json",
                 )
-                yield f"--with-cross-build={icu_native_builder.build_path}"
-                yield "--disable-tools"
-            if configInfo.build in ("android", "wasm"):
-                yield "--with-data-packaging=archive"
 
-        def set_env(self, env):
-            env["ICU_DATA_FILTER_FILE"] = pj(
-                os.path.dirname(os.path.realpath(__file__)), "icu4c_data_filter.json"
-            )
+    else:
 
-        def _post_configure_script(self, context):
-            if self.buildEnv.configInfo.build != "wasm":
-                context.skip()
-            context.try_skip(self.build_path)
-            for line in fileinput.input(pj(self.build_path, "Makefile"), inplace=True):
-                if line == "#DATASUBDIR = data\n":
-                    print("DATASUBDIR = data")
-                else:
-                    print(line, end="")
+        class Builder(MakeBuilder):
+            subsource_dir = "source"
+            make_install_targets = ["install"]
+
+            @classmethod
+            def get_dependencies(cls, configInfo, allDeps):
+                plt = "native_static" if configInfo.static else "native_dyn"
+                return [(plt, "icu4c")]
+
+            @property
+            def configure_options(self):
+                yield "--disable-samples"
+                yield "--disable-tests"
+                yield "--disable-extras"
+                yield "--disable-dyload"
+                yield "--enable-rpath"
+                yield "--disable-icuio"
+                yield "--disable-layoutex"
+                configInfo = self.buildEnv.configInfo
+                if configInfo.build != "native":
+                    icu_native_builder = get_target_step(
+                        "icu4c", "native_static" if configInfo.static else "native_dyn"
+                    )
+                    yield f"--with-cross-build={icu_native_builder.build_path}"
+                    yield "--disable-tools"
+                if configInfo.build in ("android", "wasm"):
+                    yield "--with-data-packaging=archive"
+
+            def set_env(self, env):
+                env["ICU_DATA_FILTER_FILE"] = pj(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "icu4c_data_filter.json",
+                )
+
+            def _post_configure_script(self, context):
+                if self.buildEnv.configInfo.build != "wasm":
+                    context.skip()
+                context.try_skip(self.build_path)
+                for line in fileinput.input(
+                    pj(self.build_path, "Makefile"), inplace=True
+                ):
+                    if line == "#DATASUBDIR = data\n":
+                        print("DATASUBDIR = data")
+                    else:
+                        print(line, end="")
