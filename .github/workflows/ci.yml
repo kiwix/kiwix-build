@@ -117,7 +117,7 @@ jobs:
         kiwix-build/.github/scripts/ensure_base_deps.py
       env:
         PLATFORM_TARGET: ${{matrix.target}}
-    - name: Compile all deps
+     - name: Compile all deps
       shell: bash
       run: |
         cd $HOME
