@@ -3,7 +3,7 @@ import os
 from .base import (
     Dependency,
     ReleaseDownload,
-    MakeBuilder,
+    MesonBuilder,
 )
 
 from kiwixbuild.utils import Remotefile, pj, Defaultdict, SkipCommand, run_command
@@ -15,44 +15,42 @@ class LibCurl(Dependency):
 
     class Source(ReleaseDownload):
         name = "libcurl"
-        archive = Remotefile(
-            "curl-7.67.0.tar.xz",
-            "f5d2e7320379338c3952dcc7566a140abb49edb575f9f99272455785c40e536c",
-            "https://curl.haxx.se/download/curl-7.67.0.tar.xz",
+        src_archive = Remotefile(
+            "curl-8.4.0.tar.xz",
+            "",
+            "https://github.com/curl/curl/releases/curl-8_4_0/curl-8.4.0.tar.xz",
         )
+        meson_archive = Remotefile(
+            "curl_8.4.0-2_patch.zip",
+            "",
+            "https://wrapdb.mesonbuild.com/v2/curl_8.4.0-2/get_path",
+        )
+        archive = [src_archive, meson_archive]
 
-    class Builder(MakeBuilder):
+    class Builder(MesonBuilder):
         dependencies = ["zlib"]
         configure_options = [
-            *[
-                f"--without-{p}"
-                for p in (
-                    "libssh2",
-                    "ssl",
-                    "libmetalink",
-                    "librtmp",
-                    "nghttp2",
-                    "libidn2",
-                    "brotli",
-                )
-            ],
-            *[
-                f"--disable-{p}"
-                for p in (
-                    "ftp",
-                    "file",
-                    "ldap",
-                    "ldaps",
-                    "rtsp",
-                    "dict",
-                    "telnet",
-                    "tftp",
-                    "pop3",
-                    "imap",
-                    "smb",
-                    "smtp",
-                    "gopher",
-                    "manual",
-                )
-            ],
+            f"-D{p}=disabled"
+            for p in (
+                "ssh",
+                "ssl",
+                "rtmp",
+                "http2",
+                "idn",
+                "brotli",
+                "ftp",
+                "file",
+                "ldap",
+                "ldaps",
+                "rtsp",
+                "dict",
+                "telnet",
+                "tftp",
+                "pop3",
+                "imap",
+                "smb",
+                "smtp",
+                "gopher",
+                "manual",
+            )
         ]
