@@ -56,8 +56,13 @@ class AppleXCFramework(Dependency):
                 static_ars = [str(f) for f in Path(lib_dir).glob("*.a")]
 
                 # create merged.a from all *.a in install_dir/lib
-                command = "libtool -static -o merged.a "
-                command += " ".join(static_ars)
+                command = [
+                    "libtool",
+                    "-static",
+                    "-o",
+                    "merged.a",
+                    *static_ars
+                ]
                 run_command(command, lib_dir, context)
 
                 # will be included in xcframework
@@ -76,21 +81,28 @@ class AppleXCFramework(Dependency):
             fat_dir = pj(self.buildEnv.build_dir, "macOS_fat")
             os.makedirs(fat_dir, exist_ok=True)
 
-            command = "lipo -create -output {fat_dir}/merged.a ".format(fat_dir=fat_dir)
-            command += " ".join(macos_libs)
+            output_merged = pj(fat_dir, "merged.a")
+            command = [
+                "lipo",
+                "-create",
+                "-output",
+                output_merged,
+                *macos_libs
+            ]
             run_command(command, self.buildEnv.build_dir, context)
 
-            return [pj(fat_dir, "merged.a")]
+            return [output_merged]
 
         def _build_xcframework(self, xcf_libs, context):
             # create xcframework
             ref_plat = PlatformInfo.get_platform(self.macos_subplatforms[0])
-            command = "xcodebuild -create-xcframework "
+            command = ["xcodebuild", "-create-xcframework"]
             for lib in xcf_libs:
-                command += " -library {lib} -headers {include}".format(
-                    lib=lib, include=pj(ref_plat.buildEnv.install_dir, "include")
-                )
-            command += " -output {dest}".format(dest=self.final_path)
+                command += [
+                    "-library", lib,
+                    "-headers", pj(ref_plat.buildEnv.install_dir, "include")
+                ]
+            command += ["-output", self.final_path]
             run_command(command, self.buildEnv.build_dir, context)
 
         def build(self):
