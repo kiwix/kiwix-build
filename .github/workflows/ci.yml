@@ -13,6 +13,7 @@ jobs:
     env:
       OS_NAME: windows
       COMPILE_CONFIG: native_dyn
+      HOME: 'C:\\Users\\runneradmin'
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -54,10 +55,9 @@ jobs:
       env:
         SSH_KEY: ${{ runner.temp }}/id_rsa
     - name: Upload failure logs
-      shell: bash
       if: failure()
       run: |
-        $GITHUB_WORKSPACE/.github/scripts/upload_failure_logs.sh
+        python .github\\scripts\\upload_failure_logs.py
       env:
         SSH_KEY: ${{ runner.temp }}/id_rsa
 
@@ -150,7 +150,7 @@ jobs:
         COMPILE_CONFIG: ${{matrix.config}}
     - name: Upload failure logs
       if: failure()
-      run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
+      run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.py
       env:
         COMPILE_CONFIG: ${{matrix.config}}
 
@@ -196,7 +196,7 @@ jobs:
         kiwix-build/.github/scripts/build_projects.py
     - name: Upload failure logs
       if: failure()
-      run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
+      run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.py
 
   Macos:
     strategy:
@@ -262,6 +262,6 @@ jobs:
         COMPILE_CONFIG: ${{matrix.config}}
     - name: Upload failure logs
       if: failure()
-      run: $GITHUB_WORKSPACE/.github/scripts/upload_failure_logs.sh
+      run: $GITHUB_WORKSPACE/.github/scripts/upload_failure_logs.py
       env:
         COMPILE_CONFIG: ${{matrix.config}}
