@@ -30,7 +30,6 @@ class PlatformNeutralEnv:
         self.mesontest_command = [*self.meson_command, "test"]
         self.patch_command = self._detect_command('patch')
         self.git_command = self._detect_command('git')
-        self.svn_command = self._detect_command('svn')
         self.make_command = self._detect_command('make')
         self.cmake_command = self._detect_command('cmake')
         self.qmake_command = self._detect_command('qmake', required=False)
@@ -53,7 +52,7 @@ class PlatformNeutralEnv:
     def download(self, what, where=None):
         where = where or self.archive_dir
         download_remote(what, where)
-    
+
 
     def _detect_command(self, name, default=None, options=['--version'], required=True):
         if default is None:

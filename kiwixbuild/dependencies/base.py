@@ -196,30 +196,6 @@ class GitClone(Source):
             self.command('post_prepare_script', self._post_prepare_script)
 
 
-class SvnClone(Source):
-    @property
-    def source_dir(self):
-        return self.svn_dir
-
-    @property
-    def svn_path(self):
-        return pj(neutralEnv('source_dir'), self.svn_dir)
-
-    def _svn_export(self, context):
-        if os.path.exists(self.svn_path):
-            raise SkipCommand()
-        command = [
-            *neutralEnv('svn_command'), "export",
-            self.svn_remote, self.svn_dir
-        ]
-        run_command(command, neutralEnv('source_dir'), context)
-
-    def prepare(self):
-        self.command('svnexport', self._svn_export)
-        if hasattr(self, 'patches'):
-            self.command('patch', self._patch)
-
-
 class Builder:
     subsource_dir = None
     dependencies = []
