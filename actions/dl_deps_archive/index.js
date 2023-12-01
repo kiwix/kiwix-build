@@ -1,6 +1,7 @@
 const tc = require('@actions/tool-cache');
 const core = require('@actions/core');
-import * as path from 'path'
+const path = require('path');
+const os = require('os');
 
 function getInput(name, dflt) {
   const val = process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`];
@@ -42,7 +43,9 @@ async function run() {
   }
 }
 
-addLocalPath('C:\\Program Files\\Git\\usr\\bin');
+if (os.platform() === 'win32') {
+  addLocalPath('C:\\Program Files\\Git\\usr\\bin');
+}
 core.setCommandEcho(true);
 
 run()
