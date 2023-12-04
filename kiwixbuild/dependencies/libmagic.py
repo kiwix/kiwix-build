@@ -6,7 +6,7 @@ from .base import (
     MakeBuilder,
 )
 
-from kiwixbuild.utils import Remotefile, pj, Defaultdict, SkipCommand, run_command
+from kiwixbuild.utils import Remotefile, pj, SkipCommand, run_command
 from kiwixbuild._global import get_target_step
 
 class LibMagic(Dependency):
@@ -21,12 +21,11 @@ class LibMagic(Dependency):
 
     class Builder(MakeBuilder):
         @property
-        def configure_option(self):
-            return ("--disable-bzlib "
-                    "--disable-xzlib "
-                    "--disable-zstdlib "
-                    "--disable-lzlib "
-                  )
+        def configure_options(self):
+            yield "--disable-bzlib"
+            yield "--disable-xzlib"
+            yield "--disable-zstdlib"
+            yield "--disable-lzlib"
 
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
@@ -39,10 +38,12 @@ class LibMagic(Dependency):
             if platformInfo.build == 'native':
                 return super()._compile(context)
             context.try_skip(self.build_path)
-            command = "make -j4 {make_target} {make_option}".format(
-                make_target=self.make_target,
-                make_option=self.make_option
-            )
+            command = [
+                "make",
+                "-j4",
+                *self.make_targets,
+                *self.make_options
+            ]
             env = self.buildEnv.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
             libmagic_native_builder = get_target_step('libmagic', 'native_static')
             env['PATH'] = ':'.join([pj(libmagic_native_builder.build_path, 'src'), env['PATH']])

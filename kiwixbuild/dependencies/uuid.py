@@ -17,9 +17,14 @@ class UUID(Dependency):
         extract_dir = 'e2fsprogs-libs-1.43.4'
 
     class Builder(MakeBuilder):
-        configure_option = ("--enable-libuuid --disable-debugfs --disable-imager --disable-resizer --disable-defrag --enable-fsck"
-                            " --disable-uuidd")
+        configure_options = ["--enable-libuuid",
+                             "--disable-debugfs",
+                             "--disable-imager",
+                             "--disable-resizer",
+                             "--disable-defrag",
+                             "--enable-fsck",
+                             "--disable-uuidd"]
         configure_env = {'_format_CFLAGS': "{env.CFLAGS} -O3 -fPIC"}
-        static_configure_option = dynamic_configure_option = ""
-        make_target = 'libs'
-        make_install_target = 'install-libs'
+        static_configure_options = dynamic_configure_options = []
+        make_targets = ['libs']
+        make_install_targets = ['install-libs']

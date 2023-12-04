@@ -63,8 +63,8 @@ class Win64PlatformInfo(PlatformInfo):
             return "exe_wrapper = 'wine'"
 
     @property
-    def configure_option(self):
-        return '--host={}'.format(self.arch_full)
+    def configure_options(self):
+        return [f'--host={self.arch_full}']
 
     def set_compiler(self, env):
         for k, v in self.binaries.items():

@@ -4,7 +4,7 @@ import subprocess
 import platform
 import distro
 
-from .utils import pj, download_remote, Defaultdict
+from .utils import pj, download_remote, escape_path
 from ._global import neutralEnv, option
 
 
@@ -21,16 +21,19 @@ class PlatformNeutralEnv:
                   self.log_dir):
             os.makedirs(d, exist_ok=True)
         self.detect_platform()
-        self.ninja_command = self._detect_ninja()
-        if not self.ninja_command:
-            sys.exit("ERROR: ninja command not found.")
-        self.meson_command = self._detect_meson()
-        if not self.meson_command:
-            sys.exit("ERROR: meson command not found.")
-        self.qmake_command = self._detect_qmake()
-        if not self.qmake_command:
-            print("WARNING: qmake command not found.", file=sys.stderr)
-        self.mesontest_command = "{} test".format(self.meson_command)
+        self.ninja_command = self._detect_command(
+            'ninja',
+            default=[['ninja'], ['ninja-build']])
+        self.meson_command = self._detect_command(
+            'meson',
+            default= [['meson.py'], ['meson']])
+        self.mesontest_command = [*self.meson_command, "test"]
+        self.patch_command = self._detect_command('patch')
+        self.git_command = self._detect_command('git')
+        self.make_command = self._detect_command('make')
+        self.cmake_command = self._detect_command('cmake')
+        self.qmake_command = self._detect_command('qmake', required=False)
+
 
     def detect_platform(self):
         _platform = platform.system()
@@ -50,27 +53,28 @@ class PlatformNeutralEnv:
         where = where or self.archive_dir
         download_remote(what, where)
 
-    def _detect_binary(self, *bin_variants):
-        for n in bin_variants:
+
+    def _detect_command(self, name, default=None, options=['--version'], required=True):
+        if default is None:
+            default = [[name]]
+        env_key = 'KBUILD_{}_COMMAND'.format(name.upper())
+        if env_key in os.environ:
+            default = [os.environ[env_key].split()] + default
+        for command in default:
             try:
-                retcode = subprocess.check_call([n, '--version'],
+                retcode = subprocess.check_call(command + options,
                                                 stdout=subprocess.DEVNULL)
-            except (FileNotFoundError, PermissionError):
+            except (FileNotFoundError, PermissionError, OSError):
                 # Doesn't exist in PATH or isn't executable
                 continue
             if retcode == 0:
-                return n
-
-
-    def _detect_ninja(self):
-        return self._detect_binary('ninja', 'ninja-build')
-
-    def _detect_meson(self):
-        return self._detect_binary('meson.py', 'meson')
-
-    def _detect_qmake(self):
-        return self._detect_binary('qmake-qt5', 'qmake')
-
+                return command
+        else:
+            if required:
+                sys.exit("ERROR: {} command not found".format(name))
+            else:
+                print("WARNING: {} command not found".format(name))
+                return ["{}_NOT_FOUND".format(name.upper())]
 
 class BuildEnv:
     def __init__(self, platformInfo):
@@ -125,21 +129,34 @@ class BuildEnv:
         pkgconfig_path = pj(self.install_dir, self.libprefix, 'pkgconfig')
         env['PKG_CONFIG_PATH'] = ':'.join([env['PKG_CONFIG_PATH'], pkgconfig_path])
 
-        env['PATH'] = ':'.join([pj(self.install_dir, 'bin'), env['PATH']])
+        env['PATH'] = ':'.join([
+            escape_path(pj(self.install_dir, 'bin')),
+            env['PATH']
+        ])
 
         env['LD_LIBRARY_PATH'] = ':'.join([env['LD_LIBRARY_PATH'],
                                           pj(self.install_dir, 'lib'),
                                           pj(self.install_dir, self.libprefix)
                                           ])
 
-        env['QMAKE_CXXFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['QMAKE_CXXFLAGS']])
-        env['CPPFLAGS'] = " ".join(['-I'+pj(self.install_dir, 'include'), env['CPPFLAGS']])
-        env['QMAKE_LFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'),
-                                   '-L'+pj(self.install_dir, self.libprefix),
-                                   env['QMAKE_LFLAGS']])
-        env['LDFLAGS'] = " ".join(['-L'+pj(self.install_dir, 'lib'),
-                                   '-L'+pj(self.install_dir, self.libprefix),
-                                   env['LDFLAGS']])
+        env['QMAKE_CXXFLAGS'] = " ".join([
+            escape_path('-I'+pj(self.install_dir, 'include')),
+            env['QMAKE_CXXFLAGS']
+        ])
+        env['CPPFLAGS'] = " ".join([
+            escape_path('-I'+pj(self.install_dir, 'include')),
+            env['CPPFLAGS']
+        ])
+        env['QMAKE_LFLAGS'] = " ".join([
+            escape_path('-L'+pj(self.install_dir, 'lib')),
+            escape_path('-L'+pj(self.install_dir, self.libprefix)),
+            env['QMAKE_LFLAGS']
+        ])
+        env['LDFLAGS'] = " ".join([
+            escape_path('-L'+pj(self.install_dir, 'lib')),
+            escape_path('-L'+pj(self.install_dir, self.libprefix)),
+            env['LDFLAGS']
+        ])
 
         if cross_comp_flags:
             self.platformInfo.set_comp_flags(env)
@@ -152,17 +169,14 @@ class BuildEnv:
 
     @property
     def configure_wrapper(self):
-        wrapper = getattr(self.platformInfo, "configure_wrapper", "")
-        if wrapper:
-            return "{} ".format(wrapper)
-        else:
-            return ""
+        try:
+            yield self.platformInfo.configure_wrapper
+        except AttributeError:
+            pass
 
     @property
     def make_wrapper(self):
-        wrapper = getattr(self.platformInfo, "make_wrapper", "")
-        if wrapper:
-            return "{} ".format(wrapper)
-        else:
-            return ""
-
+        try:
+            yield self.platformInfo.make_wrapper
+        except AttributeError:
+            pass

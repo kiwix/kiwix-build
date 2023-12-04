@@ -16,9 +16,9 @@ class Aria2(Dependency):
 
         def _post_prepare_script(self, context):
             context.try_skip(self.extract_path)
-            command = "autoreconf -i"
+            command = ["autoreconf", "-i"]
             run_command(command, self.extract_path, context)
 
     class Builder(MakeBuilder):
         dependencies = ['zlib']
-        configure_option = "--disable-libaria2 --disable-websocket --without-sqlite3"
+        configure_options = ["--disable-libaria2", "--disable-websocket", "--without-sqlite3"]

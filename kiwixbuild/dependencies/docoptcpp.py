@@ -17,5 +17,5 @@ class docoptcpp(Dependency):
         git_ref = "3dd23e3280f213bacefdf5fcb04857bf52e90917"
 
     class Builder(CMakeBuilder):
-        make_install_target = 'install'
+        make_install_targets = ['install']
 

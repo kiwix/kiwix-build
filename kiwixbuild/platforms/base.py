@@ -23,7 +23,7 @@ class PlatformInfo(metaclass=_MetaPlatform):
     all_platforms = {}
     all_running_platforms = {}
     toolchain_names = []
-    configure_option = ""
+    configure_options = []
     mixed = False
     libdir = None
 

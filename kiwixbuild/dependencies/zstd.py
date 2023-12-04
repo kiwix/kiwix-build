@@ -18,5 +18,5 @@ class zstd(Dependency):
     class Builder(MesonBuilder):
         subsource_dir = 'build/meson'
         build_type = 'release'
-        strip_option = ''
-        configure_option = '-Dbin_programs=false -Dbin_contrib=false'
+        strip_options = []
+        configure_options = ['-Dbin_programs=false', '-Dbin_contrib=false']

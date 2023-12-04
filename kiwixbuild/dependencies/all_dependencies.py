@@ -1,3 +1,5 @@
+from os import environ
+
 from .base import (
     Dependency,
     NoopSource,
@@ -12,7 +14,7 @@ class AllBaseDependencies(Dependency):
     class Builder(NoopBuilder):
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
-            if platformInfo.build == "wasm":
+            if platformInfo.build == "wasm" or environ.get('OS_NAME') == 'bionic':
                 return ['zlib', 'lzma', 'zstd', 'icu4c', 'xapian-core']
 
             base_deps = ['zlib', 'lzma', 'zstd', 'xapian-core', 'pugixml', 'libcurl', 'icu4c', 'mustache', 'libmicrohttpd', 'zim-testing-suite']

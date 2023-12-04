@@ -20,11 +20,11 @@ class LibCurl(Dependency):
 
     class Builder(MakeBuilder):
         dependencies = ['zlib']
-        configure_option = " ".join(
-            ["--without-{}".format(p)
-                for p in ('libssh2', 'ssl', 'libmetalink', 'librtmp',
-                          'nghttp2', 'libidn2', 'brotli')] +
-            ["--disable-{}".format(p)
-                for p in ('ftp', 'file', 'ldap', 'ldaps', 'rtsp', 'dict',
-                          'telnet', 'tftp', 'pop3', 'imap', 'smb', 'smtp',
-                          'gopher', 'manual')])
+        configure_options = [
+            *[f"--without-{p}" for p in
+                ('libssh2', 'ssl', 'libmetalink', 'librtmp', 'nghttp2', 'libidn2', 'brotli')
+             ],
+            *[f"--disable-{p}" for p in
+                ('ftp', 'file', 'ldap', 'ldaps', 'rtsp', 'dict', 'telnet',
+                 'tftp', 'pop3', 'imap', 'smb', 'smtp', 'gopher', 'manual')]
+        ]

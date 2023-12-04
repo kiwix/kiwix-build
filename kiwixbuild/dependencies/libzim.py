@@ -13,8 +13,8 @@ class Libzim(Dependency):
         git_dir = "libzim"
 
     class Builder(MesonBuilder):
-        test_option = "-t 8"
-        strip_option = ''
+        test_options = ["-t", "8"]
+        strip_options = []
 
         @property
         def build_type(self):
@@ -30,24 +30,22 @@ class Libzim(Dependency):
             return deps
 
         @property
-        def configure_option(self):
+        def configure_options(self):
             platformInfo = self.buildEnv.platformInfo
-            config_options = []
             if platformInfo.build == 'android':
-                config_options.append("-DUSE_BUFFER_HEADER=false")
-                config_options.append("-Dstatic-linkage=true")
+                yield "-DUSE_BUFFER_HEADER=false"
+                yield "-Dstatic-linkage=true"
             if platformInfo.mixed and option('target') == 'libzim':
-                config_options.append("-Dstatic-linkage=true")
+                yield "-Dstatic-linkage=true"
             if platformInfo.name == "flatpak":
-                config_options.append("--wrap-mode=nodownload")
-                config_options.append("-Dtest_data_dir=none")
+                yield "--wrap-mode=nodownload"
+                yield "-Dtest_data_dir=none"
             if platformInfo.name == "wasm":
-                config_options.append("-Dexamples=false")
-                config_options.append("-DUSE_MMAP=false")
+                yield "-Dexamples=false"
+                yield "-DUSE_MMAP=false"
             if platformInfo.name not in ("flatpak", "wasm"):
                 zim_testing_suite = get_target_step('zim-testing-suite', 'source')
-                config_options.append('-Dtest_data_dir={}'.format(zim_testing_suite.source_path))
-            return " ".join(config_options)
+                yield '-Dtest_data_dir={}'.format(zim_testing_suite.source_path)
 
         @property
         def library_type(self):

@@ -8,6 +8,7 @@ import urllib.request
 import urllib.error
 import ssl
 import subprocess
+import re
 from collections import namedtuple, defaultdict
 
 from kiwixbuild._global import neutralEnv, option
@@ -39,13 +40,25 @@ def xrun_find(name):
     return output[:-1].decode()
 
 
+regex_space = re.compile(r'((?<!\\) )')
+def escape_path(path):
+    path = str(path)
+    return regex_space.sub(r'\ ', path)
+
+
 class Defaultdict(defaultdict):
     def __getattr__(self, name):
         return self[name]
 
 
-def DefaultEnv():
-    return Defaultdict(str, os.environ)
+class DefaultEnv(Defaultdict):
+    def __init__(self):
+        super().__init__(str, os.environ)
+
+    def __getitem__(self, name):
+        if name == b'PATH':
+            raise KeyError
+        return super().__getitem__(name)
 
 
 def remove_duplicates(iterable, key_function=None):
@@ -265,7 +278,7 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
 def run_command(command, cwd, context, *, env=None, input=None):
     os.makedirs(cwd, exist_ok=True)
     if env is None:
-        env = Defaultdict(str, os.environ)
+        env = DefaultEnv()
     log = None
     try:
         if not option('verbose'):
@@ -281,7 +294,7 @@ def run_command(command, cwd, context, *, env=None, input=None):
         kwargs = dict()
         if input:
             kwargs['stdin'] = subprocess.PIPE
-        process = subprocess.Popen(command, shell=True, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
+        process = subprocess.Popen(command, cwd=cwd, env=env, stdout=log or sys.stdout, stderr=subprocess.STDOUT, **kwargs)
         if input:
             input = input.encode()
         while True:

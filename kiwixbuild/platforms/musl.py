@@ -62,8 +62,8 @@ class MuslPlatformInfo(PlatformInfo):
             return f"exe_wrapper = '{self.qemu}'"
 
     @property
-    def configure_option(self):
-        return '--host={}'.format(self.arch_full)
+    def configure_options(self):
+        return [f'--host={self.arch_full}']
 
     def get_bin_dir(self):
         return [pj(self.root_path, 'bin')]
