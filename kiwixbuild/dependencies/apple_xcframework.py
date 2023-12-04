@@ -70,6 +70,7 @@ class AppleXCFramework(Dependency):
                 static_ars = [str(f) for f in Path(lib_dir).glob("*.a")]
 
                 # create merged.a from all *.a in install_dir/lib
+                command = ["libtool", "-static", "-o", "merged.a", *static_ars]
                 run_command(command, lib_dir, context)
 
                 # will be included in xcframework
@@ -89,13 +90,7 @@ class AppleXCFramework(Dependency):
             os.makedirs(fat_dir, exist_ok=True)
 
             output_merged = pj(fat_dir, "merged.a")
-            command = [
-                "lipo",
-                "-create",
-                "-output",
-                output_merged,
-                *libs
-            ]
+            command = ["lipo", "-create", "-output", output_merged, *libs]
             run_command(command, self.buildEnv.build_dir, context)
 
             return [output_merged]
@@ -106,8 +101,10 @@ class AppleXCFramework(Dependency):
             command = ["xcodebuild", "-create-xcframework"]
             for lib in xcf_libs:
                 command += [
-                    "-library", lib,
-                    "-headers", pj(ref_plat.buildEnv.install_dir, "include")
+                    "-library",
+                    lib,
+                    "-headers",
+                    pj(ref_plat.buildEnv.install_dir, "include"),
                 ]
             command += ["-output", self.final_path]
             run_command(command, self.buildEnv.build_dir, context)
