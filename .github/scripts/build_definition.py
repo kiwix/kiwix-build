@@ -26,7 +26,8 @@ BUILD_DEF = """
     | macos   | native_static      |        |          | BP        | BP          |               | macos-x86_64         |
     | macos   | native_mixed       | BP     | BP       |           |             |               | macos-x86_64         |
     | macos   | iOS_arm64          | dB     | dB       |           |             |               |                      |
-    | macos   | iOS_x86_64         | dB     | dB       |           |             |               |                      |
+    | macos   | iOSSimulator_x86_64| dB     | dB       |           |             |               |                      |
+    | macos   | iOSSimulator_arm64 | dB     | dB       |           |             |               |                      |
     | macos   | macOS_arm64_static |        |          | BP        | BP          |               | macos-arm64          |
     | macos   | macOS_arm64_mixed  | BP     | BP       |           |             |               | macos-arm64          |
     | macos   | macOS_x86_64       | B      | B        |           |             |               |                      |
