@@ -555,6 +555,7 @@ class MesonBuilder(Builder):
             *neutralEnv("meson_command"), "setup",
             ".",
             self.build_path,
+            "--pkgconfig.relocatable",
             f"--buildtype={self.build_type}",
             *self.strip_options,
             f"--default-library={self.library_type}",
