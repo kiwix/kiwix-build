@@ -2,7 +2,7 @@ from .base import (
     Dependency,
     GitClone,
     MesonBuilder)
-from kiwixbuild._global import option, get_target_step
+from kiwixbuild._global import option, get_target_step, neutralEnv
 
 class Libzim(Dependency):
     name = "libzim"
@@ -24,6 +24,8 @@ class Libzim(Dependency):
 
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
+            if neutralEnv('distname') == 'Windows':
+                return ['lzma', 'zstd', 'icu4c']
             deps = ['lzma', 'zstd', 'xapian-core', 'icu4c']
             if platformInfo.name not in ('flatpak', 'wasm'):
                 deps.append('zim-testing-suite')
