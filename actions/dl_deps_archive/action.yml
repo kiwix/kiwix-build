@@ -1,0 +1,25 @@
+name: 'DL deps archive'
+description: 'Download the dependencies archive of the project'
+inputs:
+  base_url:  # id of input
+    description: 'What is the base url to download the archive'
+    required: false
+    default: 'https://tmp.kiwix.org/ci'
+  os_name:
+    description: "On which os are we running. [Default to env var `OS_NAME`]"
+    required: false
+  target_platform:
+    description: "What platform are we targetting"
+    required: true
+  project:
+    description: "What project are we building"
+    required: false
+  branch:
+    description: "On which branch are we ?"
+    required: false
+  extract_dir:
+    description: "Where to extract our dependencies. [Default to env var `HOME`]"
+    required: false
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
