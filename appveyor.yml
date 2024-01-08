@@ -3,7 +3,7 @@ version: '0.1.{build}'
 environment:
   EXTRA_DIR: 'C:\extra'
   MINGW64_EXTRA_DIR: '/c/extra'
-  PATH: 'C:\\Python36\\Scripts;%PATH%;%EXTRA_DIR%\bin;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\%platform%'
+  PATH: 'C:\\Python312\\Scripts;%PATH%;%EXTRA_DIR%\bin;C:\\Program Files (x86)\\Windows Kits\\10\\bin\\%platform%'
   PKG_CONFIG_PATH: '%EXTRA_DIR%\lib\pkgconfig'
   MSYS2_PATH_TYPE: 'inherit'
   MSYS2_ARG_CONV_EXCL: '-Tp'
@@ -24,7 +24,7 @@ install:
   - cmd: |
      cd C:\projects
      REM Install meson
-     C:\Python36\Scripts\pip install meson
+     C:\Python312\Scripts\pip install meson
 
      REM Install ninja
      curl -o ninja-win.zip -L https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-win.zip

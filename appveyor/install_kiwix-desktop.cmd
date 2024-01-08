@@ -16,7 +16,7 @@ IF %_WITH_CONSOLE% EQU 1 (
 )
 
 echo "Running fix_desktop"
-C:\Python36\Python ..\appveyor\fix_desktop_makefile.py Makefile.Release || exit /b 1
+C:\Python312\Python ..\appveyor\fix_desktop_makefile.py Makefile.Release || exit /b 1
 echo "Running nmake"
 nmake || exit /b 1
 cd ..
