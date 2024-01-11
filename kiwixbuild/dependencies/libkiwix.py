@@ -14,6 +14,7 @@ class Libkiwix(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/libkiwix.git"
         git_dir = "libkiwix"
+        git_ref = "error_response_i18n"
 
     class Builder(MesonBuilder):
         dependencies = ["pugixml", "libzim", "zlib", "lzma", "libcurl", "libmicrohttpd", "icu4c", "mustache", "xapian-core"]
