@@ -153,10 +153,18 @@ jobs:
           - macOS_arm64_mixed
           - macOS_x86_64
           - apple_all_static
-    runs-on: macos-13
+        os:
+          - macos-13
+          - macos-14
+        include:
+          - os: macos-13
+            os_name: macos-x86_46
+          - os: macos-14
+            os_name: macos-arm64
+    runs-on: ${{matrix.os}}
     env:
       SSH_KEY: /tmp/id_rsa
-      OS_NAME: macos
+      OS_NAME: ${{matrix.os_name}}
     steps:
     - name: Set Xcode version (15.0.1)
       # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode

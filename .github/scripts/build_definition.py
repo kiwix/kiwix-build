@@ -22,16 +22,18 @@ BUILD_DEF = """
     | bionic  | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64-bionic |
     --------------------------------------------------------------------------------------------------------------------
 # Osx builds, build binaries on native_dyn and native_static. On anyother things, build only the libraries
-    | macos   | native_dyn         | d      | d        | dB        | B           |               |                      |
-    | macos   | native_static      |        |          | BP        | BP          |               | macos-x86_64         |
-    | macos   | native_mixed       | BP     | BP       |           |             |               | macos-x86_64         |
-    | macos   | iOS_arm64          | dB     | dB       |           |             |               |                      |
-    | macos   | iOSSimulator_x86_64| dB     | dB       |           |             |               |                      |
-    | macos   | iOSSimulator_arm64 | dB     | dB       |           |             |               |                      |
-    | macos   | macOS_arm64_static |        |          | BP        | BP          |               | macos-arm64          |
-    | macos   | macOS_arm64_mixed  | BP     | BP       |           |             |               | macos-arm64          |
-    | macos   | macOS_x86_64       | B      | B        |           |             |               |                      |
-    | macos   | apple_all_static   |        | BP       |           |             |               | xcframework          |
+    | macos.* | native_dyn         | d      | d        | dB        | B           |               |                      |
+    | macos-13| native_static      |        |          | BP        | BP          |               | macos-x86_64         |
+    | macos-14| native_static      |        |          | BP        | BP          |               | macos-arm64          |
+    | macos-13| native_mixed       | BP     | BP       |           |             |               | macos-x86_64         |
+    | macos-14| native_mixed       | BP     | BP       |           |             |               | macos-arm64          |
+    | macos.* | iOS_arm64          | dB     | dB       |           |             |               |                      |
+    | macos.* | iOSSimulator_x86_64| dB     | dB       |           |             |               |                      |
+    | macos.* | iOSSimulator_arm64 | dB     | dB       |           |             |               |                      |
+    | macos.* | macOS_arm64_static |        |          | B         | B           |               |                      |
+    | macos.* | macOS_arm64_mixed  | B      | B        |           |             |               |                      |
+    | macos.* | macOS_x86_64       | B      | B        |           |             |               |                      |
+    | macos-13| apple_all_static   |        | BP       |           |             |               | xcframework          |
     ----------------------------------------------------------------------------------------------
     |         | flatpak            |        |          |           |             | BP            |                      |
     |         | native_static      | d      | d        | dBPSD     | dBPSD       |               | linux-x86_64         |
@@ -109,6 +111,7 @@ SOURCE_PUBLISH = "S"
 DEPS = "d"
 DOCKER = "D"
 
+
 def select_build_targets(criteria):
     from common import PLATFORM_TARGET, OS_NAME
 
@@ -132,6 +135,7 @@ def select_build_targets(criteria):
             return build_order
 
     raise ValueError("No definition match with current context.")
+
 
 def get_platform_name():
     from common import PLATFORM_TARGET, OS_NAME
