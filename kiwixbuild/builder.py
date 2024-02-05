@@ -12,7 +12,6 @@ from ._global import (
     add_target_step,
     get_target_step,
     target_steps,
-    backend,
 )
 from . import _global
 

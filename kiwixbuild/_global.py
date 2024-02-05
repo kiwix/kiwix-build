@@ -38,23 +38,3 @@ def get_target_step(key, default_context=None):
 
 def target_steps():
     return _target_steps
-
-
-def backend():
-    global _backend
-    if _backend is not None:
-        return _backend
-
-    _platform = platform.system()
-    if _platform == "Windows":
-        print(
-            "ERROR: kiwix-build is not intented to run on Windows platform.\n"
-            "There is no backend for Windows, so we can't launch any commands."
-        )
-        sys.exit(0)
-    if _platform == "Linux":
-        _platform, _, _ = platform.linux_distribution()
-        _platform = _platform.lower()
-        _backend = backends.Linux()
-
-    return _backend
