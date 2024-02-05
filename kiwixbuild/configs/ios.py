@@ -2,14 +2,14 @@ import subprocess
 
 from kiwixbuild._global import option
 from kiwixbuild.utils import pj, xrun_find
-from .base import PlatformInfo, MetaPlatformInfo, MixedMixin
+from .base import ConfigInfo, MetaConfigInfo, MixedMixin
 from kiwixbuild.dependencies.apple_xcframework import AppleXCFramework
 
 
 MIN_MACOS_VERSION = "12.0"
 
 
-class ApplePlatformInfo(PlatformInfo):
+class AppleConfigInfo(ConfigInfo):
     build = "iOS"
     static = True
     compatible_hosts = ["Darwin"]
@@ -148,7 +148,7 @@ class ApplePlatformInfo(PlatformInfo):
         yield f"--host={self.host}"
 
 
-class iOSArm64(ApplePlatformInfo):
+class iOSArm64(AppleConfigInfo):
     name = "iOS_arm64"
     arch = cpu = "arm64"
     host = "arm-apple-darwin"
@@ -157,7 +157,7 @@ class iOSArm64(ApplePlatformInfo):
     min_iphoneos_version = "15.0"
 
 
-class iOSx64Simulator(ApplePlatformInfo):
+class iOSx64Simulator(AppleConfigInfo):
     name = "iOSSimulator_x86_64"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
@@ -166,7 +166,7 @@ class iOSx64Simulator(ApplePlatformInfo):
     min_iphoneos_version = "15.0"
 
 
-class iOSArm64Simulator(ApplePlatformInfo):
+class iOSArm64Simulator(AppleConfigInfo):
     name = "iOSSimulator_arm64"
     arch = cpu = "arm64"
     host = "arm-apple-darwin"
@@ -175,7 +175,7 @@ class iOSArm64Simulator(ApplePlatformInfo):
     min_iphoneos_version = "15.0"
 
 
-class macOSArm64(ApplePlatformInfo):
+class macOSArm64(AppleConfigInfo):
     name = "macOS_arm64_static"
     arch = cpu = "arm64"
     host = "aarch64-apple-darwin"
@@ -185,7 +185,7 @@ class macOSArm64(ApplePlatformInfo):
     min_macos_version = MIN_MACOS_VERSION
 
 
-class macOSArm64Mixed(MixedMixin("macOS_arm64_static"), ApplePlatformInfo):
+class macOSArm64Mixed(MixedMixin("macOS_arm64_static"), AppleConfigInfo):
     name = "macOS_arm64_mixed"
     arch = cpu = "arm64"
     host = "aarch64-apple-darwin"
@@ -195,7 +195,7 @@ class macOSArm64Mixed(MixedMixin("macOS_arm64_static"), ApplePlatformInfo):
     min_macos_version = MIN_MACOS_VERSION
 
 
-class macOSx64(ApplePlatformInfo):
+class macOSx64(AppleConfigInfo):
     name = "macOS_x86_64"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
@@ -205,33 +205,33 @@ class macOSx64(ApplePlatformInfo):
     min_macos_version = MIN_MACOS_VERSION
 
 
-class IOS(MetaPlatformInfo):
+class IOS(MetaConfigInfo):
     name = "iOS_multi"
     compatible_hosts = ["Darwin"]
 
     @property
-    def subPlatformNames(self):
+    def subConfigNames(self):
         return ["iOS_{}".format(arch) for arch in option("ios_arch")]
 
     def add_targets(self, targetName, targets):
         super().add_targets(targetName, targets)
-        return PlatformInfo.add_targets(self, "_ios_fat_lib", targets)
+        return ConfigInfo.add_targets(self, "_ios_fat_lib", targets)
 
     def __str__(self):
         return self.name
 
 
-class AppleStaticAll(MetaPlatformInfo):
+class AppleStaticAll(MetaConfigInfo):
     name = "apple_all_static"
     compatible_hosts = ["Darwin"]
 
     @property
-    def subPlatformNames(self):
-        return AppleXCFramework.subPlatformNames
+    def subConfigNames(self):
+        return AppleXCFramework.subConfigNames
 
     def add_targets(self, targetName, targets):
         super().add_targets(targetName, targets)
-        return PlatformInfo.add_targets(self, "apple_xcframework", targets)
+        return ConfigInfo.add_targets(self, "apple_xcframework", targets)
 
     def __str__(self):
         return self.name

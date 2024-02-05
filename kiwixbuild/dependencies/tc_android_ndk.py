@@ -34,18 +34,18 @@ class android_ndk(Dependency):
             return self.target.api
 
         @property
-        def platform(self):
+        def config(self):
             return "android-" + self.api
 
         @property
         def arch(self):
-            return self.buildEnv.platformInfo.arch
+            return self.buildEnv.configInfo.arch
 
         @property
         def arch_full(self):
-            return self.buildEnv.platformInfo.arch_full
+            return self.buildEnv.configInfo.arch_full
 
-        def _build_platform(self, context):
+        def _build_toolchain(self, context):
             context.try_skip(self.build_path)
             script = pj(self.source_path, "build/tools/make_standalone_toolchain.py")
             add_execution_right(script)
@@ -85,5 +85,5 @@ class android_ndk(Dependency):
                     add_execution_right(file_path)
 
         def build(self):
-            self.command("build_platform", self._build_platform)
+            self.command("build_toolchain", self._build_toolchain)
             self.command("fix_permission_right", self._fix_permission_right)

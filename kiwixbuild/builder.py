@@ -2,7 +2,7 @@ import sys
 from collections import OrderedDict
 from .buildenv import *
 
-from .platforms import PlatformInfo
+from .configs import ConfigInfo
 from .utils import remove_duplicates, StopBuild, colorize
 from .dependencies import Dependency
 from .packages import PACKAGE_NAME_MAPPERS
@@ -19,19 +19,18 @@ from . import _global
 class Builder:
     def __init__(self):
         self._targets = {}
-        PlatformInfo.get_platform("neutral", self._targets)
+        ConfigInfo.get_config("neutral", self._targets)
 
-        target_platform = option("target_platform")
-        platform = PlatformInfo.get_platform(target_platform, self._targets)
-        if neutralEnv("distname") not in platform.compatible_hosts:
+        config_name = option("config")
+        config = ConfigInfo.get_config(config_name, self._targets)
+        if neutralEnv("distname") not in config.compatible_hosts:
             print(
                 (
-                    colorize("ERROR")
-                    + ": The target platform {} cannot be build on host {}.\n"
-                    "Select another target platform or change your host system."
-                ).format(platform.name, neutralEnv("distname"))
+                    colorize("ERROR") + ": The config {} cannot be build on host {}.\n"
+                    "Select another config or change your host system."
+                ).format(config.name, neutralEnv("distname"))
             )
-        self.targetDefs = platform.add_targets(option("target"), self._targets)
+        self.targetDefs = config.add_targets(option("target"), self._targets)
 
     def finalize_target_steps(self):
         steps = []
@@ -40,7 +39,7 @@ class Builder:
         steps = list(remove_duplicates(steps))
 
         if option("build_nodeps"):
-            # add all platform steps
+            # add all config steps
             for dep in steps:
                 stepClass = Dependency.all_deps[dep[1]]
                 if stepClass.dont_skip:
@@ -57,18 +56,18 @@ class Builder:
         self.instanciate_steps()
 
     def order_steps(self, targetDef):
-        for pltName in PlatformInfo.all_running_platforms:
-            plt = PlatformInfo.all_platforms[pltName]
-            for tlcName in plt.toolchain_names:
+        for cfgName in ConfigInfo.all_running_configs:
+            cfg = ConfigInfo.all_configs[cfgName]
+            for tlcName in cfg.toolchain_names:
                 tlc = Dependency.all_deps[tlcName]
                 yield ("source", tlcName)
-                yield ("neutral" if tlc.neutral else pltName, tlcName)
+                yield ("neutral" if tlc.neutral else cfgName, tlcName)
         _targets = dict(self._targets)
         yield from self.order_dependencies(targetDef, _targets)
 
     def order_dependencies(self, targetDef, targets):
-        targetPlatformName, targetName = targetDef
-        if targetPlatformName == "source":
+        targetConfigName, targetName = targetDef
+        if targetConfigName == "source":
             # Do not try to order sources, they will be added as dep by the
             # build step two lines later.
             return
@@ -77,24 +76,24 @@ class Builder:
         except KeyError:
             return
 
-        targetPlatform = PlatformInfo.get_platform(targetPlatformName)
-        for dep in target.get_dependencies(targetPlatform, True):
-            depPlatform, depName = targetPlatform.get_fully_qualified_dep(dep)
-            if (depPlatform, depName) in targets:
-                yield from self.order_dependencies((depPlatform, depName), targets)
+        targetConfig = ConfigInfo.get_config(targetConfigName)
+        for dep in target.get_dependencies(targetConfig, True):
+            depConfig, depName = targetConfig.get_fully_qualified_dep(dep)
+            if (depConfig, depName) in targets:
+                yield from self.order_dependencies((depConfig, depName), targets)
         yield ("source", targetName)
         yield targetDef
 
     def instanciate_steps(self):
         for stepDef in list(target_steps()):
-            stepPlatform, stepName = stepDef
+            stepConfig, stepName = stepDef
             stepClass = Dependency.all_deps[stepName]
-            if stepPlatform == "source":
+            if stepConfig == "source":
                 source = get_target_step(stepDef)(stepClass)
                 add_target_step(stepDef, source)
             else:
                 source = get_target_step(stepName, "source")
-                env = PlatformInfo.get_platform(stepPlatform).buildEnv
+                env = ConfigInfo.get_config(stepConfig).buildEnv
                 builder = get_target_step(stepDef)(stepClass, source, env)
                 add_target_step(stepDef, builder)
 
@@ -125,18 +124,18 @@ class Builder:
 
     def _get_packages(self):
         packages_list = []
-        for platform in PlatformInfo.all_running_platforms.values():
-            mapper_name = "{host}_{target}".format(
-                host=neutralEnv("distname"), target=platform
+        for config in ConfigInfo.all_running_configs.values():
+            mapper_name = "{host}_{config}".format(
+                host=neutralEnv("distname"), config=config
             )
             package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
             packages_list += package_name_mapper.get("COMMON", [])
 
         to_drop = []
         for builderDef in self._targets:
-            platformName, builderName = builderDef
-            mapper_name = "{host}_{target}".format(
-                host=neutralEnv("distname"), target=platformName
+            configName, builderName = builderDef
+            mapper_name = "{host}_{config}".format(
+                host=neutralEnv("distname"), config=configName
             )
             package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
             packages = package_name_mapper.get(builderName)
@@ -195,9 +194,9 @@ class Builder:
             else:
                 self.install_packages()
             self.finalize_target_steps()
-            print("[SETUP PLATFORMS]")
-            for platform in PlatformInfo.all_running_platforms.values():
-                platform.finalize_setup()
+            print("[SETUP TOOLCHAINS]")
+            for config in ConfigInfo.all_running_configs.values():
+                config.finalize_setup()
             print("[PREPARE]")
             self.prepare_sources()
             print("[BUILD]")
@@ -205,8 +204,8 @@ class Builder:
             # No error, clean intermediate file at end of build if needed.
             print("[CLEAN]")
             if option("clean_at_end"):
-                for platform in PlatformInfo.all_running_platforms.values():
-                    platform.clean_intermediate_directories()
+                for config in ConfigInfo.all_running_configs.values():
+                    config.clean_intermediate_directories()
             else:
                 print(colorize("SKIP"))
         except StopBuild as e:

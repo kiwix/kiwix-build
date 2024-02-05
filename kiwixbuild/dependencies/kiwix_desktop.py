@@ -18,11 +18,11 @@ class KiwixDesktop(Dependency):
 
         @property
         def configure_options(self):
-            if self.buildEnv.platformInfo.name == "flatpak":
+            if self.buildEnv.configInfo.name == "flatpak":
                 yield "QMAKE_INCDIR+=/app/include/QtWebEngine"
                 yield "QMAKE_INCDIR+=/app/include/QtWebEngineCore"
                 yield "QMAKE_INCDIR+=/app/include/QtWebEngineWidgets"
             else:
                 yield f"PREFIX={self.buildEnv.install_dir}"
-            if self.buildEnv.platformInfo.static:
+            if self.buildEnv.configInfo.static:
                 yield "CONFIG+=static"

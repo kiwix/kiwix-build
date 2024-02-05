@@ -1,10 +1,10 @@
 import os
 
-from .base import PlatformInfo
+from .base import ConfigInfo
 from kiwixbuild.utils import which, pj
 
 
-class I586PlatformInfo(PlatformInfo):
+class I586ConfigInfo(ConfigInfo):
     build = "i586"
     arch_full = "i586-linux-gnu"
     compatible_hosts = ["fedora", "debian"]
@@ -69,11 +69,11 @@ class I586PlatformInfo(PlatformInfo):
         self.buildEnv.meson_crossfile = self._gen_crossfile("meson_cross_file.txt")
 
 
-class I586Dyn(I586PlatformInfo):
+class I586Dyn(I586ConfigInfo):
     name = "i586_dyn"
     static = False
 
 
-class I586Static(I586PlatformInfo):
+class I586Static(I586ConfigInfo):
     name = "i586_static"
     static = True

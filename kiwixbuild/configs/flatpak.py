@@ -1,8 +1,8 @@
-from .base import PlatformInfo
+from .base import ConfigInfo
 from kiwixbuild._global import option, neutralEnv
 
 
-class FlatpakPlatformInfo(PlatformInfo):
+class FlatpakConfigInfo(ConfigInfo):
     name = "flatpak"
     build = "flatpak"
     static = ""

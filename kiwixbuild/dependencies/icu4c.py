@@ -58,8 +58,8 @@ class Icu(Dependency):
         make_install_targets = ["install"]
 
         @classmethod
-        def get_dependencies(cls, platformInfo, allDeps):
-            plt = "native_static" if platformInfo.static else "native_dyn"
+        def get_dependencies(cls, configInfo, allDeps):
+            plt = "native_static" if configInfo.static else "native_dyn"
             return [(plt, "icu4c")]
 
         @property
@@ -71,14 +71,14 @@ class Icu(Dependency):
             yield "--enable-rpath"
             yield "--disable-icuio"
             yield "--disable-layoutex"
-            platformInfo = self.buildEnv.platformInfo
-            if platformInfo.build != "native":
+            configInfo = self.buildEnv.configInfo
+            if configInfo.build != "native":
                 icu_native_builder = get_target_step(
-                    "icu4c", "native_static" if platformInfo.static else "native_dyn"
+                    "icu4c", "native_static" if configInfo.static else "native_dyn"
                 )
                 yield f"--with-cross-build={icu_native_builder.build_path}"
                 yield "--disable-tools"
-            if platformInfo.build in ("android", "wasm"):
+            if configInfo.build in ("android", "wasm"):
                 yield "--with-data-packaging=archive"
 
         def set_env(self, env):
@@ -87,7 +87,7 @@ class Icu(Dependency):
             )
 
         def _post_configure_script(self, context):
-            if self.buildEnv.platformInfo.build != "wasm":
+            if self.buildEnv.configInfo.build != "wasm":
                 context.skip()
             context.try_skip(self.build_path)
             for line in fileinput.input(pj(self.build_path, "Makefile"), inplace=True):

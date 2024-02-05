@@ -4,7 +4,7 @@ import os, sys
 import argparse
 
 from .dependencies import Dependency
-from .platforms import PlatformInfo
+from .configs import ConfigInfo
 from .builder import Builder
 from .flatpak_builder import FlatpakBuilder
 from . import _global
@@ -37,7 +37,9 @@ def parse_args():
         ),
     )
     parser.add_argument("--libprefix", default=None)
-    parser.add_argument("--target-platform", choices=PlatformInfo.all_platforms)
+    parser.add_argument(
+        "--config", choices=ConfigInfo.all_configs, default="native_dyn"
+    )
     parser.add_argument(
         "--verbose",
         "-v",
@@ -130,9 +132,6 @@ def parse_args():
     if not options.ios_arch:
         options.ios_arch = ["arm64", "x86_64"]
 
-    if not options.target_platform:
-        options.target_platform = "native_dyn"
-
     return options
 
 
@@ -140,9 +139,9 @@ def main():
     options = parse_args()
     options.working_dir = os.path.abspath(options.working_dir)
     _global.set_options(options)
-    neutralEnv = buildenv.PlatformNeutralEnv()
+    neutralEnv = buildenv.NeutralEnv()
     _global.set_neutralEnv(neutralEnv)
-    if options.target_platform == "flatpak":
+    if options.config == "flatpak":
         builder = FlatpakBuilder()
     else:
         builder = Builder()

@@ -26,10 +26,10 @@ class Xapian(Dependency):
         }
 
         @classmethod
-        def get_dependencies(cls, platformInfo, allDeps):
+        def get_dependencies(cls, configInfo, allDeps):
             deps = ["zlib", "lzma"]
             if (
-                platformInfo.build in ("win32", "wasm")
+                configInfo.build in ("win32", "wasm")
                 or neutralEnv("distname") == "Darwin"
             ):
                 return deps

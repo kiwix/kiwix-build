@@ -14,5 +14,5 @@ class KiwixTools(Dependency):
 
         @property
         def configure_options(self):
-            if self.buildEnv.platformInfo.static:
+            if self.buildEnv.configInfo.static:
                 yield "-Dstatic-linkage=true"

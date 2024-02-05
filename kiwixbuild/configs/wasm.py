@@ -1,10 +1,10 @@
-from .base import PlatformInfo
+from .base import ConfigInfo
 
 from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
 
 
-class WasmPlatformInfo(PlatformInfo):
+class WasmConfigInfo(ConfigInfo):
     name = "wasm"
     static = True
     build = "wasm"

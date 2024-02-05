@@ -25,12 +25,12 @@ class Qt(Dependency):
         @property
         def all_configure_options(self):
             yield from self.configure_options
-            if self.buildEnv.platformInfo.static:
+            if self.buildEnv.configInfo.static:
                 yield from self.static_configure_options
             else:
                 yield from self.dynamic_configure_options
             if not self.target.force_native_build:
-                yield from self.buildEnv.platformInfo.configure_options
+                yield from self.buildEnv.configInfo.configure_options
             yield from ("-prefix", self.buildEnv.install_dir)
             yield from (
                 "-libdir",

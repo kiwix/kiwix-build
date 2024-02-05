@@ -2,7 +2,7 @@ import sys
 from collections import OrderedDict
 from .buildenv import *
 
-from .platforms import PlatformInfo
+from .configs import ConfigInfo
 from .utils import remove_duplicates, run_command, StopBuild, Context
 from .dependencies import Dependency
 from .packages import PACKAGE_NAME_MAPPERS
@@ -77,16 +77,16 @@ GET_REF_URL_API_TEMPLATE = "https://api.github.com/repos{repo}/git/refs/tags/{re
 class FlatpakBuilder:
     def __init__(self):
         self._targets = {}
-        PlatformInfo.get_platform("neutral", self._targets)
-        self.platform = PlatformInfo.get_platform("flatpak", self._targets)
-        if neutralEnv("distname") not in self.platform.compatible_hosts:
+        ConfigInfo.get_config("neutral", self._targets)
+        self.config = ConfigInfo.get_config("flatpak", self._targets)
+        if neutralEnv("distname") not in self.config.compatible_hosts:
             print(
                 (
-                    "ERROR: The target platform {} cannot be build on host {}.\n"
-                    "Select another target platform or change your host system."
-                ).format(self.platform.name, neutralEnv("distname"))
+                    "ERROR: The config {} cannot be build on host {}.\n"
+                    "Select another config or change your host system."
+                ).format(self.config.name, neutralEnv("distname"))
             )
-        self.targetDefs = self.platform.add_targets(option("target"), self._targets)
+        self.targetDefs = self.config.add_targets(option("target"), self._targets)
 
     def finalize_target_steps(self):
         steps = []
@@ -94,14 +94,14 @@ class FlatpakBuilder:
             steps += self.order_steps(targetDef)
         steps = list(remove_duplicates(steps))
 
-        for pltName in PlatformInfo.all_running_platforms:
-            plt = PlatformInfo.all_platforms[pltName]
-            for tlcName in plt.toolchain_names:
+        for cfgName in ConfigInfo.all_running_configs:
+            cfg = ConfigInfo.all_configs[cfgName]
+            for tlcName in cfg.toolchain_names:
                 tlc = Dependency.all_deps[tlcName]
-                src_plt_step = ("source", tlcName)
-                add_target_step(src_plt_step, self._targets[src_plt_step])
-                blt_plt_step = ("neutral" if tlc.neutral else pltName, tlcName)
-                add_target_step(blt_plt_step, self._targets[blt_plt_step])
+                src_cfg_step = ("source", tlcName)
+                add_target_step(src_cfg_step, self._targets[src_cfg_step])
+                blt_cfg_step = ("neutral" if tlc.neutral else cfgName, tlcName)
+                add_target_step(blt_cfg_step, self._targets[blt_cfg_step])
 
         for dep in steps:
             add_target_step(dep, self._targets[dep])
@@ -112,8 +112,8 @@ class FlatpakBuilder:
         yield from self.order_dependencies(targetDef, _targets)
 
     def order_dependencies(self, targetDef, targets):
-        targetPlatformName, targetName = targetDef
-        if targetPlatformName == "source":
+        targetConfigName, targetName = targetDef
+        if targetConfigName == "source":
             # Do not try to order sources, they will be added as dep by the
             # build step two lines later.
             return
@@ -122,27 +122,27 @@ class FlatpakBuilder:
         except KeyError:
             return
 
-        targetPlatform = PlatformInfo.get_platform(targetPlatformName)
-        for dep in target.get_dependencies(targetPlatform, True):
+        targetConfig = ConfigInfo.get_config(targetConfigName)
+        for dep in target.get_dependencies(targetConfig, True):
             if isinstance(dep, tuple):
-                depPlatform, depName = dep
+                depConfig, depName = dep
             else:
-                depPlatform, depName = targetPlatformName, dep
-            if (depPlatform, depName) in targets:
-                yield from self.order_dependencies((depPlatform, depName), targets)
+                depConfig, depName = targetConfigName, dep
+            if (depConfig, depName) in targets:
+                yield from self.order_dependencies((depConfig, depName), targets)
         yield ("source", targetName)
         yield targetDef
 
     def instanciate_steps(self):
         for stepDef in list(target_steps()):
-            stepPlatform, stepName = stepDef
+            stepConfig, stepName = stepDef
             stepClass = Dependency.all_deps[stepName]
-            if stepPlatform == "source":
+            if stepConfig == "source":
                 source = get_target_step(stepDef)(stepClass)
                 add_target_step(stepDef, source)
             else:
                 source = get_target_step(stepName, "source")
-                env = PlatformInfo.get_platform(stepPlatform).buildEnv
+                env = ConfigInfo.get_config(stepConfig).buildEnv
                 builder = get_target_step(stepDef)(stepClass, source, env)
                 add_target_step(stepDef, builder)
 
@@ -206,7 +206,7 @@ class FlatpakBuilder:
             m["sources"] = temp
         manifest["modules"] = modules
         manifest_name = "{}.json".format(MANIFEST["app-id"])
-        manifest_path = pj(self.platform.buildEnv.build_dir, manifest_name)
+        manifest_path = pj(self.config.buildEnv.build_dir, manifest_name)
         with open(manifest_path, "w") as f:
             f.write(json.dumps(manifest, indent=4))
 
@@ -219,13 +219,13 @@ class FlatpakBuilder:
             for p in source.patches:
                 path = pj(SCRIPT_DIR, "patches", p)
                 os.makedirs(
-                    pj(self.platform.buildEnv.build_dir, "patches"), exist_ok=True
+                    pj(self.config.buildEnv.build_dir, "patches"), exist_ok=True
                 )
-                dest = pj(self.platform.buildEnv.build_dir, "patches", p)
+                dest = pj(self.config.buildEnv.build_dir, "patches", p)
                 copyfile(path, dest)
 
     def build(self):
-        log = pj(self.platform.buildEnv.log_dir, "cmd_build_flatpak.log")
+        log = pj(self.config.buildEnv.log_dir, "cmd_build_flatpak.log")
         context = Context("build", log, False)
         command = [
             "flatpak-builder",
@@ -241,9 +241,9 @@ class FlatpakBuilder:
         try:
             run_command(
                 command,
-                self.platform.buildEnv.build_dir,
+                self.config.buildEnv.build_dir,
                 context,
-                env=self.platform.get_env(),
+                env=self.config.get_env(),
             )
             context._finalise()
         except subprocess.CalledProcessError:
@@ -252,16 +252,16 @@ class FlatpakBuilder:
             raise StopBuild()
 
     def bundle(self):
-        log = pj(self.platform.buildEnv.log_dir, "cmd_bundle_flatpak.log")
+        log = pj(self.config.buildEnv.log_dir, "cmd_bundle_flatpak.log")
         context = Context("bundle", log, False)
         app_id = MANIFEST["app-id"]
         command = ["flatpak", "build-bundle", "repo", f"{app_id}.flatpak", app_id]
         try:
             run_command(
                 command,
-                self.platform.buildEnv.build_dir,
+                self.config.buildEnv.build_dir,
                 context,
-                env=self.platform.get_env(),
+                env=self.config.get_env(),
             )
             context._finalise()
         except subprocess.CalledProcessError:
@@ -274,7 +274,7 @@ class FlatpakBuilder:
 
         to_drop = []
         for builderDef in self._targets:
-            platformName, builderName = builderDef
+            configName, builderName = builderDef
             packages = package_name_mapper.get(builderName)
             if packages:
                 to_drop.append(builderDef)
@@ -288,16 +288,16 @@ class FlatpakBuilder:
             # dependencies we already have in the sdk.
             self._get_packages()
             self.finalize_target_steps()
-            print("[SETUP PLATFORMS]")
-            for platform in PlatformInfo.all_running_platforms.values():
-                platform.finalize_setup()
-            for pltName in PlatformInfo.all_running_platforms:
-                plt = PlatformInfo.all_platforms[pltName]
-                for tlcName in plt.toolchain_names:
+            print("[SETUP TOOLCHAINS]")
+            for config in ConfigInfo.all_running_configs.values():
+                config.finalize_setup()
+            for cfgName in ConfigInfo.all_running_configs:
+                cfg = ConfigInfo.all_configs[cfgName]
+                for tlcName in cfg.toolchain_names:
                     tlc = Dependency.all_deps[tlcName]
-                    builderDef = (pltName, tlcName)
+                    builderDef = (cfgName, tlcName)
                     builder = get_target_step(builderDef)
-                    print("build {} ({}):".format(builder.name, pltName[0]))
+                    print("build {} ({}):".format(builder.name, cfgName[0]))
                     add_target_step(builderDef, builder)
                     builder.build()
             print("[GENERATE FLATPAK MANIFEST]")
@@ -310,8 +310,8 @@ class FlatpakBuilder:
             # No error, clean intermediate file at end of build if needed.
             print("[CLEAN]")
             if option("clean_at_end"):
-                for platform in PlatformInfo.all_running_platforms.values():
-                    platform.clean_intermediate_directories()
+                for config in ConfigInfo.all_running_configs.values():
+                    config.clean_intermediate_directories()
             else:
                 print("SKIP")
         except StopBuild:

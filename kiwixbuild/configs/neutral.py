@@ -1,7 +1,7 @@
-from .base import PlatformInfo
+from .base import ConfigInfo
 
 
-class NeutralPlatformInfo(PlatformInfo):
+class NeutralConfigInfo(ConfigInfo):
     name = "neutral"
     static = ""
     compatible_hosts = ["fedora", "debian", "Darwin"]

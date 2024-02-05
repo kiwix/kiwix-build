@@ -7,7 +7,7 @@ from .utils import pj, download_remote, escape_path
 from ._global import neutralEnv, option
 
 
-class PlatformNeutralEnv:
+class NeutralEnv:
     def __init__(self):
         self.working_dir = option("working_dir")
         self.source_dir = pj(self.working_dir, "SOURCE")
@@ -75,9 +75,9 @@ class PlatformNeutralEnv:
 
 
 class BuildEnv:
-    def __init__(self, platformInfo):
-        build_dir = "BUILD_{}".format(platformInfo.name)
-        self.platformInfo = platformInfo
+    def __init__(self, configInfo):
+        build_dir = "BUILD_{}".format(configInfo.name)
+        self.configInfo = configInfo
         self.base_build_dir = pj(option("working_dir"), option("build_dir"))
         self.build_dir = pj(self.base_build_dir, build_dir)
         self.install_dir = pj(self.build_dir, "INSTALL")
@@ -102,8 +102,8 @@ class BuildEnv:
         return os.path.isfile("/etc/debian_version")
 
     def _detect_libdir(self):
-        if self.platformInfo.libdir is not None:
-            return self.platformInfo.libdir
+        if self.configInfo.libdir is not None:
+            return self.configInfo.libdir
         if self._is_debianlike():
             try:
                 pc = subprocess.Popen(
@@ -122,7 +122,7 @@ class BuildEnv:
         return "lib"
 
     def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
-        env = self.platformInfo.get_env()
+        env = self.configInfo.get_env()
         pkgconfig_path = pj(self.install_dir, self.libprefix, "pkgconfig")
         env["PKG_CONFIG_PATH"] = ":".join([env["PKG_CONFIG_PATH"], pkgconfig_path])
 
@@ -158,23 +158,23 @@ class BuildEnv:
         )
 
         if cross_comp_flags:
-            self.platformInfo.set_comp_flags(env)
+            self.configInfo.set_comp_flags(env)
         if cross_compilers:
-            self.platformInfo.set_compiler(env)
+            self.configInfo.set_compiler(env)
         if cross_path:
-            env["PATH"] = ":".join(self.platformInfo.get_bin_dir() + [env["PATH"]])
+            env["PATH"] = ":".join(self.configInfo.get_bin_dir() + [env["PATH"]])
         return env
 
     @property
     def configure_wrapper(self):
         try:
-            yield self.platformInfo.configure_wrapper
+            yield self.configInfo.configure_wrapper
         except AttributeError:
             pass
 
     @property
     def make_wrapper(self):
         try:
-            yield self.platformInfo.make_wrapper
+            yield self.configInfo.make_wrapper
         except AttributeError:
             pass

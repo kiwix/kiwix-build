@@ -11,16 +11,16 @@ class ZimTools(Dependency):
 
     class Builder(MesonBuilder):
         @classmethod
-        def get_dependencies(cls, platformInfo, allDeps):
+        def get_dependencies(cls, configInfo, allDeps):
             base_deps = ["libzim", "docoptcpp", "mustache"]
-            if platformInfo.build != "win32":
+            if configInfo.build != "win32":
                 base_deps += ["libmagic", "gumbo"]
             return base_deps
 
         @property
         def configure_options(self):
             # We don't build zimwriterfs on win32, and so we don't have magic
-            if self.buildEnv.platformInfo.build != "win32":
+            if self.buildEnv.configInfo.build != "win32":
                 yield f"-Dmagic-install-prefix={self.buildEnv.install_dir}"
-            if self.buildEnv.platformInfo.static:
+            if self.buildEnv.configInfo.static:
                 yield "-Dstatic-linkage=true"

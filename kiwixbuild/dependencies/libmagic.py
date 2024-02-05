@@ -31,14 +31,14 @@ class LibMagic(Dependency):
             yield "--disable-lzlib"
 
         @classmethod
-        def get_dependencies(cls, platformInfo, allDeps):
-            if platformInfo.build != "native":
+        def get_dependencies(cls, configInfo, allDeps):
+            if configInfo.build != "native":
                 return [("native_static", "libmagic")]
             return []
 
         def _compile(self, context):
-            platformInfo = self.buildEnv.platformInfo
-            if platformInfo.build == "native":
+            configInfo = self.buildEnv.configInfo
+            if configInfo.build == "native":
                 return super()._compile(context)
             context.try_skip(self.build_path)
             command = ["make", "-j4", *self.make_targets, *self.make_options]

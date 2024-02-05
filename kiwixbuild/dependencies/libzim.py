@@ -16,37 +16,37 @@ class Libzim(Dependency):
 
         @property
         def build_type(self):
-            if self.buildEnv.platformInfo.build == "android":
+            if self.buildEnv.configInfo.build == "android":
                 return "debug"
             return super().build_type
 
         @classmethod
-        def get_dependencies(cls, platformInfo, allDeps):
+        def get_dependencies(cls, configInfo, allDeps):
             deps = ["lzma", "zstd", "xapian-core", "icu4c"]
-            if platformInfo.name not in ("flatpak", "wasm"):
+            if configInfo.name not in ("flatpak", "wasm"):
                 deps.append("zim-testing-suite")
             return deps
 
         @property
         def configure_options(self):
-            platformInfo = self.buildEnv.platformInfo
-            if platformInfo.build == "android":
+            configInfo = self.buildEnv.configInfo
+            if configInfo.build == "android":
                 yield "-DUSE_BUFFER_HEADER=false"
                 yield "-Dstatic-linkage=true"
-            if platformInfo.mixed and option("target") == "libzim":
+            if configInfo.mixed and option("target") == "libzim":
                 yield "-Dstatic-linkage=true"
-            if platformInfo.name == "flatpak":
+            if configInfo.name == "flatpak":
                 yield "--wrap-mode=nodownload"
                 yield "-Dtest_data_dir=none"
-            if platformInfo.name == "wasm":
+            if configInfo.name == "wasm":
                 yield "-Dexamples=false"
                 yield "-DUSE_MMAP=false"
-            if platformInfo.name not in ("flatpak", "wasm"):
+            if configInfo.name not in ("flatpak", "wasm"):
                 zim_testing_suite = get_target_step("zim-testing-suite", "source")
                 yield "-Dtest_data_dir={}".format(zim_testing_suite.source_path)
 
         @property
         def library_type(self):
-            if self.buildEnv.platformInfo.build == "android":
+            if self.buildEnv.configInfo.build == "android":
                 return "shared"
             return super().library_type

@@ -1,25 +1,15 @@
 import subprocess
 
-from .base import PlatformInfo
+from .base import ConfigInfo
 from kiwixbuild.utils import which, pj
 from kiwixbuild._global import neutralEnv
 
 
-class Win64PlatformInfo(PlatformInfo):
-    extra_libs = [
-        "-lmingw32",
-        "-lwinmm",
-        "-lws2_32",
-        "-lshlwapi",
-        "-lrpcrt4",
-        "-lmsvcr100",
-        "-liphlpapi",
-        "-lshell32",
-        "-lkernel32",
-    ]
-    build = "win64"
+class Win32ConfigInfo(ConfigInfo):
+    build = "win32"
     compatible_hosts = ["fedora", "debian"]
-    arch_full = "x86_64-w64-mingw32"
+    arch_full = "i686-w64-mingw32"
+    extra_libs = ["-lwinmm", "-lshlwapi", "-lws2_32", "-lssp"]
 
     def get_cross_config(self):
         return {
@@ -27,12 +17,18 @@ class Win64PlatformInfo(PlatformInfo):
             "binaries": self.binaries,
             "root_path": self.root_path,
             "extra_libs": self.extra_libs,
-            "extra_cflags": ["-DWIN32"],
+            "extra_cflags": [
+                "-DWIN32",
+                *(
+                    "-I{}".format(include_dir)
+                    for include_dir in self.get_include_dirs()
+                ),
+            ],
             "host_machine": {
                 "system": "Windows",
                 "lsystem": "windows",
-                "cpu_family": "x86_64",
-                "cpu": "x86_64",
+                "cpu_family": "x86",
+                "cpu": "i686",
                 "endian": "little",
                 "abi": "",
             },
@@ -46,8 +42,8 @@ class Win64PlatformInfo(PlatformInfo):
     @property
     def root_path(self):
         root_paths = {
-            "fedora": "/usr/x86_64-w64-mingw32/sys-root/mingw",
-            "debian": "/usr/x86_64-w64-mingw32",
+            "fedora": "/usr/i686-w64-mingw32/sys-root/mingw",
+            "debian": "/usr/i686-w64-mingw32",
         }
         return root_paths[neutralEnv("distname")]
 
@@ -77,7 +73,7 @@ class Win64PlatformInfo(PlatformInfo):
 
     @property
     def configure_options(self):
-        return [f"--host={self.arch_full}"]
+        yield f"--host={self.arch_full}"
 
     def set_compiler(self, env):
         for k, v in self.binaries.items():
@@ -93,11 +89,11 @@ class Win64PlatformInfo(PlatformInfo):
         return env
 
 
-class Win64Dyn(Win64PlatformInfo):
-    name = "win64_dyn"
+class Win32Dyn(Win32ConfigInfo):
+    name = "win32_dyn"
     static = False
 
 
-class Win64Static(Win64PlatformInfo):
-    name = "win64_static"
+class Win32Static(Win32ConfigInfo):
+    name = "win32_static"
     static = True

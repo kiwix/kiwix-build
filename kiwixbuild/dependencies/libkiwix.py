@@ -29,25 +29,25 @@ class Libkiwix(Dependency):
 
         @property
         def build_type(self):
-            if self.buildEnv.platformInfo.build == "android":
+            if self.buildEnv.configInfo.build == "android":
                 return "debug"
             return super().build_type
 
         @property
         def configure_options(self):
-            platformInfo = self.buildEnv.platformInfo
-            if platformInfo.build == "android":
+            configInfo = self.buildEnv.configInfo
+            if configInfo.build == "android":
                 yield "-Dstatic-linkage=true"
                 yield "-Dwerror=false"
-            if platformInfo.build == "iOS":
+            if configInfo.build == "iOS":
                 yield "-Db_bitcode=true"
-            if platformInfo.name == "flatpak":
+            if configInfo.name == "flatpak":
                 yield "--wrap-mode=nodownload"
-            if platformInfo.mixed and option("target") == "libkiwix":
+            if configInfo.mixed and option("target") == "libkiwix":
                 yield "-Dstatic-linkage=true"
 
         @property
         def library_type(self):
-            if self.buildEnv.platformInfo.build == "android":
+            if self.buildEnv.configInfo.build == "android":
                 return "shared"
             return super().library_type

@@ -10,35 +10,35 @@ _SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 TEMPLATES_DIR = pj(os.path.dirname(_SCRIPT_DIR), "templates")
 
 
-class _MetaPlatform(type):
+class _MetaConfig(type):
     def __new__(cls, name, bases, dct):
         _class = type.__new__(cls, name, bases, dct)
-        if name not in ("PlatformInfo", "MetaPlatformInfo") and "name" in dct:
+        if name not in ("ConfigInfo", "MetaConfigInfo") and "name" in dct:
             dep_name = dct["name"]
-            PlatformInfo.all_platforms[dep_name] = _class
+            ConfigInfo.all_configs[dep_name] = _class
         return _class
 
 
-class PlatformInfo(metaclass=_MetaPlatform):
-    all_platforms = {}
-    all_running_platforms = {}
+class ConfigInfo(metaclass=_MetaConfig):
+    all_configs = {}
+    all_running_configs = {}
     toolchain_names = []
     configure_options = []
     mixed = False
     libdir = None
 
     @classmethod
-    def get_platform(cls, name, targets=None):
-        if name not in cls.all_running_platforms:
+    def get_config(cls, name, targets=None):
+        if name not in cls.all_running_configs:
             if targets is None:
                 print("Should not got there.")
-                print(cls.all_running_platforms)
+                print(cls.all_running_configs)
                 raise KeyError(name)
-            cls.all_running_platforms[name] = cls.all_platforms[name](targets)
-        return cls.all_running_platforms[name]
+            cls.all_running_configs[name] = cls.all_configs[name](targets)
+        return cls.all_running_configs[name]
 
     def __init__(self, targets):
-        self.all_running_platforms[self.name] = self
+        self.all_running_configs[self.name] = self
         self.buildEnv = BuildEnv(self)
         self.setup_toolchains(targets)
 
@@ -49,8 +49,8 @@ class PlatformInfo(metaclass=_MetaPlatform):
         for tlc_name in self.toolchain_names:
             ToolchainClass = Dependency.all_deps[tlc_name]
             targets[("source", tlc_name)] = ToolchainClass.Source
-            plt_name = "neutral" if ToolchainClass.neutral else self.name
-            targets[(plt_name, tlc_name)] = ToolchainClass.Builder
+            cfg_name = "neutral" if ToolchainClass.neutral else self.name
+            targets[(cfg_name, tlc_name)] = ToolchainClass.Builder
 
     def add_targets(self, targetName, targets):
         if (self.name, targetName) in targets:
@@ -60,11 +60,11 @@ class PlatformInfo(metaclass=_MetaPlatform):
         targets[(self.name, targetName)] = targetClass.Builder
         for dep in targetClass.Builder.get_dependencies(self, False):
             if isinstance(dep, tuple):
-                depPlatformName, depName = dep
+                depConfigName, depName = dep
             else:
-                depPlatformName, depName = self.name, dep
-            depPlatform = self.get_platform(depPlatformName, targets)
-            depPlatform.add_targets(depName, targets)
+                depConfigName, depName = self.name, dep
+            depConfig = self.get_config(depConfigName, targets)
+            depConfig.add_targets(depName, targets)
         return [(self.name, targetName)]
 
     def get_fully_qualified_dep(self, dep):
@@ -114,14 +114,14 @@ class PlatformInfo(metaclass=_MetaPlatform):
         self.buildEnv.clean_intermediate_directories()
 
 
-class MetaPlatformInfo(PlatformInfo):
-    subPlatformNames = []
+class MetaConfigInfo(ConfigInfo):
+    subConfigNames = []
 
     def add_targets(self, targetName, targets):
         targetDefs = []
-        for platformName in self.subPlatformNames:
-            platform = self.get_platform(platformName, targets)
-            targetDefs += platform.add_targets(targetName, targets)
+        for configName in self.subConfigNames:
+            config = self.get_config(configName, targets)
+            targetDefs += config.add_targets(targetName, targets)
         return targetDefs
 
 
@@ -135,8 +135,8 @@ def MixedMixin(static_name):
             if option("target") == targetName:
                 return super().add_targets(targetName, targets)
             else:
-                static_platform = self.get_platform(static_name, targets)
-                return static_platform.add_targets(targetName, targets)
+                static_config = self.get_config(static_name, targets)
+                return static_config.add_targets(targetName, targets)
 
         def get_fully_qualified_dep(self, dep):
             if isinstance(dep, tuple):
@@ -147,8 +147,8 @@ def MixedMixin(static_name):
 
         @property
         def static_buildEnv(self):
-            static_platform = self.get_platform(static_name)
-            return static_platform.buildEnv
+            static_config = self.get_config(static_name)
+            return static_config.buildEnv
 
         def get_include_dirs(self):
             return [

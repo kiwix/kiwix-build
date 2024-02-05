@@ -1,9 +1,9 @@
-from .base import PlatformInfo, MetaPlatformInfo
+from .base import ConfigInfo, MetaConfigInfo
 from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step, option
 
 
-class AndroidPlatformInfo(PlatformInfo):
+class AndroidConfigInfo(ConfigInfo):
     build = "android"
     static = True
     toolchain_names = ["android-ndk"]
@@ -114,7 +114,7 @@ class AndroidPlatformInfo(PlatformInfo):
         self.buildEnv.meson_crossfile = self._gen_crossfile("meson_cross_file.txt")
 
 
-class AndroidArm(AndroidPlatformInfo):
+class AndroidArm(AndroidConfigInfo):
     name = "android_arm"
     arch = cpu = "arm"
     arch_full = "arm-linux-androideabi"
@@ -122,7 +122,7 @@ class AndroidArm(AndroidPlatformInfo):
     march = "armv7-a"
 
 
-class AndroidArm64(AndroidPlatformInfo):
+class AndroidArm64(AndroidConfigInfo):
     name = "android_arm64"
     arch = "arm64"
     arch_full = "aarch64-linux-android"
@@ -130,25 +130,25 @@ class AndroidArm64(AndroidPlatformInfo):
     abi = "arm64-v8a"
 
 
-class AndroidX86(AndroidPlatformInfo):
+class AndroidX86(AndroidConfigInfo):
     name = "android_x86"
     arch = abi = "x86"
     arch_full = "i686-linux-android"
     cpu = "i686"
 
 
-class AndroidX8664(AndroidPlatformInfo):
+class AndroidX8664(AndroidConfigInfo):
     name = "android_x86_64"
     arch = cpu = abi = "x86_64"
     arch_full = "x86_64-linux-android"
 
 
-class Android(MetaPlatformInfo):
+class Android(MetaConfigInfo):
     name = "android"
     compatible_hosts = ["fedora", "debian"]
 
     @property
-    def subPlatformNames(self):
+    def subConfigNames(self):
         return ["android_{}".format(arch) for arch in option("android_arch")]
 
     def add_targets(self, targetName, targets):

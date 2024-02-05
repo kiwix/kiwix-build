@@ -237,7 +237,7 @@ class Builder:
         self.buildEnv = buildEnv
 
     @classmethod
-    def get_dependencies(cls, platformInfo, allDeps):
+    def get_dependencies(cls, configInfo, allDeps):
         return cls.dependencies
 
     @property
@@ -323,9 +323,9 @@ class Builder:
             cross_compilers=cross_compilers,
             cross_path=cross_path,
         )
-        for dep in self.get_dependencies(self.buildEnv.platformInfo, False):
+        for dep in self.get_dependencies(self.buildEnv.configInfo, False):
             try:
-                builder = get_target_step(dep, self.buildEnv.platformInfo.name)
+                builder = get_target_step(dep, self.buildEnv.configInfo.name)
                 builder.set_env(env)
             except KeyError:
                 # Some target may be missing (installed by a package, ...)
@@ -382,7 +382,7 @@ class MakeBuilder(Builder):
 
     @property
     def make_install_targets(self):
-        if self.buildEnv.platformInfo.build in ("iOS", "wasm"):
+        if self.buildEnv.configInfo.build in ("iOS", "wasm"):
             yield "install"
         else:
             yield "install-strip"
@@ -390,12 +390,12 @@ class MakeBuilder(Builder):
     @property
     def all_configure_options(self):
         yield from self.configure_options
-        if self.buildEnv.platformInfo.static:
+        if self.buildEnv.configInfo.static:
             yield from self.static_configure_options
         else:
             yield from self.dynamic_configure_options
         if not self.target.force_native_build:
-            yield from self.buildEnv.platformInfo.configure_options
+            yield from self.buildEnv.configInfo.configure_options
         yield from ("--prefix", self.buildEnv.install_dir)
         yield from ("--libdir", pj(self.buildEnv.install_dir, self.buildEnv.libprefix))
 
@@ -532,7 +532,7 @@ class MesonBuilder(Builder):
 
     @property
     def library_type(self):
-        return "static" if self.buildEnv.platformInfo.static else "shared"
+        return "static" if self.buildEnv.configInfo.static else "shared"
 
     def _configure(self, context):
         context.try_skip(self.build_path)
@@ -569,9 +569,9 @@ class MesonBuilder(Builder):
 
     def _test(self, context):
         context.try_skip(self.build_path)
-        if self.buildEnv.platformInfo.build == "android" or (
-            self.buildEnv.platformInfo.build != "native"
-            and not self.buildEnv.platformInfo.static
+        if self.buildEnv.configInfo.build == "android" or (
+            self.buildEnv.configInfo.build != "native"
+            and not self.buildEnv.configInfo.static
         ):
             raise SkipCommand()
         command = [*neutralEnv("mesontest_command"), "--verbose", *self.test_options]

@@ -1,11 +1,11 @@
-from .base import PlatformInfo, MixedMixin
+from .base import ConfigInfo, MixedMixin
 
 from kiwixbuild.utils import pj
 from kiwixbuild._global import option, neutralEnv
-from kiwixbuild.platforms.ios import MIN_MACOS_VERSION
+from kiwixbuild.configs.ios import MIN_MACOS_VERSION
 
 
-class NativePlatformInfo(PlatformInfo):
+class NativeConfigInfo(ConfigInfo):
     build = "native"
 
     def get_env(self):
@@ -17,19 +17,19 @@ class NativePlatformInfo(PlatformInfo):
         return env
 
 
-class NativeDyn(NativePlatformInfo):
+class NativeDyn(NativeConfigInfo):
     name = "native_dyn"
     static = False
     compatible_hosts = ["fedora", "debian", "Darwin"]
 
 
-class NativeStatic(NativePlatformInfo):
+class NativeStatic(NativeConfigInfo):
     name = "native_static"
     static = True
     compatible_hosts = ["fedora", "debian"]
 
 
-class NativeMixed(MixedMixin("native_static"), NativePlatformInfo):
+class NativeMixed(MixedMixin("native_static"), NativeConfigInfo):
     name = "native_mixed"
     static = False
     compatible_hosts = ["fedora", "debian", "Darwin"]

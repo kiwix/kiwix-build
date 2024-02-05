@@ -2,14 +2,14 @@ import os
 import shutil
 from pathlib import Path
 
-from kiwixbuild.platforms import PlatformInfo
+from kiwixbuild.configs import ConfigInfo
 from kiwixbuild.utils import pj, run_command
 from .base import Dependency, NoopSource, Builder as BaseBuilder
 
 
 class AppleXCFramework(Dependency):
     name = "apple_xcframework"
-    subPlatformNames = [
+    subConfigNames = [
         "macOS_x86_64",
         "macOS_arm64_static",
         "iOS_arm64",
@@ -20,34 +20,32 @@ class AppleXCFramework(Dependency):
 
     class Builder(BaseBuilder):
         @property
-        def all_subplatforms(self):
-            return self.buildEnv.platformInfo.subPlatformNames
+        def all_subconfigs(self):
+            return self.buildEnv.configInfo.subConfigNames
 
         @property
-        def macos_subplatforms(self):
+        def macos_subconfigs(self):
             return [
-                target for target in self.all_subplatforms if target.startswith("macOS")
+                target for target in self.all_subconfigs if target.startswith("macOS")
             ]
 
         @property
-        def iossimulator_subplatforms(self):
+        def iossimulator_subconfigs(self):
             return [
                 target
-                for target in self.all_subplatforms
+                for target in self.all_subconfigs
                 if target.startswith("iOSSimulator")
             ]
 
         @property
-        def ios_subplatforms(self):
+        def ios_subconfigs(self):
             return [
-                target for target in self.all_subplatforms if target.startswith("iOS_")
+                target for target in self.all_subconfigs if target.startswith("iOS_")
             ]
 
         @classmethod
-        def get_dependencies(cls, platfomInfo, alldeps):
-            return [
-                (target, "libkiwix") for target in AppleXCFramework.subPlatformNames
-            ]
+        def get_dependencies(cls, configInfo, alldeps):
+            return [(target, "libkiwix") for target in AppleXCFramework.subConfigNames]
 
         @property
         def final_path(self):
@@ -62,11 +60,11 @@ class AppleXCFramework(Dependency):
         def _merge_libs(self, context):
             """create merged.a in all targets to bundle all static archives"""
             xcf_libs = []
-            for target in self.all_subplatforms:
+            for target in self.all_subconfigs:
                 static_ars = []
 
-                plt = PlatformInfo.get_platform(target)
-                lib_dir = pj(plt.buildEnv.install_dir, "lib")
+                cfg = ConfigInfo.get_config(target)
+                lib_dir = pj(cfg.buildEnv.install_dir, "lib")
                 static_ars = [str(f) for f in Path(lib_dir).glob("*.a")]
 
                 # create merged.a from all *.a in install_dir/lib
@@ -74,17 +72,17 @@ class AppleXCFramework(Dependency):
                 run_command(command, lib_dir, context)
 
                 # will be included in xcframework
-                if target in self.ios_subplatforms:
+                if target in self.ios_subconfigs:
                     xcf_libs.append(pj(lib_dir, "merged.a"))
 
             return xcf_libs
 
-        def make_fat_with(self, platforms, folder_name, context):
-            """create fat merged.a in {folder_name} install/lib with {platforms} archs"""
+        def make_fat_with(self, configs, folder_name, context):
+            """create fat merged.a in {folder_name} install/lib with {configs}"""
             libs = []
-            for target in platforms:
-                plt = PlatformInfo.get_platform(target)
-                libs.append(pj(plt.buildEnv.install_dir, "lib", "merged.a"))
+            for target in configs:
+                cfg = ConfigInfo.get_config(target)
+                libs.append(pj(cfg.buildEnv.install_dir, "lib", "merged.a"))
 
             fat_dir = pj(self.buildEnv.build_dir, folder_name)
             os.makedirs(fat_dir, exist_ok=True)
@@ -97,14 +95,14 @@ class AppleXCFramework(Dependency):
 
         def _build_xcframework(self, xcf_libs, context):
             # create xcframework
-            ref_plat = PlatformInfo.get_platform(self.macos_subplatforms[0])
+            ref_conf = ConfigInfo.get_config(self.macos_subconfigs[0])
             command = ["xcodebuild", "-create-xcframework"]
             for lib in xcf_libs:
                 command += [
                     "-library",
                     lib,
                     "-headers",
-                    pj(ref_plat.buildEnv.install_dir, "include"),
+                    pj(ref_conf.buildEnv.install_dir, "include"),
                 ]
             command += ["-output", self.final_path]
             run_command(command, self.buildEnv.build_dir, context)
@@ -116,13 +114,13 @@ class AppleXCFramework(Dependency):
             xcf_libs += self.command(
                 "make_macos_fat",
                 self.make_fat_with,
-                self.macos_subplatforms,
+                self.macos_subconfigs,
                 "macOS_fat",
             )
             xcf_libs += self.command(
                 "make_simulator_fat",
                 self.make_fat_with,
-                self.iossimulator_subplatforms,
+                self.iossimulator_subconfigs,
                 "iOS-simulator_fat",
             )
             self.command("build_xcframework", self._build_xcframework, xcf_libs)

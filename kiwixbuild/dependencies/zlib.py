@@ -25,14 +25,14 @@ class zlib(Dependency):
             shutil.copytree(self.source_path, self.build_path)
 
         def _configure(self, context):
-            if self.buildEnv.platformInfo.build == "win32":
+            if self.buildEnv.configInfo.build == "win32":
                 raise SkipCommand()
             return super()._configure(context)
 
         @property
         def all_configure_options(self):
             yield from self.configure_options
-            yield from self.static_configure_options if self.buildEnv.platformInfo.static else self.dynamic_configure_options
+            yield from self.static_configure_options if self.buildEnv.configInfo.static else self.dynamic_configure_options
             yield from ("--prefix", self.buildEnv.install_dir)
             yield from (
                 "--libdir",
@@ -41,13 +41,13 @@ class zlib(Dependency):
 
         @property
         def make_options(self):
-            if self.buildEnv.platformInfo.build != "win32":
+            if self.buildEnv.configInfo.build != "win32":
                 return
             yield "--makefile"
             yield "win32/Makefile.gcc"
             yield "PREFIX=i686-w64-mingw32-",
             yield "SHARED_MODE={}".format(
-                "0" if self.buildEnv.platformInfo.static else "1"
+                "0" if self.buildEnv.configInfo.static else "1"
             ),
             yield "INCLUDE_PATH={}".format(pj(self.buildEnv.install_dir, "include")),
             yield "LIBRARY_PATH={}".format(
@@ -57,7 +57,7 @@ class zlib(Dependency):
 
         @property
         def make_targets(self):
-            if self.buildEnv.platformInfo.static:
+            if self.buildEnv.configInfo.static:
                 return ["static"]
             else:
                 return ["shared"]

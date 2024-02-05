@@ -1,11 +1,10 @@
-from .base import PlatformInfo, MixedMixin
+from .base import ConfigInfo, MixedMixin
 
 from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
 
 
-# Base platform
-class ArmPlatformInfo(PlatformInfo):
+class MuslConfigInfo(ConfigInfo):
     compatible_hosts = ["fedora", "debian"]
 
     def get_cross_config(self):
@@ -26,10 +25,6 @@ class ArmPlatformInfo(PlatformInfo):
                 "abi": "",
             },
         }
-
-    @property
-    def libdir(self):
-        return "lib/{}".format(self.arch_full)
 
     @property
     def toolchain(self):
@@ -61,15 +56,17 @@ class ArmPlatformInfo(PlatformInfo):
     @property
     def exe_wrapper_def(self):
         try:
-            which("qemu-arm")
+            which(self.qemu)
         except subprocess.CalledProcessError:
             return ""
+        except AttributeError:
+            return ""
         else:
-            return "exe_wrapper = 'qemu-arm'"
+            return f"exe_wrapper = '{self.qemu}'"
 
     @property
     def configure_options(self):
-        yield "--host={}".format(self.arch_full)
+        return [f"--host={self.arch_full}"]
 
     def get_bin_dir(self):
         return [pj(self.root_path, "bin")]
@@ -94,6 +91,9 @@ class ArmPlatformInfo(PlatformInfo):
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
+        env["LD_LIBRARY_PATH"] = ":".join(
+            [pj(self.root_path, self.arch_full, "lib"), env["LD_LIBRARY_PATH"]]
+        )
         env["CFLAGS"] = (
             " -fPIC -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "
             + env["CFLAGS"]
@@ -113,74 +113,50 @@ class ArmPlatformInfo(PlatformInfo):
         self.buildEnv.meson_crossfile = self._gen_crossfile("meson_cross_file.txt")
 
 
-class Armv6(ArmPlatformInfo):
-    build = "armv6"
-    arch_full = "armv6-rpi-linux-gnueabihf"
-    toolchain_names = ["armv6"]
+class Aarch64MuslConfigInfo(MuslConfigInfo):
+    build = "aarch64_musl"
+    arch_full = "aarch64-linux-musl"
+    toolchain_names = ["aarch64_musl"]
+    libdir = "lib/aarch64-linux-musl"
     cpu_family = "arm"
-    cpu = "armv6"
+    cpu = "armhf"
+    qemu = "qemu-arm"
 
 
-class Armv6Dyn(Armv6):
-    name = "armv6_dyn"
+class Aarch64MuslDyn(Aarch64MuslConfigInfo):
+    name = "aarch64_musl_dyn"
     static = False
 
 
-class Armv6Static(Armv6):
-    name = "armv6_static"
+class Aarch64MuslStatic(Aarch64MuslConfigInfo):
+    name = "aarch64_musl_static"
     static = True
 
 
-class Armv6Mixed(MixedMixin("armv6_static"), Armv6):
-    name = "armv6_mixed"
+class Aarch64MuslMixed(MixedMixin("aarch64_musl_static"), Aarch64MuslConfigInfo):
+    name = "aarch64_musl_mixed"
     static = False
 
 
-class Armv8(ArmPlatformInfo):
-    build = "armv8"
-    arch_full = "armv8-rpi3-linux-gnueabihf"
-    toolchain_names = ["armv8"]
-    cpu_family = "arm"
-    cpu = "armv8"
+class X86_64MuslConfigInfo(MuslConfigInfo):
+    build = "x86-64_musl"
+    arch_full = "x86_64-linux-musl"
+    toolchain_names = ["x86-64_musl"]
+    libdir = "lib/x86_64-linux-musl"
+    cpu_family = "x86_64"
+    cpu = "x86_64"
 
 
-class Armv8Dyn(Armv8):
-    name = "armv8_dyn"
+class X86_64MuslDyn(X86_64MuslConfigInfo):
+    name = "x86-64_musl_dyn"
     static = False
 
 
-class Armv8Static(Armv8):
-    name = "armv8_static"
+class X86_64MuslStatic(X86_64MuslConfigInfo):
+    name = "x86-64_musl_static"
     static = True
 
 
-class Armv8Mixed(MixedMixin("armv8_static"), Armv8):
-    name = "armv8_mixed"
-    static = False
-
-
-class Aarch64(ArmPlatformInfo):
-    build = "aarch64"
-    arch_full = "aarch64-linux-gnu"
-    toolchain_names = ["aarch64"]
-    cpu_family = "aarch64"
-    cpu = "aarch64"
-
-    @property
-    def root_path(self):
-        return self.toolchain.build_path
-
-
-class Aarch64Dyn(Aarch64):
-    name = "aarch64_dyn"
-    static = False
-
-
-class Aarch64Static(Aarch64):
-    name = "aarch64_static"
-    static = True
-
-
-class Aarch64Mixed(MixedMixin("aarch64_static"), Aarch64):
-    name = "aarch64_mixed"
+class x86_64MuslMixed(MixedMixin("x86-64_musl_static"), X86_64MuslConfigInfo):
+    name = "x86-64_musl_mixed"
     static = False

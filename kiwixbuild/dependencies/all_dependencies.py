@@ -12,8 +12,8 @@ class AllBaseDependencies(Dependency):
 
     class Builder(NoopBuilder):
         @classmethod
-        def get_dependencies(cls, platformInfo, allDeps):
-            if platformInfo.build == "wasm" or environ.get("OS_NAME") == "bionic":
+        def get_dependencies(cls, configInfo, allDeps):
+            if configInfo.build == "wasm" or environ.get("OS_NAME") == "bionic":
                 return ["zlib", "lzma", "zstd", "icu4c", "xapian-core"]
 
             base_deps = [
@@ -28,17 +28,14 @@ class AllBaseDependencies(Dependency):
                 "libmicrohttpd",
                 "zim-testing-suite",
             ]
-            # Add specific dependencies depending of the platform
-            if platformInfo.build not in ("android", "iOS"):
+            # Add specific dependencies depending of the config
+            if configInfo.build not in ("android", "iOS"):
                 # For zimtools
                 base_deps += ["docoptcpp"]
-                if platformInfo.build != "win32":
+                if configInfo.build != "win32":
                     # zimwriterfs
                     base_deps += ["libmagic", "gumbo"]
-                if (
-                    platformInfo.build == "native"
-                    and neutralEnv("distname") != "Darwin"
-                ):
+                if configInfo.build == "native" and neutralEnv("distname") != "Darwin":
                     # We compile kiwix-desktop only on native and not on `Darwin`
                     # So we need aria2 only there
                     base_deps += ["aria2"]
