@@ -3,7 +3,7 @@ import csv, io, re
 
 # Definition of what to build.
 # Array is read line by line.
-# Empty cells under (OS_NAME, PLATFORM_TARGET) mean "always match" (catch all, or `.*` regex)
+# Empty cells under (OS_NAME, COMPILE_CONFIG) mean "always match" (catch all, or `.*` regex)
 # Once a cell doesn't match, skip to the next line.
 # Once a line matches, other lines are not read, so put more specific combination first.
 # Lines composed of `-` , or `=`, or starting by `#` are ignored.
@@ -15,7 +15,7 @@ import csv, io, re
 # 'D' letter means we trigger the docker forkflow to build the docker image.
 # If a cell contains several letters, all are done.
 BUILD_DEF = """
-    | OS_NAME | PLATFORM_TARGET    | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop | platform_name        |
+    | OS_NAME | COMPILE_CONFIG     | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop | platform_name        |
     =====================================================================================================================
 # Bionic is a special case as we need to compile libzim on old arch for python
     | bionic  | native_mixed       | BP     |          |           |             |               | linux-x86_64-bionic  |
@@ -92,10 +92,10 @@ def selector_match(selector, value):
 
 class Context(NamedTuple):
     OS_NAME: str
-    PLATFORM_TARGET: str
+    COMPILE_CONFIG: str
 
     def match(self, row):
-        for key in ["OS_NAME", "PLATFORM_TARGET"]:
+        for key in ["OS_NAME", "COMPILE_CONFIG"]:
             context_value = getattr(self, key)
             selector = row[key]
             if not selector_match(selector, context_value):
@@ -109,10 +109,11 @@ SOURCE_PUBLISH = "S"
 DEPS = "d"
 DOCKER = "D"
 
-def select_build_targets(criteria):
-    from common import PLATFORM_TARGET, OS_NAME
 
-    context = Context(PLATFORM_TARGET=PLATFORM_TARGET, OS_NAME=OS_NAME)
+def select_build_targets(criteria):
+    from common import COMPILE_CONFIG, OS_NAME
+
+    context = Context(COMPILE_CONFIG=COMPILE_CONFIG, OS_NAME=OS_NAME)
 
     reader = csv.DictReader(strip_array(BUILD_DEF), dialect=TableDialect())
     for row in reader:
@@ -133,10 +134,11 @@ def select_build_targets(criteria):
 
     raise ValueError("No definition match with current context.")
 
-def get_platform_name():
-    from common import PLATFORM_TARGET, OS_NAME
 
-    context = Context(PLATFORM_TARGET=PLATFORM_TARGET, OS_NAME=OS_NAME)
+def get_platform_name():
+    from common import COMPILE_CONFIG, OS_NAME
+
+    context = Context(COMPILE_CONFIG=COMPILE_CONFIG, OS_NAME=OS_NAME)
 
     reader = csv.DictReader(strip_array(BUILD_DEF), dialect=TableDialect())
     for row in reader:

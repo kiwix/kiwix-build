@@ -13,9 +13,10 @@ from common import (
     upload,
     make_deps_archive,
     HOME,
-    PLATFORM_TARGET,
+    COMPILE_CONFIG,
     OS_NAME,
 )
+
 
 def download_base_archive(base_name):
     url = "http://tmp.kiwix.org/ci/{}".format(base_name)
@@ -30,14 +31,15 @@ def download_base_archive(base_name):
             file.write(batch)
     return file_path
 
-ARCHIVE_NAME_TEMPLATE = "base_deps2_{os}_{platform}_{version}.tar.xz"
 
-if PLATFORM_TARGET == 'flatpak':
+ARCHIVE_NAME_TEMPLATE = "base_deps2_{os}_{config}_{version}.tar.xz"
+
+if COMPILE_CONFIG == "flatpak":
     base_dep_archive_name = "base_deps2_flatpak.tar.xz"
 else:
     base_dep_archive_name = ARCHIVE_NAME_TEMPLATE.format(
         os=OS_NAME,
-        platform=PLATFORM_TARGET,
+        config=COMPILE_CONFIG,
         version=base_deps_meta_version,
     )
 
@@ -48,11 +50,11 @@ try:
         f.extractall(str(HOME))
     os.remove(str(local_filename))
 except URLError:
-    if PLATFORM_TARGET == "flatpak":
+    if COMPILE_CONFIG == "flatpak":
         print_message("Cannot get archive. Move on")
     else:
         print_message("Cannot get archive. Build dependencies")
-        run_kiwix_build("alldependencies", platform=PLATFORM_TARGET)
+        run_kiwix_build("alldependencies", config=COMPILE_CONFIG)
         archive_file = make_deps_archive(name=base_dep_archive_name, full=True)
         upload(archive_file, "ci@tmp.kiwix.org:30022", "/data/tmp/ci")
         os.remove(str(archive_file))
