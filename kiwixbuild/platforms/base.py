@@ -1,4 +1,3 @@
-
 import os, sys
 import subprocess
 
@@ -8,13 +7,14 @@ from kiwixbuild.buildenv import BuildEnv
 from kiwixbuild._global import neutralEnv, option, target_steps
 
 _SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-TEMPLATES_DIR = pj(os.path.dirname(_SCRIPT_DIR), 'templates')
+TEMPLATES_DIR = pj(os.path.dirname(_SCRIPT_DIR), "templates")
+
 
 class _MetaPlatform(type):
     def __new__(cls, name, bases, dct):
         _class = type.__new__(cls, name, bases, dct)
-        if name not in ('PlatformInfo', 'MetaPlatformInfo') and 'name' in dct:
-            dep_name = dct['name']
+        if name not in ("PlatformInfo", "MetaPlatformInfo") and "name" in dct:
+            dep_name = dct["name"]
             PlatformInfo.all_platforms[dep_name] = _class
         return _class
 
@@ -43,20 +43,20 @@ class PlatformInfo(metaclass=_MetaPlatform):
         self.setup_toolchains(targets)
 
     def __str__(self):
-        return "{}_{}".format(self.build, 'static' if self.static else 'dyn')
+        return "{}_{}".format(self.build, "static" if self.static else "dyn")
 
     def setup_toolchains(self, targets):
         for tlc_name in self.toolchain_names:
             ToolchainClass = Dependency.all_deps[tlc_name]
-            targets[('source', tlc_name)] = ToolchainClass.Source
-            plt_name = 'neutral' if ToolchainClass.neutral else self.name
+            targets[("source", tlc_name)] = ToolchainClass.Source
+            plt_name = "neutral" if ToolchainClass.neutral else self.name
             targets[(plt_name, tlc_name)] = ToolchainClass.Builder
 
     def add_targets(self, targetName, targets):
         if (self.name, targetName) in targets:
             return []
         targetClass = Dependency.all_deps[targetName]
-        targets[('source', targetName)] = targetClass.Source
+        targets[("source", targetName)] = targetClass.Source
         targets[(self.name, targetName)] = targetClass.Builder
         for dep in targetClass.Builder.get_dependencies(self, False):
             if isinstance(dep, tuple):
@@ -68,47 +68,40 @@ class PlatformInfo(metaclass=_MetaPlatform):
         return [(self.name, targetName)]
 
     def get_fully_qualified_dep(self, dep):
-         if isinstance(dep, tuple):
+        if isinstance(dep, tuple):
             return dep
-         else:
+        else:
             return self.name, dep
-
 
     def get_cross_config(self):
         return {}
 
     def get_include_dirs(self):
-        return [pj(self.buildEnv.install_dir, 'include')]
+        return [pj(self.buildEnv.install_dir, "include")]
 
     def get_env(self):
         return DefaultEnv()
 
-
     def get_bin_dir(self):
         return []
-
 
     def set_compiler(self, env):
         pass
 
-
     def set_comp_flags(self, env):
         if self.static:
-            env['CFLAGS'] = env['CFLAGS'] + ' -fPIC'
-            env['CXXFLAGS'] = env['CXXFLAGS'] + ' -fPIC'
-
+            env["CFLAGS"] = env["CFLAGS"] + " -fPIC"
+            env["CXXFLAGS"] = env["CXXFLAGS"] + " -fPIC"
 
     def _gen_crossfile(self, name, outname=None):
         if outname is None:
             outname = name
         crossfile = pj(self.buildEnv.build_dir, outname)
         template_file = pj(TEMPLATES_DIR, name)
-        with open(template_file, 'r') as f:
+        with open(template_file, "r") as f:
             template = f.read()
-        content = template.format(
-            **self.get_cross_config()
-        )
-        with open(crossfile, 'w') as outfile:
+        content = template.format(**self.get_cross_config())
+        with open(crossfile, "w") as outfile:
             outfile.write(content)
         return crossfile
 
@@ -119,7 +112,6 @@ class PlatformInfo(metaclass=_MetaPlatform):
 
     def clean_intermediate_directories(self):
         self.buildEnv.clean_intermediate_directories()
-
 
 
 class MetaPlatformInfo(PlatformInfo):
@@ -133,7 +125,6 @@ class MetaPlatformInfo(PlatformInfo):
         return targetDefs
 
 
-
 def MixedMixin(static_name):
     class MixedMixinClass:
         mixed = True
@@ -141,7 +132,7 @@ def MixedMixin(static_name):
 
         def add_targets(self, targetName, targets):
             print(targetName)
-            if option('target') == targetName:
+            if option("target") == targetName:
                 return super().add_targets(targetName, targets)
             else:
                 static_platform = self.get_platform(static_name, targets)
@@ -150,7 +141,7 @@ def MixedMixin(static_name):
         def get_fully_qualified_dep(self, dep):
             if isinstance(dep, tuple):
                 return dep
-            if option('target') == dep:
+            if option("target") == dep:
                 return self.name, dep
             return static_name, dep
 
@@ -161,16 +152,27 @@ def MixedMixin(static_name):
 
         def get_include_dirs(self):
             return [
-                pj(self.buildEnv.install_dir, 'include'),
-                pj(self.static_buildEnv.install_dir, 'include')
+                pj(self.buildEnv.install_dir, "include"),
+                pj(self.static_buildEnv.install_dir, "include"),
             ]
 
         def get_env(self):
             env = super().get_env()
-            env['PATH'] = ':'.join([pj(self.static_buildEnv.install_dir, 'bin')] + [env['PATH']])
-            pkgconfig_path = pj(self.static_buildEnv.install_dir, self.static_buildEnv.libprefix, 'pkgconfig')
-            env['PKG_CONFIG_PATH'] = ':'.join([env['PKG_CONFIG_PATH'], pkgconfig_path])
-            env['CPPFLAGS'] = " ".join(['-I'+pj(self.static_buildEnv.install_dir, 'include'), env['CPPFLAGS']])
+            env["PATH"] = ":".join(
+                [pj(self.static_buildEnv.install_dir, "bin")] + [env["PATH"]]
+            )
+            pkgconfig_path = pj(
+                self.static_buildEnv.install_dir,
+                self.static_buildEnv.libprefix,
+                "pkgconfig",
+            )
+            env["PKG_CONFIG_PATH"] = ":".join([env["PKG_CONFIG_PATH"], pkgconfig_path])
+            env["CPPFLAGS"] = " ".join(
+                [
+                    "-I" + pj(self.static_buildEnv.install_dir, "include"),
+                    env["CPPFLAGS"],
+                ]
+            )
             return env
 
     return MixedMixinClass

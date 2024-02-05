@@ -1,7 +1,5 @@
-from .base import (
-    Dependency,
-    GitClone,
-    MesonBuilder)
+from .base import Dependency, GitClone, MesonBuilder
+
 
 class KiwixTools(Dependency):
     name = "kiwix-tools"

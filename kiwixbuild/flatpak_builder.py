@@ -1,4 +1,3 @@
-
 import sys
 from collections import OrderedDict
 from .buildenv import *
@@ -9,9 +8,13 @@ from .dependencies import Dependency
 from .packages import PACKAGE_NAME_MAPPERS
 from .versions import base_deps_versions
 from ._global import (
-    neutralEnv, option,
-    add_target_step, get_target_step, target_steps,
-    backend)
+    neutralEnv,
+    option,
+    add_target_step,
+    get_target_step,
+    target_steps,
+    backend,
+)
 from . import _global
 from .dependencies.base import (
     Source,
@@ -22,7 +25,8 @@ from .dependencies.base import (
     CMakeBuilder,
     QMakeBuilder,
     MakeBuilder,
-    SCRIPT_DIR)
+    SCRIPT_DIR,
+)
 import json
 from shutil import copyfile
 from urllib.parse import urlparse
@@ -30,54 +34,60 @@ from urllib.request import urlopen
 import json
 
 MANIFEST = {
-    'app-id': 'org.kiwix.desktop',
-    'runtime': 'org.kde.Platform',
-    'runtime-version': base_deps_versions['org.kde'],
-    'base': 'io.qt.qtwebengine.BaseApp',
-    'base-version': base_deps_versions['org.kde'], # keep BaseApp (qwebengine) in sync with org.kde
-    'sdk': 'org.kde.Sdk',
-    'command': 'kiwix-desktop',
-    'rename-icon': 'kiwix-desktop',
-    'finish-args': [
-        '--socket=wayland',
-        '--socket=x11',
-        '--share=network',
-        '--share=ipc',
-        '--device=dri',
-        '--socket=pulseaudio',
+    "app-id": "org.kiwix.desktop",
+    "runtime": "org.kde.Platform",
+    "runtime-version": base_deps_versions["org.kde"],
+    "base": "io.qt.qtwebengine.BaseApp",
+    "base-version": base_deps_versions[
+        "org.kde"
+    ],  # keep BaseApp (qwebengine) in sync with org.kde
+    "sdk": "org.kde.Sdk",
+    "command": "kiwix-desktop",
+    "rename-icon": "kiwix-desktop",
+    "finish-args": [
+        "--socket=wayland",
+        "--socket=x11",
+        "--share=network",
+        "--share=ipc",
+        "--device=dri",
+        "--socket=pulseaudio",
     ],
-    'cleanup': [
-        '/include',
-        '/lib/pkgconfig',
-        '/lib/cmake',
-        '/lib/*.la',
-        '/bin/curl',
-        '/bin/copydatabase',
-        '/bin/kiwix-compile-resources',
-        '/bin/kiwix-manage',
-        '/bin/kiwix-read',
-        '/bin/kiwix-search',
-        '/bin/quest',
-        '/bin/simple*',
-        '/bin/xapian-*',
-        '/share/aclocal',
-        '/share/doc',
-        '/share/man'
-    ]
+    "cleanup": [
+        "/include",
+        "/lib/pkgconfig",
+        "/lib/cmake",
+        "/lib/*.la",
+        "/bin/curl",
+        "/bin/copydatabase",
+        "/bin/kiwix-compile-resources",
+        "/bin/kiwix-manage",
+        "/bin/kiwix-read",
+        "/bin/kiwix-search",
+        "/bin/quest",
+        "/bin/simple*",
+        "/bin/xapian-*",
+        "/share/aclocal",
+        "/share/doc",
+        "/share/man",
+    ],
 }
 
-GET_REF_URL_API_TEMPLATE = 'https://api.github.com/repos{repo}/git/refs/tags/{ref}'
+GET_REF_URL_API_TEMPLATE = "https://api.github.com/repos{repo}/git/refs/tags/{ref}"
+
 
 class FlatpakBuilder:
     def __init__(self):
         self._targets = {}
-        PlatformInfo.get_platform('neutral', self._targets)
-        self.platform = PlatformInfo.get_platform('flatpak', self._targets)
-        if neutralEnv('distname') not in self.platform.compatible_hosts:
-            print(('ERROR: The target platform {} cannot be build on host {}.\n'
-                   'Select another target platform or change your host system.'
-                  ).format(self.platform.name, neutralEnv('distname')))
-        self.targetDefs = self.platform.add_targets(option('target'), self._targets)
+        PlatformInfo.get_platform("neutral", self._targets)
+        self.platform = PlatformInfo.get_platform("flatpak", self._targets)
+        if neutralEnv("distname") not in self.platform.compatible_hosts:
+            print(
+                (
+                    "ERROR: The target platform {} cannot be build on host {}.\n"
+                    "Select another target platform or change your host system."
+                ).format(self.platform.name, neutralEnv("distname"))
+            )
+        self.targetDefs = self.platform.add_targets(option("target"), self._targets)
 
     def finalize_target_steps(self):
         steps = []
@@ -89,9 +99,9 @@ class FlatpakBuilder:
             plt = PlatformInfo.all_platforms[pltName]
             for tlcName in plt.toolchain_names:
                 tlc = Dependency.all_deps[tlcName]
-                src_plt_step = ('source', tlcName)
+                src_plt_step = ("source", tlcName)
                 add_target_step(src_plt_step, self._targets[src_plt_step])
-                blt_plt_step = ('neutral' if tlc.neutral else pltName, tlcName)
+                blt_plt_step = ("neutral" if tlc.neutral else pltName, tlcName)
                 add_target_step(blt_plt_step, self._targets[blt_plt_step])
 
         for dep in steps:
@@ -104,7 +114,7 @@ class FlatpakBuilder:
 
     def order_dependencies(self, targetDef, targets):
         targetPlatformName, targetName = targetDef
-        if targetPlatformName == 'source':
+        if targetPlatformName == "source":
             # Do not try to order sources, they will be added as dep by the
             # build step two lines later.
             return
@@ -121,18 +131,18 @@ class FlatpakBuilder:
                 depPlatform, depName = targetPlatformName, dep
             if (depPlatform, depName) in targets:
                 yield from self.order_dependencies((depPlatform, depName), targets)
-        yield ('source', targetName)
+        yield ("source", targetName)
         yield targetDef
 
     def instanciate_steps(self):
         for stepDef in list(target_steps()):
             stepPlatform, stepName = stepDef
             stepClass = Dependency.all_deps[stepName]
-            if stepPlatform == 'source':
+            if stepPlatform == "source":
                 source = get_target_step(stepDef)(stepClass)
                 add_target_step(stepDef, source)
             else:
-                source = get_target_step(stepName, 'source')
+                source = get_target_step(stepName, "source")
                 env = PlatformInfo.get_platform(stepPlatform).buildEnv
                 builder = get_target_step(stepDef)(stepClass, source, env)
                 add_target_step(stepDef, builder)
@@ -142,121 +152,126 @@ class FlatpakBuilder:
         modules = OrderedDict()
         for stepDef in steps:
             module = modules.setdefault(stepDef[1], {})
-            module['name'] = stepDef[1]
-            if stepDef[0] == 'source':
+            module["name"] = stepDef[1]
+            if stepDef[0] == "source":
                 source = get_target_step(stepDef)
-                if getattr(source, 'flatpak_no_autogen', False):
-                    module['no-autogen'] = True
-                module_sources = module.setdefault('sources', [])
+                if getattr(source, "flatpak_no_autogen", False):
+                    module["no-autogen"] = True
+                module_sources = module.setdefault("sources", [])
                 if isinstance(source, ReleaseDownload):
                     src = {
-                        'type': 'archive',
-                        'sha256': source.archive.sha256,
-                        'url': source.archive.url
+                        "type": "archive",
+                        "sha256": source.archive.sha256,
+                        "url": source.archive.url,
                     }
-                    if hasattr(source, 'flatpak_dest'):
-                        src['dest'] = source.flatpak_dest
+                    if hasattr(source, "flatpak_dest"):
+                        src["dest"] = source.flatpak_dest
                     module_sources.append(src)
                 elif isinstance(source, GitClone):
                     src = {
-                        'type': 'git',
-                        'url': source.git_remote,
-                        'tag': source.git_ref
+                        "type": "git",
+                        "url": source.git_remote,
+                        "tag": source.git_ref,
                     }
                     try:
                         parsed = urlparse(source.git_remote)
-                        if parsed.hostname == 'github.com':
+                        if parsed.hostname == "github.com":
                             repo = parsed.path[:-4]
                             api_url = GET_REF_URL_API_TEMPLATE.format(
-                                repo = repo,
-                                ref = source.git_ref)
+                                repo=repo, ref=source.git_ref
+                            )
                             with urlopen(api_url) as r:
                                 ret = json.loads(r.read())
-                            src['commit'] = ret['object']['sha']
+                            src["commit"] = ret["object"]["sha"]
                     except:
                         pass
                     module_sources.append(src)
-                for p in getattr(source, 'patches', []):
-                    patch = {
-                        'type': 'patch',
-                        'path': 'patches/' + p
-                    }
+                for p in getattr(source, "patches", []):
+                    patch = {"type": "patch", "path": "patches/" + p}
                     module_sources.append(patch)
 
-                if hasattr(source, 'flatpak_command'):
-                    command = {
-                        'type': 'shell',
-                        'commands': [source.flatpak_command]
-                    }
+                if hasattr(source, "flatpak_command"):
+                    command = {"type": "shell", "commands": [source.flatpak_command]}
                     module_sources.append(command)
 
             else:
                 builder = get_target_step(stepDef)
                 builder.set_flatpak_buildsystem(module)
-                print(module['name'])
+                print(module["name"])
 
         manifest = MANIFEST.copy()
-        modules = [m for m in modules.values() if m.get('sources')]
+        modules = [m for m in modules.values() if m.get("sources")]
         for m in modules:
-            temp = m['sources']
-            del m['sources']
-            m['sources'] = temp
-        manifest['modules'] = modules
-        manifest_name = "{}.json".format(MANIFEST['app-id'])
+            temp = m["sources"]
+            del m["sources"]
+            m["sources"] = temp
+        manifest["modules"] = modules
+        manifest_name = "{}.json".format(MANIFEST["app-id"])
         manifest_path = pj(self.platform.buildEnv.build_dir, manifest_name)
-        with open(manifest_path, 'w') as f:
+        with open(manifest_path, "w") as f:
             f.write(json.dumps(manifest, indent=4))
 
     def copy_patches(self):
-        sourceDefs = (tDef for tDef in target_steps() if tDef[0] == 'source')
+        sourceDefs = (tDef for tDef in target_steps() if tDef[0] == "source")
         for sourceDef in sourceDefs:
             source = get_target_step(sourceDef)
-            if not hasattr(source, 'patches'):
+            if not hasattr(source, "patches"):
                 continue
             for p in source.patches:
-                path = pj(SCRIPT_DIR, 'patches', p)
-                os.makedirs(pj(self.platform.buildEnv.build_dir, 'patches'), exist_ok=True)
-                dest = pj(self.platform.buildEnv.build_dir, 'patches', p)
+                path = pj(SCRIPT_DIR, "patches", p)
+                os.makedirs(
+                    pj(self.platform.buildEnv.build_dir, "patches"), exist_ok=True
+                )
+                dest = pj(self.platform.buildEnv.build_dir, "patches", p)
                 copyfile(path, dest)
 
-
     def build(self):
-        log = pj(self.platform.buildEnv.log_dir, 'cmd_build_flatpak.log')
-        context = Context('build', log, False)
+        log = pj(self.platform.buildEnv.log_dir, "cmd_build_flatpak.log")
+        context = Context("build", log, False)
         command = [
             "flatpak-builder",
-            "--user", "--ccache", "--force-clean", "--keep-build-dirs",
-            "--disable-rofiles-fuse", "--repo=repo", "builddir",
-            f"{MANIFEST['app-id']}.json"
+            "--user",
+            "--ccache",
+            "--force-clean",
+            "--keep-build-dirs",
+            "--disable-rofiles-fuse",
+            "--repo=repo",
+            "builddir",
+            f"{MANIFEST['app-id']}.json",
         ]
         try:
-            run_command(command, self.platform.buildEnv.build_dir, context, env=self.platform.get_env())
+            run_command(
+                command,
+                self.platform.buildEnv.build_dir,
+                context,
+                env=self.platform.get_env(),
+            )
             context._finalise()
         except subprocess.CalledProcessError:
-            with open(log, 'r') as f:
+            with open(log, "r") as f:
                 print(f.read())
             raise StopBuild()
 
     def bundle(self):
-        log = pj(self.platform.buildEnv.log_dir, 'cmd_bundle_flatpak.log')
-        context = Context('bundle', log, False)
-        app_id = MANIFEST['app-id']
-        command = [
-            "flatpak", "build-bundle", "repo",
-            f"{app_id}.flatpak",
-            app_id
-        ]
+        log = pj(self.platform.buildEnv.log_dir, "cmd_bundle_flatpak.log")
+        context = Context("bundle", log, False)
+        app_id = MANIFEST["app-id"]
+        command = ["flatpak", "build-bundle", "repo", f"{app_id}.flatpak", app_id]
         try:
-            run_command(command, self.platform.buildEnv.build_dir, context, env=self.platform.get_env())
+            run_command(
+                command,
+                self.platform.buildEnv.build_dir,
+                context,
+                env=self.platform.get_env(),
+            )
             context._finalise()
         except subprocess.CalledProcessError:
-            with open(log, 'r') as f:
+            with open(log, "r") as f:
                 print(f.read())
             raise StopBuild()
 
-
     def _get_packages(self):
-        package_name_mapper = PACKAGE_NAME_MAPPERS.get('flatpak', {})
+        package_name_mapper = PACKAGE_NAME_MAPPERS.get("flatpak", {})
 
         to_drop = []
         for builderDef in self._targets:
@@ -295,11 +310,10 @@ class FlatpakBuilder:
             self.bundle()
             # No error, clean intermediate file at end of build if needed.
             print("[CLEAN]")
-            if option('clean_at_end'):
+            if option("clean_at_end"):
                 for platform in PlatformInfo.all_running_platforms.values():
                     platform.clean_intermediate_directories()
             else:
                 print("SKIP")
         except StopBuild:
             sys.exit("Stopping build due to errors")
-

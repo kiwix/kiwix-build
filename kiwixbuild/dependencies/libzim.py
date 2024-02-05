@@ -1,8 +1,6 @@
-from .base import (
-    Dependency,
-    GitClone,
-    MesonBuilder)
+from .base import Dependency, GitClone, MesonBuilder
 from kiwixbuild._global import option, get_target_step
+
 
 class Libzim(Dependency):
     name = "libzim"
@@ -24,18 +22,18 @@ class Libzim(Dependency):
 
         @classmethod
         def get_dependencies(cls, platformInfo, allDeps):
-            deps = ['lzma', 'zstd', 'xapian-core', 'icu4c']
-            if platformInfo.name not in ('flatpak', 'wasm'):
-                deps.append('zim-testing-suite')
+            deps = ["lzma", "zstd", "xapian-core", "icu4c"]
+            if platformInfo.name not in ("flatpak", "wasm"):
+                deps.append("zim-testing-suite")
             return deps
 
         @property
         def configure_options(self):
             platformInfo = self.buildEnv.platformInfo
-            if platformInfo.build == 'android':
+            if platformInfo.build == "android":
                 yield "-DUSE_BUFFER_HEADER=false"
                 yield "-Dstatic-linkage=true"
-            if platformInfo.mixed and option('target') == 'libzim':
+            if platformInfo.mixed and option("target") == "libzim":
                 yield "-Dstatic-linkage=true"
             if platformInfo.name == "flatpak":
                 yield "--wrap-mode=nodownload"
@@ -44,11 +42,11 @@ class Libzim(Dependency):
                 yield "-Dexamples=false"
                 yield "-DUSE_MMAP=false"
             if platformInfo.name not in ("flatpak", "wasm"):
-                zim_testing_suite = get_target_step('zim-testing-suite', 'source')
-                yield '-Dtest_data_dir={}'.format(zim_testing_suite.source_path)
+                zim_testing_suite = get_target_step("zim-testing-suite", "source")
+                yield "-Dtest_data_dir={}".format(zim_testing_suite.source_path)
 
         @property
         def library_type(self):
-            if self.buildEnv.platformInfo.build == 'android':
-                return 'shared'
+            if self.buildEnv.platformInfo.build == "android":
+                return "shared"
             return super().library_type
