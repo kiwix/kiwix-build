@@ -108,12 +108,6 @@ Android
 
 `kiwix-android` (https://github.com/kiwix/kiwix-android) depends of
 the `libkiwix` project.
-It uses a special `.aar` file that represent (and embed) the libkiwix for
-all supported android arch. This is a kind of fat archive we have for MacOs.
-
-The `.aar` file is build using the `libkiwix-app` project.
-`libkiwix-app` itself is architecture independent (it is just a packaging of
-other archives) but it use `libkiwix` who is architecture dependent.
 
 When building `libkiwix`, you should directly use the
 target-platform `android_<arch>`:
@@ -124,17 +118,14 @@ kiwix-build libkiwix --target-platform android_arm
 But, `libkiwix-app` is mainly multi arch.
 To compile `libkiwix-app`, you must use the `android` platform:
 ```bash
-kiwix-build --target-platform android libkiwix-app
-kiwix-build libkiwix-app # because `android` platform is the default for `libkiwix-app`
+kiwix-build --target-platform android libkiwix
 ```
 
 By default, when using platform `android`, `libkiwix` will be build for
 all architectures. This can be changed by using the option `--android-arch`:
 ```bash
-kiwix-build libkiwix-app # aar with all architectures
-kiwix-build libkiwix-app --android-arch arm # aar with arm architecture
-kiwix-build libkiwix-app --android-arch arm --android-arch arm64 # aan with arm and arm64 architectures
-```
+kiwix-build libkiwix --android-arch arm # aar with arm architecture
+kiwix-build libkiwix --android-arch arm --android-arch arm64 # aan with arm and arm64 architectures
 
 To build `kiwix-android` itself, you should see the documentation of `kiwix-android`.
 
