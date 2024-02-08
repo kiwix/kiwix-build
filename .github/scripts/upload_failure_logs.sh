@@ -4,7 +4,7 @@ set -e
 
 cd $HOME
 
-ARCHIVE_NAME=fail_log_${OS_NAME}_${PLATFORM_TARGET}.tar.gz
+ARCHIVE_NAME=fail_log_${OS_NAME}_${COMPILE_CONFIG}.tar.gz
 tar -czf ${ARCHIVE_NAME} $HOME/BUILD_* $HOME/SOURCE $HOME/LOGS $HOME/TOOLCHAINS
 
 echo "Uploading archive $ARCHIVE_NAME"

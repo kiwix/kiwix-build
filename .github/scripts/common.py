@@ -20,12 +20,11 @@ from kiwixbuild.versions import (
 )
 
 
-
-PLATFORM_TARGET = _environ["PLATFORM_TARGET"]
+COMPILE_CONFIG = _environ["COMPILE_CONFIG"]
 OS_NAME = _environ["OS_NAME"]
 HOME = Path(os.path.expanduser("~"))
 
-BASE_DIR = HOME / "BUILD_{}".format(PLATFORM_TARGET)
+BASE_DIR = HOME / "BUILD_{}".format(COMPILE_CONFIG)
 SOURCE_DIR = HOME / "SOURCE"
 ARCHIVE_DIR = HOME / "ARCHIVE"
 TOOLCHAIN_DIR = BASE_DIR / "TOOLCHAINS"
@@ -35,7 +34,7 @@ KBUILD_SOURCE_DIR = HOME / "kiwix-build"
 
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
 MAKE_RELEASE = re.fullmatch(r"r_[0-9]+", _ref) is not None
-MAKE_RELEASE = MAKE_RELEASE and (_environ.get('GITHUB_EVENT_NAME') != 'schedule')
+MAKE_RELEASE = MAKE_RELEASE and (_environ.get("GITHUB_EVENT_NAME") != "schedule")
 
 if not MAKE_RELEASE and _ref != "main":
     DEV_BRANCH = _ref
@@ -45,19 +44,18 @@ else:
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
 
-BIN_EXT = ".exe" if PLATFORM_TARGET.startswith("win32_") else ""
+BIN_EXT = ".exe" if COMPILE_CONFIG.startswith("win32_") else ""
+
 
 def major_version(version: str) -> str:
     return version.split(".")[0]
+
 
 # We have build everything. Now create archives for public deployement.
 EXPORT_FILES = {
     "kiwix-tools": (
         INSTALL_DIR / "bin",
-        [
-            f + BIN_EXT
-            for f in ("kiwix-manage", "kiwix-search", "kiwix-serve")
-        ],
+        [f + BIN_EXT for f in ("kiwix-manage", "kiwix-search", "kiwix-serve")],
     ),
     "zim-tools": (
         INSTALL_DIR / "bin",
@@ -72,7 +70,7 @@ EXPORT_FILES = {
                 "zimpatch",
                 "zimsplit",
                 "zimwriterfs",
-                "zimrecreate"
+                "zimrecreate",
             )
         ],
     ),
@@ -80,11 +78,9 @@ EXPORT_FILES = {
         INSTALL_DIR,
         (
             # We need to package all dependencies (`*.a`) on wasm
-            "lib/*/libzim.a" if PLATFORM_TARGET != "wasm" else "lib/*.a",
+            "lib/*/libzim.a" if COMPILE_CONFIG != "wasm" else "lib/*.a",
             "lib/*/libzim.so",
-            "lib/*/libzim.so.{version}".format(
-                version=main_project_versions["libzim"]
-            ),
+            "lib/*/libzim.so.{version}".format(version=main_project_versions["libzim"]),
             "lib/*/libzim.so.{version}".format(
                 version=major_version(main_project_versions["libzim"])
             ),
@@ -95,9 +91,8 @@ EXPORT_FILES = {
             "lib/*/libzim.pc",
             "include/zim/**/*.h",
             "share/icu/{}/icudt{}l.dat".format(
-                base_deps_versions["icu4c"],
-                major_version(base_deps_versions["icu4c"])
-            )
+                base_deps_versions["icu4c"], major_version(base_deps_versions["icu4c"])
+            ),
         ),
     ),
     "libkiwix": (
@@ -118,14 +113,14 @@ EXPORT_FILES = {
             "lib/*/libkiwix.pc",
             "include/kiwix/**/*.h",
             "share/icu/{}/icudt{}l.dat".format(
-                base_deps_versions["icu4c"],
-                major_version(base_deps_versions["icu4c"])
-            )
+                base_deps_versions["icu4c"], major_version(base_deps_versions["icu4c"])
+            ),
         ),
     ),
 }
 
 DATE = date.today().isoformat()
+
 
 def print_message(message, *args, **kwargs):
     message = message.format(*args, **kwargs)
@@ -136,23 +131,26 @@ def print_message(message, *args, **kwargs):
 MANIFEST_TEMPLATE = """{archive_name}
 ***************************
 
-Dependencies archive for {target} on platform {platform}
+Dependencies archive for {target} using config {config}
 Generated at {date}
 """
 
 
-def write_manifest(manifest_file, archive_name, target, platform):
+def write_manifest(manifest_file, archive_name, target, config):
     with manifest_file.open(mode="w") as f:
         f.write(
             MANIFEST_TEMPLATE.format(
-                archive_name=archive_name, target=target, platform=platform, date=DATE,
+                archive_name=archive_name,
+                target=target,
+                config=config,
+                date=DATE,
             )
         )
 
 
 def run_kiwix_build(
     target,
-    platform,
+    config,
     build_deps_only=False,
     target_only=False,
     make_release=False,
@@ -163,7 +161,7 @@ def run_kiwix_build(
     command.append("--hide-progress")
     command.append("--fast-clone")
     command.append("--assume-packages-installed")
-    command.extend(["--target-platform", platform])
+    command.extend(["--config", config])
     if build_deps_only:
         command.append("--build-deps-only")
     if target_only:
@@ -240,7 +238,7 @@ def upload_archive(archive, project, make_release, dev_branch=None):
         print_message("No archive {} to upload!", archive)
         return
 
-    if project.startswith("kiwix-") or project in ['libkiwix']:
+    if project.startswith("kiwix-") or project in ["libkiwix"]:
         host = "ci@master.download.kiwix.org:30022"
         dest_path = "/data/download/"
     else:
@@ -264,36 +262,39 @@ def upload_archive(archive, project, make_release, dev_branch=None):
 
 # This remove "share/doc" and "share/man" from the thing to copy in the deps archive
 def filter_install_dir(path):
-    for dir in path.glob('*'):
-        if dir.name not in ['share']:
+    for dir in path.glob("*"):
+        if dir.name not in ["share"]:
             yield dir
         else:
-            for sub_dir in dir.glob('*'):
-                if sub_dir.name not in ['doc', 'man']:
+            for sub_dir in dir.glob("*"):
+                if sub_dir.name not in ["doc", "man"]:
                     yield sub_dir
 
-# Full: True if we are creating a full archive to be used as cache by kiwix-build (base_deps2_{os}_{platform}_{base_deps_version}.tar.xz)
-# Full: False if we are creating a archive to be used as pre-cached dependencies for project's CI (deps2_{os}_{platform}_{target}.tar.xz)
+
+# Full: True if we are creating a full archive to be used as cache by kiwix-build (base_deps2_{os}_{config}_{base_deps_version}.tar.xz)
+# Full: False if we are creating a archive to be used as pre-cached dependencies for project's CI (deps2_{os}_{config}_{target}.tar.xz)
 def make_deps_archive(target=None, name=None, full=False):
     archive_name = name or "deps2_{}_{}_{}.tar.xz".format(
-        OS_NAME, PLATFORM_TARGET, target
+        OS_NAME, COMPILE_CONFIG, target
     )
     print_message("Create archive {}.", archive_name)
     files_to_archive = list(filter_install_dir(INSTALL_DIR))
     files_to_archive += HOME.glob("BUILD_*/LOGS")
-    if PLATFORM_TARGET == "apple_all_static":
-        for subplatform in AppleXCFramework.subPlatformNames:
-            base_dir = HOME / "BUILD_{}".format(subplatform)
+    if COMPILE_CONFIG == "apple_all_static":
+        for subconfig in AppleXCFramework.subConfigNames:
+            base_dir = HOME / "BUILD_{}".format(subconfig)
             files_to_archive += filter_install_dir(base_dir / "INSTALL")
             if (base_dir / "meson_cross_file.txt").exists():
                 files_to_archive.append(base_dir / "meson_cross_file.txt")
 
-    if PLATFORM_TARGET.endswith("_mixed"):
-        static_platform = PLATFORM_TARGET.replace("_mixed", "_static")
-        files_to_archive += filter_install_dir(HOME / ("BUILD_" + static_platform) / "INSTALL")
-    if PLATFORM_TARGET.startswith("android_"):
+    if COMPILE_CONFIG.endswith("_mixed"):
+        static_config = COMPILE_CONFIG.replace("_mixed", "_static")
+        files_to_archive += filter_install_dir(
+            HOME / ("BUILD_" + static_config) / "INSTALL"
+        )
+    if COMPILE_CONFIG.startswith("android_"):
         files_to_archive += filter_install_dir(HOME / "BUILD_neutral" / "INSTALL")
-        base_dir = HOME / "BUILD_{}".format(PLATFORM_TARGET)
+        base_dir = HOME / "BUILD_{}".format(COMPILE_CONFIG)
         if (base_dir / "meson_cross_file.txt").exists():
             files_to_archive.append(base_dir / "meson_cross_file.txt")
     # Copy any toolchain
@@ -303,7 +304,7 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive.append(BASE_DIR / "meson_cross_file.txt")
 
     manifest_file = BASE_DIR / "manifest.txt"
-    write_manifest(manifest_file, archive_name, target, PLATFORM_TARGET)
+    write_manifest(manifest_file, archive_name, target, COMPILE_CONFIG)
     files_to_archive.append(manifest_file)
 
     relative_path = HOME
@@ -311,9 +312,9 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += ARCHIVE_DIR.glob(".*_ok")
         files_to_archive += BASE_DIR.glob("*/.*_ok")
         # Add also static build for mixed target
-        if PLATFORM_TARGET.endswith("_mixed"):
-            static_platform = PLATFORM_TARGET.replace("_mixed", "_static")
-            files_to_archive += (HOME / ("BUILD_" + static_platform)).glob("*/.*_ok")
+        if COMPILE_CONFIG.endswith("_mixed"):
+            static_config = COMPILE_CONFIG.replace("_mixed", "_static")
+            files_to_archive += (HOME / ("BUILD_" + static_config)).glob("*/.*_ok")
         # Native dyn and static is needed for potential cross compilation that use native tools (icu)
         files_to_archive += (HOME / "BUILD_native_dyn").glob("*/.*_ok")
         files_to_archive += (HOME / "BUILD_native_static").glob("*/.*_ok")
@@ -391,7 +392,7 @@ def create_desktop_image(make_release):
         postfix = DATE
         src_dir = SOURCE_DIR / "kiwix-desktop"
 
-    if PLATFORM_TARGET == "flatpak":
+    if COMPILE_CONFIG == "flatpak":
         build_path = BASE_DIR / "org.kiwix.desktop.flatpak"
         app_name = "org.kiwix.desktop.{}.flatpak".format(postfix)
         print_message("archive is {}", build_path)
@@ -459,7 +460,6 @@ def update_flathub_git():
 
 
 def fix_macos_rpath(project):
-
     base_dir, export_files = EXPORT_FILES[project]
     for file in filter(lambda f: f.endswith(".dylib"), export_files):
         lib = base_dir / file
@@ -478,22 +478,35 @@ def trigger_workflow(repo, workflow="docker.yml", ref="main", inputs=None):
     ref: branch or tag name
     inputs: dict of inputs to pass to the workflow"""
     print_message(
-        "triggering workflow `{workflow}` on {repo}@{ref} "
-        "with inputs={inputs}", workflow=workflow, repo=repo, ref=ref, inputs=inputs)
+        "triggering workflow `{workflow}` on {repo}@{ref} " "with inputs={inputs}",
+        workflow=workflow,
+        repo=repo,
+        ref=ref,
+        inputs=inputs,
+    )
 
     url = "{base_url}/repos/{repo}/actions/workflows/{workflow}/dispatches".format(
         base_url=os.getenv("GITHUB_API_URL", "https://api.github.com"),
-        repo=repo, workflow=workflow)
+        repo=repo,
+        workflow=workflow,
+    )
 
-    resp = requests.post(url, headers={
+    resp = requests.post(
+        url,
+        headers={
             "Content-Type": "application/json",
-            "Authorization": "token {token}".format(
-                token=os.getenv('GITHUB_PAT', '')),
+            "Authorization": "token {token}".format(token=os.getenv("GITHUB_PAT", "")),
             "Accept": "application/vnd.github.v3+json",
-        }, json={"ref": ref, "inputs": inputs}, timeout=5)
+        },
+        json={"ref": ref, "inputs": inputs},
+        timeout=5,
+    )
     if resp.status_code != 204:
-        raise ValueError("Unexpected HTTP {code}: {reason}".format(
-                         code=resp.status_code, reason=resp.reason))
+        raise ValueError(
+            "Unexpected HTTP {code}: {reason}".format(
+                code=resp.status_code, reason=resp.reason
+            )
+        )
 
 
 def trigger_docker_publish(target):
@@ -501,13 +514,14 @@ def trigger_docker_publish(target):
         return
 
     version = get_postfix(target)
-    repo = {
-        "zim-tools": "openzim/zim-tools",
-        "kiwix-tools": "kiwix/kiwix-tools"}.get(target)
+    repo = {"zim-tools": "openzim/zim-tools", "kiwix-tools": "kiwix/kiwix-tools"}.get(
+        target
+    )
 
     try:
-        trigger_workflow(repo, workflow="docker.yml", ref="main",
-                         inputs={"version": version})
+        trigger_workflow(
+            repo, workflow="docker.yml", ref="main", inputs={"version": version}
+        )
         print_message("triggered docker workflow on {repo}", repo=repo)
     except Exception as exc:
         print_message("Error triggering workflow: {exc}", exc=exc)
@@ -515,39 +529,52 @@ def trigger_docker_publish(target):
 
 
 def notarize_macos_build(project):
-    """ sign and notarize files for macOS
+    """sign and notarize files for macOS
 
-        Expects the following environment:
-        - `SIGNING_IDENTITY` environ with Certificate name/identity
-        - `KEYCHAIN` environ with path to the keychain storing credentials
-        - `KEYCHAIN_PROFILE` environ with name of the profile in that keychain
-        - `KEYCHAIN_PASSWORD` environ with password to unlock the keychain
-        """
+    Expects the following environment:
+    - `SIGNING_IDENTITY` environ with Certificate name/identity
+    - `KEYCHAIN` environ with path to the keychain storing credentials
+    - `KEYCHAIN_PROFILE` environ with name of the profile in that keychain
+    - `KEYCHAIN_PASSWORD` environ with password to unlock the keychain
+    """
     if project != "libzim":
         return
 
     # currently only supports libzim use case: sign every dylib
     base_dir, export_files = EXPORT_FILES[project]
-    filepaths = [base_dir.joinpath(file)
-                 for file in filter(lambda f: f.endswith(".dylib"), export_files)
-                 if not base_dir.joinpath(file).is_symlink()]
+    filepaths = [
+        base_dir.joinpath(file)
+        for file in filter(lambda f: f.endswith(".dylib"), export_files)
+        if not base_dir.joinpath(file).is_symlink()
+    ]
 
     if not filepaths:
         return
 
     for filepath in filepaths:
-        subprocess.check_call(["/usr/bin/codesign", "--force", "--sign",
-                               os.getenv("SIGNING_IDENTITY", "no-signing-ident"),
-                               "--keychain",
-                               os.getenv("KEYCHAIN", "no-keychain-path"),
-                               str(filepath), "--deep", "--timestamp"], env=os.environ)
+        subprocess.check_call(
+            [
+                "/usr/bin/codesign",
+                "--force",
+                "--sign",
+                os.getenv("SIGNING_IDENTITY", "no-signing-ident"),
+                "--keychain",
+                os.getenv("KEYCHAIN", "no-keychain-path"),
+                str(filepath),
+                "--deep",
+                "--timestamp",
+            ],
+            env=os.environ,
+        )
 
     # create a zip of the dylibs and upload for notarization
     zip_name = "{}.zip".format(project)
     subprocess.check_call(
         ["/usr/bin/ditto", "-c", "-k", "--keepParent"]
-        + [str(f) for f in filepaths] + [zip_name],
-        env=os.environ)
+        + [str(f) for f in filepaths]
+        + [zip_name],
+        env=os.environ,
+    )
 
     # make sure keychain is unlocked
     subprocess.check_call(

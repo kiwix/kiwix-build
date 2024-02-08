@@ -6,13 +6,13 @@ from common import (
     run_kiwix_build,
     make_deps_archive,
     upload,
-    PLATFORM_TARGET,
+    COMPILE_CONFIG,
     DEV_BRANCH,
 )
 from build_definition import select_build_targets, DEPS
 
 for target in select_build_targets(DEPS):
-    run_kiwix_build(target, platform=PLATFORM_TARGET, build_deps_only=True)
+    run_kiwix_build(target, config=COMPILE_CONFIG, build_deps_only=True)
     archive_file = make_deps_archive(target=target)
     if DEV_BRANCH:
         destination = "/data/tmp/ci/dev_preview/" + DEV_BRANCH

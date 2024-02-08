@@ -1,79 +1,80 @@
 import shutil
 
-from .base import (
-    Dependency,
-    ReleaseDownload,
-    MakeBuilder,
-    QMakeBuilder)
+from .base import Dependency, ReleaseDownload, MakeBuilder, QMakeBuilder
 
 from kiwixbuild.utils import Remotefile, pj, SkipCommand
 
 
 class Qt(Dependency):
-    name = 'qt'
+    name = "qt"
 
     class Source(ReleaseDownload):
         name = "qt"
         source_dir = "qt-5.10.1"
-        archive = Remotefile('qt-everywhere-src-5.10.1.tar.xz',
-                             '',
-                             'http://ftp.oregonstate.edu/.1/blfs/conglomeration/qt5/qt-everywhere-src-5.10.1.tar.xz')
+        archive = Remotefile(
+            "qt-everywhere-src-5.10.1.tar.xz",
+            "",
+            "http://ftp.oregonstate.edu/.1/blfs/conglomeration/qt5/qt-everywhere-src-5.10.1.tar.xz",
+        )
 
     class Builder(MakeBuilder):
-        dependencies = ['icu4c', 'zlib']
+        dependencies = ["icu4c", "zlib"]
         dynamic_configure_options = ["-shared"]
         static_configure_options = ["-static"]
 
         @property
         def all_configure_options(self):
             yield from self.configure_options
-            if self.buildEnv.platformInfo.static:
+            if self.buildEnv.configInfo.static:
                 yield from self.static_configure_options
             else:
                 yield from self.dynamic_configure_options
             if not self.target.force_native_build:
-                yield from self.buildEnv.platformInfo.configure_options
-            yield from ('-prefix', self.buildEnv.install_dir)
-            yield from ('-libdir', pj(self.buildEnv.install_dir, self.buildEnv.libprefix))
+                yield from self.buildEnv.configInfo.configure_options
+            yield from ("-prefix", self.buildEnv.install_dir)
+            yield from (
+                "-libdir",
+                pj(self.buildEnv.install_dir, self.buildEnv.libprefix),
+            )
 
         @property
         def configure_options(self):
             skip_modules = [
-                'qt3d',
-                'qtcanvas3d',
-                'qtcharts',
-                'qtconnectivity',
-                'qtdatavis3d',
-            #    'qtdeclarative',
-                'qtdoc',
-                'qtgamepad',
-                'qtgraphicaleffects',
-                'qtlocation',
-                'qtmultimedia',
-                'qtnetworkauth',
-                'qtpurchasing',
-            #    'qtquickcontrols',
-                'qtquickcontrols2',
-                'qtremoteobjects',
-                'qtscript',
-                'qtscxml',
-                'qtsensors',
-                'qtserialbus',
-                'qtserialport',
-                'qtspeech',
-                'qtvirtualkeyboard',
-                'qtwayland',
-                'qtwebglplugin',
-                'qtwebsockets',
-#                'qtwebview',
+                "qt3d",
+                "qtcanvas3d",
+                "qtcharts",
+                "qtconnectivity",
+                "qtdatavis3d",
+                #    'qtdeclarative',
+                "qtdoc",
+                "qtgamepad",
+                "qtgraphicaleffects",
+                "qtlocation",
+                "qtmultimedia",
+                "qtnetworkauth",
+                "qtpurchasing",
+                #    'qtquickcontrols',
+                "qtquickcontrols2",
+                "qtremoteobjects",
+                "qtscript",
+                "qtscxml",
+                "qtsensors",
+                "qtserialbus",
+                "qtserialport",
+                "qtspeech",
+                "qtvirtualkeyboard",
+                "qtwayland",
+                "qtwebglplugin",
+                "qtwebsockets",
+                #                'qtwebview',
             ]
-            yield '-recheck'
-            yield '-opensource'
-            yield '-confirm-license'
-            yield '-ccache'
-            yield from ('-make', 'libs')
+            yield "-recheck"
+            yield "-opensource"
+            yield "-confirm-license"
+            yield "-ccache"
+            yield from ("-make", "libs")
             for module in skip_modules:
-               yield from ('-skip', module)
+                yield from ("-skip", module)
 
 
 class QtWebEngine(Dependency):
@@ -82,5 +83,5 @@ class QtWebEngine(Dependency):
     Source = Qt.Source
 
     class Builder(QMakeBuilder):
-        dependencies = ['qt']
+        dependencies = ["qt"]
         subsource_dir = "qtwebengine"

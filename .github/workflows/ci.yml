@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target:
+        config:
           - native_static
           - native_dyn
           - native_mixed
@@ -37,13 +37,13 @@ jobs:
           - android_x86_64
         image_variant: ['focal']
         include:
-          - target: native_mixed
+          - config: native_mixed
             image_variant: bionic
-          - target: aarch64_mixed
+          - config: aarch64_mixed
             image_variant: bionic
-          - target: win32_static
+          - config: win32_static
             image_variant: f35
-          - target: win32_dyn
+          - config: win32_dyn
             image_variant: f35
     env:
       HOME: /home/runner
@@ -74,26 +74,26 @@ jobs:
         cd $HOME
         kiwix-build/.github/scripts/ensure_base_deps.py
       env:
-        PLATFORM_TARGET: ${{matrix.target}}
+        COMPILE_CONFIG: ${{matrix.config}}
     - name: Compile all deps
       shell: bash
       run: |
         cd $HOME
         kiwix-build/.github/scripts/compile_all_deps.py
       env:
-        PLATFORM_TARGET: ${{matrix.target}}
+        COMPILE_CONFIG: ${{matrix.config}}
     - name: Build projects
       shell: bash
       run: |
         cd $HOME
         kiwix-build/.github/scripts/build_projects.py
       env:
-        PLATFORM_TARGET: ${{matrix.target}}
+        COMPILE_CONFIG: ${{matrix.config}}
     - name: Upload failure logs
       if: failure()
       run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.sh
       env:
-        PLATFORM_TARGET: ${{matrix.target}}
+        COMPILE_CONFIG: ${{matrix.config}}
 
   Flatpak:
     strategy:
@@ -101,7 +101,7 @@ jobs:
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
-      PLATFORM_TARGET: flatpak
+      COMPILE_CONFIG: flatpak
       OS_NAME: focal
     runs-on: ubuntu-22.04
     steps:
@@ -142,7 +142,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target:
+        config:
           - native_dyn
           - native_static
           - native_mixed
@@ -185,23 +185,23 @@ jobs:
         cd $HOME
         $GITHUB_WORKSPACE/.github/scripts/ensure_base_deps.py
       env:
-        PLATFORM_TARGET: ${{matrix.target}}
+        COMPILE_CONFIG: ${{matrix.config}}
     - name: Compile all deps
       shell: bash
       run: |
         cd $HOME
         $GITHUB_WORKSPACE/.github/scripts/compile_all_deps.py
       env:
-        PLATFORM_TARGET: ${{matrix.target}}
+        COMPILE_CONFIG: ${{matrix.config}}
     - name: Build projects
       shell: bash
       run: |
         cd $HOME
         $GITHUB_WORKSPACE/.github/scripts/build_projects.py
       env:
-        PLATFORM_TARGET: ${{matrix.target}}
+        COMPILE_CONFIG: ${{matrix.config}}
     - name: Upload failure logs
       if: failure()
       run: $GITHUB_WORKSPACE/.github/scripts/upload_failure_logs.sh
       env:
-        PLATFORM_TARGET: ${{matrix.target}}
+        COMPILE_CONFIG: ${{matrix.config}}

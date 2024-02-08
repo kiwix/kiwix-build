@@ -1,7 +1,5 @@
-from .base import (
-    Dependency,
-    GitClone,
-    MesonBuilder)
+from .base import Dependency, GitClone, MesonBuilder
+
 
 class KiwixTools(Dependency):
     name = "kiwix-tools"
@@ -16,5 +14,5 @@ class KiwixTools(Dependency):
 
         @property
         def configure_options(self):
-            if self.buildEnv.platformInfo.static:
+            if self.buildEnv.configInfo.static:
                 yield "-Dstatic-linkage=true"

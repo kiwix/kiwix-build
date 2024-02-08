@@ -1,4 +1,3 @@
-
 from .base import *
 from . import (
     all_dependencies,
@@ -28,5 +27,5 @@ from . import (
     zim_tools,
     zim_testing_suite,
     zlib,
-    zstd
+    zstd,
 )
