@@ -12,6 +12,13 @@ then
     ci@master.download.kiwix.org:/data/download/nightly
 fi
 
+if [[ "$APPVEYOR_REPO_BRANCH" != "master" ]]
+then
+  scp -P 30022 -vrp -i ${SSH_KEY} -o StrictHostKeyChecking=no \
+    ${NIGHTLY_KIWIX_ARCHIVES_DIR} \
+    ci@master.download.kiwix.org:/data/tmp/ci/dev_preview/${APPVEYOR_REPO_BRANCH}
+fi
+
 if [[ "$APPVEYOR_REPO_TAG" = "true" ]]
 then
   RELEASE_ARCHIVES=$(find $RELEASE_KIWIX_ARCHIVES_DIR -type f)
