@@ -9,6 +9,7 @@ class Libzim(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/openzim/libzim.git"
         git_dir = "libzim"
+        git_ref = "trace_mmap_macos"
 
     class Builder(MesonBuilder):
         test_options = ["-t", "8"]
