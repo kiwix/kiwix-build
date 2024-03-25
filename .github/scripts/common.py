@@ -10,7 +10,7 @@ import shutil
 
 import requests
 
-from build_definition import get_platform_name
+from build_definition import get_platform_name, get_dependency_archive_name
 
 from kiwixbuild.dependencies.apple_xcframework import AppleXCFramework
 from kiwixbuild.versions import (
@@ -274,8 +274,8 @@ def filter_install_dir(path):
 # Full: True if we are creating a full archive to be used as cache by kiwix-build (base_deps2_{os}_{config}_{base_deps_version}.tar.xz)
 # Full: False if we are creating a archive to be used as pre-cached dependencies for project's CI (deps2_{os}_{config}_{target}.tar.xz)
 def make_deps_archive(target=None, name=None, full=False):
-    archive_name = name or "deps2_{}_{}_{}.tar.xz".format(
-        OS_NAME, COMPILE_CONFIG, target
+    archive_name = name or "deps_{}_{}.tar.xz".format(
+        get_dependency_archive_name(), target
     )
     print_message("Create archive {}.", archive_name)
     files_to_archive = list(filter_install_dir(INSTALL_DIR))
