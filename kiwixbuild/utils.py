@@ -79,7 +79,7 @@ def remove_duplicates(iterable, key_function=None):
 
 
 def get_sha256(path):
-    progress_chars = "/-\|"
+    progress_chars = "/-\\|"
     current = 0
     batch_size = 1024 * 8
     sha256 = hashlib.sha256()
@@ -139,7 +139,7 @@ def download_remote(what, where):
         context = None
     batch_size = 1024 * 8
     extra_args = {"context": context} if sys.version_info >= (3, 4, 3) else {}
-    progress_chars = "/-\|"
+    progress_chars = "/-\\|"
     try:
         with urllib.request.urlopen(what.url, **extra_args) as resource, open(
             file_path, "wb"
