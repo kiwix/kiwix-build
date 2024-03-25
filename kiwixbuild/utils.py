@@ -13,7 +13,9 @@ from collections import namedtuple, defaultdict
 
 from kiwixbuild._global import neutralEnv, option
 
-pj = os.path.join
+
+def pj(*args):
+    return os.path.normpath(os.path.join(*args))
 
 
 COLORS = {
