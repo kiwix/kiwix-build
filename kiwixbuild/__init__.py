@@ -36,6 +36,14 @@ def parse_args():
             "build-dir can be absolute path or a relative (to working-dir) one."
         ),
     )
+    parser.add_argument(
+        "--install-dir",
+        default="INSTALL",
+        help=(
+            "Directory in which main config binaries will be installed.\n"
+            "By default, `INSTALL` directory in build-dir"
+        ),
+    )
     parser.add_argument("--libprefix", default=None)
     parser.add_argument(
         "--config", choices=ConfigInfo.all_configs, default="native_dyn"

@@ -80,7 +80,7 @@ class BuildEnv:
         self.configInfo = configInfo
         self.base_build_dir = pj(option("working_dir"), option("build_dir"))
         self.build_dir = pj(self.base_build_dir, build_dir)
-        self.install_dir = pj(self.build_dir, "INSTALL")
+        self.install_dir = pj(self.build_dir, option("install_dir"))
         self.toolchain_dir = pj(self.build_dir, "TOOLCHAINS")
         self.log_dir = pj(self.build_dir, "LOGS")
         for d in (self.build_dir, self.install_dir, self.toolchain_dir, self.log_dir):

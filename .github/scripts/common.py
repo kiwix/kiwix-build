@@ -155,6 +155,7 @@ def run_kiwix_build(
     target_only=False,
     make_release=False,
     make_dist=False,
+    install_dir=None,
 ):
     command = ["kiwix-build"]
     command.append(target)
@@ -170,6 +171,8 @@ def run_kiwix_build(
         command.append("--make-release")
     if make_dist:
         command.append("--make-dist")
+    if install_dir:
+        command.extend(["--install-dir", install_dir])
     print_message(
         "Build {} (deps={}, release={}, dist={})",
         target,
