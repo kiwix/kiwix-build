@@ -135,7 +135,7 @@ def select_build_targets(criteria):
     raise ValueError("No definition match with current context.")
 
 
-def get_platform_name():
+def get_column_value(column_name):
     from common import COMPILE_CONFIG, OS_NAME
 
     context = Context(COMPILE_CONFIG=COMPILE_CONFIG, OS_NAME=OS_NAME)
@@ -143,7 +143,11 @@ def get_platform_name():
     reader = csv.DictReader(strip_array(BUILD_DEF), dialect=TableDialect())
     for row in reader:
         if context.match(row):
-            name = row["platform_name"]
+            name = row[column_name]
             return name or None
 
     raise ValueError("No definition match with current context.")
+
+
+def get_platform_name():
+    return get_column_value("platform_name")
