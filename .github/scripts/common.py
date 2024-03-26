@@ -28,7 +28,7 @@ BASE_DIR = HOME / "BUILD_{}".format(COMPILE_CONFIG)
 SOURCE_DIR = HOME / "SOURCE"
 ARCHIVE_DIR = HOME / "ARCHIVE"
 TOOLCHAIN_DIR = BASE_DIR / "TOOLCHAINS"
-INSTALL_DIR = BASE_DIR / "INSTALL"
+INSTALL_DIR = HOME / "INSTALL"
 TMP_DIR = Path(os.getenv("TMP_DIR", "/tmp"))
 KBUILD_SOURCE_DIR = HOME / "kiwix-build"
 
@@ -155,7 +155,6 @@ def run_kiwix_build(
     target_only=False,
     make_release=False,
     make_dist=False,
-    install_dir=None,
 ):
     command = ["kiwix-build"]
     command.append(target)
@@ -163,6 +162,7 @@ def run_kiwix_build(
     command.append("--fast-clone")
     command.append("--assume-packages-installed")
     command.extend(["--config", config])
+    command.extend(["--install-dir", "../INSTALL"])
     if build_deps_only:
         command.append("--build-deps-only")
     if target_only:
@@ -171,8 +171,6 @@ def run_kiwix_build(
         command.append("--make-release")
     if make_dist:
         command.append("--make-dist")
-    if install_dir:
-        command.extend(["--install-dir", install_dir])
     print_message(
         "Build {} (deps={}, release={}, dist={})",
         target,

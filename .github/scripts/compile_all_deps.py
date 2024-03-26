@@ -16,7 +16,6 @@ for target in select_build_targets(DEPS):
         target,
         config=COMPILE_CONFIG,
         build_deps_only=True,
-        install_dir="../INSTALL",
     )
     archive_file = make_deps_archive(target=target)
     if DEV_BRANCH:
