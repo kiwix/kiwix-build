@@ -148,6 +148,10 @@ class Android(MetaConfigInfo):
     compatible_hosts = ["fedora", "debian"]
 
     @property
+    def arch_name(self):
+        return "multi-linux-android"
+
+    @property
     def subConfigNames(self):
         return ["android_{}".format(arch) for arch in option("android_arch")]
 

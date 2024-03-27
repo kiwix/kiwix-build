@@ -27,6 +27,10 @@ class ConfigInfo(metaclass=_MetaConfig):
     mixed = False
     libdir = None
 
+    @property
+    def arch_name(self):
+        return self.arch_full
+
     @classmethod
     def get_config(cls, name, targets=None):
         if name not in cls.all_running_configs:

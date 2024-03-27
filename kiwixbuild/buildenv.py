@@ -76,9 +76,12 @@ class NeutralEnv:
 
 class BuildEnv:
     def __init__(self, configInfo):
-        build_dir = "BUILD_{}".format(configInfo.name)
         self.configInfo = configInfo
         self.base_build_dir = pj(option("working_dir"), option("build_dir"))
+        build_dir = (
+            configInfo.arch_name if option("use_target_arch_name") else configInfo.name
+        )
+        build_dir = f"BUILD_{build_dir}"
         self.build_dir = pj(self.base_build_dir, build_dir)
         self.install_dir = pj(self.build_dir, "INSTALL")
         self.toolchain_dir = pj(self.build_dir, "TOOLCHAINS")

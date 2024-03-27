@@ -161,6 +161,7 @@ def run_kiwix_build(
     command.append("--hide-progress")
     command.append("--fast-clone")
     command.append("--assume-packages-installed")
+    command.append("--use-target-arch-name")
     command.extend(["--config", config])
     if build_deps_only:
         command.append("--build-deps-only")
