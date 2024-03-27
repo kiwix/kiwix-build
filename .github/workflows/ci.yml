@@ -68,6 +68,11 @@ jobs:
       run: |
         echo "${{secrets.ssh_key}}" > $SSH_KEY
         chmod 600 $SSH_KEY
+    - name: Print info
+      shell: bash
+      run: |
+        cd $HOME
+        kiwix-build/.github/scripts/print_info.py
     - name: Ensure base deps
       shell: bash
       run: |
@@ -179,6 +184,11 @@ jobs:
       run: |
         echo "${{secrets.ssh_key}}" > $SSH_KEY
         chmod 600 $SSH_KEY
+    - name: Print info
+      shell: bash
+      run: |
+        cd $HOME
+        $GITHUB_WORKSPACE/.github/scripts/print_info.py
     - name: Ensure base deps
       shell: bash
       run: |

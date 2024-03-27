@@ -36,6 +36,14 @@ def parse_args():
             "build-dir can be absolute path or a relative (to working-dir) one."
         ),
     )
+    parser.add_argument(
+        "--install-dir",
+        default="INSTALL",
+        help=(
+            "Directory in which main config binaries will be installed.\n"
+            "By default, `INSTALL` directory in build-dir"
+        ),
+    )
     parser.add_argument("--libprefix", default=None)
     parser.add_argument(
         "--config", choices=ConfigInfo.all_configs, default="native_dyn"
@@ -123,6 +131,18 @@ def parse_args():
             "Do not clone the whole repository.\n"
             "This is useful for one shot build but it is not recommended if you want "
             "to develop with the cloned sources."
+        ),
+    )
+    subgroup.add_argument(
+        "--use-target-arch-name",
+        action="store_true",
+        help=(
+            "Name the build directory using the arch name instead of the config name.\n"
+            "Different configs may create binary for the same arch so this option is "
+            "not recommended when working with several config on the same computer.\n"
+            "However, when generating dependencies for other it is better to have a "
+            "directory named using the target instead of the used config.\n"
+            "Intended to be used in CI only."
         ),
     )
     options = parser.parse_args()
