@@ -25,6 +25,10 @@ class AppleConfigInfo(ConfigInfo):
         self._root_path = None
 
     @property
+    def arch_name(self):
+        return self.target
+
+    @property
     def root_path(self):
         if self._root_path is None:
             command = "xcrun --sdk {} --show-sdk-path".format(self.sdk_name)
@@ -210,6 +214,10 @@ class IOS(MetaConfigInfo):
     compatible_hosts = ["Darwin"]
 
     @property
+    def arch_name(self):
+        return self.name
+
+    @property
     def subConfigNames(self):
         return ["iOS_{}".format(arch) for arch in option("ios_arch")]
 
@@ -224,6 +232,10 @@ class IOS(MetaConfigInfo):
 class AppleStaticAll(MetaConfigInfo):
     name = "apple_all_static"
     compatible_hosts = ["Darwin"]
+
+    @property
+    def arch_name(self):
+        return self.name
 
     @property
     def subConfigNames(self):
