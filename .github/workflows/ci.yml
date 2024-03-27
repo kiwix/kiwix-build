@@ -188,7 +188,7 @@ jobs:
       shell: bash
       run: |
         cd $HOME
-        kiwix-build/.github/scripts/print_info.py
+        $GITHUB_WORKSPACE/.github/scripts/print_info.py
     - name: Ensure base deps
       shell: bash
       run: |
