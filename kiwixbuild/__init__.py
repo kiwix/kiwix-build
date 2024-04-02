@@ -137,6 +137,9 @@ def parse_args():
             "Intended to be used in CI only."
         ),
     )
+    subgroup.add_argument(
+        "--get-build-dir", action="store_true", help="Print the output directory."
+    )
     options = parser.parse_args()
 
     if not options.android_arch:
@@ -157,4 +160,7 @@ def main():
         builder = FlatpakBuilder()
     else:
         builder = Builder()
-    builder.run()
+    if options.get_build_dir:
+        print(ConfigInfo.get_config(options.config).buildEnv.build_dir)
+    else:
+        builder.run()

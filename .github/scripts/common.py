@@ -20,11 +20,23 @@ from kiwixbuild.versions import (
 )
 
 
+def get_build_dir(config) -> Path:
+    command = ["kiwix-build"]
+    command.extend(["--config", config])
+    command.append("--get-build-dir")
+    command.append("--use-target-arch-name")
+    return Path(
+        subprocess.run(command, cwd=str(HOME), check=True, stdout=subprocess.PIPE)
+        .stdout[:-1]
+        .decode("utf8")
+    )
+
+
 COMPILE_CONFIG = _environ["COMPILE_CONFIG"]
 OS_NAME = _environ["OS_NAME"]
 HOME = Path(os.path.expanduser("~"))
 
-BASE_DIR = HOME / "BUILD_{}".format(COMPILE_CONFIG)
+BASE_DIR = get_build_dir(COMPILE_CONFIG)
 SOURCE_DIR = HOME / "SOURCE"
 ARCHIVE_DIR = HOME / "ARCHIVE"
 TOOLCHAIN_DIR = BASE_DIR / "TOOLCHAINS"
@@ -283,19 +295,17 @@ def make_deps_archive(target=None, name=None, full=False):
     files_to_archive += HOME.glob("BUILD_*/LOGS")
     if COMPILE_CONFIG == "apple_all_static":
         for subconfig in AppleXCFramework.subConfigNames:
-            base_dir = HOME / "BUILD_{}".format(subconfig)
+            base_dir = get_build_dir(subconfig)
             files_to_archive += filter_install_dir(base_dir / "INSTALL")
             if (base_dir / "meson_cross_file.txt").exists():
                 files_to_archive.append(base_dir / "meson_cross_file.txt")
 
     if COMPILE_CONFIG.endswith("_mixed"):
         static_config = COMPILE_CONFIG.replace("_mixed", "_static")
-        files_to_archive += filter_install_dir(
-            HOME / ("BUILD_" + static_config) / "INSTALL"
-        )
+        files_to_archive += filter_install_dir(get_build_dir(static_config) / "INSTALL")
     if COMPILE_CONFIG.startswith("android_"):
         files_to_archive += filter_install_dir(HOME / "BUILD_neutral" / "INSTALL")
-        base_dir = HOME / "BUILD_{}".format(COMPILE_CONFIG)
+        base_dir = get_build_dir(COMPILE_CONFIG)
         if (base_dir / "meson_cross_file.txt").exists():
             files_to_archive.append(base_dir / "meson_cross_file.txt")
     # Copy any toolchain
@@ -315,13 +325,13 @@ def make_deps_archive(target=None, name=None, full=False):
         # Add also static build for mixed target
         if COMPILE_CONFIG.endswith("_mixed"):
             static_config = COMPILE_CONFIG.replace("_mixed", "_static")
-            files_to_archive += (HOME / ("BUILD_" + static_config)).glob("*/.*_ok")
+            files_to_archive += get_build_dir(static_config).glob("*/.*_ok")
         # Native dyn and static is needed for potential cross compilation that use native tools (icu)
-        files_to_archive += (HOME / "BUILD_native_dyn").glob("*/.*_ok")
-        files_to_archive += (HOME / "BUILD_native_static").glob("*/.*_ok")
-        files_to_archive += HOME.glob("BUILD_android*/**/.*_ok")
-        files_to_archive += HOME.glob("BUILD_macOS*/**/.*_ok")
-        files_to_archive += HOME.glob("BUILD_iOS*/**/.*_ok")
+        files_to_archive += get_build_dir("native_dyn").glob("*/.*_ok")
+        files_to_archive += get_build_dir("native_static").glob("*/.*_ok")
+        files_to_archive += HOME.glob("BUILD_*android*/**/.*_ok")
+        files_to_archive += HOME.glob("BUILD_*apple-macos*/**/.*_ok")
+        files_to_archive += HOME.glob("BUILD_*apple-ios*/**/.*_ok")
         files_to_archive += SOURCE_DIR.glob("*/.*_ok")
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
 
