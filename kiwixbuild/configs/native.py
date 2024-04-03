@@ -35,7 +35,7 @@ class NativeDyn(NativeConfigInfo):
 class NativeStatic(NativeConfigInfo):
     name = "native_static"
     static = True
-    compatible_hosts = ["fedora", "debian"]
+    compatible_hosts = ["fedora", "debian", "Darwin"]
 
 
 class NativeMixed(MixedMixin("native_static"), NativeConfigInfo):
