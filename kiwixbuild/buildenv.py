@@ -36,7 +36,8 @@ class NeutralEnv:
         if _platform == "Windows":
             print(
                 "ERROR: kiwix-build is not intented to run on Windows platform.\n"
-                "It should probably not work, but well, you still can have a try."
+                "It should probably not work, but well, you still can have a try.",
+                file=sys.stderr,
             )
             cont = input("Do you want to continue ? [y/N]")
             if cont.lower() != "y":
@@ -70,7 +71,7 @@ class NeutralEnv:
             if required:
                 sys.exit("ERROR: {} command not found".format(name))
             else:
-                print("WARNING: {} command not found".format(name))
+                print("WARNING: {} command not found".format(name), file=sys.stderr)
                 return ["{}_NOT_FOUND".format(name.upper())]
 
 

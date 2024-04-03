@@ -135,7 +135,6 @@ def MixedMixin(static_name):
         static = False
 
         def add_targets(self, targetName, targets):
-            print(targetName)
             if option("target") == targetName:
                 return super().add_targets(targetName, targets)
             else:
