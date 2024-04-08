@@ -32,10 +32,10 @@ def download_base_archive(base_name):
     return file_path
 
 
-ARCHIVE_NAME_TEMPLATE = "base_deps2_{os}_{config}_{version}.tar.xz"
+ARCHIVE_NAME_TEMPLATE = "base_deps_{os}_{config}_{version}.tar.xz"
 
 if COMPILE_CONFIG == "flatpak":
-    base_dep_archive_name = "base_deps2_flatpak.tar.xz"
+    base_dep_archive_name = "base_deps_flatpak.tar.xz"
 else:
     base_dep_archive_name = ARCHIVE_NAME_TEMPLATE.format(
         os=OS_NAME,
