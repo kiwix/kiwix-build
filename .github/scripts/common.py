@@ -10,7 +10,7 @@ import shutil
 
 import requests
 
-from build_definition import get_platform_name
+from build_definition import get_platform_name, get_dependency_archive_name
 
 from kiwixbuild.dependencies.apple_xcframework import AppleXCFramework
 from kiwixbuild.versions import (
@@ -20,11 +20,23 @@ from kiwixbuild.versions import (
 )
 
 
+def get_build_dir(config) -> Path:
+    command = ["kiwix-build"]
+    command.extend(["--config", config])
+    command.append("--get-build-dir")
+    command.append("--use-target-arch-name")
+    return Path(
+        subprocess.run(command, cwd=str(HOME), check=True, stdout=subprocess.PIPE)
+        .stdout[:-1]
+        .decode("utf8")
+    )
+
+
 COMPILE_CONFIG = _environ["COMPILE_CONFIG"]
 OS_NAME = _environ["OS_NAME"]
 HOME = Path(os.path.expanduser("~"))
 
-BASE_DIR = HOME / "BUILD_{}".format(COMPILE_CONFIG)
+BASE_DIR = get_build_dir(COMPILE_CONFIG)
 SOURCE_DIR = HOME / "SOURCE"
 ARCHIVE_DIR = HOME / "ARCHIVE"
 TOOLCHAIN_DIR = BASE_DIR / "TOOLCHAINS"
@@ -161,6 +173,7 @@ def run_kiwix_build(
     command.append("--hide-progress")
     command.append("--fast-clone")
     command.append("--assume-packages-installed")
+    command.append("--use-target-arch-name")
     command.extend(["--config", config])
     if build_deps_only:
         command.append("--build-deps-only")
@@ -271,30 +284,28 @@ def filter_install_dir(path):
                     yield sub_dir
 
 
-# Full: True if we are creating a full archive to be used as cache by kiwix-build (base_deps2_{os}_{config}_{base_deps_version}.tar.xz)
-# Full: False if we are creating a archive to be used as pre-cached dependencies for project's CI (deps2_{os}_{config}_{target}.tar.xz)
+# Full: True if we are creating a full archive to be used as cache by kiwix-build (base_deps_{os}_{config}_{base_deps_version}.tar.xz)
+# Full: False if we are creating a archive to be used as pre-cached dependencies for project's CI (deps_{config}_{target}.tar.xz)
 def make_deps_archive(target=None, name=None, full=False):
-    archive_name = name or "deps2_{}_{}_{}.tar.xz".format(
-        OS_NAME, COMPILE_CONFIG, target
+    archive_name = name or "deps_{}_{}.tar.xz".format(
+        get_dependency_archive_name(), target
     )
     print_message("Create archive {}.", archive_name)
     files_to_archive = list(filter_install_dir(INSTALL_DIR))
     files_to_archive += HOME.glob("BUILD_*/LOGS")
     if COMPILE_CONFIG == "apple_all_static":
         for subconfig in AppleXCFramework.subConfigNames:
-            base_dir = HOME / "BUILD_{}".format(subconfig)
+            base_dir = get_build_dir(subconfig)
             files_to_archive += filter_install_dir(base_dir / "INSTALL")
             if (base_dir / "meson_cross_file.txt").exists():
                 files_to_archive.append(base_dir / "meson_cross_file.txt")
 
     if COMPILE_CONFIG.endswith("_mixed"):
         static_config = COMPILE_CONFIG.replace("_mixed", "_static")
-        files_to_archive += filter_install_dir(
-            HOME / ("BUILD_" + static_config) / "INSTALL"
-        )
+        files_to_archive += filter_install_dir(get_build_dir(static_config) / "INSTALL")
     if COMPILE_CONFIG.startswith("android_"):
         files_to_archive += filter_install_dir(HOME / "BUILD_neutral" / "INSTALL")
-        base_dir = HOME / "BUILD_{}".format(COMPILE_CONFIG)
+        base_dir = get_build_dir(COMPILE_CONFIG)
         if (base_dir / "meson_cross_file.txt").exists():
             files_to_archive.append(base_dir / "meson_cross_file.txt")
     # Copy any toolchain
@@ -314,13 +325,13 @@ def make_deps_archive(target=None, name=None, full=False):
         # Add also static build for mixed target
         if COMPILE_CONFIG.endswith("_mixed"):
             static_config = COMPILE_CONFIG.replace("_mixed", "_static")
-            files_to_archive += (HOME / ("BUILD_" + static_config)).glob("*/.*_ok")
+            files_to_archive += get_build_dir(static_config).glob("*/.*_ok")
         # Native dyn and static is needed for potential cross compilation that use native tools (icu)
-        files_to_archive += (HOME / "BUILD_native_dyn").glob("*/.*_ok")
-        files_to_archive += (HOME / "BUILD_native_static").glob("*/.*_ok")
-        files_to_archive += HOME.glob("BUILD_android*/**/.*_ok")
-        files_to_archive += HOME.glob("BUILD_macOS*/**/.*_ok")
-        files_to_archive += HOME.glob("BUILD_iOS*/**/.*_ok")
+        files_to_archive += get_build_dir("native_dyn").glob("*/.*_ok")
+        files_to_archive += get_build_dir("native_static").glob("*/.*_ok")
+        files_to_archive += HOME.glob("BUILD_*android*/**/.*_ok")
+        files_to_archive += HOME.glob("BUILD_*apple-macos*/**/.*_ok")
+        files_to_archive += HOME.glob("BUILD_*apple-ios*/**/.*_ok")
         files_to_archive += SOURCE_DIR.glob("*/.*_ok")
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
 

@@ -4,6 +4,7 @@ from kiwixbuild._global import option, neutralEnv
 
 class FlatpakConfigInfo(ConfigInfo):
     name = "flatpak"
+    arch_name = "flatpak"
     build = "flatpak"
     static = ""
     toolchain_names = ["org.kde", "io.qt.qtwebengine"]

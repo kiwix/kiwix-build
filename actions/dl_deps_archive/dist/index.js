@@ -30484,7 +30484,6 @@ function addLocalPath(inputPath) {
 async function run() {
   try {
     const base_url = core.getInput("base_url");
-    const os_name = getInput("os_name", process.env["OS_NAME"]);
     const target = core.getInput("target_platform");
     const project = getInput(
       "project",
@@ -30501,11 +30500,11 @@ async function run() {
 
     let archivePath;
     try {
-      const archive_url = `${base_url}/dev_preview/${branch}/deps2_${os_name}_${target}_${project}.tar.xz`;
+      const archive_url = `${base_url}/dev_preview/${branch}/deps_${target}_${project}.tar.xz`;
       process.stdout.write("Downloading " + archive_url + "\n");
       archivePath = await tc.downloadTool(archive_url);
     } catch (error) {
-      const archive_url = `${base_url}/deps2_${os_name}_${target}_${project}.tar.xz`;
+      const archive_url = `${base_url}/deps_${target}_${project}.tar.xz`;
       process.stdout.write("Downloading " + archive_url + "\n");
       archivePath = await tc.downloadTool(archive_url);
     }

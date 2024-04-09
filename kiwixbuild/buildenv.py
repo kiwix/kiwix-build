@@ -36,7 +36,8 @@ class NeutralEnv:
         if _platform == "Windows":
             print(
                 "ERROR: kiwix-build is not intented to run on Windows platform.\n"
-                "It should probably not work, but well, you still can have a try."
+                "It should probably not work, but well, you still can have a try.",
+                file=sys.stderr,
             )
             cont = input("Do you want to continue ? [y/N]")
             if cont.lower() != "y":
@@ -70,15 +71,18 @@ class NeutralEnv:
             if required:
                 sys.exit("ERROR: {} command not found".format(name))
             else:
-                print("WARNING: {} command not found".format(name))
+                print("WARNING: {} command not found".format(name), file=sys.stderr)
                 return ["{}_NOT_FOUND".format(name.upper())]
 
 
 class BuildEnv:
     def __init__(self, configInfo):
-        build_dir = "BUILD_{}".format(configInfo.name)
         self.configInfo = configInfo
         self.base_build_dir = pj(option("working_dir"), option("build_dir"))
+        build_dir = (
+            configInfo.arch_name if option("use_target_arch_name") else configInfo.name
+        )
+        build_dir = f"BUILD_{build_dir}"
         self.build_dir = pj(self.base_build_dir, build_dir)
         self.install_dir = pj(self.build_dir, "INSTALL")
         self.toolchain_dir = pj(self.build_dir, "TOOLCHAINS")

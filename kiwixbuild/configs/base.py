@@ -27,6 +27,10 @@ class ConfigInfo(metaclass=_MetaConfig):
     mixed = False
     libdir = None
 
+    @property
+    def arch_name(self):
+        return self.arch_full
+
     @classmethod
     def get_config(cls, name, targets=None):
         if name not in cls.all_running_configs:
@@ -131,7 +135,6 @@ def MixedMixin(static_name):
         static = False
 
         def add_targets(self, targetName, targets):
-            print(targetName)
             if option("target") == targetName:
                 return super().add_targets(targetName, targets)
             else:
