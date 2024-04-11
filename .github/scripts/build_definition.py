@@ -29,7 +29,7 @@ BUILD_DEF = """
     | macos   | iOSSimulator_x86_64| dB     | dB       |           |             |               |                      | ios-x86_64-dyn         |
     | macos   | iOSSimulator_arm64 | B      | B        |           |             |               |                      |                        |
     | macos   | macOS_arm64_static |        |          | BP        | BP          |               | macos-arm64          |                        |
-    | macos   | macOS_arm64_mixed  | BP     | BP       |           |             |               | macos-arm64          |                        |
+    | macos   | macOS_arm64_mixed  | dBP    | dBP      | d         |             |               | macos-arm64          | macos-aarch64-dyn      |
     | macos   | macOS_x86_64       | B      | B        |           |             |               |                      |                        |
     | macos   | apple_all_static   |        | BP       |           |             |               | xcframework          |                        |
     ----------------------------------------------------------------------------------------------------------------------------------------------
