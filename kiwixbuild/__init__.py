@@ -154,7 +154,7 @@ def main():
     options = parse_args()
     options.working_dir = os.path.abspath(options.working_dir)
     _global.set_options(options)
-    neutralEnv = buildenv.NeutralEnv()
+    neutralEnv = buildenv.NeutralEnv(options.get_build_dir)
     _global.set_neutralEnv(neutralEnv)
     if options.config == "flatpak":
         builder = FlatpakBuilder()

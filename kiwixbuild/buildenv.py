@@ -8,7 +8,7 @@ from ._global import neutralEnv, option
 
 
 class NeutralEnv:
-    def __init__(self):
+    def __init__(self, dummy_run):
         self.working_dir = option("working_dir")
         self.source_dir = pj(self.working_dir, "SOURCE")
         self.archive_dir = pj(self.working_dir, "ARCHIVE")
@@ -17,6 +17,10 @@ class NeutralEnv:
         for d in (self.source_dir, self.archive_dir, self.toolchain_dir, self.log_dir):
             os.makedirs(d, exist_ok=True)
         self.detect_platform()
+        if dummy_run:
+            # If this is for a dummy run, we will not run anything.
+            # To check for command (and so, don't enforce their presence)
+            return
         self.ninja_command = self._detect_command(
             "ninja", default=[["ninja"], ["ninja-build"]]
         )
