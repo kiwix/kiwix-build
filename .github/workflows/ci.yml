@@ -40,20 +40,24 @@ jobs:
       env:
         SSH_KEY: ${{ runner.temp }}/id_rsa
     - name: Ensure base deps
-      run: python .github\\scripts\\ensure_base_deps.py
+      run: |
+        python .github\\scripts\\ensure_base_deps.py
       env:
         SSH_KEY: ${{ runner.temp }}/id_rsa
     - name: Compile all deps
-      run: python .github\\scripts\\compile_all_deps.py
+      run: |
+        python .github\\scripts\\compile_all_deps.py
       env:
         SSH_KEY: ${{ runner.temp }}/id_rsa
     - name: Build projects
-      run: python .github\\scripts\\build_projects.py
+      run: |
+        python .github\\scripts\\build_projects.py
       env:
         SSH_KEY: ${{ runner.temp }}/id_rsa
     - name: Upload failure logs
       if: failure()
-      run: python .github\\scripts\\upload_failure_logs.py
+      run: |
+        python .github\\scripts\\upload_failure_logs.py
 
   Linux:
     strategy:
@@ -128,7 +132,7 @@ jobs:
         kiwix-build/.github/scripts/ensure_base_deps.py
       env:
         COMPILE_CONFIG: ${{matrix.config}}
-     - name: Compile all deps
+    - name: Compile all deps
       shell: bash
       run: |
         cd $HOME
