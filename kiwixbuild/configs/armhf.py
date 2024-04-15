@@ -76,18 +76,15 @@ class ArmConfigInfo(ConfigInfo):
 
     def get_env(self):
         env = super().get_env()
-        env["LD_LIBRARY_PATH"] = ":".join(
-            [
-                pj(self.root_path, self.arch_full, "lib64"),
-                pj(self.root_path, "lib"),
-                env["LD_LIBRARY_PATH"],
-            ]
-        )
+        env["LD_LIBRARY_PATH"][0:0] = [
+            pj(self.root_path, self.arch_full, "lib64"),
+            pj(self.root_path, "lib"),
+        ]
         env["PKG_CONFIG_LIBDIR"] = pj(self.root_path, "lib", "pkgconfig")
         env["QEMU_LD_PREFIX"] = pj(self.root_path, self.arch_full, "libc")
         env["QEMU_SET_ENV"] = "LD_LIBRARY_PATH={}".format(
             ":".join(
-                [pj(self.root_path, self.arch_full, "lib"), env["LD_LIBRARY_PATH"]]
+                [pj(self.root_path, self.arch_full, "lib"), str(env["LD_LIBRARY_PATH"])]
             )
         )
         return env

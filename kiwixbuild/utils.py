@@ -63,7 +63,7 @@ class DefaultEnv(Defaultdict):
     def __getitem__(self, name):
         if name == b"PATH":
             raise KeyError
-        if name in ['PATH', 'PKG_CONFIG_PATH', 'LD_LIBRARY_PATH']:
+        if name in ["PATH", "PKG_CONFIG_PATH", "LD_LIBRARY_PATH"]:
             item = super().__getitem__(name)
             if isinstance(item, PathArray):
                 return item
@@ -73,8 +73,10 @@ class DefaultEnv(Defaultdict):
                 return item
         return super().__getitem__(name)
 
+
 def get_separator():
-    return ';' if neutralEnv('distname') == 'Windows' else ':'
+    return ";" if neutralEnv("distname") == "Windows" else ":"
+
 
 class PathArray(list):
     def __init__(self, value):
@@ -298,11 +300,18 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
                         if perm:
                             os.chmod(pj(tmpdir, getname(member)), perm)
                 name = name or topdir
-                shutil.copytree(pj(tmpdir, topdir), pj(dest_dir, name), symlinks=True, dirs_exist_ok=True)
+                shutil.copytree(
+                    pj(tmpdir, topdir),
+                    pj(dest_dir, name),
+                    symlinks=True,
+                    dirs_exist_ok=True,
+                )
                 # Be sure that all directory in tmpdir are writable to allow correct suppersion of it
                 for root, dirs, _files in os.walk(tmpdir):
                     for d in dirs:
-                        os.chmod(pj(root, d), stat.S_IWRITE|stat.S_IREAD|stat.S_IEXEC)
+                        os.chmod(
+                            pj(root, d), stat.S_IWRITE | stat.S_IREAD | stat.S_IEXEC
+                        )
 
         else:
             if name:
@@ -325,10 +334,9 @@ def run_command(command, cwd, context, *, env=None, input=None):
         print("run command '{}'".format(command), file=log)
         print("current directory is '{}'".format(cwd), file=log)
         print("env is :", file=log)
-        env = {k:str(v) for k,v in env.items()}
+        env = {k: str(v) for k, v in env.items()}
         for k, v in env.items():
             print("  {} : {!r}".format(k, v), file=log)
-
 
         if log:
             log.flush()
