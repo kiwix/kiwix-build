@@ -18,7 +18,6 @@ class Libkiwix(Dependency):
             "pugixml",
             "libzim",
             "zlib",
-            "lzma",
             "libcurl",
             "libmicrohttpd",
             "icu4c",

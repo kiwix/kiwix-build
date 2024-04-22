@@ -27,6 +27,8 @@ class Xapian(Dependency):
 
         @classmethod
         def get_dependencies(cls, configInfo, allDeps):
+            if neutralEnv("distname") == "Windows":
+                return ["zlib"]
             deps = ["zlib", "lzma"]
             if (
                 configInfo.build in ("win32", "wasm")
