@@ -29,7 +29,7 @@ class NativeConfigInfo(ConfigInfo):
 class NativeDyn(NativeConfigInfo):
     name = "native_dyn"
     static = False
-    compatible_hosts = ["fedora", "debian", "Darwin"]
+    compatible_hosts = ["fedora", "debian", "Darwin", "Windows"]
 
 
 class NativeStatic(NativeConfigInfo):
