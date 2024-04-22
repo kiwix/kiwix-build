@@ -25,6 +25,11 @@ class NativeConfigInfo(ConfigInfo):
             return f"{platform.machine()}-apple-darwin"
         return sysconfig.get_platform()
 
+    @property
+    def configure_wrapper(self):
+        if neutralEnv("distname") == "Windows":
+            yield "C:\\Program Files\\Git\\bin\\bash.exe"
+
 
 class NativeDyn(NativeConfigInfo):
     name = "native_dyn"

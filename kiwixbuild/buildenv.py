@@ -166,7 +166,7 @@ class BuildEnv:
     @property
     def configure_wrapper(self):
         try:
-            yield self.configInfo.configure_wrapper
+            yield from self.configInfo.configure_wrapper
         except AttributeError:
             pass
 

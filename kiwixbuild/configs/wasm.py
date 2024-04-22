@@ -68,7 +68,7 @@ class WasmConfigInfo(ConfigInfo):
 
     @property
     def configure_wrapper(self):
-        return "emconfigure"
+        yield "emconfigure"
 
     @property
     def make_wrapper(self):
