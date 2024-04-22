@@ -22,9 +22,9 @@ BUILD_DEF = """
     | bionic  | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64-bionic |                        |
     ----------------------------------------------------------------------------------------------------------------------------------------------
 # On Windows, we build only libzim for now. And only native_mixed as xapian doesn't compile as dll
-    | windows | native_static      | Bd     |          |           |             |               | win-x86_64           |                        |
-    | windows | native_dyn         | Bd     |          |           |             |               | win-x86_64           |                        |
-    | windows | native_mixed       | BPd    |          |           |             |               | win-x86_64           |                        |
+    | windows | native_static      | Bd     |          |           |             |               | win-x86_64           | win-x86_64             |
+    | windows | native_dyn         | Bd     |          |           |             |               | win-x86_64           | win-x86_64             |
+    | windows | native_mixed       | BPd    |          |           |             |               | win-x86_64           | win-x86_64             |
     ----------------------------------------------------------------------------------------------------------------------------------------------
 # Osx builds, build binaries on native_dyn and native_static. On anyother things, build only the libraries
     | macos   | native_dyn         | d      | d        | dB        | B           |               |                      | macos-x86_64-dyn       |
