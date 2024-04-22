@@ -14,7 +14,7 @@ class AllBaseDependencies(Dependency):
         @classmethod
         def get_dependencies(cls, configInfo, allDeps):
             if neutralEnv("distname") == "Windows":
-                return ["zlib", "zstd", "icu4c"]
+                return ["zlib", "zstd", "icu4c", "zim-testing-suite"]
             if configInfo.build == "wasm" or environ.get("OS_NAME") == "bionic":
                 return ["zlib", "lzma", "zstd", "icu4c", "xapian-core"]
 
