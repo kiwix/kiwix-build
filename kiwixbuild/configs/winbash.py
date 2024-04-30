@@ -7,9 +7,11 @@ from kiwixbuild._global import get_target_step
 class WinBashConfigInfo(ConfigInfo):
     """This config is kind of internal config to compile xapian using git bash."""
 
+    build = "winbash"
     name = "win_bash"
     compatible_hosts = ["Windows"]
     exe_wrapper_def = ""
+    static = True
 
     @property
     def arch_name(self):
