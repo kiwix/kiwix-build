@@ -42,7 +42,7 @@ SOURCE_DIR = HOME / "SOURCE"
 ARCHIVE_DIR = HOME / "ARCHIVE"
 TOOLCHAIN_DIR = BASE_DIR / "TOOLCHAINS"
 INSTALL_DIR = BASE_DIR / "INSTALL"
-default_tmp_dir = os.getenv("TEMP") if platform.system() == 'Windows' else "/tmp"
+default_tmp_dir = os.getenv("TEMP") if platform.system() == "Windows" else "/tmp"
 TMP_DIR = Path(os.getenv("TMP_DIR", default_tmp_dir))
 KBUILD_SOURCE_DIR = HOME / "kiwix-build"
 
@@ -176,7 +176,7 @@ def run_kiwix_build(
     command.append("--fast-clone")
     command.append("--assume-packages-installed")
     command.append("--use-target-arch-name")
-    command.append("--verbose")
+    #    command.append("--verbose")
     command.extend(["--config", config])
     if build_deps_only:
         command.append("--build-deps-only")
@@ -198,6 +198,7 @@ def run_kiwix_build(
     subprocess.check_call(command, cwd=str(HOME), env=env)
     print_message("Build ended")
 
+
 try:
     import paramiko
 
@@ -210,8 +211,8 @@ try:
             host, port = host.split(":", 1)
         else:
             port = "22"
-        if '@' in host:
-            user, host = host.split('@', 1)
+        if "@" in host:
+            user, host = host.split("@", 1)
         else:
             user = None
 
@@ -222,7 +223,14 @@ try:
             client = paramiko.client.SSHClient()
             client.set_missing_host_key_policy(paramiko.client.WarningPolicy)
             print_message(f"Connect to {host}:{port}")
-            client.connect(host, port=port, username=user, key_filename=_environ.get("SSH_KEY"), look_for_keys=False, compress=True)
+            client.connect(
+                host,
+                port=port,
+                username=user,
+                key_filename=_environ.get("SSH_KEY"),
+                look_for_keys=False,
+                compress=True,
+            )
             try:
                 yield client
             finally:
@@ -250,7 +258,6 @@ try:
 
             print_message(f"Sending archive {file_to_upload} to {remote_file}")
             sftp.put(str(file_to_upload), str(remote_file), confirm=True)
-
 
 except ModuleNotFoundError:
     # On old system (bionic) paramiko is really complex to install
