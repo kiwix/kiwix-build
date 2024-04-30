@@ -328,7 +328,9 @@ def run_command(command, cwd, context, *, env=None, input=None, force_posix_path
         env = DefaultEnv()
     log = None
     if force_posix_path:
-        transform_path = lambda v: PurePosixPath(v) if isinstance(v, Path) else v
+        transform_path = lambda v: (
+            str(PurePosixPath(v)).replace("C:/", "/c/") if isinstance(v, Path) else v
+        )
     else:
         transform_path = lambda v: v
     command = [str(transform_path(v)) for v in command]
