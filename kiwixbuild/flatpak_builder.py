@@ -82,9 +82,9 @@ class FlatpakBuilder:
         if neutralEnv("distname") not in self.config.compatible_hosts:
             print(
                 (
-                    "ERROR: The config {} cannot be build on host {}.\n"
+                    f"ERROR: The config {self.config.name} cannot be build on host {neutralEnv('distname')}.\n"
                     "Select another config or change your host system."
-                ).format(self.config.name, neutralEnv("distname"))
+                )
             )
         self.targetDefs = self.config.add_targets(option("target"), self._targets)
 
@@ -205,7 +205,7 @@ class FlatpakBuilder:
             del m["sources"]
             m["sources"] = temp
         manifest["modules"] = modules
-        manifest_name = "{}.json".format(MANIFEST["app-id"])
+        manifest_name = f"{MANIFEST['app-id']}.json"
         manifest_path = self.config.buildEnv.build_dir / manifest_name
         manifest_path.write_text(json.dumps(manifest, indent=4))
 
@@ -294,7 +294,7 @@ class FlatpakBuilder:
                     tlc = Dependency.all_deps[tlcName]
                     builderDef = (cfgName, tlcName)
                     builder = get_target_step(builderDef)
-                    print("build {} ({}):".format(builder.name, cfgName[0]))
+                    print(f"build {builder.name} ({cfgName[0]}):")
                     add_target_step(builderDef, builder)
                     builder.build()
             print("[GENERATE FLATPAK MANIFEST]")

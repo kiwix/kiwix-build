@@ -32,7 +32,7 @@ class AppleConfigInfo(ConfigInfo):
     @property
     def root_path(self) -> Path:
         if self._root_path is None:
-            command = "xcrun --sdk {} --show-sdk-path".format(self.sdk_name)
+            command = f"xcrun --sdk {self.sdk_name} --show-sdk-path"
             self._root_path = Path(
                 subprocess.check_output(command, shell=True)[:-1].decode()
             )
@@ -70,10 +70,7 @@ class AppleConfigInfo(ConfigInfo):
                 self.arch,
                 "-target",
                 self.target,
-                *(
-                    "-I{}".format(include_dir)
-                    for include_dir in self.get_include_dirs()
-                ),
+                *(f"-I{include_dir}" for include_dir in self.get_include_dirs()),
             ],
             "host_machine": {
                 "system": "Darwin",
@@ -86,17 +83,17 @@ class AppleConfigInfo(ConfigInfo):
         }
         if self.min_iphoneos_version:
             config["extra_libs"].append(
-                "-miphoneos-version-min={}".format(self.min_iphoneos_version)
+                f"-miphoneos-version-min={self.min_iphoneos_version}"
             )
             config["extra_cflags"].append(
-                "-miphoneos-version-min={}".format(self.min_iphoneos_version)
+                f"-miphoneos-version-min={self.min_iphoneos_version}"
             )
         if self.min_macos_version:
             config["extra_libs"].append(
-                "-mmacosx-version-min={}".format(self.min_macos_version)
+                f"-mmacosx-version-min={self.min_macos_version}"
             )
             config["extra_cflags"].append(
-                "-mmacosx-version-min={}".format(self.min_macos_version)
+                f"-mmacosx-version-min={self.min_macos_version}"
             )
         return config
 
@@ -104,22 +101,22 @@ class AppleConfigInfo(ConfigInfo):
         env = super().get_env()
         cflags = [env["CFLAGS"]]
         if self.min_iphoneos_version:
-            cflags.append("-miphoneos-version-min={}".format(self.min_iphoneos_version))
+            cflags.append(f"-miphoneos-version-min={self.min_iphoneos_version}")
         if self.min_macos_version:
-            cflags.append("-mmacosx-version-min={}".format(self.min_macos_version))
+            cflags.append(f"-mmacosx-version-min={self.min_macos_version}")
         env["CFLAGS"] = " ".join(cflags)
         return env
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
         cflags = [
-            "-isysroot {}".format(self.root_path),
-            "-arch {}".format(self.arch),
-            "-target {}".format(self.target),
+            f"-isysroot {self.root_path}",
+            f"-arch {self.arch}",
+            f"-target {self.target}",
             env["CFLAGS"],
         ]
         if self.min_iphoneos_version:
-            cflags.append("-miphoneos-version-min={}".format(self.min_iphoneos_version))
+            cflags.append(f"-miphoneos-version-min={self.min_iphoneos_version}")
         env["CFLAGS"] = " ".join(cflags)
         env["CXXFLAGS"] = " ".join(
             [
@@ -130,8 +127,8 @@ class AppleConfigInfo(ConfigInfo):
         )
         env["LDFLAGS"] = " ".join(
             [
-                " -arch {}".format(self.arch),
-                "-isysroot {}".format(self.root_path),
+                f" -arch {self.arch}",
+                f"-isysroot {self.root_path}",
             ]
         )
 
@@ -222,7 +219,7 @@ class IOS(MetaConfigInfo):
 
     @property
     def subConfigNames(self):
-        return ["iOS_{}".format(arch) for arch in option("ios_arch")]
+        return [f"iOS_{arch}" for arch in option("ios_arch")]
 
     def add_targets(self, targetName, targets):
         super().add_targets(targetName, targets)

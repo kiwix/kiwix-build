@@ -46,7 +46,7 @@ class Dependency(metaclass=_MetaDependency):
     @classmethod
     def full_name(cls):
         if cls.version():
-            return "{}-{}".format(cls.name, cls.version())
+            return f"{cls.name}-{cls.version()}"
         return cls.name
 
 
@@ -86,15 +86,15 @@ class Source:
             run_command(patch_command, self.source_path, context)
 
     def command(self, name, function, *args):
-        print("  {} {} : ".format(name, self.name), end="", flush=True)
-        log = self._log_dir / "cmd_{}_{}.log".format(name, self.name)
+        print(f"  {name} {self.name} : ", end="", flush=True)
+        log = self._log_dir / f"cmd_{name}_{self.name}.log"
         context = Context(name, log, True)
         try:
             start_time = time.time()
             ret = function(*args, context=context)
             context._finalise()
             duration = time.time() - start_time
-            print(colorize("OK"), "({:.1f}s)".format(duration))
+            print(colorize("OK"), f"({duration:.1f}s)")
             return ret
         except WarningMessage as e:
             print(e)
@@ -175,7 +175,7 @@ class GitClone(Source):
     @property
     def source_dir(self):
         if option("make_release"):
-            return "{}_release".format(self.git_dir)
+            return f"{self.git_dir}_release"
         else:
             return self.git_dir
 
@@ -269,8 +269,8 @@ class Builder:
         return self.buildEnv.log_dir
 
     def command(self, name, function, *args):
-        print("  {} {} : ".format(name, self.name), end="", flush=True)
-        log = self._log_dir / "cmd_{}_{}.log".format(name, self.name)
+        print(f"  {name} {self.name} : ", end="", flush=True)
+        log = self._log_dir / f"cmd_{name}_{self.name}.log"
         context = Context(name, log, self.target.force_native_build)
         if self.target.force_build:
             context.no_skip = True
@@ -279,7 +279,7 @@ class Builder:
             ret = function(*args, context=context)
             context._finalise()
             duration = time.time() - start_time
-            print(colorize("OK"), "({:.1f}s)".format(duration))
+            print(colorize("OK"), f"({duration:.1f}s)")
             return ret
         except SkipCommand as e:
             print(e)

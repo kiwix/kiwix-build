@@ -14,7 +14,7 @@ class MuslConfigInfo(ConfigInfo):
             "root_path": self.root_path,
             "extra_libs": [],
             "extra_cflags": [
-                "-I{}".format(include_dir) for include_dir in self.get_include_dirs()
+                f"-I{include_dir}" for include_dir in self.get_include_dirs()
             ],
             "host_machine": {
                 "system": "linux",
@@ -37,7 +37,7 @@ class MuslConfigInfo(ConfigInfo):
     @property
     def binaries(self):
         binaries = (
-            (k, "{}-{}".format(self.arch_full, v))
+            (k, f"{self.arch_full}-{v}")
             for k, v in (
                 ("CC", "gcc"),
                 ("CXX", "g++"),

@@ -50,7 +50,7 @@ class NeutralEnv:
     def _detect_command(self, name, default=None, options=["--version"], required=True):
         if default is None:
             default = [[name]]
-        env_key = "KBUILD_{}_COMMAND".format(name.upper())
+        env_key = f"KBUILD_{name.upper()}_COMMAND"
         if env_key in os.environ:
             default = [os.environ[env_key].split()] + default
         for command in default:
@@ -65,10 +65,10 @@ class NeutralEnv:
                 return command
         else:
             if required:
-                sys.exit("ERROR: {} command not found".format(name))
+                sys.exit(f"ERROR: {name} command not found")
             else:
-                print("WARNING: {} command not found".format(name), file=sys.stderr)
-                return ["{}_NOT_FOUND".format(name.upper())]
+                print(f"WARNING: {name} command not found", file=sys.stderr)
+                return [f"{name.upper()}_NOT_FOUND"]
 
 
 class BuildEnv:

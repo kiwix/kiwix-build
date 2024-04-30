@@ -50,7 +50,7 @@ class Libzim(Dependency):
                 yield "-DUSE_MMAP=false"
             if configInfo.name not in ("flatpak", "wasm"):
                 zim_testing_suite = get_target_step("zim-testing-suite", "source")
-                yield "-Dtest_data_dir={}".format(zim_testing_suite.source_path)
+                yield f"-Dtest_data_dir={zim_testing_suite.source_path}"
 
         @property
         def library_type(self):

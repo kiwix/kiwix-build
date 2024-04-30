@@ -26,9 +26,10 @@ class Builder:
         if neutralEnv("distname") not in config.compatible_hosts:
             print(
                 (
-                    colorize("ERROR") + ": The config {} cannot be build on host {}.\n"
+                    colorize("ERROR")
+                    + f": The config {config.name} cannot be build on host {neutralEnv('distname')}.\n"
                     "Select another config or change your host system."
-                ).format(config.name, neutralEnv("distname"))
+                )
             )
         self.targetDefs = config.add_targets(option("target"), self._targets)
 
@@ -106,7 +107,7 @@ class Builder:
             tDef for tDef in target_steps() if tDef[0] == "source"
         )
         for sourceDef in sourceDefs:
-            print("prepare sources {} :".format(sourceDef[1]))
+            print(f"prepare sources {sourceDef[1]} :")
             source = get_target_step(sourceDef)
             source.prepare()
 
@@ -115,28 +116,24 @@ class Builder:
         for builderDef in builderDefs:
             builder = get_target_step(builderDef)
             if option("make_dist") and builderDef[1] == option("target"):
-                print("make dist {} ({}):".format(builder.name, builderDef[0]))
+                print(f"make dist {builder.name} ({builderDef[0]}):")
                 builder.make_dist()
                 continue
-            print("build {} ({}):".format(builder.name, builderDef[0]))
+            print(f"build {builder.name} ({builderDef[0]}):")
             add_target_step(builderDef, builder)
             builder.build()
 
     def _get_packages(self):
         packages_list = []
         for config in ConfigInfo.all_running_configs.values():
-            mapper_name = "{host}_{config}".format(
-                host=neutralEnv("distname"), config=config
-            )
+            mapper_name = f"{neutralEnv('distname')}_{config}"
             package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
             packages_list += package_name_mapper.get("COMMON", [])
 
         to_drop = []
         for builderDef in self._targets:
             configName, builderName = builderDef
-            mapper_name = "{host}_{config}".format(
-                host=neutralEnv("distname"), config=configName
-            )
+            mapper_name = f"{neutralEnv('distname')}_{config}"
             package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
             packages = package_name_mapper.get(builderName)
             if packages:
@@ -169,7 +166,7 @@ class Builder:
 
         packages_to_install = []
         for package in packages_to_have:
-            print(" - {} : ".format(package), end="")
+            print(f" - {package} : ", end="")
             command = package_checker.format(package)
             try:
                 subprocess.check_call(command, shell=True)

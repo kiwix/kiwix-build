@@ -48,7 +48,8 @@ class ConfigInfo(metaclass=_MetaConfig):
         self.setup_toolchains(targets)
 
     def __str__(self):
-        return "{}_{}".format(self.build, "static" if self.static else "dyn")
+        postfix = "static" if self.static else "dyn"
+        return f"{self.build}_{postfix}"
 
     def setup_toolchains(self, targets):
         for tlc_name in self.toolchain_names:

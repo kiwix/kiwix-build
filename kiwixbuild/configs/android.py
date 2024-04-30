@@ -14,18 +14,18 @@ class AndroidConfigInfo(ConfigInfo):
 
     @property
     def libdir(self):
-        return "lib/{}".format(self.arch_full)
+        return f"lib/{self.arch_full}"
 
     @property
     def binaries_name(self):
         arch_full = self.arch_full
         return {
-            "CC": "{}-{}".format(arch_full, "clang"),
-            "CXX": "{}-{}".format(arch_full, "clang++"),
-            "AR": "{}-{}".format(arch_full, "ar"),
-            "STRIP": "{}-{}".format(arch_full, "strip"),
-            "RANLIB": "{}-{}".format(arch_full, "ranlib"),
-            "LD": "{}-{}".format(arch_full, "ld"),
+            "CC": f"{arch_full}-clang",
+            "CXX": f"{arch_full}-clang++",
+            "AR": f"{arch_full}-ar",
+            "STRIP": f"{arch_full}-strip",
+            "RANLIB": f"{arch_full}-ranlib",
+            "LD": f"{arch_full}-ld",
         }
 
     def binaries(self):
@@ -44,12 +44,10 @@ class AndroidConfigInfo(ConfigInfo):
 
     def get_cross_config(self):
         extra_libs = ["-llog"]
-        extra_cflags = [
-            "-I{}".format(include_dir) for include_dir in self.get_include_dirs()
-        ]
+        extra_cflags = [f"-I{include_dir}" for include_dir in self.get_include_dirs()]
         if hasattr(self, "march"):
-            extra_libs.append("-march={}".format(self.march))
-            extra_cflags.append("-march={}".format(self.march))
+            extra_libs.append(f"-march={self.march}")
+            extra_cflags.append(f"-march={self.march}")
         return {
             "exe_wrapper_def": "",
             "install_path": self.install_path,
@@ -80,20 +78,16 @@ class AndroidConfigInfo(ConfigInfo):
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
         root_path = self.install_path / "sysroot"
-        march = "-march={}".format(self.march) if hasattr(self, "march") else ""
+        march = f"-march={self.march}" if hasattr(self, "march") else ""
         env["CFLAGS"] = (
-            "-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} {} ".format(
-                root_path, march
-            )
+            f"-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={root_path} {march} "
             + env["CFLAGS"]
         )
         env["CXXFLAGS"] = (
-            "-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} {} ".format(
-                root_path, march
-            )
+            f"-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={root_path} {march} "
             + env["CXXFLAGS"]
         )
-        env["LDFLAGS"] = "--sysroot={} {} ".format(root_path, march) + env["LDFLAGS"]
+        env["LDFLAGS"] = f"--sysroot={root_path} {march} " + env["LDFLAGS"]
 
     def set_compiler(self, env):
         binaries = self.binaries()
@@ -102,7 +96,7 @@ class AndroidConfigInfo(ConfigInfo):
 
     @property
     def configure_options(self):
-        yield "--host={}".format(self.arch_full)
+        yield f"--host={self.arch_full}"
 
     def finalize_setup(self):
         super().finalize_setup()
@@ -151,7 +145,7 @@ class Android(MetaConfigInfo):
 
     @property
     def subConfigNames(self):
-        return ["android_{}".format(arch) for arch in option("android_arch")]
+        return [f"android_{arch}" for arch in option("android_arch")]
 
     def add_targets(self, targetName, targets):
         return super().add_targets(targetName, targets)

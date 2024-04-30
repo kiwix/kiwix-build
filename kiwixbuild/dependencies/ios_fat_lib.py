@@ -15,10 +15,10 @@ class IOSFatLib(Dependency):
         @classmethod
         def get_dependencies(self, platfomInfo, alldeps):
             base_target = option("target")
-            return [("iOS_{}".format(arch), base_target) for arch in option("ios_arch")]
+            return [(f"iOS_{arch}", base_target) for arch in option("ios_arch")]
 
         def _copy_headers(self, context):
-            plt = ConfigInfo.get_config("iOS_{}".format(option("ios_arch")[0]))
+            plt = ConfigInfo.get_config(f"iOS_{option('ios_arch')[0]}")
             include_src = plt.buildEnv.install_dir / "include"
             include_dst = self.buildEnv.install_dir / "include"
             copy_tree(include_src, include_dst)
@@ -26,7 +26,7 @@ class IOSFatLib(Dependency):
         def _merge_libs(self, context):
             lib_dirs = []
             for arch in option("ios_arch"):
-                plt = ConfigInfo.get_config("iOS_{}".format(arch))
+                plt = ConfigInfo.get_config(f"iOS_{arch}")
                 lib_dirs.append(plt.buildEnv.install_dir / "lib")
             libs = []
             for f in lib_dirs[0].iterdir():

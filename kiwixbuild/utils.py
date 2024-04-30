@@ -28,13 +28,13 @@ REMOTE_PREFIX = "http://mirror.download.kiwix.org/dev/kiwix-build/"
 
 
 def which(name):
-    command = "which {}".format(name)
+    command = f"which {name}"
     output = subprocess.check_output(command, shell=True)
     return output[:-1].decode()
 
 
 def xrun_find(name):
-    command = "xcrun -find {}".format(name)
+    command = f"xcrun -find {name}"
     output = subprocess.check_output(command, shell=True)
     return output[:-1].decode()
 
@@ -117,12 +117,12 @@ def get_sha256(path: Path):
 def colorize(text, color=None):
     if color is None:
         color = text
-    return "{}{}{}".format(COLORS[color], text, COLORS[""])
+    return f"{COLORS[color]}{text}{COLORS['']}"
 
 
 def print_progress(progress):
     if option("show_progress"):
-        text = "{}\033[{}D".format(progress, len(progress))
+        text = f"{progress}\033[{len(progress)}D"
         print(text, end="")
 
 
@@ -181,17 +181,17 @@ def download_remote(what: Remotefile, where: Path):
                     break
                 if tsize:
                     current += batch_size
-                    print_progress("{:.2%}".format(current / tsize))
+                    print_progress(f"{current/tsize:.2%}")
                 else:
                     print_progress(progress_chars[current])
                     current = (current + 1) % 4
                 file.write(batch)
     except urllib.error.URLError as e:
-        print("Cannot download url {}:\n{}".format(what.url, e.reason))
+        print(f"Cannot download url {what.url}:\n{e.reason}")
         raise StopBuild()
 
     if not what.sha256:
-        print("Sha256 for {} not set, do no verify download".format(what.name))
+        print(f"Sha256 for {what.name} not set, do no verify download")
     elif what.sha256 != get_sha256(file_path):
         file_path.unlink()
         raise StopBuild("Sha 256 doesn't correspond")
@@ -208,13 +208,13 @@ class BaseCommandResult(Exception):
 class SkipCommand(BaseCommandResult):
     def __str__(self):
         if self.msg:
-            return colorize("SKIP") + " : {}".format(self.msg)
+            return colorize("SKIP") + f" : {self.msg}"
         return colorize("SKIP")
 
 
 class WarningMessage(BaseCommandResult):
     def __str__(self):
-        return colorize("WARNING") + " : {}".format(self.msg)
+        return colorize("WARNING") + f" : {self.msg}"
 
 
 class StopBuild(BaseCommandResult):
@@ -236,8 +236,8 @@ class Context:
         if self.no_skip:
             return
         if extra_name:
-            extra_name = "_{}".format(extra_name)
-        self.autoskip_file = path / ".{}{}_ok".format(self.command_name, extra_name)
+            extra_name = f"_{extra_name}"
+        self.autoskip_file = path / f".{self.command_name}{extra_name}_ok"
         if self.autoskip_file.exists():
             raise SkipCommand()
 
@@ -331,12 +331,12 @@ def run_command(command, cwd, context, *, env=None, input=None):
     try:
         if not option("verbose"):
             log = open(context.log_file, "w")
-        print("run command '{}'".format(command), file=log)
-        print("current directory is '{}'".format(cwd), file=log)
+        print(f"run command '{command}'", file=log)
+        print(f"current directory is '{cwd}'", file=log)
         print("env is :", file=log)
         env = {k: str(v) for k, v in env.items()}
         for k, v in env.items():
-            print("  {} : {!r}".format(k, v), file=log)
+            print(f"  {k} : {v!r}", file=log)
 
         if log:
             log.flush()
@@ -349,7 +349,7 @@ def run_command(command, cwd, context, *, env=None, input=None):
             env=env,
             stdout=log or sys.stdout,
             stderr=subprocess.STDOUT,
-            **kwargs
+            **kwargs,
         )
         if input:
             input = input.encode()

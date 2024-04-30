@@ -21,10 +21,7 @@ class Win32ConfigInfo(ConfigInfo):
             "extra_libs": self.extra_libs,
             "extra_cflags": [
                 "-DWIN32",
-                *(
-                    "-I{}".format(include_dir)
-                    for include_dir in self.get_include_dirs()
-                ),
+                *(f"-I{include_dir}" for include_dir in self.get_include_dirs()),
             ],
             "host_machine": {
                 "system": "Windows",
@@ -52,7 +49,7 @@ class Win32ConfigInfo(ConfigInfo):
     @property
     def binaries(self):
         return {
-            k: which("{}-{}".format(self.arch_full, v))
+            k: which(f"{self.arch_full}-{v}")
             for k, v in (
                 ("CC", "gcc"),
                 ("CXX", "g++"),

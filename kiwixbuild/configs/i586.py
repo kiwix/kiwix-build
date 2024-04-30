@@ -18,10 +18,7 @@ class I586ConfigInfo(ConfigInfo):
                 "-m32",
                 "-march=i586",
                 "-mno-sse",
-                *(
-                    "-I{}".format(include_dir)
-                    for include_dir in self.get_include_dirs()
-                ),
+                *(f"-I{include_dir}" for include_dir in self.get_include_dirs()),
             ],
             "host_machine": {
                 "system": "linux",

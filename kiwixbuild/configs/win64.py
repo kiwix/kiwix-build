@@ -55,7 +55,7 @@ class Win64ConfigInfo(ConfigInfo):
     @property
     def binaries(self):
         return {
-            k: which("{}-{}".format(self.arch_full, v))
+            k: which(f"{self.arch_full}-{v}")
             for k, v in (
                 ("CC", "gcc"),
                 ("CXX", "g++"),

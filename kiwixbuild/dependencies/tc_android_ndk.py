@@ -62,7 +62,7 @@ class android_ndk(Dependency):
             context.try_skip(self.build_path)
             bin_dirs = [
                 self.install_path / "bin",
-                self.install_pat / self.arch_full / "bin",
+                self.install_path / self.arch_full / "bin",
                 self.install_path
                 / "libexec"
                 / "gcc"

@@ -15,7 +15,7 @@ class ArmConfigInfo(ConfigInfo):
             "root_path": self.root_path,
             "extra_libs": [],
             "extra_cflags": [
-                "-I{}".format(include_dir) for include_dir in self.get_include_dirs()
+                f"-I{include_dir}" for include_dir in self.get_include_dirs()
             ],
             "host_machine": {
                 "system": "linux",
@@ -29,7 +29,7 @@ class ArmConfigInfo(ConfigInfo):
 
     @property
     def libdir(self):
-        return "lib/{}".format(self.arch_full)
+        return f"lib/{self.arch_full}"
 
     @property
     def toolchain(self):
@@ -42,7 +42,7 @@ class ArmConfigInfo(ConfigInfo):
     @property
     def binaries(self):
         binaries = (
-            (k, "{}-{}".format(self.arch_full, v))
+            (k, f"{self.arch_full}-{v}")
             for k, v in (
                 ("CC", "gcc"),
                 ("CXX", "g++"),
@@ -69,7 +69,7 @@ class ArmConfigInfo(ConfigInfo):
 
     @property
     def configure_options(self):
-        yield "--host={}".format(self.arch_full)
+        yield f"--host={self.arch_full}"
 
     def get_bin_dir(self):
         return [self.root_path / "bin"]
