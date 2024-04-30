@@ -322,15 +322,19 @@ def extract_archive(archive_path: Path, dest_dir: Path, topdir=None, name=None):
             archive.close()
 
 
+def win_to_posix_path(p: Path or str) -> str:
+    if isinstance(p, Path):
+        return str(PurePosixPath(p)).replace("C:/", "/c/")
+    return p
+
+
 def run_command(command, cwd, context, *, env=None, input=None, force_posix_path=False):
     os.makedirs(cwd, exist_ok=True)
     if env is None:
         env = DefaultEnv()
     log = None
     if force_posix_path:
-        transform_path = lambda v: (
-            str(PurePosixPath(v)).replace("C:/", "/c/") if isinstance(v, Path) else v
-        )
+        transform_path = win_to_posix_path
     else:
         transform_path = lambda v: v
     command = [str(transform_path(v)) for v in command]
