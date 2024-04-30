@@ -1,13 +1,10 @@
-import os
-
 from .base import (
     Dependency,
     ReleaseDownload,
     MakeBuilder,
 )
 
-from kiwixbuild.utils import Remotefile, pj, Defaultdict, SkipCommand, run_command
-from kiwixbuild._global import get_target_step
+from kiwixbuild.utils import Remotefile
 
 
 class LibCurl(Dependency):

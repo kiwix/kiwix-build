@@ -1,9 +1,7 @@
 import os
 
 from .base import Dependency, ReleaseDownload, Builder
-from kiwixbuild.utils import Remotefile, add_execution_right, run_command
-
-pj = os.path.join
+from kiwixbuild.utils import Remotefile, add_execution_right, run_command, pj
 
 
 class android_ndk(Dependency):

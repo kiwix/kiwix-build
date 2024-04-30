@@ -1,8 +1,5 @@
-import shutil, os
-
 from .base import Dependency, GitClone, MesonBuilder
-from kiwixbuild.utils import pj, copy_tree
-from kiwixbuild._global import option, get_target_step, neutralEnv
+from kiwixbuild._global import option
 
 
 class Libkiwix(Dependency):

@@ -1,8 +1,6 @@
-import shutil
-
 from .base import Dependency, ReleaseDownload, MakeBuilder, QMakeBuilder
 
-from kiwixbuild.utils import Remotefile, pj, SkipCommand
+from kiwixbuild.utils import Remotefile, pj
 
 
 class Qt(Dependency):

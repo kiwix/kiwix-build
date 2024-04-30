@@ -1,10 +1,6 @@
-from .base import (
-    Dependency,
-    ReleaseDownload,
-    MakeBuilder, MesonBuilder
-)
+from .base import Dependency, ReleaseDownload, MakeBuilder, MesonBuilder
 
-from kiwixbuild.utils import pj, SkipCommand, Remotefile, extract_archive
+from kiwixbuild.utils import pj, Remotefile, extract_archive
 from kiwixbuild._global import get_target_step, neutralEnv
 import os, shutil
 import fileinput
@@ -15,16 +11,21 @@ class Icu(Dependency):
     name = "icu4c"
 
     class Source(ReleaseDownload):
-        archive_src = Remotefile('icu4c-73_2-src.tgz',
-                                 '818a80712ed3caacd9b652305e01afc7fa167e6f2e94996da44b90c2ab604ce1',
-                                 'https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-src.tgz')
-        archive_data = Remotefile('icu4c-73_2-data.zip',
-                                  'ca1ee076163b438461e484421a7679fc33a64cd0a54f9d4b401893fa1eb42701',
-                                  'https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-data.zip')
-        meson_patch = Remotefile('icu_73.2-2_patch.zip',
-                                  '',
-                                  'https://wrapdb.mesonbuild.com/v2/icu_73.2-2/get_patch')
-
+        archive_src = Remotefile(
+            "icu4c-73_2-src.tgz",
+            "818a80712ed3caacd9b652305e01afc7fa167e6f2e94996da44b90c2ab604ce1",
+            "https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-src.tgz",
+        )
+        archive_data = Remotefile(
+            "icu4c-73_2-data.zip",
+            "ca1ee076163b438461e484421a7679fc33a64cd0a54f9d4b401893fa1eb42701",
+            "https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-data.zip",
+        )
+        meson_patch = Remotefile(
+            "icu_73.2-2_patch.zip",
+            "",
+            "https://wrapdb.mesonbuild.com/v2/icu_73.2-2/get_patch",
+        )
 
         archives = [archive_src, archive_data, meson_patch]
 
@@ -48,28 +49,33 @@ class Icu(Dependency):
                 name="data",
             )
             extract_archive(
-                pj(neutralEnv('archive_dir'), self.meson_patch.name),
-                neutralEnv('source_dir'),
-                topdir='icu',
-                name= self.source_dir
+                pj(neutralEnv("archive_dir"), self.meson_patch.name),
+                neutralEnv("source_dir"),
+                topdir="icu",
+                name=self.source_dir,
             )
 
         patches = [
-                   "icu4c_fix_static_lib_name_mingw.patch",
-        #           "icu4c_android_elf64_st_info.patch",
-        #           "icu4c_custom_data.patch",
-        #           "icu4c_noxlocale.patch",
-                   "icu4c_rpath.patch",
-        #           "icu4c_build_config.patch",
-                   "icu4c_wasm.patch",
-                  ]
+            "icu4c_fix_static_lib_name_mingw.patch",
+            #           "icu4c_android_elf64_st_info.patch",
+            #           "icu4c_custom_data.patch",
+            #           "icu4c_noxlocale.patch",
+            "icu4c_rpath.patch",
+            #           "icu4c_build_config.patch",
+            "icu4c_wasm.patch",
+        ]
 
-    if platform.system() == 'Windows':
+    if platform.system() == "Windows":
+
         class Builder(MesonBuilder):
             def set_env(self, env):
-                env['ICU_DATA_FILTER_FILE'] = pj(os.path.dirname(os.path.realpath(__file__)), "icu4c_data_filter.json")
+                env["ICU_DATA_FILTER_FILE"] = pj(
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "icu4c_data_filter.json",
+                )
 
     else:
+
         class Builder(MakeBuilder):
             subsource_dir = "source"
             make_install_targets = ["install"]
@@ -100,14 +106,17 @@ class Icu(Dependency):
 
             def set_env(self, env):
                 env["ICU_DATA_FILTER_FILE"] = pj(
-                    os.path.dirname(os.path.realpath(__file__)), "icu4c_data_filter.json"
+                    os.path.dirname(os.path.realpath(__file__)),
+                    "icu4c_data_filter.json",
                 )
 
             def _post_configure_script(self, context):
                 if self.buildEnv.configInfo.build != "wasm":
                     context.skip()
                 context.try_skip(self.build_path)
-                for line in fileinput.input(pj(self.build_path, "Makefile"), inplace=True):
+                for line in fileinput.input(
+                    pj(self.build_path, "Makefile"), inplace=True
+                ):
                     if line == "#DATASUBDIR = data\n":
                         print("DATASUBDIR = data")
                     else:

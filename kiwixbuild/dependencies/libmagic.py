@@ -1,12 +1,10 @@
-import os
-
 from .base import (
     Dependency,
     ReleaseDownload,
     MakeBuilder,
 )
 
-from kiwixbuild.utils import Remotefile, pj, SkipCommand, run_command
+from kiwixbuild.utils import Remotefile, pj, run_command
 from kiwixbuild._global import get_target_step
 
 

@@ -1,9 +1,5 @@
-import os
-
 from .base import Dependency, ReleaseDownload, Builder
-from kiwixbuild.utils import Remotefile, run_command, copy_tree
-
-pj = os.path.join
+from kiwixbuild.utils import pj, Remotefile, run_command, copy_tree
 
 
 class emsdk(Dependency):

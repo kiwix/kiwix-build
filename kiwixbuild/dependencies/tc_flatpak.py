@@ -3,8 +3,6 @@ import os
 from .base import Dependency, NoopSource, Builder
 from kiwixbuild.utils import Remotefile, add_execution_right, run_command
 
-pj = os.path.join
-
 
 class org_kde(Dependency):
     neutral = False
