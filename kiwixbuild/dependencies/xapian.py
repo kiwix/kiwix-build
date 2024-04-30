@@ -1,6 +1,6 @@
 from .base import Dependency, ReleaseDownload, MakeBuilder
 
-from kiwixbuild.utils import Remotefile
+from kiwixbuild.utils import Remotefile, pj
 from kiwixbuild._global import neutralEnv
 
 
@@ -14,12 +14,24 @@ class Xapian(Dependency):
         )
 
     class Builder(MakeBuilder):
-        configure_options = [
-            "--disable-sse",
-            "--disable-backend-chert",
-            "--disable-backend-remote",
-            "--disable-documentation",
-        ]
+        @property
+        def configure_options(self):
+            if neutralEnv("distname") == "Windows":
+                compile_script = pj(self.source_path, "compile")
+                return [
+                    'CC="cl -nologo"',
+                    'CXX=f"{compile_script} cl -nologo"',
+                    "CXXFLAGS=-EHsc",
+                    "AR=lib",
+                ]
+            else:
+                return [
+                    "--disable-sse",
+                    "--disable-backend-chert",
+                    "--disable-backend-remote",
+                    "--disable-documentation",
+                ]
+
         configure_env = {
             "_format_LDFLAGS": "{env.LDFLAGS} -L{buildEnv.install_dir}/{buildEnv.libprefix}",
             "_format_CXXFLAGS": "{env.CXXFLAGS} -O3 -I{buildEnv.install_dir}/include",
