@@ -23,6 +23,8 @@ class Xapian(Dependency):
                     f"CXX={compile_script} cl -nologo",
                     "CXXFLAGS=-EHsc",
                     "AR=lib",
+                    "--srcdir",
+                    win_to_posix_path(self.source_path),
                 ]
             else:
                 return [
