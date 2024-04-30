@@ -23,6 +23,10 @@ class WinBashConfigInfo(ConfigInfo):
         yield "C:\\Program Files\\Git\\bin\\bash.exe"
 
     @property
+    def make_wrapper(self):
+        yield "C:\\Program Files\\Git\\bin\\bash.exe"
+
+    @property
     def binaries(self):
         binaries = {
             "CC": "cl -nologo",
@@ -31,7 +35,11 @@ class WinBashConfigInfo(ConfigInfo):
         }
         return binaries
 
+    def set_compiler(self, env):
+        for k, v in self.binaries.items():
+            env[k] = v
+
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
-        env["PATH"] += "C:\\Program Files\\Git\\bin"
+        env["PATH"] += ["C:\\Program Files\\Git\\bin"]
         env["CXXFLAGS"] = "-EHsc -MD " + env["CXXFLAGS"]
