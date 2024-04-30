@@ -33,4 +33,5 @@ class WinBashConfigInfo(ConfigInfo):
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
+        env["PATH"] += "C:\\Program Files\\Git\\bin"
         env["CXXFLAGS"] = "-EHsc -MD " + env["CXXFLAGS"]
