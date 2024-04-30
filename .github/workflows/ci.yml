@@ -17,10 +17,10 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    - name: Setup python 3.8
+    - name: Setup python 3.12
       uses: actions/setup-python@v3
       with:
-        python-version: '3.8'
+        python-version: '3.12'
     - name: Install packages
       run: |
         choco.exe install pkgconfiglite ninja
