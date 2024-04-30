@@ -1,6 +1,6 @@
+from pathlib import Path
 from .base import ConfigInfo, MixedMixin
 
-from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
 
 
@@ -31,7 +31,7 @@ class MuslConfigInfo(ConfigInfo):
         return get_target_step(self.build, "neutral")
 
     @property
-    def root_path(self):
+    def root_path(self) -> Path:
         return self.toolchain.build_path
 
     @property
@@ -49,7 +49,7 @@ class MuslConfigInfo(ConfigInfo):
                 ("LDSHARED", "g++ -shared"),
             )
         )
-        binaries = {k: pj(self.root_path, "bin", v) for k, v in binaries}
+        binaries = {k: self.root_path / "bin" / v for k, v in binaries}
         binaries["PKGCONFIG"] = "pkg-config"
         return binaries
 
@@ -69,26 +69,26 @@ class MuslConfigInfo(ConfigInfo):
         return [f"--host={self.arch_full}"]
 
     def get_bin_dir(self):
-        return [pj(self.root_path, "bin")]
+        return [self.root_path / "bin"]
 
     def get_env(self):
         env = super().get_env()
         env["LD_LIBRARY_PATH"][0:0] = [
-            pj(self.root_path, self.arch_full, "lib64"),
-            pj(self.root_path, "lib"),
+            self.root_path / self.arch_full / "lib64",
+            self.root_path / "lib",
         ]
-        env["PKG_CONFIG_LIBDIR"] = pj(self.root_path, "lib", "pkgconfig")
-        env["QEMU_LD_PREFIX"] = pj(self.root_path, self.arch_full, "libc")
+        env["PKG_CONFIG_LIBDIR"] = self.root_path / "lib" / "pkgconfig"
+        env["QEMU_LD_PREFIX"] = self.root_path / self.arch_full / "libc"
         env["QEMU_SET_ENV"] = "LD_LIBRARY_PATH={}".format(
             ":".join(
-                [pj(self.root_path, self.arch_full, "lib"), str(env["LD_LIBRARY_PATH"])]
+                [self.root_path / self.arch_full / "lib", str(env["LD_LIBRARY_PATH"])]
             )
         )
         return env
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
-        env["LD_LIBRARY_PATH"].insert(0, pj(self.root_path, self.arch_full, "lib"))
+        env["LD_LIBRARY_PATH"].insert(0, self.root_path / self.arch_full / "lib")
         env["CFLAGS"] = (
             " -fPIC -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 "
             + env["CFLAGS"]

@@ -1,9 +1,8 @@
-import os
 import shutil
 from pathlib import Path
 
 from kiwixbuild.configs import ConfigInfo
-from kiwixbuild.utils import pj, run_command
+from kiwixbuild.utils import run_command
 from .base import Dependency, NoopSource, Builder as BaseBuilder
 
 
@@ -48,11 +47,11 @@ class AppleXCFramework(Dependency):
             return [(target, "libkiwix") for target in AppleXCFramework.subConfigNames]
 
         @property
-        def final_path(self):
-            return pj(self.buildEnv.install_dir, "lib", "CoreKiwix.xcframework")
+        def final_path(self) -> Path:
+            return self.buildEnv.install_dir / "lib" / "CoreKiwix.xcframework"
 
         def _remove_if_exists(self, context):
-            if not os.path.exists(self.final_path):
+            if not self.final_path.exists():
                 return
 
             shutil.rmtree(self.final_path)
@@ -64,8 +63,8 @@ class AppleXCFramework(Dependency):
                 static_ars = []
 
                 cfg = ConfigInfo.get_config(target)
-                lib_dir = pj(cfg.buildEnv.install_dir, "lib")
-                static_ars = [str(f) for f in Path(lib_dir).glob("*.a")]
+                lib_dir = cfg.buildEnv.install_dir / "lib"
+                static_ars = [str(f) for f in lib_dir.glob("*.a")]
 
                 # create merged.a from all *.a in install_dir/lib
                 command = ["libtool", "-static", "-o", "merged.a", *static_ars]
@@ -73,7 +72,7 @@ class AppleXCFramework(Dependency):
 
                 # will be included in xcframework
                 if target in self.ios_subconfigs:
-                    xcf_libs.append(pj(lib_dir, "merged.a"))
+                    xcf_libs.append(lib_dir / "merged.a")
 
             return xcf_libs
 
@@ -82,12 +81,12 @@ class AppleXCFramework(Dependency):
             libs = []
             for target in configs:
                 cfg = ConfigInfo.get_config(target)
-                libs.append(pj(cfg.buildEnv.install_dir, "lib", "merged.a"))
+                libs.append(cfg.buildEnv.install_dir / "lib" / "merged.a")
 
-            fat_dir = pj(self.buildEnv.build_dir, folder_name)
-            os.makedirs(fat_dir, exist_ok=True)
+            fat_dir = self.buildEnv.build_dir / folder_name
+            fad_dir.mkdir(parents=True, exist_ok=True)
 
-            output_merged = pj(fat_dir, "merged.a")
+            output_merged = fat_dir / "merged.a"
             command = ["lipo", "-create", "-output", output_merged, *libs]
             run_command(command, self.buildEnv.build_dir, context)
 
@@ -102,7 +101,7 @@ class AppleXCFramework(Dependency):
                     "-library",
                     lib,
                     "-headers",
-                    pj(ref_conf.buildEnv.install_dir, "include"),
+                    ref_conf.buildEnv.install_dir / "include",
                 ]
             command += ["-output", self.final_path]
             run_command(command, self.buildEnv.build_dir, context)

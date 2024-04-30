@@ -1,5 +1,5 @@
+from pathlib import Path
 from .base import ConfigInfo, MetaConfigInfo
-from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step, option
 
 
@@ -30,9 +30,7 @@ class AndroidConfigInfo(ConfigInfo):
 
     def binaries(self):
         install_path = self.install_path
-        binaries = {
-            k: pj(install_path, "bin", v) for k, v in self.binaries_name.items()
-        }
+        binaries = {k: install_path / "bin" / v for k, v in self.binaries_name.items()}
         binaries["PKGCONFIG"] = "pkg-config"
         return binaries
 
@@ -41,7 +39,7 @@ class AndroidConfigInfo(ConfigInfo):
         return get_target_step("android-ndk", self.name)
 
     @property
-    def install_path(self):
+    def install_path(self) -> Path:
         return self.ndk_builder.install_path
 
     def get_cross_config(self):
@@ -56,7 +54,7 @@ class AndroidConfigInfo(ConfigInfo):
             "exe_wrapper_def": "",
             "install_path": self.install_path,
             "binaries": self.binaries(),
-            "root_path": pj(self.install_path, "sysroot"),
+            "root_path": self.install_path / "sysroot",
             "extra_libs": extra_libs,
             "extra_cflags": extra_cflags,
             "host_machine": {
@@ -71,17 +69,17 @@ class AndroidConfigInfo(ConfigInfo):
 
     def get_env(self):
         env = super().get_env()
-        root_path = pj(self.install_path, "sysroot")
-        env["PKG_CONFIG_LIBDIR"] = pj(root_path, "lib", "pkgconfig")
+        root_path = self.install_path / "sysroot"
+        env["PKG_CONFIG_LIBDIR"] = root_path / "lib" / "pkgconfig"
         env["NDK_DEBUG"] = "0"
         return env
 
     def get_bin_dir(self):
-        return [pj(self.install_path, "bin")]
+        return [self.install_path / "bin"]
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
-        root_path = pj(self.install_path, "sysroot")
+        root_path = self.install_path / "sysroot"
         march = "-march={}".format(self.march) if hasattr(self, "march") else ""
         env["CFLAGS"] = (
             "-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} {} ".format(

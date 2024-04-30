@@ -1,6 +1,6 @@
 from .base import Dependency, ReleaseDownload, MakeBuilder
 
-from kiwixbuild.utils import Remotefile, pj
+from kiwixbuild.utils import Remotefile
 from kiwixbuild._global import neutralEnv
 
 
@@ -17,7 +17,7 @@ class Xapian(Dependency):
         @property
         def configure_options(self):
             if neutralEnv("distname") == "Windows":
-                compile_script = pj(self.source_path, "compile")
+                compile_script = self.source_path / "compile"
                 return [
                     'CC="cl -nologo"',
                     'CXX=f"{compile_script} cl -nologo"',

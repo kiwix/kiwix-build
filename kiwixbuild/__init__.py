@@ -2,6 +2,7 @@
 
 import os, sys
 import argparse
+from pathlib import Path
 
 from .dependencies import Dependency
 from .configs import ConfigInfo
@@ -22,6 +23,7 @@ def parse_args():
     parser.add_argument(
         "--working-dir",
         default=".",
+        type=Path,
         help=(
             "Directory where kiwix-build puts all its files "
             "(source, archive and build)\n"
@@ -31,6 +33,7 @@ def parse_args():
     parser.add_argument(
         "--build-dir",
         default=".",
+        type=Path,
         help=(
             "Directory where kiwix-build puts all build files.\n"
             "build-dir can be absolute path or a relative (to working-dir) one."
@@ -152,7 +155,7 @@ def parse_args():
 
 def main():
     options = parse_args()
-    options.working_dir = os.path.abspath(options.working_dir)
+    options.working_dir = options.working_dir.absolute()
     _global.set_options(options)
     neutralEnv = buildenv.NeutralEnv(options.get_build_dir)
     _global.set_neutralEnv(neutralEnv)

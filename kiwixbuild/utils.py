@@ -1,4 +1,3 @@
-import os.path
 import hashlib
 import tarfile, zipfile
 import tempfile
@@ -9,13 +8,10 @@ import urllib.error
 import ssl
 import subprocess
 import re
+from pathlib import Path
 from collections import namedtuple, defaultdict
 
 from kiwixbuild._global import neutralEnv, option
-
-
-def pj(*args):
-    return os.path.normpath(os.path.join(*args))
 
 
 COLORS = {
@@ -46,7 +42,7 @@ def xrun_find(name):
 regex_space = re.compile(r"((?<!\\) )")
 
 
-def escape_path(path):
+def escape_path(path: Path):
     path = str(path)
     return regex_space.sub(r"\ ", path)
 
@@ -87,7 +83,7 @@ class PathArray(list):
             super().__init__(value.split(self.separator))
 
     def __str__(self):
-        return self.separator.join(self)
+        return self.separator.join((str(v) for v in self))
 
 
 def remove_duplicates(iterable, key_function=None):
@@ -102,12 +98,12 @@ def remove_duplicates(iterable, key_function=None):
         yield elem
 
 
-def get_sha256(path):
+def get_sha256(path: Path):
     progress_chars = "/-\\|"
     current = 0
     batch_size = 1024 * 8
     sha256 = hashlib.sha256()
-    with open(path, "br") as f:
+    with path.open("br") as f:
         while True:
             batch = f.read(batch_size)
             if not batch:
@@ -130,30 +126,37 @@ def print_progress(progress):
         print(text, end="")
 
 
-def add_execution_right(file_path):
+def add_execution_right(file_path: Path):
     current_permissions = stat.S_IMODE(os.lstat(file_path).st_mode)
-    os.chmod(file_path, current_permissions | stat.S_IXUSR)
+    file_path.chmod(current_permissions | stat.S_IXUSR)
 
 
-def copy_tree(src, dst, post_copy_function=None):
-    os.makedirs(dst, exist_ok=True)
-    for root, dirs, files in os.walk(src):
-        r = os.path.relpath(root, src)
-        dstdir = pj(dst, r)
-        os.makedirs(dstdir, exist_ok=True)
+def copy_tree(src: Path, dst: Path, post_copy_function=None):
+    dst.mkdir(parents=True, exist_ok=True)
+    for root, dirs, files in src.walk():
+        r = root.relative_to(src)
+        dstdir = dst / r
+        dstdir.mkdir(exist_ok=True)
         for f in files:
-            dstfile = pj(dstdir, f)
-            shutil.copy2(pj(root, f), dstfile, follow_symlinks=False)
+            dstfile = dstdir / f
+            shutil.copy2(root / f, dstfile, follow_symlinks=False)
             if post_copy_function is not None:
                 post_copy_function(dstfile)
 
 
-def download_remote(what, where):
-    file_path = pj(where, what.name)
-    if os.path.exists(file_path):
+class Remotefile(namedtuple("Remotefile", ("name", "sha256", "url"))):
+    def __new__(cls, name, sha256, url=None):
+        if url is None:
+            url = REMOTE_PREFIX + name
+        return super().__new__(cls, name, sha256, url)
+
+
+def download_remote(what: Remotefile, where: Path):
+    file_path = where / what.name
+    if file_path.exists():
         if what.sha256 == get_sha256(file_path):
             raise SkipCommand()
-        os.remove(file_path)
+        file_path.unlink()
 
     if option("no_cert_check"):
         context = ssl.create_default_context()
@@ -165,8 +168,8 @@ def download_remote(what, where):
     extra_args = {"context": context} if sys.version_info >= (3, 4, 3) else {}
     progress_chars = "/-\\|"
     try:
-        with urllib.request.urlopen(what.url, **extra_args) as resource, open(
-            file_path, "wb"
+        with urllib.request.urlopen(what.url, **extra_args) as resource, file_path.open(
+            "wb"
         ) as file:
             tsize = resource.info().get("Content-Length", None)
             if tsize is not None:
@@ -190,7 +193,7 @@ def download_remote(what, where):
     if not what.sha256:
         print("Sha256 for {} not set, do no verify download".format(what.name))
     elif what.sha256 != get_sha256(file_path):
-        os.remove(file_path)
+        file_path.unlink()
         raise StopBuild("Sha 256 doesn't correspond")
 
 
@@ -218,13 +221,6 @@ class StopBuild(BaseCommandResult):
     pass
 
 
-class Remotefile(namedtuple("Remotefile", ("name", "sha256", "url"))):
-    def __new__(cls, name, sha256, url=None):
-        if url is None:
-            url = REMOTE_PREFIX + name
-        return super().__new__(cls, name, sha256, url)
-
-
 class Context:
     def __init__(self, command_name, log_file, force_native_build):
         self.command_name = command_name
@@ -236,24 +232,28 @@ class Context:
     def skip(self, msg=""):
         raise SkipCommand(msg)
 
-    def try_skip(self, path, extra_name=""):
+    def try_skip(self, path: Path, extra_name=""):
         if self.no_skip:
             return
         if extra_name:
             extra_name = "_{}".format(extra_name)
-        self.autoskip_file = pj(path, ".{}{}_ok".format(self.command_name, extra_name))
-        if os.path.exists(self.autoskip_file):
+        self.autoskip_file = path / ".{}{}_ok".format(self.command_name, extra_name)
+        if self.autoskip_file.exists():
             raise SkipCommand()
 
     def _finalise(self):
         if self.autoskip_file is not None:
-            os.makedirs(os.path.dirname(self.autoskip_file), exist_ok=True)
-            with open(self.autoskip_file, "w"):
-                pass
+            self.autoskip_file.parent.mkdir(parents=True, exist_ok=True)
+            self.autoskip_file.touch()
 
 
-def extract_archive(archive_path, dest_dir, topdir=None, name=None):
-    is_zip_archive = archive_path.endswith(".zip")
+def extract_archive(archive_path: Path, dest_dir: Path, topdir=None, name=None):
+    """Extract an archive to dest_dir.
+    This archive can be a zip or a tar archive.
+    If topdir is given, only this directory (and sub files/dirs) will be extracted.
+    If name is given, the topdir will be extracted under this name.
+    """
+    is_zip_archive = archive_path.suffix == ".zip"
     archive = None
     try:
         if is_zip_archive:
@@ -283,40 +283,39 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
             members_to_extract = [
                 m for m in members if getname(m).startswith(topdir + "/")
             ]
-            os.makedirs(dest_dir, exist_ok=True)
+            dest_dir.mkdir(parents=True, exist_ok=True)
             with tempfile.TemporaryDirectory(
-                prefix=os.path.basename(archive_path), dir=dest_dir
+                prefix=archive_path.name, dir=dest_dir
             ) as tmpdir:
+                tmpdir_path = Path(tmpdir)
                 if is_zip_archive:
                     _members_to_extract = [getname(m) for m in members_to_extract]
                 else:
                     _members_to_extract = members_to_extract
-                archive.extractall(path=tmpdir, members=_members_to_extract)
+                archive.extractall(path=tmpdir_path, members=_members_to_extract)
                 if is_zip_archive:
                     for member in members_to_extract:
                         if isdir(member):
                             continue
                         perm = (member.external_attr >> 16) & 0x1FF
                         if perm:
-                            os.chmod(pj(tmpdir, getname(member)), perm)
+                            (tmpdir_path / getname(member)).chmod(perm)
                 name = name or topdir
                 shutil.copytree(
-                    pj(tmpdir, topdir),
-                    pj(dest_dir, name),
+                    tmpdir_path / topdir,
+                    dest_dir / name,
                     symlinks=True,
                     dirs_exist_ok=True,
                 )
                 # Be sure that all directory in tmpdir are writable to allow correct suppersion of it
-                for root, dirs, _files in os.walk(tmpdir):
+                for root, dirs, _files in tmpdir_path.walk():
                     for d in dirs:
-                        os.chmod(
-                            pj(root, d), stat.S_IWRITE | stat.S_IREAD | stat.S_IEXEC
-                        )
+                        (root / d).chmod(stat.S_IWRITE | stat.S_IREAD | stat.S_IEXEC)
 
         else:
             if name:
-                dest_dir = pj(dest_dir, name)
-                os.makedirs(dest_dir)
+                dest_dir = dest_dir / name
+                dest_dir.mkdir(parents=True)
             archive.extractall(path=dest_dir)
     finally:
         if archive is not None:
@@ -328,6 +327,7 @@ def run_command(command, cwd, context, *, env=None, input=None):
     if env is None:
         env = DefaultEnv()
     log = None
+    command = [str(v) for v in command]
     try:
         if not option("verbose"):
             log = open(context.log_file, "w")

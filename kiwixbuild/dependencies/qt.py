@@ -1,6 +1,6 @@
 from .base import Dependency, ReleaseDownload, MakeBuilder, QMakeBuilder
 
-from kiwixbuild.utils import Remotefile, pj
+from kiwixbuild.utils import Remotefile
 
 
 class Qt(Dependency):
@@ -32,7 +32,7 @@ class Qt(Dependency):
             yield from ("-prefix", self.buildEnv.install_dir)
             yield from (
                 "-libdir",
-                pj(self.buildEnv.install_dir, self.buildEnv.libprefix),
+                self.buildEnv.install_dir / self.buildEnv.libprefix,
             )
 
         @property

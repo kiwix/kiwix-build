@@ -1,7 +1,9 @@
 import subprocess
 
+
+from pathlib import Path
 from .base import ConfigInfo
-from kiwixbuild.utils import which, pj
+from kiwixbuild.utils import which
 from kiwixbuild._global import neutralEnv
 
 
@@ -40,12 +42,12 @@ class Win32ConfigInfo(ConfigInfo):
         self.buildEnv.meson_crossfile = self._gen_crossfile("meson_cross_file.txt")
 
     @property
-    def root_path(self):
+    def root_path(self) -> Path:
         root_paths = {
             "fedora": "/usr/i686-w64-mingw32/sys-root/mingw",
             "debian": "/usr/i686-w64-mingw32",
         }
-        return root_paths[neutralEnv("distname")]
+        return Path(root_paths[neutralEnv("distname")])
 
     @property
     def binaries(self):
@@ -80,11 +82,11 @@ class Win32ConfigInfo(ConfigInfo):
             env[k] = v
 
     def get_bin_dir(self):
-        return [pj(self.root_path, "bin")]
+        return [self.root_path / "bin"]
 
     def get_env(self):
         env = super().get_env()
-        env["PKG_CONFIG_LIBDIR"] = pj(self.root_path, "lib", "pkgconfig")
+        env["PKG_CONFIG_LIBDIR"] = self.root_path / "lib" / "pkgconfig"
         env["LIBS"] = " ".join(self.extra_libs) + " " + env["LIBS"]
         return env
 

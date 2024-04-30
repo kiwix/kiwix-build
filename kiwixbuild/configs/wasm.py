@@ -1,6 +1,6 @@
+from pathlib import Path
 from .base import ConfigInfo
 
-from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
 
 
@@ -37,11 +37,11 @@ class WasmConfigInfo(ConfigInfo):
         return get_target_step("emsdk", self.name)
 
     @property
-    def install_path(self):
+    def install_path(self) -> Path:
         return self.wasm_sdk.install_path
 
     @property
-    def root_path(self):
+    def root_path(self) -> Path:
         return self.install_path
 
     @property
@@ -56,7 +56,7 @@ class WasmConfigInfo(ConfigInfo):
             ("LD", "wasm-ld"),
         )
         binaries = {
-            k: pj(self.install_path, "upstream", "emscripten", v) for k, v in binaries
+            k: self.install_path / "upstream" / "emscripten" / v for k, v in binaries
         }
         binaries["PKGCONFIG"] = "pkg-config"
         return binaries
@@ -75,20 +75,20 @@ class WasmConfigInfo(ConfigInfo):
         return "emmake"
 
     def get_bin_dir(self):
-        return [pj(self.install_path, "bin")]
+        return [self.install_path / "bin"]
 
     def get_env(self):
         env = super().get_env()
         env["PATH"].extend(
             [
                 self.install_path,
-                pj(self.install_path, "upstream", "emscripten"),
-                pj(self.install_path, "node", "14.18.2_64bit", "bin"),
+                self.install_path / "upstream" / "emscripten",
+                self.install_path / "node" / "14.18.2_64bit" / "bin",
             ]
         )
         env["EMSDK"] = self.install_path
-        env["EMSDK_NODE"] = pj(
-            self.install_path, "node", "14.18.2_64bit", "bin", "node"
+        env["EMSDK_NODE"] = (
+            self.install_path / "node" / "14.18.2_64bit" / "bin" / "node"
         )
         return env
 

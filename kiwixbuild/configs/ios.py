@@ -1,7 +1,8 @@
+from pathlib import Path
 import subprocess
 
 from kiwixbuild._global import option
-from kiwixbuild.utils import pj, xrun_find
+from kiwixbuild.utils import xrun_find
 from .base import ConfigInfo, MetaConfigInfo, MixedMixin
 from kiwixbuild.dependencies.apple_xcframework import AppleXCFramework
 
@@ -29,10 +30,12 @@ class AppleConfigInfo(ConfigInfo):
         return self.target
 
     @property
-    def root_path(self):
+    def root_path(self) -> Path:
         if self._root_path is None:
             command = "xcrun --sdk {} --show-sdk-path".format(self.sdk_name)
-            self._root_path = subprocess.check_output(command, shell=True)[:-1].decode()
+            self._root_path = Path(
+                subprocess.check_output(command, shell=True)[:-1].decode()
+            )
         return self._root_path
 
     def __str__(self):
@@ -133,7 +136,7 @@ class AppleConfigInfo(ConfigInfo):
         )
 
     def get_bin_dir(self):
-        return [pj(self.root_path, "bin")]
+        return [self.root_path / "bin"]
 
     @property
     def binaries(self):

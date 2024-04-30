@@ -1,7 +1,7 @@
 import os
 
 from .base import ConfigInfo
-from kiwixbuild.utils import which, pj
+from kiwixbuild.utils import which
 
 
 class I586ConfigInfo(ConfigInfo):

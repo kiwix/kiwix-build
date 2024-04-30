@@ -1,5 +1,6 @@
+from pathlib import Path
 from .base import Dependency, ReleaseDownload, Builder
-from kiwixbuild.utils import pj, Remotefile, run_command, copy_tree
+from kiwixbuild.utils import Remotefile, run_command, copy_tree
 
 
 class emsdk(Dependency):
@@ -20,8 +21,8 @@ class emsdk(Dependency):
 
     class Builder(Builder):
         @property
-        def install_path(self):
-            return pj(self.buildEnv.toolchain_dir, self.target.full_name())
+        def install_path(self) -> Path:
+            return self.buildEnv.toolchain_dir / self.target.full_name()
 
         def _copy_source(self, context):
             context.try_skip(self.build_path)

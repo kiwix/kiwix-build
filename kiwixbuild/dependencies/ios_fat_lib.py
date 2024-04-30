@@ -1,7 +1,7 @@
 import os
 
 from kiwixbuild.configs import ConfigInfo
-from kiwixbuild.utils import pj, copy_tree, run_command
+from kiwixbuild.utils import copy_tree, run_command
 from kiwixbuild._global import option
 from .base import Dependency, NoopSource, Builder as BaseBuilder
 
@@ -19,29 +19,29 @@ class IOSFatLib(Dependency):
 
         def _copy_headers(self, context):
             plt = ConfigInfo.get_config("iOS_{}".format(option("ios_arch")[0]))
-            include_src = pj(plt.buildEnv.install_dir, "include")
-            include_dst = pj(self.buildEnv.install_dir, "include")
+            include_src = plt.buildEnv.install_dir / "include"
+            include_dst = self.buildEnv.install_dir / "include"
             copy_tree(include_src, include_dst)
 
         def _merge_libs(self, context):
             lib_dirs = []
             for arch in option("ios_arch"):
                 plt = ConfigInfo.get_config("iOS_{}".format(arch))
-                lib_dirs.append(pj(plt.buildEnv.install_dir, "lib"))
+                lib_dirs.append(plt.buildEnv.install_dir / "lib")
             libs = []
-            for f in os.listdir(lib_dirs[0]):
-                if os.path.islink(pj(lib_dirs[0], f)):
+            for f in lib_dirs[0].iterdir():
+                if f.is_symlink():
                     continue
-                if f.endswith(".a") or f.endswith(".dylib"):
+                if f.suffix in (".a", ".dylib"):
                     libs.append(f)
-            os.makedirs(pj(self.buildEnv.install_dir, "lib"), exist_ok=True)
+            (self.buildEnv.install_dir / "lib").mkdir(parents=True, exist_ok=True)
             for l in libs:
                 command = [
                     "lipo",
                     "-create",
-                    *[pj(d, l) for d in lib_dirs],
+                    *[d / l for d in lib_dirs],
                     "-output",
-                    pj(self.buildEnv.install_dir, "lib", l),
+                    self.buildEnv.install_dir / "lib" / l,
                 ]
                 run_command(command, self.buildEnv.install_dir, context)
 

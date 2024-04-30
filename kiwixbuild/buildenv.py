@@ -2,20 +2,21 @@ import os, sys, shutil
 import subprocess
 import platform
 import distro
+from pathlib import Path
 
-from .utils import pj, download_remote, escape_path
+from .utils import download_remote, escape_path
 from ._global import neutralEnv, option
 
 
 class NeutralEnv:
     def __init__(self, dummy_run):
-        self.working_dir = option("working_dir")
-        self.source_dir = pj(self.working_dir, "SOURCE")
-        self.archive_dir = pj(self.working_dir, "ARCHIVE")
-        self.toolchain_dir = pj(self.working_dir, "TOOLCHAINS")
-        self.log_dir = pj(self.working_dir, "LOGS")
+        self.working_dir: Path = option("working_dir")
+        self.source_dir: Path = self.working_dir / "SOURCE"
+        self.archive_dir: Path = self.working_dir / "ARCHIVE"
+        self.toolchain_dir: Path = self.working_dir / "TOOLCHAINS"
+        self.log_dir: Path = self.working_dir / "LOGS"
         for d in (self.source_dir, self.archive_dir, self.toolchain_dir, self.log_dir):
-            os.makedirs(d, exist_ok=True)
+            d.mkdir(parents=True, exist_ok=True)
         self.detect_platform()
         if dummy_run:
             # If this is for a dummy run, we will not run anything.
@@ -73,29 +74,28 @@ class NeutralEnv:
 class BuildEnv:
     def __init__(self, configInfo):
         self.configInfo = configInfo
-        self.base_build_dir = pj(option("working_dir"), option("build_dir"))
+        self.base_build_dir: Path = option("working_dir") / option("build_dir")
         build_dir = (
             configInfo.arch_name if option("use_target_arch_name") else configInfo.name
         )
         build_dir = f"BUILD_{build_dir}"
-        self.build_dir = pj(self.base_build_dir, build_dir)
-        self.install_dir = pj(self.build_dir, "INSTALL")
-        self.toolchain_dir = pj(self.build_dir, "TOOLCHAINS")
-        self.log_dir = pj(self.build_dir, "LOGS")
+        self.build_dir: Path = self.base_build_dir / build_dir
+        self.install_dir: Path = self.build_dir / "INSTALL"
+        self.toolchain_dir: Path = self.build_dir / "TOOLCHAINS"
+        self.log_dir: Path = self.build_dir / "LOGS"
         for d in (self.build_dir, self.install_dir, self.toolchain_dir, self.log_dir):
-            os.makedirs(d, exist_ok=True)
+            d.mkdir(parents=True, exist_ok=True)
 
         self.libprefix = option("libprefix") or self._detect_libdir()
 
     def clean_intermediate_directories(self):
-        for subdir in os.listdir(self.build_dir):
-            subpath = pj(self.build_dir, subdir)
+        for subpath in self.build_dir.iterdir():
             if subpath == self.install_dir:
                 continue
-            if os.path.isdir(subpath):
+            if subpath.isdir():
                 shutil.rmtree(subpath)
             else:
-                os.remove(subpath)
+                subpath.unlink()
 
     def _is_debianlike(self):
         return os.path.isfile("/etc/debian_version")
@@ -122,35 +122,35 @@ class BuildEnv:
 
     def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
         env = self.configInfo.get_env()
-        pkgconfig_path = pj(self.install_dir, self.libprefix, "pkgconfig")
+        pkgconfig_path = self.install_dir / self.libprefix / "pkgconfig"
         env["PKG_CONFIG_PATH"].append(pkgconfig_path)
 
-        env["PATH"].insert(0, pj(self.install_dir, "bin"))
+        env["PATH"].insert(0, self.install_dir / "bin")
 
         env["LD_LIBRARY_PATH"].extend(
             [
-                pj(self.install_dir, "lib"),
-                pj(self.install_dir, self.libprefix),
+                self.install_dir / "lib",
+                self.install_dir / self.libprefix,
             ]
         )
 
         env["QMAKE_CXXFLAGS"] = " ".join(
-            [escape_path("-I" + pj(self.install_dir, "include")), env["QMAKE_CXXFLAGS"]]
+            [escape_path(f"-I{self.install_dir / 'include'}"), env["QMAKE_CXXFLAGS"]]
         )
         env["CPPFLAGS"] = " ".join(
-            [escape_path("-I" + pj(self.install_dir, "include")), env["CPPFLAGS"]]
+            [escape_path(f"-I{self.install_dir / 'include'}"), env["CPPFLAGS"]]
         )
         env["QMAKE_LFLAGS"] = " ".join(
             [
-                escape_path("-L" + pj(self.install_dir, "lib")),
-                escape_path("-L" + pj(self.install_dir, self.libprefix)),
+                escape_path(f"-L{self.install_dir / 'lib'}"),
+                escape_path(f"-L{self.install_dir / self.libprefix}"),
                 env["QMAKE_LFLAGS"],
             ]
         )
         env["LDFLAGS"] = " ".join(
             [
-                escape_path("-L" + pj(self.install_dir, "lib")),
-                escape_path("-L" + pj(self.install_dir, self.libprefix)),
+                escape_path(f"-L{self.install_dir / 'lib'}"),
+                escape_path(f"-L{self.install_dir / self.libprefix}"),
                 env["LDFLAGS"],
             ]
         )

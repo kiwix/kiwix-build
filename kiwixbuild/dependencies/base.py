@@ -1,10 +1,10 @@
 import subprocess
-import os
 import shutil
 import time
+from pathlib import Path
+from os import environ
 
 from kiwixbuild.utils import (
-    pj,
     Context,
     SkipCommand,
     WarningMessage,
@@ -17,7 +17,7 @@ from kiwixbuild.utils import (
 from kiwixbuild.versions import main_project_versions, base_deps_versions
 from kiwixbuild._global import neutralEnv, option, get_target_step
 
-SCRIPT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
 
 
 class _MetaDependency(type):
@@ -71,23 +71,23 @@ class Source:
         return self.target.full_name()
 
     @property
-    def source_path(self):
-        return pj(neutralEnv("source_dir"), self.source_dir)
+    def source_path(self) -> Path:
+        return neutralEnv("source_dir") / self.source_dir
 
     @property
-    def _log_dir(self):
+    def _log_dir(self) -> Path:
         return neutralEnv("log_dir")
 
     def _patch(self, context):
         context.try_skip(self.source_path)
         for p in self.patches:
-            patch_file_path = pj(SCRIPT_DIR, "patches", p)
+            patch_file_path = SCRIPT_DIR / "patches" / p
             patch_command = [*neutralEnv("patch_command"), "-p1", "-i", patch_file_path]
             run_command(patch_command, self.source_path, context)
 
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
-        log = pj(self._log_dir, "cmd_{}_{}.log".format(name, self.name))
+        log = self._log_dir / "cmd_{}_{}.log".format(name, self.name)
         context = Context(name, log, True)
         try:
             start_time = time.time()
@@ -126,8 +126,8 @@ class ReleaseDownload(Source):
         return (self.archive,)
 
     @property
-    def extract_path(self):
-        return pj(neutralEnv("source_dir"), self.source_dir)
+    def extract_path(self) -> Path:
+        return neutralEnv("source_dir") / self.source_dir
 
     def _download(self, context):
         context.try_skip(neutralEnv("archive_dir"), self.full_name)
@@ -145,11 +145,11 @@ class ReleaseDownload(Source):
 
     def _extract(self, context):
         context.try_skip(self.extract_path)
-        if os.path.exists(self.extract_path):
+        if self.extract_path.exists():
             shutil.rmtree(self.extract_path)
         for archive in self.archives:
             extract_archive(
-                pj(neutralEnv("archive_dir"), archive.name),
+                neutralEnv("archive_dir") / archive.name,
                 neutralEnv("source_dir"),
                 topdir=self.archive_top_dir,
                 name=self.source_dir,
@@ -180,8 +180,8 @@ class GitClone(Source):
             return self.git_dir
 
     @property
-    def git_path(self):
-        return pj(neutralEnv("source_dir"), self.source_dir)
+    def git_path(self) -> Path:
+        return neutralEnv("source_dir") / self.source_dir
 
     @property
     def git_ref(self):
@@ -228,7 +228,7 @@ class GitClone(Source):
             raise WarningMessage("Cannot update, please check log for information")
 
     def prepare(self):
-        if not os.path.exists(self.git_path):
+        if not self.git_path.exists():
             self.command("gitinit", self._git_init)
         else:
             self.command("gitupdate", self._git_update)
@@ -254,23 +254,23 @@ class Builder:
         return self.target.name
 
     @property
-    def source_path(self):
+    def source_path(self) -> Path:
         base_source_path = self.source.source_path
         if self.subsource_dir:
-            return pj(base_source_path, self.subsource_dir)
+            return base_source_path / self.subsource_dir
         return base_source_path
 
     @property
-    def build_path(self):
-        return pj(self.buildEnv.build_dir, self.target.full_name())
+    def build_path(self) -> Path:
+        return self.buildEnv.build_dir / self.target.full_name()
 
     @property
-    def _log_dir(self):
+    def _log_dir(self) -> Path:
         return self.buildEnv.log_dir
 
     def command(self, name, function, *args):
         print("  {} {} : ".format(name, self.name), end="", flush=True)
-        log = pj(self._log_dir, "cmd_{}_{}.log".format(name, self.name))
+        log = self._log_dir / "cmd_{}_{}.log".format(name, self.name)
         context = Context(name, log, self.target.force_native_build)
         if self.target.force_build:
             context.no_skip = True
@@ -357,8 +357,8 @@ class TcCopyBuilder(Builder):
     src_subdir = None
 
     @property
-    def build_path(self):
-        return pj(self.buildEnv.toolchain_dir, self.target.full_name())
+    def build_path(self) -> Path:
+        return self.buildEnv.toolchain_dir / self.target.full_name()
 
     def build(self):
         self.command("copy", self._copy)
@@ -366,7 +366,7 @@ class TcCopyBuilder(Builder):
     def _copy(self, context):
         context.try_skip(self.build_path)
         if self.src_subdir:
-            source_path = pj(self.source_path, self.src_subdir)
+            source_path = self.source_path / self.src_subdir
         else:
             source_path = self.source_path
         copy_tree(source_path, self.build_path)
@@ -406,7 +406,7 @@ class MakeBuilder(Builder):
         if not self.target.force_native_build:
             yield from self.buildEnv.configInfo.configure_options
         yield from ("--prefix", self.buildEnv.install_dir)
-        yield from ("--libdir", pj(self.buildEnv.install_dir, self.buildEnv.libprefix))
+        yield from ("--libdir", self.buildEnv.install_dir / self.buildEnv.libprefix)
 
     def set_configure_env(self, env):
         dep_conf_env = self.configure_env
@@ -423,7 +423,7 @@ class MakeBuilder(Builder):
         context.try_skip(self.build_path)
         command = [
             *self.buildEnv.configure_wrapper,
-            pj(self.source_path, self.configure_script),
+            self.source_path / self.configure_script,
             *self.all_configure_options,
         ]
         env = self.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
@@ -494,10 +494,10 @@ class QMakeBuilder(MakeBuilder):
 
     @property
     def env_options(self):
-        if "QMAKE_CC" in os.environ:
-            yield f"QMAKE_CC={os.environ['QMAKE_CC']}"
-        if "QMAKE_CXX" in os.environ:
-            yield f"QMAKE_CXX={os.environ['QMAKE_CXX']}"
+        if "QMAKE_CC" in environ:
+            yield f"QMAKE_CC={environ['QMAKE_CC']}"
+        if "QMAKE_CXX" in environ:
+            yield f"QMAKE_CXX={environ['QMAKE_CXX']}"
 
     def _configure(self, context):
         context.try_skip(self.build_path)
@@ -545,9 +545,9 @@ class MesonBuilder(Builder):
 
     def _configure(self, context):
         context.try_skip(self.build_path)
-        if os.path.exists(self.build_path):
+        if self.build_path.exists():
             shutil.rmtree(self.build_path)
-        os.makedirs(self.build_path)
+        self.build_path.mkdir(parents=True)
         cross_options = []
         if not self.target.force_native_build and self.buildEnv.meson_crossfile:
             cross_options += ["--cross-file", self.buildEnv.meson_crossfile]

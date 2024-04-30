@@ -1,6 +1,6 @@
 from .base import Dependency, ReleaseDownload, Builder as BaseBuilder
 
-from kiwixbuild.utils import Remotefile, pj
+from kiwixbuild.utils import Remotefile
 from shutil import copy2
 
 
@@ -21,8 +21,8 @@ class Mustache(Dependency):
         def _copy_header(self, context):
             context.try_skip(self.build_path)
             copy2(
-                pj(self.source_path, "mustache.hpp"),
-                pj(self.buildEnv.install_dir, "include"),
+                self.source_path / "mustache.hpp",
+                self.buildEnv.install_dir / "include",
             )
 
         def set_flatpak_buildsystem(self, module):

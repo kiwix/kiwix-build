@@ -1,13 +1,14 @@
 import os, sys
 import subprocess
+from pathlib import Path
 
 from kiwixbuild.dependencies import Dependency
-from kiwixbuild.utils import pj, remove_duplicates, DefaultEnv
+from kiwixbuild.utils import remove_duplicates, DefaultEnv
 from kiwixbuild.buildenv import BuildEnv
 from kiwixbuild._global import neutralEnv, option, target_steps
 
-_SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-TEMPLATES_DIR = pj(os.path.dirname(_SCRIPT_DIR), "templates")
+_SCRIPT_DIR = Path(__file__).resolve().parent
+TEMPLATES_DIR = _SCRIPT_DIR.parent / "templates"
 
 
 class _MetaConfig(type):
@@ -81,7 +82,7 @@ class ConfigInfo(metaclass=_MetaConfig):
         return {}
 
     def get_include_dirs(self):
-        return [pj(self.buildEnv.install_dir, "include")]
+        return [self.buildEnv.install_dir / "include"]
 
     def get_env(self):
         return DefaultEnv()
@@ -100,13 +101,11 @@ class ConfigInfo(metaclass=_MetaConfig):
     def _gen_crossfile(self, name, outname=None):
         if outname is None:
             outname = name
-        crossfile = pj(self.buildEnv.build_dir, outname)
-        template_file = pj(TEMPLATES_DIR, name)
-        with open(template_file, "r") as f:
-            template = f.read()
+        crossfile = self.buildEnv.build_dir / outname
+        template_file = TEMPLATES_DIR / name
+        template = template_file.read_text()
         content = template.format(**self.get_cross_config())
-        with open(crossfile, "w") as outfile:
-            outfile.write(content)
+        crossfile.write_text(content)
         return crossfile
 
     def finalize_setup(self):
@@ -155,22 +154,22 @@ def MixedMixin(static_name):
 
         def get_include_dirs(self):
             return [
-                pj(self.buildEnv.install_dir, "include"),
-                pj(self.static_buildEnv.install_dir, "include"),
+                self.buildEnv.install_dir / "include",
+                self.static_buildEnv.install_dir / "include",
             ]
 
         def get_env(self):
             env = super().get_env()
-            env["PATH"].insert(0, pj(self.static_buildEnv.install_dir, "bin"))
-            pkgconfig_path = pj(
-                self.static_buildEnv.install_dir,
-                self.static_buildEnv.libprefix,
-                "pkgconfig",
+            env["PATH"].insert(0, self.static_buildEnv.install_dir / "bin")
+            pkgconfig_path = (
+                self.static_buildEnv.install_dir
+                / self.static_buildEnv.libprefix
+                / "pkgconfig"
             )
             env["PKG_CONFIG_PATH"].append(pkgconfig_path)
             env["CPPFLAGS"] = " ".join(
                 [
-                   "-I" + pj(self.static_buildEnv.install_dir, "include"),
+                    f"-I{self.static_buildEnv.install_dir / 'include'}",
                     env["CPPFLAGS"],
                 ]
             )

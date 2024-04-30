@@ -1,7 +1,6 @@
 from .base import ConfigInfo
 import sysconfig
 
-from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
 
 

@@ -206,9 +206,8 @@ class FlatpakBuilder:
             m["sources"] = temp
         manifest["modules"] = modules
         manifest_name = "{}.json".format(MANIFEST["app-id"])
-        manifest_path = pj(self.config.buildEnv.build_dir, manifest_name)
-        with open(manifest_path, "w") as f:
-            f.write(json.dumps(manifest, indent=4))
+        manifest_path = self.config.buildEnv.build_dir / manifest_name
+        manifest_path.write_text(json.dumps(manifest, indent=4))
 
     def copy_patches(self):
         sourceDefs = (tDef for tDef in target_steps() if tDef[0] == "source")
@@ -217,15 +216,15 @@ class FlatpakBuilder:
             if not hasattr(source, "patches"):
                 continue
             for p in source.patches:
-                path = pj(SCRIPT_DIR, "patches", p)
-                os.makedirs(
-                    pj(self.config.buildEnv.build_dir, "patches"), exist_ok=True
+                path = SCRIPT_DIR / "patches" / p
+                (self.config.buildEnv.build_dir / "patches").mkdir(
+                    parents=True, exist_ok=True
                 )
-                dest = pj(self.config.buildEnv.build_dir, "patches", p)
+                dest = self.config.buildEnv.build_dir / "patches" / p
                 copyfile(path, dest)
 
     def build(self):
-        log = pj(self.config.buildEnv.log_dir, "cmd_build_flatpak.log")
+        log = self.config.buildEnv.log_dir / "cmd_build_flatpak.log"
         context = Context("build", log, False)
         command = [
             "flatpak-builder",
@@ -247,12 +246,11 @@ class FlatpakBuilder:
             )
             context._finalise()
         except subprocess.CalledProcessError:
-            with open(log, "r") as f:
-                print(f.read())
+            print(log.read_text())
             raise StopBuild()
 
     def bundle(self):
-        log = pj(self.config.buildEnv.log_dir, "cmd_bundle_flatpak.log")
+        log = self.config.buildEnv.log_dir / "cmd_bundle_flatpak.log"
         context = Context("bundle", log, False)
         app_id = MANIFEST["app-id"]
         command = ["flatpak", "build-bundle", "repo", f"{app_id}.flatpak", app_id]
@@ -265,8 +263,7 @@ class FlatpakBuilder:
             )
             context._finalise()
         except subprocess.CalledProcessError:
-            with open(log, "r") as f:
-                print(f.read())
+            print(log.read_text())
             raise StopBuild()
 
     def _get_packages(self):

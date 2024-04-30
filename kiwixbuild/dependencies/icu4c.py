@@ -1,6 +1,7 @@
 from .base import Dependency, ReleaseDownload, MakeBuilder, MesonBuilder
 
-from kiwixbuild.utils import pj, Remotefile, extract_archive
+from pathlib import Path
+from kiwixbuild.utils import Remotefile, extract_archive
 from kiwixbuild._global import get_target_step, neutralEnv
 import os, shutil
 import fileinput
@@ -31,25 +32,25 @@ class Icu(Dependency):
 
         def _extract(self, context):
             context.try_skip(self.extract_path)
-            if os.path.exists(self.extract_path):
+            if self.extract_path.exists():
                 shutil.rmtree(self.extract_path)
             extract_archive(
-                pj(neutralEnv("archive_dir"), self.archive_src.name),
+                neutralEnv("archive_dir") / self.archive_src.name,
                 neutralEnv("source_dir"),
                 topdir=None,
                 name=self.source_dir,
             )
             shutil.rmtree(
-                pj(neutralEnv("source_dir"), self.source_dir, "source", "data")
+                neutralEnv("source_dir") / self.source_dir / "source" / "data"
             )
             extract_archive(
-                pj(neutralEnv("archive_dir"), self.archive_data.name),
-                pj(neutralEnv("source_dir"), self.source_dir, "source"),
+                neutralEnv("archive_dir") / self.archive_data.name,
+                neutralEnv("source_dir") / self.source_dir / "source",
                 topdir="data",
                 name="data",
             )
             extract_archive(
-                pj(neutralEnv("archive_dir"), self.meson_patch.name),
+                neutralEnv("archive_dir") / self.meson_patch.name,
                 neutralEnv("source_dir"),
                 topdir="icu",
                 name=self.source_dir,
@@ -69,9 +70,8 @@ class Icu(Dependency):
 
         class Builder(MesonBuilder):
             def set_env(self, env):
-                env["ICU_DATA_FILTER_FILE"] = pj(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "icu4c_data_filter.json",
+                env["ICU_DATA_FILTER_FILE"] = (
+                    Path(__file__).resolve().parent / "icu4c_data_filter.json"
                 )
 
     else:
@@ -105,18 +105,15 @@ class Icu(Dependency):
                     yield "--with-data-packaging=archive"
 
             def set_env(self, env):
-                env["ICU_DATA_FILTER_FILE"] = pj(
-                    os.path.dirname(os.path.realpath(__file__)),
-                    "icu4c_data_filter.json",
+                env["ICU_DATA_FILTER_FILE"] = (
+                    Path(__file__).resolve().parent / "icu4c_data_filter.json"
                 )
 
             def _post_configure_script(self, context):
                 if self.buildEnv.configInfo.build != "wasm":
                     context.skip()
                 context.try_skip(self.build_path)
-                for line in fileinput.input(
-                    pj(self.build_path, "Makefile"), inplace=True
-                ):
+                for line in fileinput.input(self.build_path / "Makefile", inplace=True):
                     if line == "#DATASUBDIR = data\n":
                         print("DATASUBDIR = data")
                     else:

@@ -1,7 +1,6 @@
-import os
-
+from pathlib import Path
 from .base import Dependency, ReleaseDownload, Builder
-from kiwixbuild.utils import Remotefile, add_execution_right, run_command, pj
+from kiwixbuild.utils import Remotefile, add_execution_right, run_command
 
 
 class android_ndk(Dependency):
@@ -24,8 +23,8 @@ class android_ndk(Dependency):
 
     class Builder(Builder):
         @property
-        def install_path(self):
-            return pj(self.buildEnv.toolchain_dir, self.target.full_name())
+        def install_path(self) -> Path:
+            return self.buildEnv.toolchain_dir / self.target.full_name()
 
         @property
         def api(self):
@@ -45,7 +44,7 @@ class android_ndk(Dependency):
 
         def _build_toolchain(self, context):
             context.try_skip(self.build_path)
-            script = pj(self.source_path, "build/tools/make_standalone_toolchain.py")
+            script = self.source_path / "build/tools/make_standalone_toolchain.py"
             add_execution_right(script)
             command = [
                 script,
@@ -62,23 +61,21 @@ class android_ndk(Dependency):
         def _fix_permission_right(self, context):
             context.try_skip(self.build_path)
             bin_dirs = [
-                pj(self.install_path, "bin"),
-                pj(self.install_path, self.arch_full, "bin"),
-                pj(
-                    self.install_path,
-                    "libexec",
-                    "gcc",
-                    self.arch_full,
-                    self.target.gccver,
-                ),
+                self.install_path / "bin",
+                self.install_pat / self.arch_full / "bin",
+                self.install_path
+                / "libexec"
+                / "gcc"
+                / self.arch_full
+                / self.target.gccver,
             ]
-            for root, dirs, files in os.walk(self.install_path):
+            for root, dirs, files in self.install_path.walk():
                 if not root in bin_dirs:
                     continue
 
                 for file_ in files:
-                    file_path = pj(root, file_)
-                    if os.path.islink(file_path):
+                    file_path = root / file_
+                    if file_path.is_symlink():
                         continue
                     add_execution_right(file_path)
 
