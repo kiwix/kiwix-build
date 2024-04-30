@@ -173,6 +173,6 @@ class BuildEnv:
     @property
     def make_wrapper(self):
         try:
-            yield self.configInfo.make_wrapper
+            yield from self.configInfo.make_wrapper
         except AttributeError:
             pass
