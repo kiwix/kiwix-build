@@ -18,7 +18,7 @@ class WinBashConfigInfo(ConfigInfo):
         return sysconfig.get_platform()
 
     @property
-    def config_wrapper(self):
+    def configure_wrapper(self):
         yield "C:\\Program Files\\Git\\bin\\bash.exe"
 
     @property

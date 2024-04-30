@@ -20,7 +20,7 @@ class Xapian(Dependency):
                 compile_script = self.source_path / "compile"
                 return [
                     'CC="cl -nologo"',
-                    'CXX=f"{compile_script} cl -nologo"',
+                    f'CXX="{compile_script} cl -nologo"',
                     "CXXFLAGS=-EHsc",
                     "AR=lib",
                 ]
