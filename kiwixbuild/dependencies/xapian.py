@@ -19,8 +19,8 @@ class Xapian(Dependency):
             if neutralEnv("distname") == "Windows":
                 compile_script = win_to_posix_path(self.source_path / "compile")
                 return [
-                    f'CC="{compile_script} cl -nologo"',
-                    f'CXX="{compile_script} cl -nologo"',
+                    f"CC={compile_script} cl -nologo",
+                    f"CXX={compile_script} cl -nologo",
                     "CXXFLAGS=-EHsc",
                     "AR=lib",
                 ]
