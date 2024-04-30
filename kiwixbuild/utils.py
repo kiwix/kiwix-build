@@ -8,7 +8,7 @@ import urllib.error
 import ssl
 import subprocess
 import re
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from collections import namedtuple, defaultdict
 
 from kiwixbuild._global import neutralEnv, option
@@ -322,19 +322,23 @@ def extract_archive(archive_path: Path, dest_dir: Path, topdir=None, name=None):
             archive.close()
 
 
-def run_command(command, cwd, context, *, env=None, input=None):
+def run_command(command, cwd, context, *, env=None, input=None, force_posix_path=False):
     os.makedirs(cwd, exist_ok=True)
     if env is None:
         env = DefaultEnv()
     log = None
-    command = [str(v) for v in command]
+    if force_posix_path:
+        transform_path = lambda v: PurePosixPath(v) if isinstance(v, Path) else v
+    else:
+        transform_path = lambda v: v
+    command = [str(transform_path(v)) for v in command]
     try:
         if not option("verbose"):
             log = open(context.log_file, "w")
         print(f"run command '{command}'", file=log)
         print(f"current directory is '{cwd}'", file=log)
         print("env is :", file=log)
-        env = {k: str(v) for k, v in env.items()}
+        env = {k: str(transform_path(v)) for k, v in env.items()}
         for k, v in env.items():
             print(f"  {k} : {v!r}", file=log)
 

@@ -428,7 +428,13 @@ class MakeBuilder(Builder):
         ]
         env = self.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)
         self.set_configure_env(env)
-        run_command(command, self.build_path, context, env=env)
+        run_command(
+            command,
+            self.build_path,
+            context,
+            env=env,
+            force_posix_path=self.buildEnv.configInfo.force_posix_path,
+        )
 
     def _compile(self, context):
         context.try_skip(self.build_path)

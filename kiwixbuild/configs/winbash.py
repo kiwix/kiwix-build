@@ -12,6 +12,7 @@ class WinBashConfigInfo(ConfigInfo):
     compatible_hosts = ["Windows"]
     exe_wrapper_def = ""
     static = True
+    force_posix_path = True
 
     @property
     def arch_name(self):

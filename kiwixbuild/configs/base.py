@@ -27,6 +27,7 @@ class ConfigInfo(metaclass=_MetaConfig):
     configure_options = []
     mixed = False
     libdir = None
+    force_posix_path = False
 
     @property
     def arch_name(self):
