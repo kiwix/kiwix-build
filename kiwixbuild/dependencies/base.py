@@ -421,9 +421,11 @@ class MakeBuilder(Builder):
 
     def _configure(self, context):
         context.try_skip(self.build_path)
+        configure_path = self.source_path / self.configure_script
+        configure_path = configure_path.relative_to(self.build_path, walk_up=True)
         command = [
             *self.buildEnv.configure_wrapper,
-            self.source_path / self.configure_script,
+            configure_path,
             *self.all_configure_options,
         ]
         env = self.get_env(cross_comp_flags=True, cross_compilers=True, cross_path=True)

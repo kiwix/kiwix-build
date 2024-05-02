@@ -23,8 +23,6 @@ class Xapian(Dependency):
                     f"CXX={compile_script} cl -nologo",
                     "CXXFLAGS=-EHsc",
                     "AR=lib",
-                    "--srcdir",
-                    "../../SOURCE/xapian-core-1.4.23",
                 ]
             else:
                 return [
