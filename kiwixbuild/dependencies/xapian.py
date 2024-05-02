@@ -24,7 +24,7 @@ class Xapian(Dependency):
                     "CXXFLAGS=-EHsc",
                     "AR=lib",
                     "--srcdir",
-                    self.source_path,
+                    "../../SOURCE/xapian-core-1.4.23",
                 ]
             else:
                 return [
