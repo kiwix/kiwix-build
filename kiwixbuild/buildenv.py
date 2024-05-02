@@ -4,7 +4,7 @@ import platform
 import distro
 from pathlib import Path
 
-from .utils import download_remote, escape_path
+from .utils import download_remote, escape_path, win_to_posix_path
 from ._global import neutralEnv, option
 
 
@@ -122,35 +122,42 @@ class BuildEnv:
 
     def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
         env = self.configInfo.get_env()
+        if self.configInfo.force_posix_path:
+            tr_path = win_to_posix_path
+        else:
+            tr_path = lambda v: v
         pkgconfig_path = self.install_dir / self.libprefix / "pkgconfig"
-        env["PKG_CONFIG_PATH"].append(pkgconfig_path)
+        env["PKG_CONFIG_PATH"].append(tr_path(pkgconfig_path))
 
-        env["PATH"].insert(0, self.install_dir / "bin")
+        env["PATH"].insert(0, tr_path(self.install_dir / "bin"))
 
         env["LD_LIBRARY_PATH"].extend(
             [
-                self.install_dir / "lib",
-                self.install_dir / self.libprefix,
+                tr_path(self.install_dir / "lib"),
+                tr_path(self.install_dir / self.libprefix),
             ]
         )
 
         env["QMAKE_CXXFLAGS"] = " ".join(
-            [escape_path(f"-I{self.install_dir / 'include'}"), env["QMAKE_CXXFLAGS"]]
+            [
+                escape_path(f"-I{tr_path(self.install_dir / 'include')}"),
+                env["QMAKE_CXXFLAGS"],
+            ]
         )
         env["CPPFLAGS"] = " ".join(
-            [escape_path(f"-I{self.install_dir / 'include'}"), env["CPPFLAGS"]]
+            [escape_path(f"-I{tr_path(self.install_dir / 'include')}"), env["CPPFLAGS"]]
         )
         env["QMAKE_LFLAGS"] = " ".join(
             [
-                escape_path(f"-L{self.install_dir / 'lib'}"),
-                escape_path(f"-L{self.install_dir / self.libprefix}"),
+                escape_path(f"-L{tr_path(self.install_dir / 'lib')}"),
+                escape_path(f"-L{tr_path(self.install_dir / self.libprefix)}"),
                 env["QMAKE_LFLAGS"],
             ]
         )
         env["LDFLAGS"] = " ".join(
             [
-                escape_path(f"-L{self.install_dir / 'lib'}"),
-                escape_path(f"-L{self.install_dir / self.libprefix}"),
+                escape_path(f"-L{tr_path(self.install_dir / 'lib')}"),
+                escape_path(f"-L{tr_path(self.install_dir / self.libprefix)}"),
                 env["LDFLAGS"],
             ]
         )

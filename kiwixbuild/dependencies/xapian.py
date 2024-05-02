@@ -34,10 +34,16 @@ class Xapian(Dependency):
                     "--disable-documentation",
                 ]
 
-        configure_env = {
-            "_format_LDFLAGS": "{env.LDFLAGS} -L{buildEnv.install_dir}/{buildEnv.libprefix}",
-            "_format_CXXFLAGS": "{env.CXXFLAGS} -O3 -I{buildEnv.install_dir}/include",
-        }
+        def set_configure_env(self, env):
+            lib_dir = self.buildEnv.install_dir / self.buildEnv.libprefix
+            env["LDFLAGS"] = " ".join(
+                [env["LDFLAGS"], "-L" + win_to_posix_path(lib_dir)]
+            )
+
+            include_dir = self.buildEnv.install_dir / "include"
+            env["CXXFLAGS"] = " ".join(
+                [env["CXXFLAGS"], "-O3", "-I" + win_to_posix_path(include_dir)]
+            )
 
         @classmethod
         def get_dependencies(cls, configInfo, allDeps):
