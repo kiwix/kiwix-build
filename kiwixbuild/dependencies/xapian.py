@@ -18,19 +18,14 @@ class Xapian(Dependency):
         def configure_options(self):
             if neutralEnv("distname") == "Windows":
                 compile_script = win_to_posix_path(self.source_path / "compile")
-                return [
-                    f"CC={compile_script} cl -nologo",
-                    f"CXX={compile_script} cl -nologo",
-                    "CXXFLAGS=-EHsc",
-                    "AR=lib",
-                ]
-            else:
-                return [
-                    "--disable-sse",
-                    "--disable-backend-chert",
-                    "--disable-backend-remote",
-                    "--disable-documentation",
-                ]
+                yield f"CC={compile_script} cl -nologo"
+                yield f"CXX={compile_script} cl -nologo"
+                yield "CXXFLAGS=-EHsc"
+                yield "AR=lib"
+            yield "--disable-backend-chert"
+            yield "--disable-backend-remote"
+            yield "--disable-documentation"
+            yield "--disable-sse"
 
         def set_configure_env(self, env):
             lib_dir = self.buildEnv.install_dir / self.buildEnv.libprefix
@@ -39,8 +34,8 @@ class Xapian(Dependency):
             )
 
             include_dir = self.buildEnv.install_dir / "include"
-            env["CXXFLAGS"] = " ".join(
-                [env["CXXFLAGS"], "-O3", "-I" + win_to_posix_path(include_dir)]
+            env["CPPFLAGS"] = " ".join(
+                [env["CPPFLAGS"], "-O3", "-I" + win_to_posix_path(include_dir)]
             )
 
         @classmethod
