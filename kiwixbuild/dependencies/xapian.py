@@ -24,7 +24,7 @@ class Xapian(Dependency):
                     "CXXFLAGS=-EHsc",
                     "AR=lib",
                     "--srcdir",
-                    win_to_posix_path(self.source_path),
+                    self.source_path,
                 ]
             else:
                 return [
