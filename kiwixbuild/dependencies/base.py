@@ -493,7 +493,7 @@ class QMakeBuilder(MakeBuilder):
     def _configure(self, context):
         context.try_skip(self.build_path)
         command = [
-            "qmake",
+            *neutralEnv("qmake_command"),
             *self.configure_options,
             *self.env_options,
             self.source_path,

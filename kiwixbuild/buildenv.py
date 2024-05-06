@@ -32,7 +32,11 @@ class NeutralEnv:
         self.git_command = self._detect_command("git")
         self.make_command = self._detect_command("make")
         self.cmake_command = self._detect_command("cmake")
-        self.qmake_command = self._detect_command("qmake", required=False)
+        self.qmake_command = self._detect_command(
+            "qmake",
+            required=False,
+            default=[["qmake"], ["qmake-qt5"]],
+        )
 
     def detect_platform(self):
         _platform = platform.system()
