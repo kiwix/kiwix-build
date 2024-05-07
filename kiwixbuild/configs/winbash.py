@@ -20,11 +20,14 @@ class WinBashConfigInfo(ConfigInfo):
 
     @property
     def configure_wrapper(self):
-        yield "C:\\Program Files\\Git\\bin\\bash.exe"
+        yield "C:\\msys64\\usr\\bin\\bash.exe"
+
+    #        yield "C:\\Program Files\\Git\\bin\\bash.exe"
 
     @property
     def make_wrapper(self):
-        yield "C:\\Program Files\\Git\\bin\\bash.exe"
+        yield "C:\\msys64\\usr\\bin\\bash.exe"
+        #        yield "C:\\Program Files\\Git\\bin\\bash.exe"
         yield "-c"
 
     @property
@@ -42,10 +45,9 @@ class WinBashConfigInfo(ConfigInfo):
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
-        env["PATH"] += ["C:\\Program Files\\Git\\bin"]
         env["CXXFLAGS"] = "-EHsc -MD " + env["CXXFLAGS"]
 
     def get_env(self):
         env = super().get_env()
-        env["MAKESHELL"] = "C:/'Program Files'/Git/bin/sh.exe"
+        env["PATH"] += ["C:\\msys64\\usr\\bin"]
         return env
