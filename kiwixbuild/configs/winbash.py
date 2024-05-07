@@ -49,6 +49,13 @@ class WinBashConfigInfo(ConfigInfo):
 
     def get_env(self):
         env = super().get_env()
-        env["PATH"] += ["C:\\msys64\\usr\\bin"]
+        PATH_ENV = env["PATH"]
+        PATH_ENV = filter(
+            lambda p: p
+            not in ["C:\\Program Files\\Git\\bin", "C:\\Program Files\\Git\\usr\\bin"],
+            PATH_ENV,
+        )
+        env["PATH"][:] = list(PATH_ENV)
+        #        env["PATH"] += ["C:\\msys64\\usr\\bin"]
         env["SHELL"] = "C:\\Windows\\System32\\bash.exe"
         return env
