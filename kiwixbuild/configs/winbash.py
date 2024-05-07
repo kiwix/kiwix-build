@@ -44,3 +44,8 @@ class WinBashConfigInfo(ConfigInfo):
         super().set_comp_flags(env)
         env["PATH"] += ["C:\\Program Files\\Git\\bin"]
         env["CXXFLAGS"] = "-EHsc -MD " + env["CXXFLAGS"]
+
+    def get_env(self):
+        env = super().get_env()
+        env["MAKESHELL"] = "C:/'Program Files'/Git/bin/sh.exe"
+        return env
