@@ -25,6 +25,7 @@ class WinBashConfigInfo(ConfigInfo):
 
     @property
     def make_wrapper(self):
+        return []
         # yield "C:\\msys64\\usr\\bin\\bash.exe"
         yield "C:\\Program Files\\Git\\bin\\bash.exe"
         yield "-c"
