@@ -83,7 +83,7 @@ class PathArray(list):
             super().__init__(value.split(self.separator))
 
     def __str__(self):
-        return self.separator.join((str(v) for v in self))
+        return self.separator.join((escape_path(str(v)) for v in self))
 
 
 def remove_duplicates(iterable, key_function=None):
