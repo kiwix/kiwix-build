@@ -39,12 +39,17 @@ def xrun_find(name):
     return output[:-1].decode()
 
 
-regex_space = re.compile(r"((?<!\\) )")
+def enclose(part: str) -> str:
+    if " " in part:
+        return f"'{part}'"
+    return part
 
 
 def escape_path(path: Path):
-    path = str(path)
-    return regex_space.sub(r"\ ", path)
+    path = Path(path)
+    parts = [enclose(p) for p in path.parts]
+    path = Path(*parts)
+    return str(path)
 
 
 class Defaultdict(defaultdict):
@@ -83,7 +88,7 @@ class PathArray(list):
             super().__init__(value.split(self.separator))
 
     def __str__(self):
-        return self.separator.join((escape_path(str(v)) for v in self))
+        return self.separator.join((escape_path(v) for v in self))
 
 
 def remove_duplicates(iterable, key_function=None):
