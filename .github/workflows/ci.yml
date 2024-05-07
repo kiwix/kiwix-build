@@ -20,10 +20,10 @@ jobs:
     - name: List info
       shell: bash
       run: |
-        echo "***************************** C:/mingw64/bin"
-        ls C:/mingw64/bin
-        echo "***************************** C:/msys64/usr/bin"
-        ls C:/msys64/usr/bin
+        echo "***************************** C:\\Program Files\\Git\\bin"
+        ls C:/'Program Files'/Git/bin
+        echo "***************************** "
+        ls C:/'Program Files'/Git/usr/bin
     - name: Setup python 3.12
       uses: actions/setup-python@v3
       with:
