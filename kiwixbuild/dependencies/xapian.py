@@ -34,8 +34,8 @@ class Xapian(Dependency):
             )
 
             include_dir = self.buildEnv.install_dir / "include"
-            env["CPPFLAGS"] = " ".join(
-                [env["CPPFLAGS"], "-O3", "-I" + win_to_posix_path(include_dir)]
+            env["CXXFLAGS"] = " ".join(
+                [env["CXXFLAGS"], "-O3", "-I" + win_to_posix_path(include_dir)]
             )
 
         @classmethod
