@@ -21,10 +21,12 @@ class WinBashConfigInfo(ConfigInfo):
     @property
     def configure_wrapper(self):
         yield "C:\\Program Files\\Git\\bin\\bash.exe"
+        yield "-c"
 
     @property
     def make_wrapper(self):
         yield "C:\\Program Files\\Git\\bin\\bash.exe"
+        yield "-c"
 
     @property
     def binaries(self):
