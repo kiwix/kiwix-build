@@ -20,14 +20,13 @@ class WinBashConfigInfo(ConfigInfo):
 
     @property
     def configure_wrapper(self):
-        yield "C:\\msys64\\usr\\bin\\bash.exe"
-
-    #        yield "C:\\Program Files\\Git\\bin\\bash.exe"
+        # yield "C:\\msys64\\usr\\bin\\bash.exe"
+        yield "C:\\Program Files\\Git\\bin\\bash.exe"
 
     @property
     def make_wrapper(self):
-        yield "C:\\msys64\\usr\\bin\\bash.exe"
-        #        yield "C:\\Program Files\\Git\\bin\\bash.exe"
+        # yield "C:\\msys64\\usr\\bin\\bash.exe"
+        yield "C:\\Program Files\\Git\\bin\\bash.exe"
         yield "-c"
 
     @property
