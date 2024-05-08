@@ -20,7 +20,11 @@ jobs:
     - name: List info
       shell: bash
       run: |
+        echo "$SHELL"
         echo "***************************** C:\\Program Files\\Git\\bin"
+        mkdir $HOME/usr
+        cp -a C:/'Program Files'/Git/usr/bin $HOME/usr
+        cp -a C:/'Program Files'/Git/bin $HOME
         ls C:/'Program Files'/Git/bin
         echo "***************************** "
         ls C:/'Program Files'/Git/usr/bin

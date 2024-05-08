@@ -2,6 +2,7 @@ from .base import ConfigInfo
 import sysconfig
 
 from kiwixbuild._global import get_target_step
+from pathlib import Path
 
 
 class WinBashConfigInfo(ConfigInfo):
@@ -20,8 +21,10 @@ class WinBashConfigInfo(ConfigInfo):
 
     @property
     def configure_wrapper(self):
-        # yield "C:\\msys64\\usr\\bin\\bash.exe"
-        yield "C:\\msys64\\usr\\bin\\bash.exe"
+        # yield "C:\\msys64\\usr\\bin\\bash.iexe"
+        yield str(Path.home() / "bin" / "bash.exe")
+
+    #        yield "C:\\msys64\\usr\\bin\\bash.exe"
 
     @property
     def make_wrapper(self):
@@ -57,6 +60,6 @@ class WinBashConfigInfo(ConfigInfo):
         #        )
         #        env["PATH"][:] = list(PATH_ENV)
         #        env["PATH"] += ["C:\\msys64\\usr\\bin"]
-        env["SHELL"] = "C:\\msys64\\usr\\bin\\bash.exe"
-        env["CONFIG_SHELL"] = "C:\\msys64\\usr\\bin\\bash.exe"
+        #        env["SHELL"] = "C:\\msys64\\usr\\bin\\bash.exe"
+        #        env["CONFIG_SHELL"] = "C:\\msys64\\usr\\bin\\bash.exe"
         return env
