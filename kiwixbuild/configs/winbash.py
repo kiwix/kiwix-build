@@ -58,4 +58,5 @@ class WinBashConfigInfo(ConfigInfo):
         #        env["PATH"][:] = list(PATH_ENV)
         #        env["PATH"] += ["C:\\msys64\\usr\\bin"]
         env["SHELL"] = "C:\\Windows\\System32\\bash.exe"
+        env["CONFIG_SHELL"] = "C:\\Windows\\System32\\bash.exe"
         return env
