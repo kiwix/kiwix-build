@@ -16,9 +16,9 @@ class LibCurl(Dependency):
     class Source(ReleaseDownload):
         name = "libcurl"
         archive = Remotefile(
-            "curl-7.67.0.tar.xz",
-            "f5d2e7320379338c3952dcc7566a140abb49edb575f9f99272455785c40e536c",
-            "https://curl.haxx.se/download/curl-7.67.0.tar.xz",
+            "curl-8.7.1.tar.xz",
+            "6fea2aac6a4610fbd0400afb0bcddbe7258a64c63f1f68e5855ebc0c659710cd",
+            "https://curl.se/download/curl-8.7.1.tar.xz",
         )
 
     class Builder(MakeBuilder):
@@ -29,11 +29,12 @@ class LibCurl(Dependency):
                 for p in (
                     "libssh2",
                     "ssl",
-                    "libmetalink",
                     "librtmp",
                     "nghttp2",
+                    "nghttp3",
                     "libidn2",
                     "brotli",
+                    "hyper",
                 )
             ],
             *[
@@ -52,6 +53,8 @@ class LibCurl(Dependency):
                     "smb",
                     "smtp",
                     "gopher",
+                    "mqtt",
+                    "docs",
                     "manual",
                 )
             ],
