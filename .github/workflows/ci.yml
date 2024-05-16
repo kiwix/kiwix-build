@@ -22,12 +22,8 @@ jobs:
       run: |
         echo "$SHELL"
         echo "***************************** C:\\Program Files\\Git\\bin"
-        mkdir $HOME/usr
-        cp -a C:/'Program Files'/Git/usr/bin $HOME/usr
-        cp -a C:/'Program Files'/Git/bin $HOME
-        ls C:/'Program Files'/Git/bin
-        echo "***************************** "
-        ls C:/'Program Files'/Git/usr/bin
+        cp -a C:/'Program Files'/Git $HOME
+        ls C:/'Program Files'/Git
     - name: Setup python 3.12
       uses: actions/setup-python@v3
       with:

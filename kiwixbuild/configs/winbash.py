@@ -22,7 +22,7 @@ class WinBashConfigInfo(ConfigInfo):
     @property
     def configure_wrapper(self):
         # yield "C:\\msys64\\usr\\bin\\bash.iexe"
-        yield str(Path.home() / "bin" / "bash.exe")
+        yield str(Path.home() / "Git" / "bin" / "bash.exe")
 
     #        yield "C:\\msys64\\usr\\bin\\bash.exe"
 
