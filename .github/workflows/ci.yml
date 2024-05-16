@@ -52,6 +52,7 @@ jobs:
       env:
         SSH_KEY: ${{ runner.temp }}/id_rsa
     - name: Compile all deps
+      shell: bash
       run: |
         python .github\\scripts\\compile_all_deps.py
       env:
