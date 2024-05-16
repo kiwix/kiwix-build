@@ -21,8 +21,14 @@ class WinBashConfigInfo(ConfigInfo):
 
     @property
     def configure_wrapper(self):
-        # yield "C:\\msys64\\usr\\bin\\bash.iexe"
-        yield str(Path.home() / "Git" / "bin" / "bash.exe")
+        if True:
+            yield "C:\\Program Files\\Git\\bin\\bash.exe"
+        else:
+            yield str(Path.home() / "Git" / "bin" / "bash.exe")
+            yield "--noprofile"
+            yield "--norc"
+            yield "-e"
+            yield "-o"
 
     #        yield "C:\\msys64\\usr\\bin\\bash.exe"
 
