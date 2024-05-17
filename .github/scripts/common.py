@@ -28,7 +28,7 @@ def get_build_dir(config) -> Path:
     command.append("--use-target-arch-name")
     return Path(
         subprocess.run(command, cwd=str(HOME), check=True, stdout=subprocess.PIPE)
-        .stdout[:-1]
+        .stdout.strip()
         .decode("utf8")
     )
 
