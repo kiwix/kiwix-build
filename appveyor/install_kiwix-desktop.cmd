@@ -10,9 +10,9 @@ IF %KIWIX_DESKTOP_RELEASE% EQU 1 (
   )
 )
 IF %_WITH_CONSOLE% EQU 1 (
-    C:\Qt\5.15\msvc2019_64\bin\qmake.exe "CONFIG+=static console" || exit /b 1
+    C:\Qt\6.7\msvc2019_64\bin\qmake.exe "CONFIG+=static console" || exit /b 1
 ) else (
-    C:\Qt\5.15\msvc2019_64\bin\qmake.exe "CONFIG+=static" || exit /b 1
+    C:\Qt\6.7\msvc2019_64\bin\qmake.exe "CONFIG+=static" || exit /b 1
 )
 
 echo "Running fix_desktop"
