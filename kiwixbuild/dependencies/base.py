@@ -131,8 +131,17 @@ class ReleaseDownload(Source):
 
     def _download(self, context):
         context.try_skip(neutralEnv("archive_dir"), self.full_name)
-        for archive in self.archives:
-            neutralEnv("download")(archive)
+        archive_iter = iter(self.archives)
+        archive = next(archive_iter, None)
+        while archive:
+            try:
+                neutralEnv("download")(archive)
+            except SkipCommand as e:
+                archive = next(archive_iter, None)
+                if not archive:
+                    raise e
+                continue
+            archive = next(archive_iter, None)
 
     def _extract(self, context):
         context.try_skip(self.extract_path)
@@ -543,9 +552,10 @@ class MesonBuilder(Builder):
         if not self.target.force_native_build and self.buildEnv.meson_crossfile:
             cross_options += ["--cross-file", self.buildEnv.meson_crossfile]
         command = [
-            *neutralEnv("meson_command"),
+            *neutralEnv("meson_command"), "setup",
             ".",
             self.build_path,
+            "--pkgconfig.relocatable",
             f"--buildtype={self.build_type}",
             *self.strip_options,
             f"--default-library={self.library_type}",

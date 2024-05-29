@@ -9,10 +9,10 @@ class UUID(Dependency):
     class Source(ReleaseDownload):
         archive = Remotefile(
             "e2fsprogs-libs-1.43.4.tar.gz",
-            "eed4516325768255c9745e7b82c9d7d0393abce302520a5b2cde693204b0e419",
-            "https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.43.4/e2fsprogs-libs-1.43.4.tar.gz",
+            "0d2e0bf80935c3392b73a60dbff82d8a6ef7ea88b806c2eea964b6837d3fd6c2",
+            "https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.47.1/e2fsprogs-1.47.1.tar.gz",
         )
-        extract_dir = "e2fsprogs-libs-1.43.4"
+        extract_dir = "e2fsprogs-libs-1.47.1"
 
     class Builder(MakeBuilder):
         configure_options = [

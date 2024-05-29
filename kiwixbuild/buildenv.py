@@ -37,15 +37,6 @@ class NeutralEnv:
     def detect_platform(self):
         _platform = platform.system()
         self.distname = _platform
-        if _platform == "Windows":
-            print(
-                "ERROR: kiwix-build is not intented to run on Windows platform.\n"
-                "It should probably not work, but well, you still can have a try.",
-                file=sys.stderr,
-            )
-            cont = input("Do you want to continue ? [y/N]")
-            if cont.lower() != "y":
-                sys.exit(0)
         if _platform == "Linux":
             self.distname = distro.id()
             if self.distname == "ubuntu":
@@ -132,13 +123,12 @@ class BuildEnv:
     def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
         env = self.configInfo.get_env()
         pkgconfig_path = pj(self.install_dir, self.libprefix, "pkgconfig")
-        env["PKG_CONFIG_PATH"] = ":".join([env["PKG_CONFIG_PATH"], pkgconfig_path])
+        env["PKG_CONFIG_PATH"].append(pkgconfig_path)
 
-        env["PATH"] = ":".join([escape_path(pj(self.install_dir, "bin")), env["PATH"]])
+        env["PATH"].insert(0, pj(self.install_dir, "bin"))
 
-        env["LD_LIBRARY_PATH"] = ":".join(
+        env["LD_LIBRARY_PATH"].extend(
             [
-                env["LD_LIBRARY_PATH"],
                 pj(self.install_dir, "lib"),
                 pj(self.install_dir, self.libprefix),
             ]
@@ -170,7 +160,7 @@ class BuildEnv:
         if cross_compilers:
             self.configInfo.set_compiler(env)
         if cross_path:
-            env["PATH"] = ":".join(self.configInfo.get_bin_dir() + [env["PATH"]])
+            env["PATH"][0:0] = self.configInfo.get_bin_dir()
         return env
 
     @property

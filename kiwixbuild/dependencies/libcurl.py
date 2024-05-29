@@ -3,7 +3,7 @@ import os
 from .base import (
     Dependency,
     ReleaseDownload,
-    MakeBuilder,
+    MesonBuilder,
 )
 
 from kiwixbuild.utils import Remotefile, pj, Defaultdict, SkipCommand, run_command
@@ -15,35 +15,38 @@ class LibCurl(Dependency):
 
     class Source(ReleaseDownload):
         name = "libcurl"
-        archive = Remotefile(
-            "curl-7.67.0.tar.xz",
-            "f5d2e7320379338c3952dcc7566a140abb49edb575f9f99272455785c40e536c",
-            "https://curl.haxx.se/download/curl-7.67.0.tar.xz",
+        src_archive = Remotefile(
+            "curl-8.4.0.tar.xz",
+            "16c62a9c4af0f703d28bda6d7bbf37ba47055ad3414d70dec63e2e6336f2a82d",
+            "https://github.com/curl/curl/releases/download/curl-8_4_0/curl-8.4.0.tar.xz",
         )
+        meson_archive = Remotefile(
+            "curl_8.4.0-2_patch.zip",
+            "bbb6ae75225c36ef9bb336cface729794c7c070c623a003fff40bd416042ff6e",
+            "https://wrapdb.mesonbuild.com/v2/curl_8.4.0-2/get_patch",
+        )
+        archives = [src_archive, meson_archive]
 
-    class Builder(MakeBuilder):
+    class Builder(MesonBuilder):
         dependencies = ["zlib"]
-        configure_options = [
-            *[
-                f"--without-{p}"
+
+        @property
+        def configure_options(self):
+            yield from (
+                f"-D{p}=disabled"
                 for p in (
-                    "libssh2",
+                    "ssh",
                     "ssl",
-                    "libmetalink",
-                    "librtmp",
-                    "nghttp2",
-                    "libidn2",
+                    "rtmp",
+                    "http2",
+                    "idn",
                     "brotli",
-                )
-            ],
-            *[
-                f"--disable-{p}"
-                for p in (
                     "ftp",
                     "file",
                     "ldap",
                     "ldaps",
                     "rtsp",
+                    "proxy",
                     "dict",
                     "telnet",
                     "tftp",
@@ -51,8 +54,7 @@ class LibCurl(Dependency):
                     "imap",
                     "smb",
                     "smtp",
+                    "mqtt",
                     "gopher",
-                    "manual",
                 )
-            ],
-        ]
+            )
