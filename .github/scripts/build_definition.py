@@ -17,9 +17,9 @@ import csv, io, re
 BUILD_DEF = """
     | OS_NAME | COMPILE_CONFIG     | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop | platform_name        | dependency_name        |
     ==============================================================================================================================================
-# Bionic is a special case as we need to compile libzim on old arch for python
-    | bionic  | native_mixed       | BP     |          |           |             |               | linux-x86_64-bionic  |                        |
-    | bionic  | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64-bionic |                        |
+# manylinux is a special case as we need to compile libzim on old arch for python
+    | manylinux  | native_mixed       | BP     |          |           |             |               | linux-x86_64-manylinux  |                        |
+    | manylinux  | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64-manylinux |                        |
     ----------------------------------------------------------------------------------------------------------------------------------------------
 # Osx builds, build binaries on native_dyn and native_static. On anyother things, build only the libraries
     | macos   | native_dyn         | d      | d        | dB        | B           |               |                      | macos-x86_64-dyn       |
