@@ -52,9 +52,10 @@ jobs:
       env:
         SSH_KEY: ${{ runner.temp }}/id_rsa
     - name: Upload failure logs
-      shell: bash
       if: failure()
-      run: $GITHUB_WORKSPACE/.github/scripts/upload_failure_logs.sh
+      run: python .github\\scripts\\upload_failure_logs.py
+      env:
+        SSH_KEY: ${{ runner.temp }}/id_rsa
 
   Linux:
     strategy:
@@ -125,7 +126,7 @@ jobs:
         kiwix-build/.github/scripts/ensure_base_deps.py
       env:
         COMPILE_CONFIG: ${{matrix.config}}
-     - name: Compile all deps
+    - name: Compile all deps
       shell: bash
       run: |
         cd $HOME
