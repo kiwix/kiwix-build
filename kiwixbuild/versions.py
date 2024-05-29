@@ -46,7 +46,7 @@ base_deps_versions = {
     "lzma": "5.2.6",
     "zstd": "1.5.2",
     "docoptcpp": "0.6.2",
-    "uuid": "1.43.4",
+    "uuid": "1.47.1",
     "xapian-core": "1.4.23",
     "mustache": "4.1",
     "pugixml": "1.2",
