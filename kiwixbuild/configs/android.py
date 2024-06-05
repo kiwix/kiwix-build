@@ -45,7 +45,11 @@ class AndroidConfigInfo(ConfigInfo):
         return self.ndk_builder.install_path
 
     def get_cross_config(self):
-        extra_libs = ["-llog"]
+        extra_libs = [
+            "-llog",
+            "-Wl,--exclude-libs,libgcc.a",
+            "-Wl,--exclude-libs,libunwind.a",
+        ]
         extra_cflags = [
             "-I{}".format(include_dir) for include_dir in self.get_include_dirs()
         ]
