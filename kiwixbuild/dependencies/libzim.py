@@ -34,6 +34,7 @@ class Libzim(Dependency):
             configInfo = self.buildEnv.configInfo
             if neutralEnv("distname") == "Windows":
                 yield "-Dwith_xapian=false"
+                yield "-Dwerror=false"
             if configInfo.build == "android":
                 yield "-DUSE_BUFFER_HEADER=false"
                 yield "-Dstatic-linkage=true"
