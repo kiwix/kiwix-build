@@ -38,8 +38,8 @@ release_versions = {
 
 
 # This is the "version" of the whole base_deps_versions dict.
-# Change this when you change base_deps_versions.
-base_deps_meta_version = "00"
+# Change this when you change base_deps_versions
+base_deps_meta_version = "01"
 
 base_deps_versions = {
     "zlib": "1.2.12",
@@ -60,6 +60,6 @@ base_deps_versions = {
     "qtwebengine": "5.10.1",
     "org.kde": "5.15-21.08",
     "io.qt.qtwebengine": "5.15-21.08",
-    "zim-testing-suite": "0.5",
+    "zim-testing-suite": "0.6.0",
     "emsdk": "3.1.41",
 }
