@@ -1,5 +1,5 @@
 from .base import Dependency, GitClone, MesonBuilder
-from kiwixbuild._global import option, get_target_step
+from kiwixbuild._global import option, get_target_step, neutralEnv
 
 
 class Libzim(Dependency):
@@ -9,6 +9,13 @@ class Libzim(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/openzim/libzim.git"
         git_dir = "libzim"
+
+        @property
+        def git_ref(self):
+            if neutralEnv("distname") == "Windows":
+                return "libzim_github_ci_windows"
+            else:
+                return "main"
 
     class Builder(MesonBuilder):
         test_options = ["-t", "8"]
@@ -22,6 +29,8 @@ class Libzim(Dependency):
 
         @classmethod
         def get_dependencies(cls, configInfo, allDeps):
+            if neutralEnv("distname") == "Windows":
+                return ["zstd", "icu4c", "zim-testing-suite"]
             deps = ["lzma", "zstd", "xapian-core", "icu4c"]
             if configInfo.name not in ("flatpak", "wasm"):
                 deps.append("zim-testing-suite")
@@ -30,6 +39,9 @@ class Libzim(Dependency):
         @property
         def configure_options(self):
             configInfo = self.buildEnv.configInfo
+            if neutralEnv("distname") == "Windows":
+                yield "-Dwith_xapian=false"
+                yield "-Dwerror=false"
             if configInfo.build == "android":
                 yield "-DUSE_BUFFER_HEADER=false"
                 yield "-Dstatic-linkage=true"

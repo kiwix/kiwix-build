@@ -63,7 +63,31 @@ class DefaultEnv(Defaultdict):
     def __getitem__(self, name):
         if name == b"PATH":
             raise KeyError
+        if name in ["PATH", "PKG_CONFIG_PATH", "LD_LIBRARY_PATH"]:
+            item = super().__getitem__(name)
+            if isinstance(item, PathArray):
+                return item
+            else:
+                item = PathArray(item)
+                self[name] = item
+                return item
         return super().__getitem__(name)
+
+
+def get_separator():
+    return ";" if neutralEnv("distname") == "Windows" else ":"
+
+
+class PathArray(list):
+    def __init__(self, value):
+        self.separator = get_separator()
+        if not value:
+            super().__init__([])
+        else:
+            super().__init__(value.split(self.separator))
+
+    def __str__(self):
+        return self.separator.join(self)
 
 
 def remove_duplicates(iterable, key_function=None):
@@ -273,9 +297,22 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
                         if isdir(member):
                             continue
                         perm = (member.external_attr >> 16) & 0x1FF
-                        os.chmod(pj(tmpdir, getname(member)), perm)
+                        if perm:
+                            os.chmod(pj(tmpdir, getname(member)), perm)
                 name = name or topdir
-                os.rename(pj(tmpdir, topdir), pj(dest_dir, name))
+                shutil.copytree(
+                    pj(tmpdir, topdir),
+                    pj(dest_dir, name),
+                    symlinks=True,
+                    dirs_exist_ok=True,
+                )
+                # Be sure that all directory in tmpdir are writable to allow correct suppersion of it
+                for root, dirs, _files in os.walk(tmpdir):
+                    for d in dirs:
+                        os.chmod(
+                            pj(root, d), stat.S_IWRITE | stat.S_IREAD | stat.S_IEXEC
+                        )
+
         else:
             if name:
                 dest_dir = pj(dest_dir, name)
@@ -297,6 +334,7 @@ def run_command(command, cwd, context, *, env=None, input=None):
         print("run command '{}'".format(command), file=log)
         print("current directory is '{}'".format(cwd), file=log)
         print("env is :", file=log)
+        env = {k: str(v) for k, v in env.items()}
         for k, v in env.items():
             print("  {} : {!r}".format(k, v), file=log)
 
