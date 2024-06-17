@@ -23,7 +23,7 @@ class Libzim(Dependency):
         @classmethod
         def get_dependencies(cls, configInfo, allDeps):
             if neutralEnv("distname") == "Windows":
-                return ["zstd", "icu4c", "zim-testing-suite"]
+                return ["zstd", "xapian-core", "icu4c", "zim-testing-suite"]
             deps = ["lzma", "zstd", "xapian-core", "icu4c"]
             if configInfo.name not in ("flatpak", "wasm"):
                 deps.append("zim-testing-suite")
@@ -33,7 +33,6 @@ class Libzim(Dependency):
         def configure_options(self):
             configInfo = self.buildEnv.configInfo
             if neutralEnv("distname") == "Windows":
-                yield "-Dwith_xapian=false"
                 yield "-Dwerror=false"
             if configInfo.build == "android":
                 yield "-DUSE_BUFFER_HEADER=false"
