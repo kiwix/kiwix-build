@@ -1,4 +1,8 @@
 
+echo "ld is"
+which ld
+echo "******************************************"
+
 XAPIAN_SOURCE=$(pwd)/..
 
 $XAPIAN_SOURCE/configure \
