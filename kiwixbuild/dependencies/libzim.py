@@ -10,13 +10,6 @@ class Libzim(Dependency):
         git_remote = "https://github.com/openzim/libzim.git"
         git_dir = "libzim"
 
-        @property
-        def git_ref(self):
-            if neutralEnv("distname") == "Windows":
-                return "libzim_github_ci_windows"
-            else:
-                return "main"
-
     class Builder(MesonBuilder):
         test_options = ["-t", "8"]
         strip_options = []
