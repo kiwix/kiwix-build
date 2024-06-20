@@ -31,7 +31,7 @@ install:
      7z e ninja-win.zip -o%EXTRA_DIR%\bin
 
      REM Install pkg-config-lite
-     curl --insecure -o pkg-config-lite-0.28-1.zip https://netix.dl.sourceforge.net/project/pkgconfiglite/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip
+     curl -o pkg-config-lite-0.28-1.zip -L https://deac-fra.dl.sourceforge.net/project/pkgconfiglite/0.28-1/pkg-config-lite-0.28-1_bin-win32.zip
      7z e pkg-config-lite-0.28-1.zip -o%EXTRA_DIR%\bin pkg-config-lite-0.28-1/bin/pkg-config.exe
      cd kiwix-build
 
