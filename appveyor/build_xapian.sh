@@ -17,4 +17,6 @@ $XAPIAN_SOURCE/configure \
 
 make -j2
 
+make check
+
 make install
