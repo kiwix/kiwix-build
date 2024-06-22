@@ -1,7 +1,7 @@
 # This file reference all the versions of the depedencies we use in kiwix-build.
 
 main_project_versions = {
-    "libzim": "9.2.1",
+    "libzim": "9.2.2",
     "libkiwix": "13.1.0",
     "kiwix-tools": "3.7.0",
     "zim-tools": "3.4.1",
@@ -29,8 +29,8 @@ main_project_versions = {
 # - set KIWIX_DESKTOP_RELEASE to 0
 
 release_versions = {
-    "libzim": 1,  # Depends of base deps (was 0)
-    "libkiwix": 3,  # Depends of libzim (was 2)
+    "libzim": 0,  # Depends of base deps (was 1)
+    "libkiwix": None,  # Depends of libzim (was 3)
     "kiwix-tools": None,  # Depends of libkiwix and libzim (was 2)
     "zim-tools": None,  # Depends of libzim (was 0)
     "kiwix-desktop": None,  # Depends of libkiwix and libzim (was 4)
@@ -39,7 +39,7 @@ release_versions = {
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = "00"
+base_deps_meta_version = "01"
 
 base_deps_versions = {
     "zlib": "1.2.12",
@@ -60,6 +60,6 @@ base_deps_versions = {
     "qtwebengine": "5.10.1",
     "org.kde": "5.15-21.08",
     "io.qt.qtwebengine": "5.15-21.08",
-    "zim-testing-suite": "0.5",
+    "zim-testing-suite": "0.6.0",
     "emsdk": "3.1.41",
 }
