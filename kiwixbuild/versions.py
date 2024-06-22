@@ -60,6 +60,6 @@ base_deps_versions = {
     "qtwebengine": "5.10.1",
     "org.kde": "5.15-21.08",
     "io.qt.qtwebengine": "5.15-21.08",
-    "zim-testing-suite": "0.5",
+    "zim-testing-suite": "0.6.0",
     "emsdk": "3.1.41",
 }
