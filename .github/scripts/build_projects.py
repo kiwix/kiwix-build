@@ -13,7 +13,7 @@ from common import (
 )
 
 for target in select_build_targets(BUILD):
-    run_kiwix_build(target, config=COMPILE_CONFIG)
+    run_kiwix_build(target, config=COMPILE_CONFIG, make_release=True)
     if target == "kiwix-desktop":
         archive = create_desktop_image(make_release=False)
     else:
