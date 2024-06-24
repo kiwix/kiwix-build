@@ -9,6 +9,7 @@ $XAPIAN_SOURCE/configure \
   CC="cl -nologo" \
   CXX="$XAPIAN_SOURCE/compile cl -nologo" \
   CXXFLAGS="-EHsc -MD" AR=lib \
+  LD="link" \
   CPPFLAGS="-I${MINGW64_EXTRA_DIR}/include" \
   LDFLAGS="-L${MINGW64_EXTRA_DIR}/lib" \
   --disable-backend-remote \
