@@ -39,15 +39,15 @@ class Icu(Dependency):
                 topdir=None,
                 name=self.source_dir,
             )
-            shutil.rmtree(
-                pj(neutralEnv("source_dir"), self.source_dir, "source", "data")
-            )
-            extract_archive(
-                pj(neutralEnv("archive_dir"), self.archive_data.name),
-                pj(neutralEnv("source_dir"), self.source_dir, "source"),
-                topdir="data",
-                name="data",
-            )
+            #shutil.rmtree(
+            #    pj(neutralEnv("source_dir"), self.source_dir, "source", "data")
+            #)
+            #extract_archive(
+            #    pj(neutralEnv("archive_dir"), self.archive_data.name),
+            #    pj(neutralEnv("source_dir"), self.source_dir, "source"),
+            #    topdir="data",
+            #    name="data",
+            #)
             extract_archive(
                 pj(neutralEnv("archive_dir"), self.meson_patch.name),
                 neutralEnv("source_dir"),
