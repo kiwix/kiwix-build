@@ -13,4 +13,9 @@ $XAPIAN_SOURCE/configure \
 
 make -j2
 
+echo "**************************"
+ls -a -R
+find -name "*.def"
+echo "**************************"
+
 make install
