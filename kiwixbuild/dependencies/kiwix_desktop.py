@@ -14,15 +14,11 @@ class KiwixDesktop(Dependency):
         make_install_targets = ["install"]
         configure_env = None
 
-        flatpack_build_options = {"env": ["QMAKEPATH=/app/lib"]}
+        flatpack_build_options = {"env": {"QMAKEPATH": "/app/lib"}}
 
         @property
         def configure_options(self):
-            if self.buildEnv.configInfo.name == "flatpak":
-                yield "QMAKE_INCDIR+=/app/include/QtWebEngine"
-                yield "QMAKE_INCDIR+=/app/include/QtWebEngineCore"
-                yield "QMAKE_INCDIR+=/app/include/QtWebEngineWidgets"
-            else:
+            if self.buildEnv.configInfo.name != "flatpak":
                 yield f"PREFIX={self.buildEnv.install_dir}"
             if self.buildEnv.configInfo.static:
                 yield "CONFIG+=static"

@@ -37,19 +37,18 @@ MANIFEST = {
     "runtime": "org.kde.Platform",
     "runtime-version": base_deps_versions["org.kde"],
     "base": "io.qt.qtwebengine.BaseApp",
-    "base-version": base_deps_versions[
-        "org.kde"
-    ],  # keep BaseApp (qwebengine) in sync with org.kde
+    "base-version": base_deps_versions["io.qt.qtwebengine"],
     "sdk": "org.kde.Sdk",
     "command": "kiwix-desktop",
     "rename-icon": "kiwix-desktop",
     "finish-args": [
+        "--device=dri",
+        "--env=QTWEBENGINEPROCESS_PATH=/app/bin/QtWebEngineProcess",
         "--socket=wayland",
-        "--socket=x11",
+        "--socket=fallback-x11",
+        "--socket=pulseaudio",
         "--share=network",
         "--share=ipc",
-        "--device=dri",
-        "--socket=pulseaudio",
     ],
     "cleanup": [
         "/include",
@@ -69,6 +68,7 @@ MANIFEST = {
         "/share/doc",
         "/share/man",
     ],
+    "cleanup-commands": ["/app/cleanup-BaseApp.sh"],
 }
 
 GET_REF_URL_API_TEMPLATE = "https://api.github.com/repos{repo}/git/refs/tags/{ref}"
@@ -297,7 +297,7 @@ class FlatpakBuilder:
                     tlc = Dependency.all_deps[tlcName]
                     builderDef = (cfgName, tlcName)
                     builder = get_target_step(builderDef)
-                    print("build {} ({}):".format(builder.name, cfgName[0]))
+                    print("build {} ({}):".format(builder.name, cfgName))
                     add_target_step(builderDef, builder)
                     builder.build()
             print("[GENERATE FLATPAK MANIFEST]")

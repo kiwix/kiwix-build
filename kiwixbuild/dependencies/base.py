@@ -323,8 +323,8 @@ class Builder:
             module["subdir"] = self.subsource_dir
         if getattr(self, "flatpack_build_options", None):
             module["build-options"] = self.flatpack_build_options
-        if getattr(self, "configure_option", ""):
-            module["config-opts"] = self.configure_option.split(" ")
+        if getattr(self, "configure_options", ""):
+            module["config-opts"] = list(self.configure_options)
 
     def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
         env = self.buildEnv.get_env(
