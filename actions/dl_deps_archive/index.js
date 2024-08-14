@@ -34,17 +34,17 @@ async function run() {
 
     let archivePath;
     try {
-      const archive_url = `${base_url}/dev_preview/${branch}/deps_${target}_${project}.tar.xz`;
+      const archive_url = `${base_url}/dev_preview/${branch}/deps_${target}_${project}.tar.gz`;
       process.stdout.write("Downloading " + archive_url + "\n");
       archivePath = await tc.downloadTool(archive_url);
     } catch (error) {
-      const archive_url = `${base_url}/deps_${target}_${project}.tar.xz`;
+      const archive_url = `${base_url}/deps_${target}_${project}.tar.gz`;
       process.stdout.write("Downloading " + archive_url + "\n");
       archivePath = await tc.downloadTool(archive_url);
     }
 
     process.stdout.write("Extracting " + archivePath + " to " + extract_dir);
-    const archive_dir = await tc.extractTar(archivePath, extract_dir, "x");
+    const archive_dir = await tc.extractTar(archivePath, extract_dir);
     process.stdout.write("Extracted to " + archive_dir);
   } catch (error) {
     core.setFailed(error.message);

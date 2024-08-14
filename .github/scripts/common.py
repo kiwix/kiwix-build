@@ -343,10 +343,10 @@ def filter_install_dir(path):
                     yield sub_dir
 
 
-# Full: True if we are creating a full archive to be used as cache by kiwix-build (base_deps_{os}_{config}_{base_deps_version}.tar.xz)
-# Full: False if we are creating a archive to be used as pre-cached dependencies for project's CI (deps_{config}_{target}.tar.xz)
+# Full: True if we are creating a full archive to be used as cache by kiwix-build (base_deps_{os}_{config}_{base_deps_version}.tar.gz)
+# Full: False if we are creating a archive to be used as pre-cached dependencies for project's CI (deps_{config}_{target}.tar.gz)
 def make_deps_archive(target=None, name=None, full=False):
-    archive_name = name or "deps_{}_{}.tar.xz".format(
+    archive_name = name or "deps_{}_{}.tar.gz".format(
         get_dependency_archive_name(), target
     )
     print_message("Create archive {}.", archive_name)
@@ -395,7 +395,7 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
 
     archive_file = TMP_DIR / archive_name
-    with tarfile.open(str(archive_file), "w:xz") as tar:
+    with tarfile.open(str(archive_file), "w:gz") as tar:
         for name in set(files_to_archive):
             print(".{}".format(name), flush=True)
             tar.add(str(name), arcname=str(name.relative_to(relative_path)))
