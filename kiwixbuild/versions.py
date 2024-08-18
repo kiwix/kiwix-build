@@ -56,8 +56,6 @@ base_deps_versions = {
     "libaria2": "1.37.0",
     "libmagic": "5.44",
     "android-ndk": "r21e",
-    "qt": "5.10.1",
-    "qtwebengine": "5.10.1",
     "org.kde": "5.15-23.08",
     "io.qt.qtwebengine": "5.15-23.08",
     "zim-testing-suite": "0.6.0",
