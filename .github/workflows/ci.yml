@@ -12,7 +12,7 @@ jobs:
     runs-on: windows-latest
     env:
       OS_NAME: windows
-      COMPILE_CONFIG: native_dyn
+      COMPILE_CONFIG: native_mixed
       HOME: 'C:\\Users\\runneradmin'
     steps:
     - name: Checkout code
