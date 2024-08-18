@@ -34,6 +34,12 @@ jobs:
       run: |
         pip3 install meson pytest requests distro paramiko
         pip3 install --no-deps $GITHUB_WORKSPACE
+    - name: Install QT
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: 5.15.2
+        modules: "qtwebengine"
+        setup-python: false
     - name: Setup MSVC compiler
       uses: bus1/cabuild/action/msdevshell@v1
       with:
