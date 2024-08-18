@@ -1,4 +1,4 @@
-from .base import Dependency, ReleaseDownload, MakeBuilder
+from .base import Dependency, ReleaseDownload, MakeBuilder, NoopBuilder
 
 from kiwixbuild.utils import Remotefile, run_command
 

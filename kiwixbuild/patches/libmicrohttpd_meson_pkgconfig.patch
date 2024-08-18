@@ -1,0 +1,29 @@
+diff '--color=auto' -ur libmicrohttpd-0.9.76_orig/meson.build libmicrohttpd-0.9.76/meson.build
+--- libmicrohttpd-0.9.76_orig/meson.build	2024-08-18 14:55:29.372805433 +0200
++++ libmicrohttpd-0.9.76/meson.build	2024-08-18 17:19:44.087444728 +0200
+@@ -6,6 +6,8 @@
+   default_options: ['warning_level=1'],
+ )
+ 
++pkg = import('pkgconfig')
++
+ add_project_arguments('-D_GNU_SOURCE', language: 'c')
+ 
+ incdirs = include_directories('src/include')
+@@ -267,6 +269,16 @@
+   install: true,
+ )
+ 
++install_headers(
++  'src/include/microhttpd.h',
++)
++
++pkg.generate(
++  libmicrohttpd,
++  description: 'Libmicrohttpd',
++  name: 'libmicrohttpd',
++)
++
+ depinc = include_directories('.', 'src/include')
+ libmicrohttpd_dep = declare_dependency(
+   include_directories: depinc,
