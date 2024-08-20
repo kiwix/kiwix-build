@@ -8,6 +8,61 @@ on:
    - cron: '0 1 * * *'
 
 jobs:
+  Windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - native_mixed
+          - native_dyn
+          - native_static
+    runs-on: windows-latest
+    env:
+      OS_NAME: windows
+      COMPILE_CONFIG: ${{matrix.config}}
+      HOME: 'C:\\Users\\runneradmin'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Setup python 3.8
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.8'
+    - name: Install packages
+      run: |
+        choco.exe install pkgconfiglite ninja
+    - name: Install python modules
+      shell: bash
+      run: |
+        pip3 install meson pytest requests distro paramiko
+        pip3 install --no-deps $GITHUB_WORKSPACE
+    - name: Setup MSVC compiler
+      uses: bus1/cabuild/action/msdevshell@v1
+      with:
+        architecture: x64
+    - name: secret
+      shell: bash
+      run: |
+        echo "${{secrets.ssh_key}}" > $SSH_KEY
+      env:
+        SSH_KEY: ${{ runner.temp }}/id_rsa
+    - name: Ensure base deps
+      run: |
+        python .github\\scripts\\ensure_base_deps.py
+      env:
+        SSH_KEY: ${{ runner.temp }}/id_rsa
+    - name: Build Release
+      run: |
+        python .github\\scripts\\build_release_nightly.py
+      env:
+        SSH_KEY: ${{ runner.temp }}/id_rsa
+    - name: Upload failure logs
+      if: failure()
+      run: |
+        python .github\\scripts\\upload_failure_logs.py
+      env:
+        SSH_KEY: ${{ runner.temp }}/id_rsa
+
   Linux:
     strategy:
       fail-fast: false
