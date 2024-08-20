@@ -70,8 +70,8 @@ CXXFLAGS =  -std=c++11
 DEFS = 
 prefix = {prefix}
 exec_prefix = ${{prefix}}
-libdir = ${{exec_prefix}}\\lib
-includedir = ${{prefix}}\\include
+libdir = ${{exec_prefix}}/lib
+includedir = ${{prefix}}/include
 baselibs = -lpthread -lm 
 UNICODE_VERSION=15.0
 ICUPREFIX=icu
@@ -85,7 +85,7 @@ Version: 73.1
 Cflags: -I${{includedir}}
 Description: International Components for Unicode: Internationalization library
 Name: icu-i18n
-Libs: -L&{{libdir}} -licuin -licuuc -licudt"""
+Libs: -L${{libdir}} -licuin -licuuc -licudt"""
 
                 pkg_config_content = pkg_config_template.format(
                     prefix=self.buildEnv.install_dir
