@@ -9,10 +9,15 @@ jobs:
   Windows:
     strategy:
       fail-fast: false
+      matrix:
+        config:
+          - native_mixed
+          - native_dyn
+          - native_static
     runs-on: windows-latest
     env:
       OS_NAME: windows
-      COMPILE_CONFIG: native_mixed
+      COMPILE_CONFIG: ${{matrix.config}}
       HOME: 'C:\\Users\\runneradmin'
     steps:
     - name: Checkout code
