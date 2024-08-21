@@ -1,4 +1,6 @@
+from kiwixbuild._global import option
 from .base import Dependency, GitClone, QMakeBuilder
+import platform
 
 
 class KiwixDesktop(Dependency):
@@ -11,10 +13,23 @@ class KiwixDesktop(Dependency):
 
     class Builder(QMakeBuilder):
         dependencies = ["qt", "qtwebengine", "libkiwix", "aria2"]
-        make_install_targets = ["install"]
         configure_env = None
 
         flatpack_build_options = {"env": {"QMAKEPATH": "/app/lib"}}
+
+        @property
+        def make_targets(self):
+            if platform.system() == "Windows":
+                yield "release-all" if option("make_release") else "debug-all"
+            else:
+                yield from super().make_targets
+
+        @property
+        def make_install_targets(self):
+            if platform.system() == "Windows":
+                yield "release-install" if option("make_release") else "debug-install"
+            else:
+                yield "install"
 
         @property
         def configure_options(self):
