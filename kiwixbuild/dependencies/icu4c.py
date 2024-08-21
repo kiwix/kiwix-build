@@ -2,7 +2,6 @@ from .base import (
     Dependency,
     ReleaseDownload,
     MakeBuilder,
-    MesonBuilder,
     Builder as BaseBuilder,
 )
 
@@ -137,12 +136,6 @@ else:
                     pj(neutralEnv("source_dir"), self.source_dir, "source"),
                     topdir="data",
                     name="data",
-                )
-                extract_archive(
-                    pj(neutralEnv("archive_dir"), self.meson_patch.name),
-                    neutralEnv("source_dir"),
-                    topdir="icu",
-                    name=self.source_dir,
                 )
 
             patches = [
