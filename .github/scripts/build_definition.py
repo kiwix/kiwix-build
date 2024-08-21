@@ -22,9 +22,9 @@ BUILD_DEF = """
     | manylinux | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64-manylinux |                        |
     ----------------------------------------------------------------------------------------------------------------------------------------------
 # On Windows, we build only libzim for now. And only native_mixed as xapian doesn't compile as dll
-    | windows   | native_static      | Bd     |          |           |             |               | win-x86_64              | win-x86_64-static      |
+    | windows   | native_static      | Bd     | d        |           | d           |               | win-x86_64              | win-x86_64-static      |
     | windows   | native_dyn         | Bd     |          |           |             |               | win-x86_64              | win-x86_64-dyn         |
-    | windows   | native_mixed       | BPd    |          |           |             |               | win-x86_64              | win-x86_64-mixed       |
+    | windows   | native_mixed       | BPd    | d        |           |             | d             | win-x86_64              | win-x86_64-mixed       |
     ----------------------------------------------------------------------------------------------------------------------------------------------
 # Osx builds, build binaries on native_dyn and native_static. On anyother things, build only the libraries
     | macos     | native_dyn         | d      | d        | dB        | B           |               |                         | macos-x86_64-dyn       |
