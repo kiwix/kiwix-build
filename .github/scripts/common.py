@@ -103,6 +103,8 @@ EXPORT_FILES = {
             ),
             "lib/libzim.dylib",
             "lib/*/libzim.pc",
+            "lib/libzim.dll",
+            "lib/libzim.lib",
             "include/zim/**/*.h",
             "share/icu/{}/icudt{}l.dat".format(
                 base_deps_versions["icu4c"], major_version(base_deps_versions["icu4c"])
