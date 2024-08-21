@@ -15,5 +15,4 @@ class Pugixml(Dependency):
         flatpak_dest = "src"
 
     class Builder(MesonBuilder):
-        build_type = "release"
         strip_options = []

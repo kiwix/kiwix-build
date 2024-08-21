@@ -103,6 +103,8 @@ EXPORT_FILES = {
             ),
             "lib/libzim.dylib",
             "lib/*/libzim.pc",
+            "lib/libzim.dll",
+            "lib/libzim.lib",
             "include/zim/**/*.h",
             "share/icu/{}/icudt{}l.dat".format(
                 base_deps_versions["icu4c"], major_version(base_deps_versions["icu4c"])
@@ -432,7 +434,7 @@ def make_archive(project, make_release):
     files_to_archive = []
     for export_file in export_files:
         files_to_archive.extend(base_dir.glob(export_file))
-    if platform_name == "win-i686":
+    if platform_name == "win-i686" or platform.system() == "Windows":
         open_archive = lambda a: zipfile.ZipFile(
             str(a), "w", compression=zipfile.ZIP_DEFLATED
         )

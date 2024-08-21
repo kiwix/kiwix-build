@@ -158,14 +158,16 @@ class FlatpakBuilder:
                     module["no-autogen"] = True
                 module_sources = module.setdefault("sources", [])
                 if isinstance(source, ReleaseDownload):
-                    src = {
-                        "type": "archive",
-                        "sha256": source.archive.sha256,
-                        "url": source.archive.url,
-                    }
-                    if hasattr(source, "flatpak_dest"):
-                        src["dest"] = source.flatpak_dest
-                    module_sources.append(src)
+                    for archive in source.archives:
+                        src = {
+                            "type": "archive",
+                            "dest-filename": archive.name,
+                            "sha256": archive.sha256,
+                            "url": archive.url,
+                        }
+                        if hasattr(source, "flatpak_dest"):
+                            src["dest"] = source.flatpak_dest
+                        module_sources.append(src)
                 elif isinstance(source, GitClone):
                     src = {
                         "type": "git",
