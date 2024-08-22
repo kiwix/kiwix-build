@@ -18,7 +18,10 @@ class MicroHttpd(Dependency):
             "https://wrapdb.mesonbuild.com/v2/libmicrohttpd_0.9.76-3/get_patch",
         )
         archives = [src_archive, meson_archive]
-        patches = ["libmicrohttpd_meson_pkgconfig.patch"]
+        patches = [
+            "libmicrohttpd_meson_pkgconfig.patch",
+            "libmicrohttpd_meson_timeval_tvsec_size.patch",
+        ]
 
     class Builder(MesonBuilder):
         configure_options = [

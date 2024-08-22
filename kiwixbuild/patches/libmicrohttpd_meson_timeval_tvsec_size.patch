@@ -1,0 +1,31 @@
+diff '--color=auto' -ur libmicrohttpd-0.9.76/meson.build libmicrohttpd-0.9.76_patched/meson.build
+--- libmicrohttpd-0.9.76/meson.build	2024-08-22 15:17:59.217715872 +0200
++++ libmicrohttpd-0.9.76_patched/meson.build	2024-08-22 15:20:23.755358647 +0200
+@@ -126,7 +126,26 @@
+ foreach s : sizes
+   cdata.set('SIZEOF_@0@'.format(s.underscorify().to_upper()), cc.sizeof(s))
+ endforeach
+-cdata.set('SIZEOF_STRUCT_TIMEVAL_TV_SEC', cc.sizeof('time_t'))
++
++cdata.set(
++  'SIZEOF_STRUCT_TIMEVAL_TV_SEC',
++  cc.sizeof(
++    'test_var.tv_sec',
++    prefix: '''#ifdef HAVE_SYS_TIME_H
++#include <sys/time.h>
++#endif /* HAVE_SYS_TIME_H */
++#ifdef HAVE_TIME_H
++#include <time.h>
++#endif /* HAVE_TIME_H */
++#if HAVE_SYS_TYPES_H
++#include <sys/types.h>
++#endif /* HAVE_SYS_TYPES_H */
++#ifdef _WIN32
++#include <winsock.h>
++#endif /* _WIN32 */
++struct timeval test_var;'''
++  )
++)
+ cdata.set('SIZEOF_UINT64_T', 8)
+ 
+ cdata.set('HAVE_PIPE2_FUNC', cc.has_function('pipe2'))
