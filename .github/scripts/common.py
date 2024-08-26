@@ -42,9 +42,13 @@ SOURCE_DIR = HOME / "SOURCE"
 ARCHIVE_DIR = HOME / "ARCHIVE"
 TOOLCHAIN_DIR = BASE_DIR / "TOOLCHAINS"
 INSTALL_DIR = BASE_DIR / "INSTALL"
-default_tmp_dir = os.getenv("TEMP") if platform.system() == 'Windows' else "/tmp"
+default_tmp_dir = os.getenv("TEMP") if platform.system() == "Windows" else "/tmp"
 TMP_DIR = Path(os.getenv("TMP_DIR", default_tmp_dir))
-KBUILD_SOURCE_DIR = HOME / "kiwix-build"
+if platform.system() == "Windows":
+    KBUILD_SOURCE_DIR = Path(_environ["GITHUB_WORKSPACE"])
+else:
+    KBUILD_SOURCE_DIR = HOME / "kiwix-build"
+
 
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
 MAKE_RELEASE = re.fullmatch(r"r_[0-9]+", _ref) is not None
@@ -204,6 +208,7 @@ def run_kiwix_build(
     subprocess.check_call(command, cwd=str(HOME), env=env)
     print_message("Build ended")
 
+
 try:
     import paramiko
 
@@ -216,8 +221,8 @@ try:
             host, port = host.split(":", 1)
         else:
             port = "22"
-        if '@' in host:
-            user, host = host.split('@', 1)
+        if "@" in host:
+            user, host = host.split("@", 1)
         else:
             user = None
 
@@ -228,7 +233,14 @@ try:
             client = paramiko.client.SSHClient()
             client.set_missing_host_key_policy(paramiko.client.WarningPolicy)
             print_message(f"Connect to {host}:{port}")
-            client.connect(host, port=port, username=user, key_filename=_environ.get("SSH_KEY"), look_for_keys=False, compress=True)
+            client.connect(
+                host,
+                port=port,
+                username=user,
+                key_filename=_environ.get("SSH_KEY"),
+                look_for_keys=False,
+                compress=True,
+            )
             try:
                 yield client
             finally:
@@ -256,7 +268,6 @@ try:
 
             print_message(f"Sending archive {file_to_upload} to {remote_file}")
             sftp.put(str(file_to_upload), str(remote_file), confirm=True)
-
 
 except ModuleNotFoundError:
     # On old system (bionic) paramiko is really complex to install
@@ -473,11 +484,27 @@ def create_desktop_image(make_release):
         build_path = BASE_DIR / "org.kiwix.desktop.flatpak"
         app_name = "org.kiwix.desktop.{}.flatpak".format(postfix)
         print_message("archive is {}", build_path)
+    elif platform.system() == "Windows":
+        archive_basename = "Kiwix-{}-win-amd64".format(postfix)
+        working_dir = INSTALL_DIR / archive_basename
+        build_path = working_dir.with_suffix(".zip")
+        app_name = build_path.name
+        command = [
+            "python",
+            KBUILD_SOURCE_DIR / "scripts" / "package_kiwix-desktop_windows.py",
+            str(INSTALL_DIR),
+            str(working_dir),
+            str(build_path),
+        ]
+        if make_release:
+            command += ["-s"]
+        print_message("Package archive of kiwix-desktop")
+        subprocess.check_call(command, cwd=str(HOME))
     else:
         build_path = HOME / "Kiwix-{}-x86_64.AppImage".format(postfix)
         app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
         command = [
-            "kiwix-build/scripts/create_kiwix-desktop_appImage.sh",
+            KBUILD_SOURCE_DIR / "scripts" / "create_kiwix-desktop_appImage.sh",
             str(INSTALL_DIR),
             str(src_dir),
             str(HOME / "AppDir"),

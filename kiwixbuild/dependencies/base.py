@@ -2,6 +2,7 @@ import subprocess
 import os
 import shutil
 import time
+import platform
 
 from kiwixbuild.utils import (
     pj,
@@ -379,7 +380,7 @@ class MakeBuilder(Builder):
     configure_options = []
     dynamic_configure_options = ["--enable-shared", "--disable-static"]
     static_configure_options = ["--enable-static", "--disable-shared"]
-    make_options = []
+    make_options = ["-j4"]
     install_options = []
     configure_script = "configure"
     configure_env = {
@@ -435,7 +436,6 @@ class MakeBuilder(Builder):
         command = [
             *self.buildEnv.make_wrapper,
             *neutralEnv("make_command"),
-            "-j4",
             *self.make_targets,
             *self.make_options,
         ]
@@ -491,6 +491,12 @@ class CMakeBuilder(MakeBuilder):
 class QMakeBuilder(MakeBuilder):
     qmake_targets = []
     flatpak_buildsystem = "qmake"
+
+    @property
+    def make_options(self):
+        if platform.system() == "Windows":
+            return []
+        return super().make_options
 
     @property
     def env_options(self):

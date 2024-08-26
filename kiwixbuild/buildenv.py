@@ -30,7 +30,10 @@ class NeutralEnv:
         self.mesontest_command = [*self.meson_command, "test"]
         self.patch_command = self._detect_command("patch")
         self.git_command = self._detect_command("git")
-        self.make_command = self._detect_command("make")
+        if platform.system() == "Windows":
+            self.make_command = self._detect_command("nmake", options=["/?", "/NOLOGO"])
+        else:
+            self.make_command = self._detect_command("make")
         self.cmake_command = self._detect_command("cmake")
         self.qmake_command = self._detect_command(
             "qmake", required=False, default=[["qmake"], ["qmake-qt5"]]
