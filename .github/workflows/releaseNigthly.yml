@@ -24,10 +24,10 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    - name: Setup python 3.8
+    - name: Setup python 3.12
       uses: actions/setup-python@v3
       with:
-        python-version: '3.8'
+        python-version: '3.12'
     - name: Install packages
       run: |
         choco.exe install pkgconfiglite ninja
@@ -36,6 +36,12 @@ jobs:
       run: |
         pip3 install meson pytest requests distro paramiko
         pip3 install --no-deps $GITHUB_WORKSPACE
+    - name: Install QT
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: 5.15.2
+        modules: "qtwebengine"
+        setup-python: false
     - name: Setup MSVC compiler
       uses: bus1/cabuild/action/msdevshell@v1
       with:
