@@ -50,11 +50,3 @@ class Libkiwix(Dependency):
             if self.buildEnv.configInfo.build == "android":
                 return "shared"
             return super().library_type
-
-        def _test(self, context):
-            # Libkiwix tests are currently broken on Windows.
-            # Until we fix them, let's deactivate tests.
-            # It allow us to build dependencies for kiwix-desktop
-            if neutralEnv("distname") == "Windows":
-                context.skip()
-            super()._test(context)
