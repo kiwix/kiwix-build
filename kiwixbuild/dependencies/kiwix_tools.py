@@ -10,7 +10,7 @@ class KiwixTools(Dependency):
         git_dir = "kiwix-tools"
 
     class Builder(MesonBuilder):
-        dependencies = ["libkiwix"]
+        dependencies = ["libkiwix", "docoptcpp"]
 
         @property
         def configure_options(self):
