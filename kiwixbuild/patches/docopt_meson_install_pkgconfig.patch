@@ -1,0 +1,31 @@
+diff '--color=auto' -ur docoptcpp-0.6.2/meson.build docoptcpp-0.6.2_patched/meson.build
+--- docoptcpp-0.6.2/meson.build	2024-08-26 14:28:47.553448529 +0200
++++ docoptcpp-0.6.2_patched/meson.build	2024-08-26 14:10:47.232603427 +0200
+@@ -10,11 +10,25 @@
+ 
+ # bug with missing dllexport. fixed in next version.
+ if cpp.get_argument_syntax() == 'msvc'
+-  doclib = static_library('docopt', 'docopt.cpp')
++  doclib = static_library('docopt', 'docopt.cpp', install: true)
+ else
+-  doclib = library('docopt', 'docopt.cpp')
++  doclib = library('docopt', 'docopt.cpp', install: true)
+ endif
+ 
+ executable('docopt_example', 'examples/naval_fate.cpp', link_with: doclib)
+ docopt_dep = declare_dependency(include_directories: include_directories('.'),
+     link_with: doclib)
++
++install_headers(
++  'docopt.h',
++  'docopt_value.h',
++  subdir: 'docopt'
++)
++
++pkg_mod = import('pkgconfig')
++pkg_mod.generate(
++  doclib,
++  version: meson.project_version(),
++  name: 'docopt',
++  filebase: 'docopt'
++)

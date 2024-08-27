@@ -9,9 +9,6 @@ base_url = (
 )
 
 
-aarch_base_url = "https://master.dl.sourceforge.net/project/raspberry-pi-cross-compilers/Bonus%20Raspberry%20Pi%20GCC%2064-Bit%20Toolchains/Raspberry%20Pi%20GCC%2064-Bit%20Cross-Compiler%20Toolchains/Stretch/GCC%206.3.0/"
-
-
 class armv6_toolchain(Dependency):
     dont_skip = True
     neutral = True
@@ -53,7 +50,6 @@ class aarch64_toolchain(Dependency):
         archive = Remotefile(
             "cross-gcc-6.3.0-pi_64.tar.gz",
             "1b048bb8886ad63d21797cd9129fc37b9ea0dfaac7e3c36f888aa16fbec1d320",
-            aarch_base_url + "cross-gcc-6.3.0-pi_64.tar.gz",
         )
 
     Builder = TcCopyBuilder
