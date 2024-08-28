@@ -1,0 +1,14 @@
+diff -ur docoptcpp-0.6.2/meson.build docoptcpp-0.6.2_boostregex/meson.build
+--- docoptcpp-0.6.2/meson.build	2024-08-28 17:22:46.256716100 +0200
++++ docoptcpp-0.6.2_boostregex/meson.build	2024-08-28 17:02:47.932681000 +0200
+@@ -8,6 +8,10 @@
+   add_project_arguments('-DDOCOPT_DLL', '-DDOCOPT_EXPORTS', language: 'cpp')
+ endif
+ 
++if cpp.get_id() =='msvc'
++  add_project_arguments('-DDOCTOPT_USE_BOOST_REGEX', '-DBOOST_REGEX_STANDALONE', language: 'cpp')
++endif
++
+ # bug with missing dllexport. fixed in next version.
+ if cpp.get_argument_syntax() == 'msvc'
+   doclib = static_library('docopt', 'docopt.cpp', install: true)

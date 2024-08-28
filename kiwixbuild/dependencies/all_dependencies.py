@@ -23,6 +23,8 @@ class AllBaseDependencies(Dependency):
                     "xapian-core",
                     "zim-testing-suite",
                     "icu4c",
+                    "boostregex",
+                    "docoptcpp"
                 ]
 
                 if not configInfo.name.endswith("_dyn"):

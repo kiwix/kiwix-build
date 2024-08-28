@@ -1,7 +1,7 @@
 from .base import Dependency, ReleaseDownload, MesonBuilder
 
 from kiwixbuild.utils import Remotefile
-
+from kiwixbuild._global import neutralEnv
 
 class docoptcpp(Dependency):
     name = "docoptcpp"
@@ -21,6 +21,14 @@ class docoptcpp(Dependency):
         )
 
         archives = [src_archive, meson_archive]
-        patches = ["docopt_meson_install_pkgconfig.patch"]
+        patches = [
+            "docopt_meson_install_pkgconfig.patch",
+            "docopt_meson_use_boostregex.patch",
+        ]
 
-    Builder = MesonBuilder
+    class Builder(MesonBuilder):
+        @classmethod
+        def get_dependencies(cls, configInfo, allDeps):
+            if neutralEnv("distname") == "Windows":
+                return ["boostregex"]
+            return []
