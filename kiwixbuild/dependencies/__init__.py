@@ -1,6 +1,7 @@
 from .base import *
 from . import (
     all_dependencies,
+    boostregex,
     tc_android_ndk,
     aria2,
     tc_armhf,
