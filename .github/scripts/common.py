@@ -73,7 +73,8 @@ def major_version(version: str) -> str:
 EXPORT_FILES = {
     "kiwix-tools": (
         INSTALL_DIR / "bin",
-        [f + BIN_EXT for f in ("kiwix-manage", "kiwix-search", "kiwix-serve")],
+        [f + BIN_EXT for f in ("kiwix-manage", "kiwix-search", "kiwix-serve")]
+        + ["icu*.dll"],
     ),
     "zim-tools": (
         INSTALL_DIR / "bin",
@@ -90,7 +91,8 @@ EXPORT_FILES = {
                 "zimwriterfs",
                 "zimrecreate",
             )
-        ],
+        ]
+        + ["icu*.dll"],
     ),
     "libzim": (
         INSTALL_DIR,
@@ -110,6 +112,7 @@ EXPORT_FILES = {
             "bin/zim-{version}.dll".format(
                 version=major_version(main_project_versions["libzim"])
             ),
+            "bin/icu*.dll",
             "bin/zim-{version}.pdb".format(
                 version=major_version(main_project_versions["libzim"])
             ),
@@ -134,6 +137,7 @@ EXPORT_FILES = {
             "lib/libkiwix.{}.dylib".format(
                 major_version(main_project_versions["libkiwix"])
             ),
+            "bin/icu*.dll",
             "lib/libkiwix.dylib",
             "lib/*/libkiwix.pc",
             "include/kiwix/**/*.h",
