@@ -18,9 +18,9 @@ if platform.system() == "Windows":
 
         class Source(ReleaseDownload):
             archive = Remotefile(
-                "icu4c-73_1-Win64-MSVC2019.zip",
+                "icu4c-74_1-Win64-MSVC2022.zip",
                 "",
-                "https://github.com/unicode-org/icu/releases/download/release-73-1/icu4c-73_1-Win64-MSVC2019.zip",
+                "https://github.com/unicode-org/icu/releases/download/release-74-1/icu4c-74_1-Win64-MSVC2022.zip",
             )
 
         class Builder(BaseBuilder):
