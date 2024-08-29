@@ -34,12 +34,6 @@ jobs:
       run: |
         pip3 install meson pytest requests distro paramiko
         pip3 install --no-deps $GITHUB_WORKSPACE
-    - name: Install QT
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: 5.15.2
-        modules: "qtwebengine"
-        setup-python: false
     - name: Setup MSVC compiler
       uses: bus1/cabuild/action/msdevshell@v1
       with:
@@ -81,27 +75,33 @@ jobs:
           $Thumbprint = $CodeSigningCert.Thumbprint
           echo "SIGNTOOL_THUMBPRINT=$Thumbprint" >> $env:GITHUB_ENV
 
-    - name: Ensure base deps
+    - name: download sample exe
       run: |
-        python .github\\scripts\\ensure_base_deps.py
+        Invoke-WebRequest -OutFile kiwix-tools.zip "https://mirror.download.kiwix.org/nightly/2024-08-29/kiwix-tools_win-i686-2024-08-29.zip"
+        Expand-Archive -Force kiwix-tools.zip
+
+    - name: test signing exe
+      shell: python
       env:
-        SSH_KEY: ${{ runner.temp }}/id_rsa
-    - name: Compile all deps
+        SIGNTOOL_PATH: "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x86/signtool.exe"
       run: |
-        python .github\\scripts\\compile_all_deps.py
-      env:
-        SSH_KEY: ${{ runner.temp }}/id_rsa
-    - name: Build projects
-      run: |
-        python .github\\scripts\\build_projects.py
-      env:
-        SSH_KEY: ${{ runner.temp }}/id_rsa
-    - name: Upload failure logs
-      if: failure()
-      run: |
-        python .github\\scripts\\upload_failure_logs.py
-      env:
-        SSH_KEY: ${{ runner.temp }}/id_rsa
+        import os
+        import subprocess
+        command = [
+          os.environ["SIGNTOOL_PATH"],
+          "sign",
+          "/fd",
+          "sha256",
+          "/tr",
+          "http://ts.ssl.com",
+          "/td",
+          "sha256",
+          "/sha1",
+          os.environ["SIGNTOOL_THUMBPRINT"],
+          "kiwix-tools\\kiwix-serve.exe",
+        ]
+        subprocess.run(command, check=True)
+
 
   Linux:
     strategy:
