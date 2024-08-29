@@ -52,6 +52,37 @@ jobs:
         echo "${{secrets.ssh_key}}" > $SSH_KEY
       env:
         SSH_KEY: ${{ runner.temp }}/id_rsa
+    - name: Install and configure eSigner CKA and Windows SDK
+      if: github.event_name == 'push'
+      env:
+        ESIGNER_URL: https://github.com/SSLcom/eSignerCKA/releases/download/v1.0.7/SSL.COM-eSigner-CKA_1.0.7.zip
+      run: |
+          Set-StrictMode -Version 'Latest'
+
+          # Download and Unzip eSignerCKA Setup
+          Invoke-WebRequest -OutFile eSigner_CKA_Setup.zip "$env:ESIGNER_URL"
+          Expand-Archive -Force eSigner_CKA_Setup.zip
+          Remove-Item eSigner_CKA_Setup.zip
+          Move-Item -Destination “eSigner_CKA_Installer.exe” -Path “eSigner_CKA_*\*.exe”
+
+          # Install eSignerCKA
+          New-Item -ItemType Directory -Force -Path "C:\esigner"
+          ./eSigner_CKA_Installer.exe /CURRENTUSER /VERYSILENT /SUPPRESSMSGBOXES /DIR=”C:\esigner” /TYPE=automatic | Out-Null
+          Remove-Item "eSigner_CKA_Installer.exe"
+
+          # Configure the CKA with SSL.com credentials
+          C:\esigner\eSignerCKATool.exe config -mode product -user "${{ secrets.ESIGNER_USERNAME }}" -pass "${{ secrets.ESIGNER_PASSWORD }}" -totp "${{ secrets.ESIGNER_TOTP_SECRET }}" -key "C:\esigner\master.key" -r
+          C:\esigner\eSignerCKATool.exe unload
+          C:\esigner\eSignerCKATool.exe load
+
+          # Find certificate
+          $CodeSigningCert = Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert | Select-Object -First 1
+          echo Certificate: $CodeSigningCert
+
+          # Extract thumbprint and subject name
+          $Thumbprint = $CodeSigningCert.Thumbprint
+          echo "SIGNTOOL_THUMBPRINT=$Thumbprint" >> $env:GITHUB_ENV
+
     - name: Ensure base deps
       run: |
         python .github\\scripts\\ensure_base_deps.py
@@ -61,6 +92,7 @@ jobs:
       run: |
         python .github\\scripts\\build_release_nightly.py
       env:
+        SIGNTOOL_PATH: "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x86/signtool.exe"
         SSH_KEY: ${{ runner.temp }}/id_rsa
     - name: Upload failure logs
       if: failure()

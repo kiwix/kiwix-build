@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys, subprocess, shutil, argparse
+import sys, subprocess, shutil, argparse, os
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
@@ -48,9 +48,23 @@ ssl_directory = Path("C:/") / "Program Files" / "OpenSSL"
 shutil.copy2(ssl_directory / "libcrypto-1_1-x64.dll", out_dir)
 shutil.copy2(ssl_directory / "libssl-1_1-x64.dll", out_dir)
 
-# [TODO] Sign binary
 if args.sign:
-    pass
+    # We assume here that signtool and certificate are properly configured.
+    # Env var `SIGNTOOL_THUMBPRINT` must contain thumbprint of the certificate to use.
+    command = [
+        os.getenv("SIGNTOOL_PATH", "signtool.exe"),
+        "sign",
+        "/fd",
+        "sha256",
+        "/tr",
+        "http://ts.ssl.com",
+        "/td",
+        "sha256",
+        "/sha1",
+        os.environ["SIGNTOOL_THUMBPRINT"],
+        str(out_dir / "kiwix-desktop.exe"),
+    ]
+    subprocess.run(command, check=True)
 
 print(
     f"""Create archive
