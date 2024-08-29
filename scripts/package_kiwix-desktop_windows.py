@@ -52,7 +52,7 @@ if args.sign:
     # We assume here that signtool and certificate are properly configured.
     # Env var `SIGNTOOL_THUMBPRINT` must contain thumbprint of the certificate to use.
     command = [
-        "signtool.exe",
+        os.getenv("SIGNTOOL_PATH", "signtool.exe"),
         "sign",
         "/fd",
         "sha256",
