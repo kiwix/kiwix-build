@@ -48,7 +48,7 @@ ssl_directory = Path("C:/") / "Program Files" / "OpenSSL"
 shutil.copy2(ssl_directory / "libcrypto-1_1-x64.dll", out_dir)
 shutil.copy2(ssl_directory / "libssl-1_1-x64.dll", out_dir)
 
-if args.sign:
+if True:
     # We assume here that signtool and certificate are properly configured.
     # Env var `SIGNTOOL_THUMBPRINT` must contain thumbprint of the certificate to use.
     command = [
