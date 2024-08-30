@@ -489,7 +489,7 @@ def create_desktop_image(make_release):
         app_name = "org.kiwix.desktop.{}.flatpak".format(postfix)
         print_message("archive is {}", build_path)
     elif platform.system() == "Windows":
-        archive_basename = "Kiwix-{}-win-amd64".format(postfix)
+        archive_basename = "kiwix-desktop_windows_x64_{}".format(postfix)
         working_dir = INSTALL_DIR / archive_basename
         build_path = working_dir.with_suffix(".zip")
         app_name = build_path.name
