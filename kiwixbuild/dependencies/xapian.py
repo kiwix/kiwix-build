@@ -50,9 +50,6 @@ class Xapian(Dependency):
             @classmethod
             def get_dependencies(cls, configInfo, allDeps):
                 deps = ["zlib", "lzma"]
-                if (
-                    configInfo.build in ("win32", "win64", "wasm")
-                    or neutralEnv("distname") == "Darwin"
-                ):
+                if configInfo.build == "wasm" or neutralEnv("distname") == "Darwin":
                     return deps
                 return deps + ["uuid"]

@@ -50,7 +50,7 @@ PACKAGE_NAME_MAPPERS = {
     },
     "fedora_native_static": {
         "COMMON": _fedora_common + ["glibc-static", "libstdc++-static"],
-        "lzma": ["xz-devel", "xz-static"]
+        "lzma": ["xz-devel", "xz-static"],
         # Either there is no packages, or no static or too old
     },
     "fedora_i586_dyn": {
@@ -58,33 +58,6 @@ PACKAGE_NAME_MAPPERS = {
     },
     "fedora_i586_static": {
         "COMMON": _fedora_common + ["glibc-devel.i686"],
-    },
-    "fedora_win32_dyn": {
-        "COMMON": _fedora_common
-        + [
-            "mingw32-gcc-c++",
-            "mingw32-bzip2",
-            "mingw32-win-iconv",
-            "mingw32-winpthreads",
-            "wine",
-        ],
-        "zlib": ["mingw32-zlib"],
-        "lzma": ["mingw32-xz-libs"],
-        "libmicrohttpd": ["mingw32-libmicrohttpd"],
-    },
-    "fedora_win32_static": {
-        "COMMON": _fedora_common
-        + [
-            "mingw32-gcc-c++",
-            "mingw32-bzip2-static",
-            "mingw32-win-iconv-static",
-            "mingw32-winpthreads-static",
-            "wine",
-        ],
-        "zlib": ["mingw32-zlib-static"],
-        "lzma": ["mingw32-xz-libs-static"],
-        "libmicrohttpd": None,  # ['mingw32-libmicrohttpd-static'] packaging dependecy seems buggy, and some static lib are name libfoo.dll.a and
-        # gcc cannot found them.
     },
     "fedora_armhf_static": {"COMMON": _fedora_common},
     "fedora_armhf_dyn": {"COMMON": _fedora_common},
@@ -108,24 +81,6 @@ PACKAGE_NAME_MAPPERS = {
     "debian_i586_static": {
         "COMMON": _debian_common
         + ["libc6-dev-i386", "lib32stdc++6", "gcc-multilib", "g++-multilib"],
-    },
-    "debian_win32_dyn": {
-        "COMMON": _debian_common
-        + [
-            "g++-mingw-w64-i686",
-            "gcc-mingw-w64-i686",
-            "gcc-mingw-w64-base",
-            "mingw-w64-tools",
-        ],
-    },
-    "debian_win32_static": {
-        "COMMON": _debian_common
-        + [
-            "g++-mingw-w64-i686",
-            "gcc-mingw-w64-i686",
-            "gcc-mingw-w64-base",
-            "mingw-w64-tools",
-        ],
     },
     "debian_armhf_static": {
         "COMMON": _debian_common,

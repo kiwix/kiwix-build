@@ -49,7 +49,7 @@ if platform.system() == "Windows":
     BIN_EXT = ".exe"
 else:
     KBUILD_SOURCE_DIR = HOME / "kiwix-build"
-    BIN_EXT = ".exe" if COMPILE_CONFIG.startswith("win32_") else ""
+    BIN_EXT = ""
 
 
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
