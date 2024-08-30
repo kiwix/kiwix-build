@@ -137,7 +137,14 @@ EXPORT_FILES = {
             "lib/libkiwix.{}.dylib".format(
                 major_version(main_project_versions["libkiwix"])
             ),
+            "bin/kiwix-{version}.dll".format(
+                version=major_version(main_project_versions["libkiwix"])
+            ),
             "bin/icu*.dll",
+            "bin/kiwix-{version}.pdb".format(
+                version=major_version(main_project_versions["libkiwix"])
+            ),
+            "lib/kiwix.lib",
             "lib/libkiwix.dylib",
             "lib/*/libkiwix.pc",
             "include/kiwix/**/*.h",
