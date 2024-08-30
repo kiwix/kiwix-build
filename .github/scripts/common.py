@@ -46,8 +46,10 @@ default_tmp_dir = os.getenv("TEMP") if platform.system() == "Windows" else "/tmp
 TMP_DIR = Path(os.getenv("TMP_DIR", default_tmp_dir))
 if platform.system() == "Windows":
     KBUILD_SOURCE_DIR = Path(_environ["GITHUB_WORKSPACE"])
+    BIN_EXT = ".exe"
 else:
     KBUILD_SOURCE_DIR = HOME / "kiwix-build"
+    BIN_EXT = ".exe" if COMPILE_CONFIG.startswith("win32_") else ""
 
 
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
@@ -61,8 +63,6 @@ else:
 
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
-
-BIN_EXT = ".exe" if COMPILE_CONFIG.startswith("win32_") else ""
 
 
 def major_version(version: str) -> str:
