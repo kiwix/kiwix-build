@@ -46,8 +46,10 @@ default_tmp_dir = os.getenv("TEMP") if platform.system() == "Windows" else "/tmp
 TMP_DIR = Path(os.getenv("TMP_DIR", default_tmp_dir))
 if platform.system() == "Windows":
     KBUILD_SOURCE_DIR = Path(_environ["GITHUB_WORKSPACE"])
+    BIN_EXT = ".exe"
 else:
     KBUILD_SOURCE_DIR = HOME / "kiwix-build"
+    BIN_EXT = ".exe" if COMPILE_CONFIG.startswith("win32_") else ""
 
 
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
@@ -61,8 +63,6 @@ else:
 
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
-
-BIN_EXT = ".exe" if COMPILE_CONFIG.startswith("win32_") else ""
 
 
 def major_version(version: str) -> str:
@@ -137,7 +137,14 @@ EXPORT_FILES = {
             "lib/libkiwix.{}.dylib".format(
                 major_version(main_project_versions["libkiwix"])
             ),
+            "bin/kiwix-{version}.dll".format(
+                version=major_version(main_project_versions["libkiwix"])
+            ),
             "bin/icu*.dll",
+            "bin/kiwix-{version}.pdb".format(
+                version=major_version(main_project_versions["libkiwix"])
+            ),
+            "lib/kiwix.lib",
             "lib/libkiwix.dylib",
             "lib/*/libkiwix.pc",
             "include/kiwix/**/*.h",
@@ -489,7 +496,7 @@ def create_desktop_image(make_release):
         app_name = "org.kiwix.desktop.{}.flatpak".format(postfix)
         print_message("archive is {}", build_path)
     elif platform.system() == "Windows":
-        archive_basename = "Kiwix-{}-win-amd64".format(postfix)
+        archive_basename = "kiwix-desktop_windows_x64_{}".format(postfix)
         working_dir = INSTALL_DIR / archive_basename
         build_path = working_dir.with_suffix(".zip")
         app_name = build_path.name
