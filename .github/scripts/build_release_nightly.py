@@ -21,16 +21,15 @@ from common import (
 from build_definition import select_build_targets, BUILD, PUBLISH, SOURCE_PUBLISH
 
 
+def release_filter(project):
+    return release_versions.get(project) is not None
+
+
 # Filter what to build if we are doing a release.
+TARGETS = select_build_targets(PUBLISH)
+
 if MAKE_RELEASE:
-    TARGETS = select_build_targets(PUBLISH)
-
-    def release_filter(project):
-        return release_versions.get(project) is not None
-
     TARGETS = tuple(filter(release_filter, TARGETS))
-else:
-    TARGETS = select_build_targets(BUILD)
 
 for target in TARGETS:
     run_kiwix_build(target, config=COMPILE_CONFIG, make_release=MAKE_RELEASE)
