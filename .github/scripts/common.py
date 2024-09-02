@@ -69,6 +69,14 @@ def major_version(version: str) -> str:
     return version.split(".")[0]
 
 
+# Depending of base distribution, libraries are in "lib64" (redhat base) or "lib/<arch>" (debian base).
+# On top of that, when cross-compiling, libraries are always put in `lib/<arch>`.
+# As we use this as glob regex to select which files to add to archive, this is not a problem to have both.
+def lib_prefix(file):
+    yield "lib64/" + file
+    yield "lib/*/" + file
+
+
 # We have build everything. Now create archives for public deployement.
 EXPORT_FILES = {
     "kiwix-tools": (
@@ -97,18 +105,25 @@ EXPORT_FILES = {
     "libzim": (
         INSTALL_DIR,
         (
+            ## Linux
             # We need to package all dependencies (`*.a`) on wasm
-            "lib/*/libzim.a" if COMPILE_CONFIG != "wasm" else "lib/*.a",
-            "lib/*/libzim.so",
-            "lib/*/libzim.so.{version}".format(version=main_project_versions["libzim"]),
-            "lib/*/libzim.so.{version}".format(
-                version=major_version(main_project_versions["libzim"])
+            *lib_prefix("libzim.a" if COMPILE_CONFIG != "wasm" else "*.a"),
+            *lib_prefix("libzim.so"),
+            *lib_prefix(
+                "libzim.so.{version}".format(version=main_project_versions["libzim"])
             ),
+            *lib_prefix(
+                "libzim.so.{version}".format(
+                    version=major_version(main_project_versions["libzim"])
+                )
+            ),
+            ## MacOS
             "lib/libzim.{}.dylib".format(
                 major_version(main_project_versions["libzim"])
             ),
             "lib/libzim.dylib",
             "lib/*/libzim.pc",
+            ## Windows
             "bin/zim-{version}.dll".format(
                 version=major_version(main_project_versions["libzim"])
             ),
@@ -117,6 +132,7 @@ EXPORT_FILES = {
                 version=major_version(main_project_versions["libzim"])
             ),
             "lib/zim.lib",
+            ## Includes and others
             "include/zim/**/*.h",
             "share/icu/{}/icudt{}l.dat".format(
                 base_deps_versions["icu4c"], major_version(base_deps_versions["icu4c"])

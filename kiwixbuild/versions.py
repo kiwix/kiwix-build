@@ -2,7 +2,7 @@
 
 main_project_versions = {
     "libzim": "9.2.3",
-    "libkiwix": "13.1.0",
+    "libkiwix": "14.0.0",
     "kiwix-tools": "3.7.0",
     "zim-tools": "3.4.2",
     "kiwix-desktop": "2.3.1",
