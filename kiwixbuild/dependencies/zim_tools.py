@@ -14,17 +14,14 @@ class ZimTools(Dependency):
         @classmethod
         def get_dependencies(cls, configInfo, allDeps):
             base_deps = ["libzim", "docoptcpp", "mustache"]
-            if configInfo.build != "win32" and neutralEnv("distname") != "Windows":
+            if neutralEnv("distname") != "Windows":
                 base_deps += ["libmagic", "gumbo"]
             return base_deps
 
         @property
         def configure_options(self):
-            # We don't build zimwriterfs on win32, and so we don't have magic
-            if (
-                self.buildEnv.configInfo.build != "win32"
-                and neutralEnv("distname") != "Windows"
-            ):
+            # We don't build zimwriterfs on Windows, and so we don't have magic
+            if neutralEnv("distname") != "Windows":
                 yield f"-Dmagic-install-prefix={self.buildEnv.install_dir}"
             if self.buildEnv.configInfo.static:
                 yield "-Dstatic-linkage=true"

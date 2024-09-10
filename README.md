@@ -89,8 +89,6 @@ platforms:
 - native_dyn
 - native_mixed
 - native_static
-- win32_dyn
-- win32_static
 - android
 - android_arm
 - android_arm64
@@ -100,11 +98,6 @@ platforms:
 
 All `native_*` config means using the native compiler without any cross-compilation option.
 Other may simply use cross-compilation or may download a specific toolchain to use.
-
-If you want to compile `kiwix-tools` for win32 using static linkage:
-```bash
-kiwix-build --config win32_dyn
-```
 
 Android
 -------

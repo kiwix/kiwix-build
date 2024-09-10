@@ -24,7 +24,7 @@ class AllBaseDependencies(Dependency):
                     "zim-testing-suite",
                     "icu4c",
                     "boostregex",
-                    "docoptcpp"
+                    "docoptcpp",
                 ]
 
                 if not configInfo.name.endswith("_dyn"):
@@ -50,10 +50,7 @@ class AllBaseDependencies(Dependency):
                 # Add specific dependencies depending of the config
                 if configInfo.build not in ("android", "iOS"):
                     # For zimtools
-                    base_deps += ["docoptcpp"]
-                    if configInfo.build != "win32":
-                        # zimwriterfs
-                        base_deps += ["libmagic", "gumbo"]
+                    base_deps += ["docoptcpp", "libmagic", "gumbo"]
                     if (
                         configInfo.build == "native"
                         and neutralEnv("distname") != "Darwin"

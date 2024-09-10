@@ -49,7 +49,7 @@ if platform.system() == "Windows":
     BIN_EXT = ".exe"
 else:
     KBUILD_SOURCE_DIR = HOME / "kiwix-build"
-    BIN_EXT = ".exe" if COMPILE_CONFIG.startswith("win32_") else ""
+    BIN_EXT = ""
 
 
 _ref = _environ.get("GITHUB_REF", "").split("/")[-1]
@@ -456,6 +456,25 @@ def get_postfix(project):
     return postfix
 
 
+def sign_binary(path):
+    # We assume here that signtool and certificate are properly configured.
+    # Env var `SIGNTOOL_THUMBPRINT` must contain thumbprint of the certificate to use.
+    command = [
+        os.getenv("SIGNTOOL_PATH", "signtool.exe"),
+        "sign",
+        "/fd",
+        "sha256",
+        "/tr",
+        "http://ts.ssl.com",
+        "/td",
+        "sha256",
+        "/sha1",
+        os.environ["SIGNTOOL_THUMBPRINT"],
+        str(path),
+    ]
+    subprocess.run(command, check=True)
+
+
 def make_archive(project, make_release):
     platform_name = get_platform_name()
     if not platform_name:
@@ -477,6 +496,12 @@ def make_archive(project, make_release):
     files_to_archive = []
     for export_file in export_files:
         files_to_archive.extend(base_dir.glob(export_file))
+
+    if make_release and platform.system() == "Windows":
+        for file in files_to_archive:
+            if str(file).endswith(".exe"):
+                sign_binary(file)
+
     if platform_name == "win-i686" or platform.system() == "Windows":
         open_archive = lambda a: zipfile.ZipFile(
             str(a), "w", compression=zipfile.ZIP_DEFLATED

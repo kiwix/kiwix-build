@@ -61,8 +61,6 @@ BUILD_DEF = """
     |           | aarch64_musl_dyn   | d      |          | B         | B           |               |                         | linux-aarch64-musl-dyn |
     |           | x86-64_musl_static |        |          | BP        | BP          |               | linux-x86_64-musl       |                        |
     |           | x86-64_musl_mixed  | BP     |          |           |             |               | linux-x86_64-musl       |                        |
-    |           | win32_static       | d      | dB       | dBP       | dBP         |               | win-i686                |win32-static            |
-    |           | win32_dyn          | d      | dB       | dB        | dB          |               |                         |win32-dyn               |
     |           | i586_static        |        |          | BP        | BP          |               | linux-i586              |                        |
     |           | i586_dyn           |        |          | B         | B           |               |                         |                        |
     |           | wasm               | dBP    |          |           |             |               | wasm-emscripten         | wasm                   |

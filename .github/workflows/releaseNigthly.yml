@@ -131,8 +131,6 @@ jobs:
             image_variant: manylinux
           - config: aarch64_mixed
             image_variant: manylinux
-          - config: win32_static
-            image_variant: f35
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
