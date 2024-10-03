@@ -12,6 +12,7 @@ class Libkiwix(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/kiwix/libkiwix.git"
         git_dir = "libkiwix"
+        git_ref = "ci_fix"
 
     class Builder(MesonBuilder):
         dependencies = [
