@@ -9,6 +9,7 @@ class Libzim(Dependency):
     class Source(GitClone):
         git_remote = "https://github.com/openzim/libzim.git"
         git_dir = "libzim"
+        git_ref = "fix_locate"
 
     class Builder(MesonBuilder):
         test_options = ["-t", "8"]
