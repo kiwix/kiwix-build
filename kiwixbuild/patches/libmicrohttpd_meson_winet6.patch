@@ -1,0 +1,15 @@
+--- libmicrohttpd-0.9.76_orig/meson.build	2024-10-08 15:53:53.370828250 +0400
++++ libmicrohttpd-0.9.76/meson.build	2024-10-08 16:23:24.985668690 +0400
+@@ -77,7 +77,11 @@
+ endforeach
+
+ cdata.set('HAVE_ASSERT', cc.has_header_symbol('assert.h', 'assert'))
+-cdata.set10('HAVE_INET6', cc.has_header_symbol('netinet/in.h', 'struct in6_addr'))
++if host_machine.system() == 'windows'
++  cdata.set10('HAVE_INET6', 1)
++else
++  cdata.set10('HAVE_INET6', cc.has_header_symbol('netinet/in.h', 'struct in6_addr'))
++endif
+
+ functions = [
+   'accept4',
