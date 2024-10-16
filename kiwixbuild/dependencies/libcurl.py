@@ -23,7 +23,7 @@ class LibCurl(Dependency):
         meson_archive = Remotefile(
             "curl_8.4.0-2_patch.zip",
             "bbb6ae75225c36ef9bb336cface729794c7c070c623a003fff40bd416042ff6e",
-            "https://public.kymeria.fr/KIWIX/curl_8.4.0-2_patch.zip",
+            "https://dev.kiwix.org/libkiwix/curl_8.4.0-2_patch.zip",
         )
         archives = [src_archive, meson_archive]
 
