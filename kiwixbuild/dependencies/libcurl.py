@@ -32,6 +32,7 @@ class LibCurl(Dependency):
         configure_options = [
             f"-D{p}=disabled"
             for p in (
+                "psl",
                 "ssh",
                 "ssl",
                 "rtmp",
