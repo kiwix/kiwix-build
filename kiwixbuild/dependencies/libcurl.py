@@ -33,6 +33,8 @@ class LibCurl(Dependency):
             f"-D{p}=disabled"
             for p in (
                 "psl",
+                "kerberos-auth",
+                "gss-api",
                 "ssh",
                 "ssl",
                 "rtmp",
