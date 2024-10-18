@@ -310,7 +310,10 @@ except ModuleNotFoundError:
         else:
             port = "22"
 
-        # sending SFTP mkdir command to the sftp interactive mode and not batch (-b) mode
+        # Using SFTP to create the directory hierarchy because we can not
+        # use SSH (no shell for this user); and then scp to upload the file.
+        #
+        # Sending SFTP mkdir command to the SFTP interactive mode and not batch (-b) mode
         # as the latter would exit on any mkdir error while it is most likely
         # the first parts of the destination is already present and thus can't be created
         sftp_commands = "\n".join(
@@ -321,6 +324,8 @@ except ModuleNotFoundError:
         )
         command = [
             "sftp",
+            "-c",
+            "aes128-ctr",
             "-i",
             _environ.get("SSH_KEY"),
             "-P",
