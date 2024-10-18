@@ -21,7 +21,7 @@ jobs:
       HOME: 'C:\\Users\\runneradmin'
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Setup python 3.12
       uses: actions/setup-python@v3
       with:
