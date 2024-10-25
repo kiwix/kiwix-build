@@ -25,41 +25,6 @@ rm -f $APPDIR/usr/lib/libmagic.so*
 cp -a /usr/$SYSTEMLIBDIR/nss $APPDIR/usr/lib
 # Copy libthai.so (see kiwix-desktop issue#1016)
 cp -a /usr/$SYSTEMLIBDIR/libthai.so* $APPDIR/usr/lib
-
-# Copy ssl libs so that the appimage runs on newer systems
-# that use a backward incompatible version of openssl
-cp /usr/$SYSTEMLIBDIR/lib{crypto,ssl}.so.1.1 $APPDIR/usr/lib
-
-patch_rodata()
-{
-    local elffile=$1
-    local sedscript=$2
-    local rodatafile=$elffile.rodata
-    objcopy --dump-section .rodata="$rodatafile" "$elffile"
-    sed -i "$sedscript" "$rodatafile"
-    objcopy --update-section .rodata="$rodatafile" "$elffile"
-    rm $rodatafile
-}
-
-# copy and patch a couple of libs depending on ssl functionalty before
-# linuxdeployqt copies and modifies them whereupon the patch_rodata procedure
-# stops working on them correctly
-cp -rL /usr/$SYSTEMLIBDIR/{libgnutls.so.30,libQt5Network.so.5} $APPDIR/usr/lib
-
-# patch libQt5Network.so so that if it fails to load certificates from
-# system paths the last path that it tries points to the certificate bundle
-# included with the appimage
-
-# !!! crt_bundle_new_path must have the same length as crt_bundle_old_path
-crt_bundle_old_path=/usr/local/share/certs/ca-root-nss.crt
-crt_bundle_new_path=/tmp/cert_bundle_provided_by_kiwix.crt
-# !!! crt_bundle_new_path must have the same length as crt_bundle_old_path
-
-libQtNetworkPatchingSedScript="s|$crt_bundle_old_path|$crt_bundle_new_path|"
-
-patch_rodata $APPDIR/usr/lib/libQt5Network.so.5 "$libQtNetworkPatchingSedScript"
-
-
 cp $ICONFILE $APPDIR/usr/share/icons/hicolor/48x48/apps/kiwix-desktop.svg
 mkdir -p $APPDIR/usr/share/applications
 cp $DESKTOPFILE $APPDIR/usr/share/applications/kiwix-desktop.desktop
@@ -78,35 +43,5 @@ chmod u+x linuxdeployqt
 ./linuxdeployqt $APPDIR/usr/bin/kiwix-desktop -bundle-non-qt-libs -extra-plugins=imageformats,iconengines
 # Fix the RPATH of QtWebEngineProcess [TODO] Fill a issue ?
 patchelf --set-rpath '$ORIGIN/../lib' $APPDIR/usr/libexec/QtWebEngineProcess
-
-cp $DESKTOPFILE $APPDIR/kiwix-desktop.desktop
-cp $ICONFILE $APPDIR/
-cp $ICONFILE $APPDIR/.DirIcon
-
-rm "$APPDIR"/AppRun
-
-cat > "$APPDIR"/AppRun <<'END'
-#!/usr/bin/env bash
-
-mydir=$(dirname "$0")
-mydir=$(cd "$mydir" && pwd)
-
-crt_path=??? # this is set by postprocessing via sed
-
-if [ ! -e "$crt_path" ]
-then
-    ln -s "$mydir"/etc/ssl/certs/ca-certificates.crt "$crt_path"
-    trap "rm '$crt_path'" EXIT
-fi
-
-"$mydir"/usr/bin/kiwix-desktop "$@"
-END
-
-sed -i "s#^crt_path=.*#crt_path=$crt_bundle_new_path#" "$APPDIR"/AppRun
-
-chmod 0755 "$APPDIR"/AppRun
-
-wget --continue https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
-chmod u+x appimagetool-x86_64.AppImage
-
-./appimagetool-x86_64.AppImage AppDir Kiwix-"$VERSION"-x86_64.AppImage
+# Build the image.
+./linuxdeployqt $APPDIR/usr/share/applications/kiwix-desktop.desktop -bundle-non-qt-libs -extra-plugins=imageformats,iconengines -appimage
