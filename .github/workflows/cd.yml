@@ -5,7 +5,7 @@ on:
    tags:
      - r_[0-9]+
  schedule:
-   - cron: '0 1 * * *'
+   - cron: '0 3 * * *'
 
 jobs:
   Windows:
