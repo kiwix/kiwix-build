@@ -12,7 +12,7 @@ Kiwix Build audience is:
 * Kiwix developer team for its own CI/CD
 
 [![CI Build Status](https://github.com/kiwix/kiwix-build/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kiwix/kiwix-build/actions/workflows/ci.yml?query=branch%3Amain)
-[![CD Build Status](https://github.com/kiwix/kiwix-build/actions/workflows/releaseNigthly.yml/badge.svg?branch=main)](https://github.com/kiwix/kiwix-build/actions/workflows/releaseNigthly.yml?query=branch%3Amain)
+[![CD Build Status](https://github.com/kiwix/kiwix-build/actions/workflows/cd.yml/badge.svg?branch=main)](https://github.com/kiwix/kiwix-build/actions/workflows/cd.yml?query=branch%3Amain)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 Prerequisites
