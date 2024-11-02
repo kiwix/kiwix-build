@@ -73,5 +73,5 @@ print(
 - With {out_dir.name}"""
 )
 shutil.make_archive(
-    archive_path.with_suffix(""), "zip", root_dir=out_dir.parent, base_dir=out_dir.name
+    archive_path.with_suffix(""), "zip", root_dir=out_dir, base_dir=""
 )
