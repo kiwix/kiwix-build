@@ -538,6 +538,9 @@ class MesonBuilder(Builder):
 
     @property
     def build_type(self):
+        if platform.system() == "Windows":
+            return "release"
+
         return "release" if option("make_release") else "debug"
 
     @property

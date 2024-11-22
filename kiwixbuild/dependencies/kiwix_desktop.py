@@ -20,14 +20,14 @@ class KiwixDesktop(Dependency):
         @property
         def make_targets(self):
             if platform.system() == "Windows":
-                yield "release-all" if option("make_release") else "debug-all"
+                yield "release-all"
             else:
                 yield from super().make_targets
 
         @property
         def make_install_targets(self):
             if platform.system() == "Windows":
-                yield "release-install" if option("make_release") else "debug-install"
+                yield "release-install"
             else:
                 yield "install"
 
