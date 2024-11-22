@@ -54,6 +54,7 @@ class LibCurl(Dependency):
                 "smb",
                 "smtp",
                 "gopher",
+                "tool",
             )
         ]
 
