@@ -110,6 +110,7 @@ jobs:
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
+      OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04
     container:
       image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2024-06-03"

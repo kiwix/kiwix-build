@@ -38,32 +38,32 @@ BUILD_DEF = """
     | macos     | macOS_x86_64       | B      | B        |           |             |               |                         |                        |
     | macos     | apple_all_static   |        | BP       |           |             |               | xcframework             |                        |
     ----------------------------------------------------------------------------------------------------------------------------------------------
-    |           | flatpak            |        |          |           |             | BP            |                         |                        |
-    |           | native_static      | d      | d        | dBPSD     | dBPSD       |               | linux-x86_64            | linux-x86_64-static    |
-    |           | native_mixed       | BPS    | BPS      |           |             |               | linux-x86_64            |                        |
-    |           | native_dyn         | d      | d        | dB        | dB          | dBPS          |                         | linux-x86_64-dyn       |
+    | focal     | flatpak            |        |          |           |             | BP            |                         |                        |
+    | focal     | native_static      | d      | d        | dBPSD     | dBPSD       |               | linux-x86_64            | linux-x86_64-static    |
+    | focal     | native_mixed       | BPS    | BPS      |           |             |               | linux-x86_64            |                        |
+    | focal     | native_dyn         | d      | d        | dB        | dB          | dBPS          |                         | linux-x86_64-dyn       |
     # libzim CI is building alpine_dyn but not us
-    |           | android_arm        | dBP    | dBP      |           |             |               | android-arm             | android-arm            |
-    |           | android_arm64      | dBP    | dBP      |           |             |               | android-arm64           | android-arm64          |
-    |           | android_x86        | BP     | BP       |           |             |               | android-x86             |                        |
-    |           | android_x86_64     | BP     | BP       |           |             |               | android-x86_64          |                        |
-    |           | armv6_static       |        |          | BP        | BP          |               | linux-armv6             |                        |
-    |           | armv6_mixed        | BP     |          |           |             |               | linux-armv6             |                        |
-    |           | armv6_dyn          |        |          | B         | B           |               |                         |                        |
-    |           | armv8_static       |        |          | BP        | BP          |               | linux-armv8             |                        |
-    |           | armv8_mixed        | BP     |          |           |             |               | linux-armv8             |                        |
-    |           | armv8_dyn          |        |          | B         | B           |               |                         |                        |
-    |           | aarch64_static     |        |          | BP        | BP          |               | linux-aarch64           |                        |
-    |           | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64           |                        |
-    |           | aarch64_dyn        | d      |          | B         | B           |               |                         | linux-aarch64-dyn      |
-    |           | aarch64_musl_static|        |          | BP        | BP          |               | linux-aarch64-musl      |                        |
-    |           | aarch64_musl_mixed | BP     |          |           |             |               | linux-aarch64-musl      |                        |
-    |           | aarch64_musl_dyn   | d      |          | B         | B           |               |                         | linux-aarch64-musl-dyn |
-    |           | x86-64_musl_static |        |          | BP        | BP          |               | linux-x86_64-musl       |                        |
-    |           | x86-64_musl_mixed  | BP     |          |           |             |               | linux-x86_64-musl       |                        |
-    |           | i586_static        |        |          | BP        | BP          |               | linux-i586              |                        |
-    |           | i586_dyn           |        |          | B         | B           |               |                         |                        |
-    |           | wasm               | dBP    |          |           |             |               | wasm-emscripten         | wasm                   |
+    | focal     | android_arm        | dBP    | dBP      |           |             |               | android-arm             | android-arm            |
+    | focal     | android_arm64      | dBP    | dBP      |           |             |               | android-arm64           | android-arm64          |
+    | focal     | android_x86        | BP     | BP       |           |             |               | android-x86             |                        |
+    | focal     | android_x86_64     | BP     | BP       |           |             |               | android-x86_64          |                        |
+    | focal     | armv6_static       |        |          | BP        | BP          |               | linux-armv6             |                        |
+    | focal     | armv6_mixed        | BP     |          |           |             |               | linux-armv6             |                        |
+    | focal     | armv6_dyn          |        |          | B         | B           |               |                         |                        |
+    | focal     | armv8_static       |        |          | BP        | BP          |               | linux-armv8             |                        |
+    | focal     | armv8_mixed        | BP     |          |           |             |               | linux-armv8             |                        |
+    | focal     | armv8_dyn          |        |          | B         | B           |               |                         |                        |
+    | focal     | aarch64_static     |        |          | BP        | BP          |               | linux-aarch64           |                        |
+    | focal     | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64           |                        |
+    | focal     | aarch64_dyn        | d      |          | B         | B           |               |                         | linux-aarch64-dyn      |
+    | focal     | aarch64_musl_static|        |          | BP        | BP          |               | linux-aarch64-musl      |                        |
+    | focal     | aarch64_musl_mixed | BP     |          |           |             |               | linux-aarch64-musl      |                        |
+    | focal     | aarch64_musl_dyn   | d      |          | B         | B           |               |                         | linux-aarch64-musl-dyn |
+    | focal     | x86-64_musl_static |        |          | BP        | BP          |               | linux-x86_64-musl       |                        |
+    | focal     | x86-64_musl_mixed  | BP     |          |           |             |               | linux-x86_64-musl       |                        |
+    | focal     | i586_static        |        |          | BP        | BP          |               | linux-i586              |                        |
+    | focal     | i586_dyn           |        |          | B         | B           |               |                         |                        |
+    | focal     | wasm               | dBP    |          |           |             |               | wasm-emscripten         | wasm                   |
 """
 
 
