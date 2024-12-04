@@ -28,7 +28,7 @@ COLORS = {
 }
 
 
-REMOTE_PREFIX = "http://mirror.download.kiwix.org/dev/kiwix-build/"
+REMOTE_PREFIX = "https://dev.kiwix.org/kiwix-build/"
 
 
 def which(name):
