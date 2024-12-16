@@ -544,7 +544,7 @@ def create_desktop_image(make_release):
     elif platform.system() == "Windows":
         archive_basename = "kiwix-desktop_windows_x64_{}".format(postfix)
         working_dir = INSTALL_DIR / archive_basename
-        build_path = working_dir.with_suffix(".zip")
+        build_path = working_dir + ".zip"
         app_name = build_path.name
         command = [
             "python",
