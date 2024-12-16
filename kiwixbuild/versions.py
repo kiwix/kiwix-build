@@ -5,7 +5,7 @@ main_project_versions = {
     "libkiwix": "14.0.0",
     "kiwix-tools": "3.7.0",
     "zim-tools": "3.5.0",
-    "kiwix-desktop": "2.3.1",
+    "kiwix-desktop": "2.4.0",
 }
 
 # This dictionnary specify what we need to build at each release process.
