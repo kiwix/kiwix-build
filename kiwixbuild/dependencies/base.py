@@ -524,8 +524,8 @@ class QMakeBuilder(MakeBuilder):
             *neutralEnv("git_command"),
             "archive",
             "-o",
-            f"{self.build_path}/{self.target_full_name()}.tar.gz",
-            f"--prefix={self.target_full_name()}/",
+            f"{self.build_path}/{self.target.full_name()}.tar.gz",
+            f"--prefix={self.target.full_name()}/",
             "HEAD",
         ]
         run_command(command, self.source_path, context)
