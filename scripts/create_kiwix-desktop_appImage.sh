@@ -29,10 +29,12 @@ LD_LIBRARY_PATH=$INSTALLDIR/lib/x86_64-linux-gnu ./linuxdeploy-x86_64.AppImage \
     --icon-file=$ICONFILE \
     --library=/usr/lib/x86_64-linux-gnu/libthai.so.0 \
 
-# get the aria2
-wget --continue https://dev.kiwix.org/kiwix-desktop/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
-mkdir -p $APPDIR/usr/bin/ && tar -C $APPDIR/usr/bin/ -xf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.36.0-linux-gnu-64bit-build1/aria2c --strip-components=1
-mkdir -p $APPDIR/etc/ssl/certs/ && tar -C $APPDIR/etc/ssl/certs/ -xf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.36.0-linux-gnu-64bit-build1/ca-certificates.crt --strip-components=1
+# Get the aria2c (https://github.com/abcfy2/aria2-static-build/releases/download/1.37.0/aria2-x86_64-linux-musl_libressl_static.zip)
+wget --continue https://dev.kiwix.org/kiwix-desktop/aria2-1.37.0-x86_64-linux-musl_libressl_static.zip
+mkdir -p $APPDIR/usr/bin/ && unzip aria2-1.37.0-x86_64-linux-musl_libressl_static.zip -d $APPDIR/usr/bin/
+
+# Copy the CA trustore from the hosting system
+mkdir -p $APPDIR/etc/ssl/certs/ && cp /etc/ssl/certs/ca-certificates.crt $APPDIR/etc/ssl/certs/
 
 # Fix the RPATH of QtWebEngineProcess [TODO] Fill a issue ?
 patchelf --set-rpath '$ORIGIN/../lib' $APPDIR/usr/libexec/QtWebEngineProcess
