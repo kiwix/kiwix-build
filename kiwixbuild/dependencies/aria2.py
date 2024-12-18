@@ -14,7 +14,7 @@ class Aria2(Dependency):
             archive = Remotefile(
                 "aria2-1.37.0-win-64bit-build1.zip",
                 "67d015301eef0b612191212d564c5bb0a14b5b9c4796b76454276a4d28d9b288",
-                "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip",
+                "https://dev.kiwix.org/kiwix-desktop/aria2-1.37.0-win-64bit-build1.zip",
             )
 
         class Builder(NoopBuilder):
@@ -34,7 +34,7 @@ class Aria2(Dependency):
             archive = Remotefile(
                 "aria2-1.37.0.tar.xz",
                 "60a420ad7085eb616cb6e2bdf0a7206d68ff3d37fb5a956dc44242eb2f79b66b",
-                "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0.tar.xz",
+                "https://dev.kiwix.org/kiwix-desktop/aria2-1.37.0.tar.xz",
             )
 
             def _post_prepare_script(self, context):

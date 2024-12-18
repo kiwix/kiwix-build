@@ -30,7 +30,7 @@ LD_LIBRARY_PATH=$INSTALLDIR/lib/x86_64-linux-gnu ./linuxdeploy-x86_64.AppImage \
     --library=/usr/lib/x86_64-linux-gnu/libthai.so.0 \
 
 # get the aria2
-wget --continue https://github.com/q3aql/aria2-static-builds/releases/download/v1.36.0/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
+wget --continue https://dev.kiwix.org/kiwix-desktop/aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2
 mkdir -p $APPDIR/usr/bin/ && tar -C $APPDIR/usr/bin/ -xf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.36.0-linux-gnu-64bit-build1/aria2c --strip-components=1
 mkdir -p $APPDIR/etc/ssl/certs/ && tar -C $APPDIR/etc/ssl/certs/ -xf aria2-1.36.0-linux-gnu-64bit-build1.tar.bz2 aria2-1.36.0-linux-gnu-64bit-build1/ca-certificates.crt --strip-components=1
 
