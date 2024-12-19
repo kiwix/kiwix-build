@@ -5,6 +5,7 @@ import platform
 
 class KiwixDesktop(Dependency):
     name = "kiwix-desktop"
+    base_git_ref = "win-qt6"
     force_build = True
 
     class Source(GitClone):
