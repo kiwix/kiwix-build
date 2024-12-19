@@ -37,7 +37,7 @@ jobs:
     - name: Install QT
       uses: jurplel/install-qt-action@v4
       with:
-        version: 5.15.2
+        version: 6.2.4
         modules: "qtwebengine"
         setup-python: false
     - name: Setup MSVC compiler
