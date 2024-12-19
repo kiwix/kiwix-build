@@ -42,10 +42,10 @@ class NeutralEnv:
     def detect_platform(self):
         _platform = platform.system()
         self.distname = _platform
+        self.codename = ""
         if _platform == "Linux":
             self.distname = distro.id()
-            if self.distname == "ubuntu":
-                self.distname = "debian"
+            self.codename = distro.codename()
 
     def download(self, what, where=None):
         where = where or self.archive_dir
