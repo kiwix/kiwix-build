@@ -68,7 +68,7 @@ if MAKE_RELEASE:
                 / "meson-dist"
                 / "{}.tar.xz".format(full_target_name)
             )
-        upload_archive(archive, target, make_release=MAKE_RELEASE)
+#        upload_archive(archive, target, make_release=MAKE_RELEASE)
 
     # Publish flathub
     if COMPILE_CONFIG == "flatpak" and "kiwix-desktop" in TARGETS:
