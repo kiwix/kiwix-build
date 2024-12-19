@@ -7,7 +7,7 @@ class AndroidConfigInfo(ConfigInfo):
     build = "android"
     static = True
     toolchain_names = ["android-ndk"]
-    compatible_hosts = ["fedora", "debian"]
+    compatible_hosts = ["fedora", "debian", "ubuntu"]
 
     def __str__(self):
         return "android"

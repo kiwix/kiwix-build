@@ -91,6 +91,36 @@ PACKAGE_NAME_MAPPERS = {
     "debian_android": {
         "COMMON": _debian_common,
     },
+    "ubuntu_jammy_native_dyn": {
+        "COMMON": _debian_common,
+        "zlib": ["zlib1g-dev"],
+        "uuid": ["uuid-dev"],
+        "libmicrohttpd": ["libmicrohttpd-dev", "ccache"],
+        "qt": ["libqt5gui5", "qtbase5-dev", "libqt5svg5-dev", "qt5-image-formats-plugins"],
+        "qtwebengine": ["qtwebengine5-dev"],
+        "aria2": ["aria2"],
+    },
+    "ubuntu_noble_native_dyn": {
+        "COMMON": _debian_common,
+        "zlib": ["zlib1g-dev"],
+        "uuid": ["uuid-dev"],
+        "libmicrohttpd": ["libmicrohttpd-dev", "ccache"],
+        "qt": ["qt6-base-dev", "qt6-base-dev-tools", "libqt6webenginecore6-bin", "libqt6svg6", "qtchooser"],
+        "qtwebengine": ["qt6-webengine-dev"],
+        "aria2": ["aria2"],
+    },
+    "ubuntu_oracular_native_dyn": {
+        "COMMON": _debian_common,
+        "zlib": ["zlib1g-dev"],
+        "uuid": ["uuid-dev"],
+        "libmicrohttpd": ["libmicrohttpd-dev", "ccache"],
+        "qt": ["qt6-base-dev", "qt6-base-dev-tools", "libqt6webenginecore6-bin", "libqt6svg6", "qtchooser"],
+        "qtwebengine": ["qt6-webengine-dev"],
+        "aria2": ["aria2"],
+    },
+    "ubuntu_native_static": {
+        "COMMON": _debian_common + ["libbz2-dev", "libmagic-dev"],
+    },
     "Darwin_native_dyn": {
         "COMMON": ["autoconf", "automake", "libtool", "cmake", "pkg-config"],
         "file": ["libmagic"],

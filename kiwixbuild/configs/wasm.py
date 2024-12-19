@@ -12,7 +12,7 @@ class WasmConfigInfo(ConfigInfo):
     libdir = "lib"
     # arch_full = 'wasm64-linux'
     toolchain_names = ["emsdk"]
-    compatible_hosts = ["fedora", "debian"]
+    compatible_hosts = ["fedora", "debian", "ubuntu"]
     exe_wrapper_def = ""
 
     def get_cross_config(self):
