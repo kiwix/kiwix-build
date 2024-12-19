@@ -9,6 +9,7 @@ _fedora_common = [
     "gcc-c++",
     "gettext-devel",
 ]
+
 _debian_common = [
     "automake",
     "libtool",
@@ -20,6 +21,27 @@ _debian_common = [
     "gcc",
     "autopoint",
 ]
+
+_debian_qt5 = {
+    "COMMON": _debian_common + ["libbz2-dev", "libmagic-dev"],
+    "zlib": ["zlib1g-dev"],
+    "uuid": ["uuid-dev"],
+    "libmicrohttpd": ["libmicrohttpd-dev", "ccache"],
+    "qt": ["libqt5gui5", "qtbase5-dev", "qt5-default"],
+    "qtwebengine": ["qtwebengine5-dev"],
+    "aria2": ["aria2"],
+}
+
+_debian_qt6 = {
+    "COMMON": _debian_common,
+    "zlib": ["zlib1g-dev"],
+    "uuid": ["uuid-dev"],
+    "libmicrohttpd": ["libmicrohttpd-dev", "ccache"],
+    "qt": ["qt6-base-dev", "qt6-base-dev-tools", "libqt6webenginecore6-bin", "libqt6svg6", "qtchooser"],
+    "qtwebengine": ["qt6-webengine-dev"],
+    "aria2": ["aria2"],
+}
+
 PACKAGE_NAME_MAPPERS = {
     "flatpak": {
         "zlib": True,
@@ -62,15 +84,7 @@ PACKAGE_NAME_MAPPERS = {
     "fedora_armhf_static": {"COMMON": _fedora_common},
     "fedora_armhf_dyn": {"COMMON": _fedora_common},
     "fedora_android": {"COMMON": _fedora_common},
-    "debian_native_dyn": {
-        "COMMON": _debian_common + ["libbz2-dev", "libmagic-dev"],
-        "zlib": ["zlib1g-dev"],
-        "uuid": ["uuid-dev"],
-        "libmicrohttpd": ["libmicrohttpd-dev", "ccache"],
-        "qt": ["libqt5gui5", "qtbase5-dev", "qt5-default"],
-        "qtwebengine": ["qtwebengine5-dev"],
-        "aria2": ["aria2"],
-    },
+    "debian_native_dyn": _debian_qt5,
     "debian_native_static": {
         "COMMON": _debian_common + ["libbz2-dev", "libmagic-dev"],
     },
@@ -90,6 +104,12 @@ PACKAGE_NAME_MAPPERS = {
     },
     "debian_android": {
         "COMMON": _debian_common,
+    },
+    "ubuntu_jammy_native_dyn":    _debian_qt5,
+    "ubuntu_noble_native_dyn":    _debian_qt6,
+    "ubuntu_oracular_native_dyn": _debian_qt6,
+    "ubuntu_native_static": {
+        "COMMON": _debian_common + ["libbz2-dev", "libmagic-dev"],
     },
     "Darwin_native_dyn": {
         "COMMON": ["autoconf", "automake", "libtool", "cmake", "pkg-config"],

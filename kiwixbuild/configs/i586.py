@@ -7,7 +7,7 @@ from kiwixbuild.utils import which, pj
 class I586ConfigInfo(ConfigInfo):
     build = "i586"
     arch_full = "i586-linux-gnu"
-    compatible_hosts = ["fedora", "debian"]
+    compatible_hosts = ["fedora", "debian", "ubuntu"]
 
     def get_cross_config(self):
         return {

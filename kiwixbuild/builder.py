@@ -149,7 +149,10 @@ class Builder:
 
     def _get_mapper_names_for_config(self, config):
         host = neutralEnv("distname")
-        return ( f"{host}_{config}", )
+        codename = neutralEnv("codename")
+        yield f"{host}_{config}"
+        if codename != "":
+            yield f"{host}_{codename}_{config}"
 
     def install_packages(self):
         packages_to_have = self._get_packages()
@@ -163,7 +166,7 @@ class Builder:
         if distname in ("fedora", "redhat", "centos"):
             package_installer = "sudo dnf install {}"
             package_checker = "rpm -q --quiet {}"
-        elif distname in ("debian", "Ubuntu"):
+        elif distname in ("debian", "ubuntu"):
             package_installer = "sudo apt-get install {}"
             package_checker = 'LANG=C dpkg -s {} 2>&1 | grep Status | grep "ok installed" 1>/dev/null 2>&1'
         elif distname == "Darwin":
