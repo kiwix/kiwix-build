@@ -61,6 +61,11 @@ if not MAKE_RELEASE and _ref != "main":
 else:
     DEV_BRANCH = None
 
+# TODO: DELETE
+MAKE_RELEASE = 42
+DEV_BRANCH = "fix-flathub"
+# TODO: DELETE
+
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
 
@@ -595,7 +600,7 @@ def update_flathub_git():
     call(command)
     shutil.copy(str(BASE_DIR / "org.kiwix.desktop.json"), str(git_repo_dir))
     patch_dir = KBUILD_SOURCE_DIR / "kiwixbuild" / "patches"
-    for dep in ["pugixml"]:
+    for dep in ["pugixml", "libmicrohttpd"]:
         for f in patch_dir.glob("{}_*.patch".format(dep)):
             shutil.copy(str(f), str(git_repo_dir / "patches"))
     command = ["git", "add", "-A", "."]
