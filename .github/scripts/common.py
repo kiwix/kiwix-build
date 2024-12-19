@@ -595,7 +595,7 @@ def update_flathub_git():
     call(command)
     shutil.copy(str(BASE_DIR / "org.kiwix.desktop.json"), str(git_repo_dir))
     patch_dir = KBUILD_SOURCE_DIR / "kiwixbuild" / "patches"
-    for dep in ["pugixml"]:
+    for dep in ["pugixml", "libmicrohttpd"]:
         for f in patch_dir.glob("{}_*.patch".format(dep)):
             shutil.copy(str(f), str(git_repo_dir / "patches"))
     command = ["git", "add", "-A", "."]
