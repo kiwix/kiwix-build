@@ -4,6 +4,8 @@ from kiwixbuild.utils import Remotefile, run_command, pj
 import platform
 from shutil import copy2
 
+# Important: in case of aria2c update,
+# 'scripts/create_kiwix-desktop_appImage.sh' should not be forgotten!
 
 class Aria2(Dependency):
     name = "aria2"
