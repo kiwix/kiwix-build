@@ -306,7 +306,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       COMPILE_CONFIG: native_static
-      OS_NAME: linux
+      OS_NAME: focal
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
