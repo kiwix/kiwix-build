@@ -15,7 +15,7 @@ class KiwixDesktop(Dependency):
         dependencies = ["qt", "qtwebengine", "libkiwix", "aria2"]
         configure_env = None
 
-        flatpack_build_options = {"env": {"QMAKEPATH": "/app/lib"}}
+        flatpack_build_options = {"env": {"QMAKEPATH": "/app"}}
 
         @property
         def make_targets(self):
