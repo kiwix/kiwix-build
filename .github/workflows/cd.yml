@@ -40,8 +40,8 @@ jobs:
       if: ${{ matrix.config == 'native_mixed' }}
       uses: jurplel/install-qt-action@v4
       with:
-        version: 5.15.2
-        modules: "qtwebengine"
+        version: 6.4.3
+        modules: "qtwebengine qtwebchannel qtpositioning"
         setup-python: false
       env:
         AQT_CONFIG: ${{ github.workspace }}/.github/configs/aqt.ini
