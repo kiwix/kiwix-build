@@ -14,7 +14,8 @@ from ._global import (
     target_steps,
 )
 from . import _global
-
+import subprocess
+import tarfile
 
 class Builder:
     def __init__(self):
@@ -31,6 +32,24 @@ class Builder:
                 ).format(config.name, neutralEnv("distname"))
             )
         self.targetDefs = config.add_targets(option("target"), self._targets)
+
+    def make_dist(self):
+        build_output_dir = "/path/to/build/output"  # Replace with your actual output directory
+        tarball_path = "/path/to/output/kiwix.tar.gz"  # Desired tarball location
+        # Create the tarball
+        print(f"Creating tarball at {tarball_path}")
+        with tarfile.open(tarball_path, "w:gz") as tar:
+            tar.add(build_output_dir, arcname=os.path.basename(build_output_dir))
+        print(f"Tarball created successfully: {tarball_path}")
+
+        # Sign the tarball with GPG
+        print(f"Signing tarball {tarball_path}")
+        sig_command = ["gpg", "--detach-sign", tarball_path]
+        try:
+            subprocess.run(sig_command, check=True)
+            print(f"Signature created: {tarball_path}.sig")
+        except subprocess.CalledProcessError as e:
+            print(f"Error signing tarball: {e}")
 
     def finalize_target_steps(self):
         steps = []
@@ -116,11 +135,20 @@ class Builder:
             builder = get_target_step(builderDef)
             if option("make_dist") and builderDef[1] == option("target"):
                 print("make dist {} ({}):".format(builder.name, builderDef[0]))
-                builder.make_dist()
+                try:
+                    builder.make_dist()
+                    print("Distribution tarball and signature created successfully.")
+                except AttributeError:
+                    print(f"ERROR: The target {builder.name} does not implement make_dist().")
+                except Exception as e:
+                    print(f"ERROR while creating tarball or signature: {e}")
                 continue
-            print("build {} ({}):".format(builder.name, builderDef[0]))
+            print(f"build {builder.name} ({builderDef[0]}):")
             add_target_step(builderDef, builder)
-            builder.build()
+            try:
+                builder.build()
+            except Exception as e:
+                print(f"ERROR during build of {builder.name}: {e}")
 
     def _get_packages(self):
         packages_list = []
