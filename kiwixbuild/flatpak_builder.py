@@ -49,6 +49,7 @@ MANIFEST = {
         "--socket=pulseaudio",
         "--share=network",
         "--share=ipc",
+        "--filesystem=host:ro",
     ],
     "cleanup": [
         "/include",
