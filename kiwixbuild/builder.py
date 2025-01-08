@@ -124,50 +124,32 @@ class Builder:
 
     def _get_packages(self):
         packages_list = []
-        for config in ConfigInfo.all_running_configs.values():
-            # get {host}_{config} packages
-            mapper_name = "{host}_{config}".format(
-                host=neutralEnv("distname"), config=config
-            )
-            package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
-            packages_list += package_name_mapper.get("COMMON", [])
-            # get {host}_{codename}_{config} packages
-            mapper_name = "{host}_{codename}_{config}".format(
-                host=neutralEnv("distname"), codename=neutralEnv("codename"), config=config
-            )
-            package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
-            packages_list += package_name_mapper.get("COMMON", [])
+        for runningConfig in ConfigInfo.all_running_configs.values():
+            for mapper_name in self._get_mapper_names_for_config(runningConfig):
+                package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
+                packages_list += package_name_mapper.get("COMMON", [])
 
         to_drop = []
         for builderDef in self._targets:
-            configName, builderName = builderDef
-            # get {host}_{config} packages
-            mapper_name = "{host}_{config}".format(
-                host=neutralEnv("distname"), config=configName
-            )
-            package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
-            packages = package_name_mapper.get(builderName)
-            if packages:
-                to_drop.append(builderDef)
-                if packages is not True:
-                    # True means "assume the dependency is install but do not try to install anything for it"
-                    packages_list += packages
+            builderConfig, builderName = builderDef
 
-            # get {host}_{codename}_{config} packages
-            mapper_name = "{host}_{codename}_{config}".format(
-                host=neutralEnv("distname"), codename=neutralEnv("codename"), config=configName
-            )
-            package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
-            packages = package_name_mapper.get(builderName)
-            if packages:
-                to_drop.append(builderDef)
-                if packages is not True:
-                    # True means "assume the dependency is install but do not try to install anything for it"
-                    packages_list += packages
+            for mapper_name in self._get_mapper_names_for_config(builderConfig):
+                package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
+                packages = package_name_mapper.get(builderName)
+                if packages:
+                    to_drop.append(builderDef)
+                    if packages is not True:
+                        # True means "assume the dependency is install but do not try to install anything for it"
+                        packages_list += packages
 
         for dep in to_drop:
             del self._targets[dep]
         return packages_list
+
+    def _get_mapper_names_for_config(self, config):
+        host = neutralEnv("distname")
+        codename = neutralEnv("codename")
+        return ( f"{host}_{config}", f"{host}_{codename}_{config}" )
 
     def install_packages(self):
         packages_to_have = self._get_packages()
