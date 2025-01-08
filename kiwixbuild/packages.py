@@ -96,8 +96,8 @@ PACKAGE_NAME_MAPPERS = {
         "zlib": ["zlib1g-dev"],
         "uuid": ["uuid-dev"],
         "libmicrohttpd": ["libmicrohttpd-dev", "ccache"],
-        "qt": ["libqt5gui5", "qtbase5-dev", "libqt5svg5-dev", "qt5-image-formats-plugins"],
-        "qtwebengine": ["qtwebengine5-dev"],
+        "qt": ["qt6-base-dev", "qt6-base-dev-tools", "libqt6webenginecore6-bin", "libqt6svg6", "qtchooser"],
+        "qtwebengine": ["qt6-webengine-dev"],
         "aria2": ["aria2"],
     },
     "ubuntu_noble_native_dyn": {
