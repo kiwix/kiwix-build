@@ -36,7 +36,6 @@ class LibCurl(Dependency):
                 "kerberos-auth",
                 "gss-api",
                 "ssh",
-                "ssl",
                 "rtmp",
                 "http2",
                 "idn",
