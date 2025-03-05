@@ -24,6 +24,10 @@ class android_ndk(Dependency):
         def source_dir(self):
             return self.target.full_name()
 
+        patches = [
+            "android-ndk-r21e-linux-x86_64-python3.12+.patch",
+        ]
+
     class Builder(Builder):
         @property
         def install_path(self):
