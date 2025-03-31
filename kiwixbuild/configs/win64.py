@@ -18,7 +18,7 @@ class Win64ConfigInfo(ConfigInfo):
         "-lkernel32",
     ]
     build = "win64"
-    compatible_hosts = ["fedora", "debian"]
+    compatible_hosts = ["fedora", "debian", "ubuntu"]
     arch_full = "x86_64-w64-mingw32"
 
     def get_cross_config(self):
