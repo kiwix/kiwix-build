@@ -42,7 +42,7 @@ BUILD_DEF = """
     | focal     | native_static      | d      | d        | dBPSD     | dBPSD       |               | linux-x86_64            | linux-x86_64-static    |
     | focal     | native_mixed       | BPS    | BPS      |           |             |               | linux-x86_64            |                        |
     | focal     | native_dyn         | d      | d        | dB        | dB          |               |                         | linux-x86_64-dyn       |
-    | jammy     | native_dyn         | d      | d        |           |             | dBPS          |                         | linux-x86_64-dyn       |
+    | jammy     | native_dyn         |        |          |           |             | dBPS          |                         | linux-x86_64-dyn       |
     # libzim CI is building alpine_dyn but not us
     | focal     | android_arm        | dBP    | dBP      |           |             |               | android-arm             | android-arm            |
     | focal     | android_arm64      | dBP    | dBP      |           |             |               | android-arm64           | android-arm64          |
