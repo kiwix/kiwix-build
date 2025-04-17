@@ -37,6 +37,7 @@ jobs:
         pip3 install meson pytest requests distro paramiko
         pip3 install --no-deps $GITHUB_WORKSPACE
     - name: Install QT
+      if: ${{ matrix.config == 'native_mixed' }}
       uses: jurplel/install-qt-action@v4
       with:
         version: 5.15.2
