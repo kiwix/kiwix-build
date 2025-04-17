@@ -40,6 +40,8 @@ jobs:
         version: 6.4.3
         modules: "qtwebengine qtwebchannel qtpositioning"
         setup-python: false
+      env:
+        AQT_CONFIG: ${{ github.workspace }}/.github/configs/aqt.ini
     - name: Setup MSVC compiler
       uses: bus1/cabuild/action/msdevshell@v1
       with:
