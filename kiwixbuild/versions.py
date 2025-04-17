@@ -52,6 +52,6 @@ base_deps_versions = {
     "android-ndk": "r21e",
     "org.kde": "6.7",
     "io.qt.qtwebengine": "6.7",
-    "zim-testing-suite": "0.7.0",
+    "zim-testing-suite": "0.8.0",
     "emsdk": "3.1.41",
 }
