@@ -42,6 +42,8 @@ jobs:
         version: 5.15.2
         modules: "qtwebengine"
         setup-python: false
+      env:
+        AQT_CONFIG: ${{ github.workspace }}/.github/configs/aqt.ini
     - name: Setup MSVC compiler
       uses: bus1/cabuild/action/msdevshell@v1
       with:
