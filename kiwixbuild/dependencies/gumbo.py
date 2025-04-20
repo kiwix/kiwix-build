@@ -8,9 +8,9 @@ class Gumbo(Dependency):
 
     class Source(ReleaseDownload):
         archive = Remotefile(
-            "gumbo-0.10.1.tar.gz",
-            "28463053d44a5dfbc4b77bcf49c8cee119338ffa636cc17fc3378421d714efad",
-            "https://github.com/google/gumbo-parser/archive/v0.10.1.tar.gz",
+            "gumbo-parser-0.12.1.tar.gz",
+            "c0bb5354e46539680724d638dbea07296b797229a7e965b13305c930ddc10d82",
+            "https://dev.kiwix.org/kiwix-build/gumbo-parser-0.12.1.tar.gz",
         )
 
         def _post_prepare_script(self, context):
