@@ -14,4 +14,7 @@ class Gumbo(Dependency):
         )
 
     class Builder(MesonBuilder):
+        configure_options = [
+            "-Dtests=false"
+        ]
         strip_options = []
