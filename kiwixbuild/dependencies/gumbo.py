@@ -1,6 +1,6 @@
-from .base import Dependency, ReleaseDownload, MakeBuilder
+from .base import Dependency, ReleaseDownload, MesonBuilder
 
-from kiwixbuild.utils import Remotefile, run_command
+from kiwixbuild.utils import Remotefile
 
 
 class Gumbo(Dependency):
