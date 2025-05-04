@@ -1,6 +1,6 @@
-from .base import Dependency, ReleaseDownload, MakeBuilder
+from .base import Dependency, ReleaseDownload, MesonBuilder
 
-from kiwixbuild.utils import Remotefile, run_command
+from kiwixbuild.utils import Remotefile
 
 
 class Gumbo(Dependency):
@@ -9,13 +9,12 @@ class Gumbo(Dependency):
     class Source(ReleaseDownload):
         archive = Remotefile(
             "gumbo-parser-0.12.1.tar.gz",
-            "c0bb5354e46539680724d638dbea07296b797229a7e965b13305c930ddc10d82",
-            "https://dev.kiwix.org/kiwix-build/gumbo-parser-0.12.1.tar.gz",
+            "ea46815cb6e5c587cc48321dd6a3c3b9071ca605efb19fc1c1735b2cecc0aac6",
+            "https://codeberg.org/gumbo-parser/gumbo-parser/archive/master.tar.gz",
         )
 
-        def _post_prepare_script(self, context):
-            context.try_skip(self.extract_path)
-            command = ["./autogen.sh"]
-            run_command(command, self.extract_path, context)
-
-    Builder = MakeBuilder
+    class Builder(MesonBuilder):
+        configure_options = [
+            "-Dtests=false"
+        ]
+        strip_options = []
