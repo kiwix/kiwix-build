@@ -18,7 +18,9 @@ BUILD_DEF = """
     | OS_NAME   | COMPILE_CONFIG     | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop | platform_name           | dependency_name        |
     ==============================================================================================================================================
 # Osx builds, build binaries on native_dyn and native_static. On anyother things, build only the libraries
+    | macos     | native_dyn         | B      |          |           |             |               |                         | macos-x86_64-dyn       |
     | macos     | native_static      | B      |          |           |             |               | macos-x86_64            |                        |
+    | macos     | native_mixed       | B      |          |           |             |               | macos-x86_64            |                        |
 """
 
 

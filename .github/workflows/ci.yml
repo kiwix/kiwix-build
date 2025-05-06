@@ -11,7 +11,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          - native_dyn
           - native_static
+          - native_mixed
     runs-on: macos-13
     env:
       SSH_KEY: /tmp/id_rsa
