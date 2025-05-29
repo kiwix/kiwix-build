@@ -69,12 +69,16 @@ def major_version(version: str) -> str:
     return version.split(".")[0]
 
 
-# Depending of base distribution, libraries are in "lib64" (redhat base) or "lib/<arch>" (debian base).
+# Depending of base distribution, libraries are in "lib64" (redhat base) or "lib/<arch>" (debian base)
+# (WASM being a special case, when libraries are directly under "lib").
 # On top of that, when cross-compiling, libraries are always put in `lib/<arch>`.
 # As we use this as glob regex to select which files to add to archive, this is not a problem to have both.
 def lib_prefix(file):
-    yield "lib64/" + file
-    yield "lib/*/" + file
+    if COMPILE_CONFIG == "wasm":
+        yield "lib/" + file
+    else:
+        yield "lib64/" + file
+        yield "lib/*/" + file
 
 
 # We have build everything. Now create archives for public deployement.
