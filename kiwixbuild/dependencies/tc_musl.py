@@ -28,7 +28,7 @@ class x86_64_musl_toolchain(Dependency):
             "x86_64-linux-musl-cross.tgz",
             "a3d55de8105739fcfb8b10eaa72cdb5d779319726bacff24149388d7608d1ed8",
 #            "https://more.musl.cc/10/x86_64-linux-musl/x86_64-linux-musl-cross.tgz",
-             "https://dev.kiwix.org/kiwix-build/aarch64-linux-musl-cross.tgz"
+             "https://dev.kiwix.org/kiwix-build/x86_64-linux-musl-cross.tgz"
         )
 
     Builder = TcCopyBuilder
