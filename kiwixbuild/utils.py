@@ -184,7 +184,7 @@ def download_remote(what, where):
                     current = (current + 1) % 4
                 file.write(batch)
     except urllib.error.URLError as e:
-        print("Cannot download url {}:\n{}".format(what.url, e.reason))
+        print("Cannot download URL {}\n{}".format(what.url, e.reason))
         raise StopBuild()
 
     if not what.sha256:
