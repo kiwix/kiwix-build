@@ -105,7 +105,7 @@ PACKAGE_NAME_MAPPERS = {
     "debian_android": {
         "COMMON": _debian_common,
     },
-    "ubuntu_jammy_native_dyn":    _debian_qt5,
+    "ubuntu_jammy_native_dyn":    _debian_qt6,
     "ubuntu_noble_native_dyn":    _debian_qt6,
     "ubuntu_oracular_native_dyn": _debian_qt6,
     "ubuntu_native_static": {
