@@ -226,14 +226,14 @@ jobs:
           - macOS_arm64_mixed
           - macOS_x86_64
           - apple_all_static
-    runs-on: macos-13
+    runs-on: macos-14
     env:
       SSH_KEY: /tmp/id_rsa
       OS_NAME: macos
     steps:
-    - name: Set Xcode version (15.0.1)
-      # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md#xcode
-      run: sudo xcode-select -s /Applications/Xcode_15.0.1.app
+    - name: Set Xcode version (16.1)
+      # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md#xcode
+      run: sudo xcode-select -s /Applications/Xcode_16.1.app
     - name: Checkout code
       uses: actions/checkout@v4
     - name: Setup Python 3.10
