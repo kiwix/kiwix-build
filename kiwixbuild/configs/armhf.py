@@ -6,7 +6,7 @@ from kiwixbuild._global import get_target_step
 
 # Base config for arm
 class ArmConfigInfo(ConfigInfo):
-    compatible_hosts = ["fedora", "debian", "almalinux"]
+    compatible_hosts = ["fedora", "debian", "ubuntu", "almalinux"]
 
     def get_cross_config(self):
         return {

@@ -5,7 +5,7 @@ from kiwixbuild._global import get_target_step
 
 
 class MuslConfigInfo(ConfigInfo):
-    compatible_hosts = ["fedora", "debian"]
+    compatible_hosts = ["fedora", "debian", "ubuntu"]
 
     def get_cross_config(self):
         return {
