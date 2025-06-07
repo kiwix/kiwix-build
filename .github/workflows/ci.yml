@@ -118,7 +118,7 @@ jobs:
       OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2024-11-30"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-06-06"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
