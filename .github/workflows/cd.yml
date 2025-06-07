@@ -24,14 +24,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Setup python 3.12
+    - name: Setup python 3.13
       uses: actions/setup-python@v5
       with:
-        python-version: '3.12'
+        python-version: '3.13'
     - name: Install packages
       run: |
         choco.exe install pkgconfiglite ninja
-    - name: Install python modules
+    - name: Install Python modules
       shell: bash
       run: |
         pip3 install meson pytest requests distro paramiko
@@ -248,14 +248,14 @@ jobs:
       run: sudo xcode-select -s /Applications/Xcode_16.1.app
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Setup python 3.10
+    - name: Setup python 3.13
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.13'
     - name: Install packages
       run:
         brew install automake # ninja
-    - name: Install python modules
+    - name: Install Python modules
       run: |
         pip3 install meson pytest requests distro
         pip3 install --no-deps $GITHUB_WORKSPACE
@@ -313,7 +313,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    - name: Install python modules
+    - name: Install Python modules
       shell: bash
       run: |
         pip3 install --user --no-deps $GITHUB_WORKSPACE
