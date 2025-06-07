@@ -104,7 +104,7 @@ jobs:
           - android_arm64
           - android_x86
           - android_x86_64
-        image_variant: ['focal']
+        image_variant: ['jammy']
         include:
           - config: native_mixed
             image_variant: manylinux
@@ -118,7 +118,7 @@ jobs:
       OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2024-11-30"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-06-07"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
@@ -174,7 +174,7 @@ jobs:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
       COMPILE_CONFIG: flatpak
-      OS_NAME: focal
+      OS_NAME: jammy
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
