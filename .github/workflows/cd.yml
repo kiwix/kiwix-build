@@ -222,7 +222,7 @@ jobs:
       if: failure()
       run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.py
 
-  Macos:
+  macOS:
     strategy:
       fail-fast: false
       matrix:
@@ -230,8 +230,8 @@ jobs:
           - native_dyn
           - native_static
           - native_mixed
-          - macOS_arm64_static
-          - macOS_arm64_mixed
+          - macos_arm64_static
+          - macos_arm64_mixed
           - apple_all_static
     runs-on: macos-14
     env:
