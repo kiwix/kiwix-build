@@ -96,8 +96,6 @@ jobs:
           - aarch64_musl_static
           - aarch64_musl_dyn
           - aarch64_musl_mixed
-          - x86-64_musl_static
-          - x86-64_musl_mixed
           - i586_static
           - i586_dyn
           - android_arm
@@ -110,8 +108,10 @@ jobs:
             image_variant: manylinux
           - config: aarch64_mixed
             image_variant: manylinux
-          - config: native_dyn
-            image_variant: jammy
+          - config: x86-64_musl_static
+            image_variant: focal
+          - config: x86-64_musl_mixed
+            image_variant: focal
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
