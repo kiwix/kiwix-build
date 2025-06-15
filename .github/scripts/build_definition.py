@@ -59,8 +59,8 @@ BUILD_DEF = """
     | jammy     | aarch64_musl_static|        |          | BP        | BP          |               | linux-aarch64-musl      |                        |
     | jammy     | aarch64_musl_mixed | BP     |          |           |             |               | linux-aarch64-musl      |                        |
     | jammy     | aarch64_musl_dyn   | d      |          | B         | B           |               |                         | linux-aarch64-musl-dyn |
-    | jammy     | x86-64_musl_static |        |          | BP        | BP          |               | linux-x86_64-musl       |                        |
-    | jammy     | x86-64_musl_mixed  | BP     |          |           |             |               | linux-x86_64-musl       |                        |
+    | focal     | x86-64_musl_static |        |          | BP        | BP          |               | linux-x86_64-musl       |                        |
+    | focal     | x86-64_musl_mixed  | BP     |          |           |             |               | linux-x86_64-musl       |                        |
     | jammy     | i586_static        |        |          | BP        | BP          |               | linux-i586              |                        |
     | jammy     | i586_dyn           |        |          | B         | B           |               |                         |                        |
     | jammy     | wasm               | dBP    |          |           |             |               | wasm-emscripten         | wasm                   |
