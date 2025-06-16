@@ -121,27 +121,27 @@ jobs:
           - aarch64_mixed
           - aarch64_musl_static
           - aarch64_musl_mixed
-          - x86-64_musl_static
-          - x86-64_musl_mixed
           - i586_static
           - android_arm
           - android_arm64
           - android_x86
           - android_x86_64
-        image_variant: ['focal']
+        image_variant: ['jammy']
         include:
           - config: native_mixed
             image_variant: manylinux
           - config: aarch64_mixed
             image_variant: manylinux
-          - config: native_dyn
-            image_variant: jammy
+          - config: x86-64_musl_static
+            image_variant: focal
+          - config: x86-64_musl_mixed
+            image_variant: focal
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
     runs-on: ubuntu-22.04
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2024-11-30"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-06-07"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
@@ -186,7 +186,7 @@ jobs:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
       COMPILE_CONFIG: flatpak
-      OS_NAME: focal
+      OS_NAME: jammy
     runs-on: ubuntu-22.04
     steps:
     - name: Checkout code
@@ -309,7 +309,7 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       COMPILE_CONFIG: native_static
-      OS_NAME: focal
+      OS_NAME: jammy
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
