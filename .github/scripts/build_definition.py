@@ -30,12 +30,12 @@ BUILD_DEF = """
     | macos     | native_dyn         | d      | d        | dB        | B           |               |                         | macos-x86_64-dyn       |
     | macos     | native_static      |        |          | BP        | BP          |               | macos-x86_64            |                        |
     | macos     | native_mixed       | BP     | BP       |           |             |               | macos-x86_64            |                        |
-    | macos     | iOS_arm64          | dB     | dB       |           |             |               |                         | ios-arm64-dyn          |
-    | macos     | iOSSimulator_x86_64| dB     | dB       |           |             |               |                         | ios-x86_64-dyn         |
-    | macos     | iOSSimulator_arm64 | B      | B        |           |             |               |                         |                        |
-    | macos     | macOS_arm64_static |        |          | BP        | BP          |               | macos-arm64             |                        |
-    | macos     | macOS_arm64_mixed  | dBP    | dBP      | d         |             |               | macos-arm64             | macos-aarch64-dyn      |
-    | macos     | macOS_x86_64       | B      | B        |           |             |               |                         |                        |
+    | macos     | ios_arm64          | dB     | dB       |           |             |               |                         | ios-arm64-dyn          |
+    | macos     | iossimulator_x86_64| dB     | dB       |           |             |               |                         | ios-x86_64-dyn         |
+    | macos     | iossimulator_arm64 | B      | B        |           |             |               |                         |                        |
+    | macos     | macos_arm64_static |        |          | BP        | BP          |               | macos-arm64             |                        |
+    | macos     | macos_arm64_mixed  | dBP    | dBP      | d         |             |               | macos-arm64             | macos-aarch64-dyn      |
+    | macos     | macos_x86_64       | B      | B        |           |             |               |                         |                        |
     | macos     | apple_all_static   |        | BP       |           |             |               | xcframework             |                        |
     ----------------------------------------------------------------------------------------------------------------------------------------------
     | jammy     | flatpak            |        |          |           |             | BP            |                         |                        |
