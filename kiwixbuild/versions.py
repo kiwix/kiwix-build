@@ -33,10 +33,10 @@ release_versions = {
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = "14"
+base_deps_meta_version = "15"
 
 base_deps_versions = {
-    "zlib": "1.2.12",
+    "zlib": "1.3.1",
     "lzma": "5.2.6",
     "zstd": "1.5.2",
     "docoptcpp": "0.6.2",

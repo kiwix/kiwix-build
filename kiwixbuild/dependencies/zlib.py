@@ -14,13 +14,13 @@ class zlib(Dependency):
 
     class Source(ReleaseDownload):
         src_archive = Remotefile(
-            "zlib-1.2.12.tar.gz",
-            "91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9"
+            "zlib-1.3.1.tar.gz", # https://zlib.net/zlib-1.3.1.tar.gz
+            "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23"
         )
         meson_patch = Remotefile(
-            "zlib_1.2.12-1_patch.zip",
-            "8ec8344f3fe7b06ad4be768fd416694bc56cb4545ce78b0f1c18b3e72b3ec936",
-            "https://wrapdb.mesonbuild.com/v2/zlib_1.2.12-1/get_patch")
+            "zlib_1.3.1-1_patch.zip", # https://wrapdb.mesonbuild.com/v2/zlib_1.3.1-1/get_patch
+            "e79b98eb24a75392009cec6f99ca5cdca9881ff20bfa174e8b8926d5c7a47095"
+        )
         archives = [src_archive, meson_patch]
         #patches = ['zlib_std_libname.patch']
 
