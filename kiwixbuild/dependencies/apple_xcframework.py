@@ -10,11 +10,11 @@ from .base import Dependency, NoopSource, Builder as BaseBuilder
 class AppleXCFramework(Dependency):
     name = "apple_xcframework"
     subConfigNames = [
-        "macOS_x86_64",
-        "macOS_arm64_static",
-        "iOS_arm64",
-        "iOSSimulator_x86_64",
-        "iOSSimulator_arm64",
+        "macos_x86_64",
+        "macos_arm64_static",
+        "ios_arm64",
+        "iossimulator_x86_64",
+        "iossimulator_arm64",
     ]
     Source = NoopSource
 
@@ -26,7 +26,7 @@ class AppleXCFramework(Dependency):
         @property
         def macos_subconfigs(self):
             return [
-                target for target in self.all_subconfigs if target.startswith("macOS")
+                target for target in self.all_subconfigs if target.startswith("macos")
             ]
 
         @property
@@ -34,13 +34,13 @@ class AppleXCFramework(Dependency):
             return [
                 target
                 for target in self.all_subconfigs
-                if target.startswith("iOSSimulator")
+                if target.startswith("iossimulator")
             ]
 
         @property
         def ios_subconfigs(self):
             return [
-                target for target in self.all_subconfigs if target.startswith("iOS_")
+                target for target in self.all_subconfigs if target.startswith("ios_")
             ]
 
         @classmethod
@@ -115,12 +115,12 @@ class AppleXCFramework(Dependency):
                 "make_macos_fat",
                 self.make_fat_with,
                 self.macos_subconfigs,
-                "macOS_fat",
+                "macos_fat",
             )
             xcf_libs += self.command(
                 "make_simulator_fat",
                 self.make_fat_with,
                 self.iossimulator_subconfigs,
-                "iOS-simulator_fat",
+                "ios-simulator_fat",
             )
             self.command("build_xcframework", self._build_xcframework, xcf_libs)

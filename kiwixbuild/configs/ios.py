@@ -10,7 +10,7 @@ MIN_MACOS_VERSION = "12.0"
 
 
 class AppleConfigInfo(ConfigInfo):
-    build = "iOS"
+    build = "ios"
     static = True
     compatible_hosts = ["Darwin"]
     arch = None
@@ -36,7 +36,7 @@ class AppleConfigInfo(ConfigInfo):
         return self._root_path
 
     def __str__(self):
-        return "iOS"
+        return "ios"
 
     def finalize_setup(self):
         super().finalize_setup()
@@ -153,7 +153,7 @@ class AppleConfigInfo(ConfigInfo):
 
 
 class iOSArm64(AppleConfigInfo):
-    name = "iOS_arm64"
+    name = "ios_arm64"
     arch = cpu = "arm64"
     host = "arm-apple-darwin"
     target = "aarch64-apple-ios"
@@ -162,7 +162,7 @@ class iOSArm64(AppleConfigInfo):
 
 
 class iOSx64Simulator(AppleConfigInfo):
-    name = "iOSSimulator_x86_64"
+    name = "iossimulator_x86_64"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
     target = "x86-apple-ios-simulator"
@@ -171,7 +171,7 @@ class iOSx64Simulator(AppleConfigInfo):
 
 
 class iOSArm64Simulator(AppleConfigInfo):
-    name = "iOSSimulator_arm64"
+    name = "iossimulator_arm64"
     arch = cpu = "arm64"
     host = "arm-apple-darwin"
     target = "aarch64-apple-ios-simulator"
@@ -180,7 +180,7 @@ class iOSArm64Simulator(AppleConfigInfo):
 
 
 class macOSArm64(AppleConfigInfo):
-    name = "macOS_arm64_static"
+    name = "macos_arm64_static"
     arch = cpu = "arm64"
     host = "aarch64-apple-darwin"
     target = "arm64-apple-macos"
@@ -189,8 +189,8 @@ class macOSArm64(AppleConfigInfo):
     min_macos_version = MIN_MACOS_VERSION
 
 
-class macOSArm64Mixed(MixedMixin("macOS_arm64_static"), AppleConfigInfo):
-    name = "macOS_arm64_mixed"
+class macOSArm64Mixed(MixedMixin("macos_arm64_static"), AppleConfigInfo):
+    name = "macos_arm64_mixed"
     arch = cpu = "arm64"
     host = "aarch64-apple-darwin"
     target = "arm64-apple-macos"
@@ -200,7 +200,7 @@ class macOSArm64Mixed(MixedMixin("macOS_arm64_static"), AppleConfigInfo):
 
 
 class macOSx64(AppleConfigInfo):
-    name = "macOS_x86_64"
+    name = "macos_x86_64"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
     target = "x86_64-apple-macos"
@@ -210,7 +210,7 @@ class macOSx64(AppleConfigInfo):
 
 
 class IOS(MetaConfigInfo):
-    name = "iOS_multi"
+    name = "ios_multi"
     compatible_hosts = ["Darwin"]
 
     @property
@@ -219,7 +219,7 @@ class IOS(MetaConfigInfo):
 
     @property
     def subConfigNames(self):
-        return ["iOS_{}".format(arch) for arch in option("ios_arch")]
+        return ["ios_{}".format(arch) for arch in option("ios_arch")]
 
     def add_targets(self, targetName, targets):
         super().add_targets(targetName, targets)

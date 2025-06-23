@@ -115,7 +115,7 @@ PACKAGE_NAME_MAPPERS = {
         "COMMON": ["autoconf", "automake", "libtool", "cmake", "pkg-config"],
         "file": ["libmagic"],
     },
-    "Darwin_iOS": {
+    "Darwin_ios": {
         "COMMON": ["autoconf", "automake", "libtool", "cmake", "pkg-config"],
         "file": ["libmagic"],
     },
