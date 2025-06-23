@@ -48,7 +48,7 @@ class AllBaseDependencies(Dependency):
                     "zim-testing-suite",
                 ]
                 # Add specific dependencies depending of the config
-                if configInfo.build not in ("android", "iOS"):
+                if configInfo.build not in ("android", "ios"):
                     # For zimtools
                     base_deps += ["docoptcpp", "libmagic", "gumbo"]
                     if (

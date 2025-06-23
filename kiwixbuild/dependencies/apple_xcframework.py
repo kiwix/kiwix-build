@@ -115,12 +115,12 @@ class AppleXCFramework(Dependency):
                 "make_macos_fat",
                 self.make_fat_with,
                 self.macos_subconfigs,
-                "macOS_fat",
+                "macos_fat",
             )
             xcf_libs += self.command(
                 "make_simulator_fat",
                 self.make_fat_with,
                 self.iossimulator_subconfigs,
-                "iOS-simulator_fat",
+                "ios-simulator_fat",
             )
             self.command("build_xcframework", self._build_xcframework, xcf_libs)

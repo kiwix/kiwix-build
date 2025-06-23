@@ -10,7 +10,7 @@ MIN_MACOS_VERSION = "12.0"
 
 
 class AppleConfigInfo(ConfigInfo):
-    build = "iOS"
+    build = "ios"
     static = True
     compatible_hosts = ["Darwin"]
     arch = None
@@ -36,7 +36,7 @@ class AppleConfigInfo(ConfigInfo):
         return self._root_path
 
     def __str__(self):
-        return "iOS"
+        return "ios"
 
     def finalize_setup(self):
         super().finalize_setup()

@@ -135,13 +135,13 @@ To do so, you should directly use the target-platfrom `ios_multi`.
 As for `android`, `kiwix-build` will build the library several times
 (once for each platform) and then create the fat library.
 ```bash
-kiwix-build --config iOS_multi libkiwix
+kiwix-build --config ios_multi libkiwix
 ```
 
 You can specify the supported architectures with the option `--ios-arch`:
 ```bash
-kiwix-build --config iOS_multi libkiwix # all architetures
-kiwix-build --config iOS_multi --ios-arch arm --ios-arch arm64 # arm and arm64 arch only
+kiwix-build --config ios_multi libkiwix # all architetures
+kiwix-build --config ios_multi --ios-arch arm --ios-arch arm64 # arm and arm64 arch only
 ```
 
 Outputs

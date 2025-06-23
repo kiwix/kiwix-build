@@ -392,7 +392,7 @@ class MakeBuilder(Builder):
 
     @property
     def make_install_targets(self):
-        if self.buildEnv.configInfo.build in ("iOS", "wasm"):
+        if self.buildEnv.configInfo.build in ("ios", "wasm"):
             yield "install"
         else:
             yield "install-strip"
