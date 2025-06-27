@@ -24,4 +24,8 @@ class zlib(Dependency):
         archives = [src_archive, meson_patch]
         #patches = ['zlib_std_libname.patch']
 
-    Builder = MesonBuilder
+    class Builder(MesonBuilder):
+        @property
+        def configure_options(self):
+            if self.buildEnv.configInfo.build == "x86-64_musl":
+                yield "-Dtests=disabled"
