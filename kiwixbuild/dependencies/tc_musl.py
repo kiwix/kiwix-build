@@ -27,8 +27,8 @@ class x86_64_musl_toolchain(Dependency):
         archive = Remotefile(
             "x86_64-linux-musl-cross.11.tgz",
             "c6226824d6b7214ce974344b186179c9fa89be3c33dd7431c4b6585649ce840b",
-            "https://more.musl.cc/11/x86_64-linux-musl/x86_64-linux-musl-cross.tgz",
-#            "https://dev.kiwix.org/kiwix-build/x86_64-linux-musl-cross.tgz"
+#            "https://more.musl.cc/11/x86_64-linux-musl/x86_64-linux-musl-cross.tgz",
+            "https://dev.kiwix.org/kiwix-build/x86_64-linux-musl-cross.11.tgz"
         )
 
     Builder = TcCopyBuilder
