@@ -62,16 +62,16 @@ if platform.system() == "Windows":
 # Copyright (C) 2010-2013, International Business Machines Corporation. All Rights Reserved.
 
 # CFLAGS contains only anything end users should set
-CFLAGS = 
+CFLAGS =
 # CXXFLAGS contains only anything end users should set
 CXXFLAGS =  -std=c++11
 # DEFS only contains those UCONFIG_CPPFLAGS which are not auto-set by platform.h
-DEFS = 
+DEFS =
 prefix = {prefix}
 exec_prefix = ${{prefix}}
 libdir = ${{exec_prefix}}/lib
 includedir = ${{prefix}}/include
-baselibs = -lpthread -lm 
+baselibs = -lpthread -lm
 UNICODE_VERSION=15.0
 ICUPREFIX=icu
 ICULIBSUFFIX=
@@ -171,6 +171,16 @@ else:
                     yield "--disable-tools"
                 if configInfo.build in ("android", "wasm"):
                     yield "--with-data-packaging=archive"
+
+            def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
+                env = super().get_env(
+                                cross_comp_flags=cross_comp_flags,
+                                cross_compilers=cross_compilers,
+                                cross_path=cross_path,
+                )
+                if self.buildEnv.configInfo.build == "x86-64_musl":
+                    del env["LD_LIBRARY_PATH"]
+                return env
 
             def set_env(self, env):
                 env["ICU_DATA_FILTER_FILE"] = pj(
