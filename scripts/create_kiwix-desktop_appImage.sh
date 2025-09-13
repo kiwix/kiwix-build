@@ -41,7 +41,7 @@ patchelf --set-rpath '$ORIGIN/../lib' $APPDIR/usr/libexec/QtWebEngineProcess
 
 mv $APPDIR/{AppRun.wrapped,kiwix-desktop}
 sed -i 's/AppRun\.wrapped/kiwix-desktop/g' $APPDIR/AppRun
-wget --continue https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
-chmod u+x appimagetool-x86_64.AppImage
+wget --continue https://github.com/AppImage/AppImageKit/releases/download/13/obsolete-appimagetool-x86_64.AppImage
+chmod u+x obsolete-appimagetool-x86_64.AppImage
 
-./appimagetool-x86_64.AppImage AppDir Kiwix-"$VERSION"-x86_64.AppImage
+./obsolete-appimagetool-x86_64.AppImage AppDir Kiwix-"$VERSION"-x86_64.AppImage
