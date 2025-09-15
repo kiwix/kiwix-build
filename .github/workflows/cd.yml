@@ -126,16 +126,14 @@ jobs:
           - android_arm64
           - android_x86
           - android_x86_64
+          - x86-64_musl_static
+          - x86-64_musl_mixed
         image_variant: ['jammy']
         include:
           - config: native_mixed
             image_variant: manylinux
           - config: aarch64_mixed
             image_variant: manylinux
-          - config: x86-64_musl_static
-            image_variant: focal
-          - config: x86-64_musl_mixed
-            image_variant: focal
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
