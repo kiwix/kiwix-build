@@ -10,7 +10,7 @@ class MicroHttpd(Dependency):
         src_archive = Remotefile(
             "libmicrohttpd-0.9.76.tar.gz",
             "f0b1547b5a42a6c0f724e8e1c1cb5ce9c4c35fb495e7d780b9930d35011ceb4c",
-            "https://ftp.gnu.org/gnu/libmicrohttpd/libmicrohttpd-0.9.76.tar.gz",
+            "https://dev.kiwix.org/kiwix-build/libmicrohttpd-0.9.76.tar.gz",
         )
         meson_archive = Remotefile(
             "libmicrohttpd_0.9.16-3_patch.zip",
