@@ -199,11 +199,21 @@ class macOSArm64Mixed(MixedMixin("macos_arm64_static"), AppleConfigInfo):
     min_macos_version = MIN_MACOS_VERSION
 
 
-class macOSx64(AppleConfigInfo):
-    name = "macos_x86_64"
+class macOSAmd64(AppleConfigInfo):
+    name = "macos_x86-64_static"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
-    target = "x86_64-apple-macos"
+    target = "x86_64-apple-darwin"
+    sdk_name = "macosx"
+    min_iphoneos_version = None
+    min_macos_version = MIN_MACOS_VERSION
+
+
+class macOSAmd64Mixed(MixedMixin("macos_x86-64_static"), AppleConfigInfo):
+    name = "macos_x86-64_mixed"
+    arch = cpu = "x86_64"
+    host = "x86_64-apple-darwin"
+    target = "x86_64-apple-darwin"
     sdk_name = "macosx"
     min_iphoneos_version = None
     min_macos_version = MIN_MACOS_VERSION

@@ -10,7 +10,7 @@ from .base import Dependency, NoopSource, Builder as BaseBuilder
 class AppleXCFramework(Dependency):
     name = "apple_xcframework"
     subConfigNames = [
-        "macos_x86_64",
+        "macos_x86-64_static",
         "macos_arm64_static",
         "ios_arm64",
         "iossimulator_x86_64",
