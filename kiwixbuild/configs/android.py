@@ -99,7 +99,7 @@ class AndroidConfigInfo(ConfigInfo):
             )
             + env["CXXFLAGS"]
         )
-        env["LDFLAGS"] = "--sysroot={} {} ".format(root_path, march) + env["LDFLAGS"]
+        env["LDFLAGS"] = "-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 --sysroot={} {} ".format(root_path, march) + env["LDFLAGS"]
 
     def set_compiler(self, env):
         binaries = self.binaries()
