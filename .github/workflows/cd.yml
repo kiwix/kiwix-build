@@ -225,9 +225,8 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - native_dyn
-          - native_static
-          - native_mixed
+          - macos_x86-64_static
+          - macos_x86-64_mixed
           - macos_arm64_static
           - macos_arm64_mixed
           - apple_all_static
