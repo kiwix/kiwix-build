@@ -43,7 +43,7 @@ base_deps_versions = {
     "uuid": "1.43.4",
     "xapian-core": "1.4.26",
     "mustache": "4.1",
-    "pugixml": "1.2",
+    "pugixml": "1.15",
     "libmicrohttpd": "0.9.76",
     "gumbo": "0.13.1",
     "icu4c": "73.2",

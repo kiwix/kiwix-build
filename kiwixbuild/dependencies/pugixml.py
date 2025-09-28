@@ -8,8 +8,9 @@ class Pugixml(Dependency):
 
     class Source(ReleaseDownload):
         archive = Remotefile(
-            "pugixml-1.2.tar.gz",
-            "0f422dad86da0a2e56a37fb2a88376aae6e931f22cc8b956978460c9db06136b",
+            "pugixml-1.15.tar.gz",
+            "2e094287f58de02047b2ef23122904de0e02e3b4e9d6b44952d087e746b25974",
+            "https://dev.kiwix.org/kiwix-build/pugixml-1.15.tar.gz"
         )
         patches = ["pugixml_meson.patch"]
         flatpak_dest = "src"
