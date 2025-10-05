@@ -13,7 +13,6 @@ class Pugixml(Dependency):
             "https://dev.kiwix.org/kiwix-build/pugixml-1.15.tar.gz"
         )
         patches = ["pugixml_meson.patch"]
-        flatpak_dest = "src"
 
     class Builder(MesonBuilder):
         strip_options = []
