@@ -444,6 +444,7 @@ def make_deps_archive(target=None, name=None, full=False):
         files_to_archive += get_build_dir("native_static").glob("*/.*_ok")
         files_to_archive += HOME.glob("BUILD_*android*/**/.*_ok")
         files_to_archive += HOME.glob("BUILD_*apple-macos*/**/.*_ok")
+        files_to_archive += HOME.glob("BUILD_*apple-darwin*/**/.*_ok")
         files_to_archive += HOME.glob("BUILD_*apple-ios*/**/.*_ok")
         files_to_archive += SOURCE_DIR.glob("*/.*_ok")
         files_to_archive += SOURCE_DIR.glob("zim-testing-suite-*/*")
