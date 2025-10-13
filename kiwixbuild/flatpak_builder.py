@@ -203,6 +203,27 @@ class FlatpakBuilder:
 
         manifest = MANIFEST.copy()
         modules = [m for m in modules.values() if m.get("sources")]
+
+        meson_module = { "name" : "meson",
+                         "buildsystem" : "simple",
+                         "build-commands" : [
+                            "python3 setup.py build",
+                            "python3 setup.py install --prefix=/app --root=/"
+                         ],
+                         "sources" : [
+                            {
+                                "type": "git",
+                                "url": "https://github.com/mesonbuild/meson.git",
+                                "tag": "1.6.1"
+                            },
+                            {
+                                "type": "patch",
+                                "path": "patches/flatpak_meson.patch"
+                            }
+                         ]
+        }
+        modules = [meson_module] + modules
+
         for m in modules:
             temp = m["sources"]
             del m["sources"]
@@ -213,19 +234,24 @@ class FlatpakBuilder:
         with open(manifest_path, "w") as f:
             f.write(json.dumps(manifest, indent=4))
 
+    def _copy_patch_file(self, fname):
+        path = pj(SCRIPT_DIR, "patches", fname)
+        os.makedirs(
+            pj(self.config.buildEnv.build_dir, "patches"), exist_ok=True
+        )
+        dest = pj(self.config.buildEnv.build_dir, "patches", fname)
+        copyfile(path, dest)
+
     def copy_patches(self):
+        self._copy_patch_file("flatpak_meson.patch")
+
         sourceDefs = (tDef for tDef in target_steps() if tDef[0] == "source")
         for sourceDef in sourceDefs:
             source = get_target_step(sourceDef)
             if not hasattr(source, "patches"):
                 continue
             for p in source.patches:
-                path = pj(SCRIPT_DIR, "patches", p)
-                os.makedirs(
-                    pj(self.config.buildEnv.build_dir, "patches"), exist_ok=True
-                )
-                dest = pj(self.config.buildEnv.build_dir, "patches", p)
-                copyfile(path, dest)
+                self._copy_patch_file(p)
 
     def build(self):
         log = pj(self.config.buildEnv.log_dir, "cmd_build_flatpak.log")
@@ -306,7 +332,7 @@ class FlatpakBuilder:
             print("[GENERATE FLATPAK MANIFEST]")
             self.configure()
             self.copy_patches()
-            print("[BUILD FLATBACK]")
+            print("[BUILD FLATPAK]")
             self.build()
             print("[BUNDLE]")
             self.bundle()
