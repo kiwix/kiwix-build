@@ -185,7 +185,7 @@ jobs:
       SSH_KEY: /tmp/id_rsa
       COMPILE_CONFIG: flatpak
       OS_NAME: jammy
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout code
       shell: bash
