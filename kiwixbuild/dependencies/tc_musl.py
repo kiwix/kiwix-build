@@ -12,7 +12,7 @@ class aarch64_musl_toolchain(Dependency):
             "aarch64-linux-musl-cross.tgz",
             "0f18a885b161815520bbb5757a4b4ab40d0898c29bebee58d0cddd6112e59cc6",
 #            "https://more.musl.cc/10/x86_64-linux-musl/aarch64-linux-musl-cross.tgz",
-             "https://dev.kiwix.org/kiwix-build/aarch64-linux-musl-cross.tgz"
+             "https://dev.kiwix.org/kiwix-build/aarch64-linux-musl-cross.11.tgz"
         )
 
     Builder = TcCopyBuilder
