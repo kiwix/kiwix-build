@@ -1,0 +1,15 @@
+diff --git a/mesonbuild/utils/universal.py b/mesonbuild/utils/universal.py
+index 88d8e1f..697a678 100644
+--- a/mesonbuild/utils/universal.py
++++ b/mesonbuild/utils/universal.py
+@@ -1021,10 +1021,6 @@ def default_libdir() -> str:
+                 return 'lib/' + archpath
+         except Exception:
+             pass
+-    if is_freebsd() or is_irix():
+-        return 'lib'
+-    if os.path.isdir('/usr/lib64') and not os.path.islink('/usr/lib64'):
+-        return 'lib64'
+     return 'lib'
+ 
+ 
