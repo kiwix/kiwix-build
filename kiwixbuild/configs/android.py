@@ -47,6 +47,7 @@ class AndroidConfigInfo(ConfigInfo):
     def get_cross_config(self):
         extra_libs = [
             "-llog",
+            "-lstdc++fs",
             "-Wl,--exclude-libs,libgcc.a",
             "-Wl,--exclude-libs,libunwind.a",
         ]
