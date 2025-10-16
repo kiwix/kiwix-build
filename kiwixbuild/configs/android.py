@@ -22,10 +22,10 @@ class AndroidConfigInfo(ConfigInfo):
         return {
             "CC": "{}-{}".format(arch_full, "clang"),
             "CXX": "{}-{}".format(arch_full, "clang++"),
-            "AR": "{}-{}".format(arch_full, "ar"),
-            "STRIP": "{}-{}".format(arch_full, "strip"),
-            "RANLIB": "{}-{}".format(arch_full, "ranlib"),
-            "LD": "{}-{}".format(arch_full, "ld"),
+            "AR": "llvm-ar",
+            "STRIP": "llvm-strip",
+            "RANLIB": "llvm-ranlib",
+            "LD": "ld",
         }
 
     def binaries(self):

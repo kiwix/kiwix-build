@@ -49,7 +49,7 @@ base_deps_versions = {
     "icu4c": "73.2",
     "libaria2": "1.37.0",
     "libmagic": "5.44",
-    "android-ndk": "r21e",
+    "android-ndk": "r23c",
     "org.kde": "6.9",
     "io.qt.qtwebengine": "6.9",
     "zim-testing-suite": "0.8.0",

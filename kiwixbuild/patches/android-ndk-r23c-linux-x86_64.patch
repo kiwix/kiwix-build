@@ -1,0 +1,35 @@
+diff -ur android-ndk-r23c/build/tools/make_standalone_toolchain.py android-ndk-r23c.patched/build/tools/make_standalone_toolchain.py
+--- android-ndk-r23c/build/tools/make_standalone_toolchain.py	2025-10-17 12:15:59.727676493 +0400
++++ android-ndk-r23c.patched/build/tools/make_standalone_toolchain.py	2025-10-20 18:48:36.724845114 +0400
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ #
+ # Copyright (C) 2016 The Android Open Source Project
+ #
+@@ -219,9 +219,25 @@
+     shutil.copy2(clangpp, gpp)
+
+
++def fix_prebuilt_toolchain_bugs(install_path):
++    for dst, src in (("clang", "clang-12"),
++                     ("clang++", "clang-12"),
++                     ("ld64.lld", "lld"),
++                     ("ld.lld", "lld"),
++                     ("lld-link", "lld"),
++                     ("llvm-addr2line", "llvm-symbolizer"),
++                     ("llvm-lib", "llvm-ar"),
++                     ("llvm-ranlib", "llvm-ar"),
++                     ("llvm-readelf", "llvm-readobj"),
++                     ("llvm-strip", "llvm-objcopy")):
++        dst = os.path.join(install_path, "bin", dst)
++        os.remove(dst)
++        os.symlink(src, dst)
++
+ def create_toolchain(install_path, arch, api, toolchain_path, host_tag):
+     """Create a standalone toolchain."""
+     copy_tree(toolchain_path, install_path)
++    fix_prebuilt_toolchain_bugs(install_path)
+     triple = get_triple(arch)
+     make_clang_scripts(install_path, arch, api, host_tag == 'windows-x86_64')
+     replace_gcc_wrappers(install_path, triple, host_tag == 'windows-x86_64')

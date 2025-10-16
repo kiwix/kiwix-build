@@ -15,9 +15,9 @@ class android_ndk(Dependency):
 
     class Source(ReleaseDownload):
         archive = Remotefile(
-            "android-ndk-r21e-linux-x86_64.zip",
-            "ad7ce5467e18d40050dc51b8e7affc3e635c85bd8c59be62de32352328ed467e",
-            "https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip",
+            "android-ndk-r23c-linux.zip",
+            "6ce94604b77d28113ecd588d425363624a5228d9662450c48d2e4053f8039242",
+            "https://dl.google.com/android/repository/android-ndk-r23c-linux.zip",
         )
 
         @property
@@ -25,7 +25,7 @@ class android_ndk(Dependency):
             return self.target.full_name()
 
         patches = [
-            "android-ndk-r21e-linux-x86_64-python3.12+.patch",
+            "android-ndk-r23c-linux-x86_64.patch",
         ]
 
     class Builder(Builder):
