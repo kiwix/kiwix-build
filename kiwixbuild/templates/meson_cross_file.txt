@@ -1,5 +1,5 @@
 [binaries]
-pkgconfig = '{binaries[PKGCONFIG]}'
+pkg-config = '{binaries[PKGCONFIG]}'
 c = '{binaries[CC]}'
 ar = '{binaries[AR]}'
 cpp = '{binaries[CXX]}'
@@ -7,11 +7,13 @@ strip = '{binaries[STRIP]}'
 ranlib = '{binaries[RANLIB]}'
 {exe_wrapper_def}
 
-[properties]
+[built-in options]
 c_link_args = {extra_libs!r}
 cpp_link_args = {extra_libs!r}
 c_args = {extra_cflags!r}
 cpp_args = {extra_cflags!r}
+
+[properties]
 android_abi = '{host_machine[abi]}'
 
 [host_machine]
