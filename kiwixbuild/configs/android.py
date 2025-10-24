@@ -49,6 +49,7 @@ class AndroidConfigInfo(ConfigInfo):
             "-llog",
             "-Wl,--exclude-libs,libgcc.a",
             "-Wl,--exclude-libs,libunwind.a",
+            "-Wl,-z,max-page-size=16384",
         ]
         extra_cflags = [
             "-I{}".format(include_dir) for include_dir in self.get_include_dirs()
@@ -99,7 +100,7 @@ class AndroidConfigInfo(ConfigInfo):
             )
             + env["CXXFLAGS"]
         )
-        env["LDFLAGS"] = "-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 --sysroot={} {} ".format(root_path, march) + env["LDFLAGS"]
+        env["LDFLAGS"] = "-Wl,-z,max-page-size=16384 --sysroot={} {} ".format(root_path, march) + env["LDFLAGS"]
 
     def set_compiler(self, env):
         binaries = self.binaries()
