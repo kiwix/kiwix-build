@@ -158,7 +158,7 @@ class Armv8Mixed(MixedMixin("armv8_static"), Armv8):
 
 class Aarch64(ArmConfigInfo):
     build = "aarch64"
-    arch_full = "aarch64-linux-gnu"
+    arch_full = "aarch64-rpi3-linux-gnu"
     toolchain_names = ["aarch64"]
     cpu_family = "aarch64"
     cpu = "aarch64"
