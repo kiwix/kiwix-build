@@ -45,8 +45,8 @@ for dll in (static_dir / "bin").glob("*.dll"):
 
 # Copy ssl stuff
 ssl_directory = Path("C:/") / "Program Files" / "OpenSSL"
-shutil.copy2(ssl_directory / "libcrypto-1_1-x64.dll", out_dir)
-shutil.copy2(ssl_directory / "libssl-1_1-x64.dll", out_dir)
+shutil.copy2(ssl_directory / "libcrypto-3-x64.dll", out_dir)
+shutil.copy2(ssl_directory / "libssl-3-x64.dll", out_dir)
 
 if args.sign:
     # We assume here that signtool and certificate are properly configured.
