@@ -112,29 +112,15 @@ EXPORT_FILES = {
             ## Linux
             # We need to package all dependencies (`*.a`) on wasm
             *lib_prefix("libzim.a" if COMPILE_CONFIG != "wasm" else "*.a"),
-            *lib_prefix("libzim.so"),
-            *lib_prefix(
-                "libzim.so.{version}".format(version=main_project_versions["libzim"])
-            ),
-            *lib_prefix(
-                "libzim.so.{version}".format(
-                    version=major_version(main_project_versions["libzim"])
-                )
-            ),
+            *lib_prefix("libzim.so*"),
             ## MacOS
-            "lib/libzim.{}.dylib".format(
-                major_version(main_project_versions["libzim"])
-            ),
+            "lib/libzim.*.dylib",
             "lib/libzim.dylib",
             "lib/*/libzim.pc",
             ## Windows
-            "bin/zim-{version}.dll".format(
-                version=major_version(main_project_versions["libzim"])
-            ),
+            "bin/zim-*.dll",
             "bin/icu*.dll",
-            "bin/zim-{version}.pdb".format(
-                version=major_version(main_project_versions["libzim"])
-            ),
+            "bin/zim-*.pdb"
             "lib/zim.lib",
             ## Includes and others
             "include/zim/**/*.h",
