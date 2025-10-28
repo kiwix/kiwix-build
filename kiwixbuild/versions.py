@@ -35,23 +35,31 @@ release_versions = {
 # Change this when you change base_deps_versions.
 base_deps_meta_version = "17"
 
-base_deps_versions = {
-    "zlib": "1.3.1",
-    "lzma": "5.2.6",
-    "zstd": "1.5.2",
-    "docoptcpp": "0.6.2",
-    "uuid": "1.43.4",
-    "xapian-core": "1.4.26",
-    "mustache": "4.1",
-    "pugixml": "1.15",
-    "libmicrohttpd": "0.9.76",
-    "gumbo": "0.13.1",
-    "icu4c": "73.2",
-    "libaria2": "1.37.0",
-    "libmagic": "5.44",
-    "android-ndk": "r23c",
-    "org.kde": "6.9",
-    "io.qt.qtwebengine": "6.9",
-    "zim-testing-suite": "0.8.0",
-    "emsdk": "3.1.41",
-}
+
+#my code 
+class Dependency:
+    def __init__(self,name ,version):
+        self.name=name
+        self.version=version
+zlib = Dependency("zlib", "1.3.1")
+lzma = Dependency("lzma", "5.2.6")
+zstd = Dependency("zstd", "1.5.2")
+docoptcpp = Dependency("docoptcpp", "0.6.2")
+uuid = Dependency("uuid", "1.43.4")
+xapian_core = Dependency("xapian-core", "1.4.26")
+mustache = Dependency("mustache", "4.1")
+pugixml = Dependency("pugixml", "1.15")
+libmicrohttpd = Dependency("libmicrohttpd", "0.9.76")
+gumbo = Dependency("gumbo", "0.13.1")
+icu4c = Dependency("icu4c", "73.2")
+libaria2 = Dependency("libaria2", "1.37.0")
+libmagic = Dependency("libmagic", "5.44")
+android_ndk = Dependency("android-ndk", "r23c")
+org_kde = Dependency("org.kde", "6.9")
+qtwebengine = Dependency("io.qt.qtwebengine", "6.9")
+zim_testing_suite = Dependency("zim-testing-suite", "0.8.0")
+emsdk = Dependency("emsdk", "3.1.41")
+
+print(emsdk.version)
+
+        
