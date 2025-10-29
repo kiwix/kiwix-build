@@ -1,17 +1,17 @@
 from .base import Dependency, ReleaseDownload, Builder as BaseBuilder
-
 from kiwixbuild.utils import Remotefile, pj
 from shutil import copy2
 
 
 class Mustache(Dependency):
     name = "mustache"
+    version = "4.1"  
 
     class Source(ReleaseDownload):
         archive = Remotefile(
-            "Mustache-4.1.tar.gz",
+            f"mustache-{Mustache.version}.tar.gz", 
             "acd66359feb4318b421f9574cfc5a511133a77d916d0b13c7caa3783c0bfe167",
-            "https://dev.kiwix.org/kiwix-build/mustache-4.1.tar.gz",
+            f"https://dev.kiwix.org/kiwix-build/mustache-{Mustache.version}.tar.gz", 
         )
 
     class Builder(BaseBuilder):

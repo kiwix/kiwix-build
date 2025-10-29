@@ -12,6 +12,7 @@ from kiwixbuild._global import get_target_step
 
 class LibMagic(Dependency):
     name = "libmagic"
+    version = "5.44"  
 
     class Source(ReleaseDownload):
         name = "libmagic"
@@ -20,6 +21,7 @@ class LibMagic(Dependency):
         archive = Remotefile(
             "file-5.44.tar.gz",
             "3751c7fba8dbc831cb8d7cc8aff21035459b8ce5155ef8b0880a27d028475f3b",
+           url= "https://dev.kiwix.org/kiwix-build/file-5.44.tar.gz", 
         )
 
     class Builder(MakeBuilder):

@@ -1,13 +1,12 @@
 from .base import Dependency, GitClone, ReleaseDownload, MakeBuilder, MesonBuilder
-
 from kiwixbuild.utils import Remotefile
 from kiwixbuild._global import neutralEnv
-
 import platform
 
 
 class Xapian(Dependency):
     name = "xapian-core"
+    version = "1.4.26"  
 
     if platform.system() == "Windows":
 
@@ -31,9 +30,10 @@ class Xapian(Dependency):
 
         class Source(ReleaseDownload):
             archive = Remotefile(
-                "xapian-core-1.4.23.tar.xz",
+                f"xapian-core-{Xapian.version}.tar.xz",  
                 "30d3518172084f310dab86d262b512718a7f9a13635aaa1a188e61dc26b2288c",
-            )
+                f"https://oligarchy.co.uk/xapian/{Xapian.version}/xapian-core-{Xapian.version}.tar.xz",  
+                )
 
         class Builder(MakeBuilder):
             configure_options = [

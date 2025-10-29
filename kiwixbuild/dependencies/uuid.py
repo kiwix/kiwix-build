@@ -1,18 +1,18 @@
 from .base import Dependency, ReleaseDownload, MakeBuilder
-
 from kiwixbuild.utils import Remotefile
 
 
 class UUID(Dependency):
     name = "uuid"
+    version = "1.43.4"  
 
     class Source(ReleaseDownload):
         archive = Remotefile(
-            "e2fsprogs-libs-1.43.4.tar.gz",
+            f"e2fsprogs-libs-{UUID.version}.tar.gz",  
             "eed4516325768255c9745e7b82c9d7d0393abce302520a5b2cde693204b0e419",
-            "https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.43.4/e2fsprogs-libs-1.43.4.tar.gz",
+            f"https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v{UUID.version}/e2fsprogs-libs-{UUID.version}.tar.gz",
         )
-        extract_dir = "e2fsprogs-libs-1.43.4"
+        extract_dir = f"e2fsprogs-libs-{UUID.version}" 
 
     class Builder(MakeBuilder):
         configure_options = [
