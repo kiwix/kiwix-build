@@ -11,16 +11,18 @@ import os, shutil
 import fileinput
 import platform
 
-if platform.system() == "Windows":
 
-    class Icu(Dependency):
-        name = "icu4c"
+class Icu(Dependency):
+    name = "icu4c"
+    version = "73.2" 
+
+    if platform.system() == "Windows":
 
         class Source(ReleaseDownload):
             archive = Remotefile(
-                "icu4c-74_1-Win64-MSVC2022.zip",
+                f"icu4c-74_1-Win64-MSVC2022.zip", 
                 "",
-                "https://github.com/unicode-org/icu/releases/download/release-74-1/icu4c-74_1-Win64-MSVC2022.zip",
+                f"https://github.com/unicode-org/icu/releases/download/release-74-1/icu4c-74_1-Win64-MSVC2022.zip",
             )
 
         class Builder(BaseBuilder):
@@ -56,17 +58,10 @@ if platform.system() == "Windows":
 
             def _generate_pkg_config(self, context):
                 context.try_skip(self.build_path)
-
-                pkg_config_template = """ Copyright (C) 2016 and later: Unicode, Inc. and others.
+                pkg_config_template = """\
+# Copyright (C) 2016 and later: Unicode, Inc.
 # License & terms of use: http://www.unicode.org/copyright.html
-# Copyright (C) 2010-2013, International Business Machines Corporation. All Rights Reserved.
 
-# CFLAGS contains only anything end users should set
-CFLAGS =
-# CXXFLAGS contains only anything end users should set
-CXXFLAGS =  -std=c++11
-# DEFS only contains those UCONFIG_CPPFLAGS which are not auto-set by platform.h
-DEFS =
 prefix = {prefix}
 exec_prefix = ${{prefix}}
 libdir = ${{exec_prefix}}/lib
@@ -76,18 +71,20 @@ UNICODE_VERSION=15.0
 ICUPREFIX=icu
 ICULIBSUFFIX=
 LIBICU=lib${{ICUPREFIX}}
-pkglibdir=${{libdir}}/icu${{ICULIBSUFFIX}}/73.1
-ICUDATA_NAME = icudt73l
+pkglibdir=${{libdir}}/icu${{ICULIBSUFFIX}}/{version}
+ICUDATA_NAME = icudt{version_minor}l
 ICUDESC=International Components for Unicode
 
-Version: 73.1
+Version: {version}
 Cflags: -I${{includedir}}
-Description: International Components for Unicode: Internationalization library
+Description: ICU library for Unicode and globalization support
 Name: icu-i18n
-Libs: -L${{libdir}} -licuin -licuuc -licudt"""
-
+Libs: -L${{libdir}} -licuin -licuuc -licudt
+"""
                 pkg_config_content = pkg_config_template.format(
-                    prefix=self.buildEnv.install_dir
+                    prefix=self.buildEnv.install_dir,
+                    version=Icu.version,
+                    version_minor=Icu.version.replace(".", ""),
                 )
 
                 os.makedirs(
@@ -99,21 +96,18 @@ Libs: -L${{libdir}} -licuin -licuuc -licudt"""
                 ) as f:
                     f.write(pkg_config_content)
 
-else:
-
-    class Icu(Dependency):
-        name = "icu4c"
+    else:
 
         class Source(ReleaseDownload):
             archive_src = Remotefile(
-                "icu4c-73_2-src.tgz",
+                f"icu4c-{Icu.version.replace('.', '_')}-src.tgz",
                 "818a80712ed3caacd9b652305e01afc7fa167e6f2e94996da44b90c2ab604ce1",
-                "https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-src.tgz",
+                f"https://github.com/unicode-org/icu/releases/download/release-{Icu.version.replace('.', '-')}/icu4c-{Icu.version.replace('.', '_')}-src.tgz",
             )
             archive_data = Remotefile(
-                "icu4c-73_2-data.zip",
+                f"icu4c-{Icu.version.replace('.', '_')}-data.zip",
                 "ca1ee076163b438461e484421a7679fc33a64cd0a54f9d4b401893fa1eb42701",
-                "https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-data.zip",
+                f"https://github.com/unicode-org/icu/releases/download/release-{Icu.version.replace('.', '-')}/icu4c-{Icu.version.replace('.', '_')}-data.zip",
             )
 
             archives = [archive_src, archive_data]
@@ -174,9 +168,9 @@ else:
 
             def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
                 env = super().get_env(
-                                cross_comp_flags=cross_comp_flags,
-                                cross_compilers=cross_compilers,
-                                cross_path=cross_path,
+                    cross_comp_flags=cross_comp_flags,
+                    cross_compilers=cross_compilers,
+                    cross_path=cross_path,
                 )
                 if self.buildEnv.configInfo.build == "x86-64_musl":
                     del env["LD_LIBRARY_PATH"]
