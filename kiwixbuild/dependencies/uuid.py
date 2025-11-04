@@ -8,11 +8,11 @@ class UUID(Dependency):
 
     class Source(ReleaseDownload):
         archive = Remotefile(
-            "e2fsprogs-libs-1.43.4.tar.gz",
-            "eed4516325768255c9745e7b82c9d7d0393abce302520a5b2cde693204b0e419",
-            "https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.43.4/e2fsprogs-libs-1.43.4.tar.gz",
+            "e2fsprogs-1.47.3.tar.xz",
+            "857e6ef800feaa2bb4578fbc810214be5d3c88b072ea53c5384733a965737329",
+            # "https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs/v1.47.3/e2fsprogs-1.47.3.tar.xz",
         )
-        extract_dir = "e2fsprogs-libs-1.43.4"
+        extract_dir = "e2fsprogs-libs-1.47.3"
 
     class Builder(MakeBuilder):
         configure_options = [
@@ -23,6 +23,7 @@ class UUID(Dependency):
             "--disable-defrag",
             "--enable-fsck",
             "--disable-uuidd",
+            "--enable-subset",
         ]
         configure_env = {"_format_CFLAGS": "{env.CFLAGS} -O3 -fPIC -Wno-error=implicit-function-declaration"}
         static_configure_options = dynamic_configure_options = []
