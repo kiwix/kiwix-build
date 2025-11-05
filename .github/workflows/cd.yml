@@ -132,12 +132,61 @@ jobs:
         include:
           - config: native_mixed
             image_variant: x86-64_manylinux
-          - config: native_mixed
-            image_variant: aarch64_manylinux
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
     runs-on: ubuntu-22.04
+    container:
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-11-05"
+      options: "--device /dev/fuse --privileged"
+    steps:
+    - name: Checkout code
+      shell: bash
+      run: |
+        cd $HOME
+        git clone https://github.com/${REP}
+        cd ./${REP##*/}
+        git checkout --force ${GITHUB_SHA}
+        pip3 install --user --no-deps .
+      env:
+        REP: ${{github.repository}}
+    - name: secret
+      shell: bash
+      run: |
+        echo "${{secrets.ssh_key}}" > $SSH_KEY
+        chmod 600 $SSH_KEY
+    - name: Ensure base deps
+      shell: bash
+      run: |
+        cd $HOME
+        kiwix-build/.github/scripts/ensure_base_deps.py
+      env:
+        COMPILE_CONFIG: ${{matrix.config}}
+    - name: Build release
+      shell: bash
+      run: |
+        cd $HOME
+        kiwix-build/.github/scripts/build_release_nightly.py
+      env:
+        COMPILE_CONFIG: ${{matrix.config}}
+    - name: Upload failure logs
+      if: failure()
+      run: $HOME/kiwix-build/.github/scripts/upload_failure_logs.py
+      env:
+        COMPILE_CONFIG: ${{matrix.config}}
+
+  ManyLinuxAarch64:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - native_mixed
+        image_variant:
+          - aarch64_manylinux
+    env:
+      HOME: /home/runner
+      SSH_KEY: /tmp/id_rsa
+    runs-on: ubuntu-22.04-arm
     container:
       image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-11-05"
       options: "--device /dev/fuse --privileged"
