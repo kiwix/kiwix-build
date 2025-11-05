@@ -131,15 +131,15 @@ jobs:
         image_variant: ['jammy']
         include:
           - config: native_mixed
-            image_variant: manylinux
-          - config: aarch64_mixed
-            image_variant: manylinux
+            image_variant: x86-64_manylinux
+          - config: native_mixed
+            image_variant: aarch64_manylinux
     env:
       HOME: /home/runner
       SSH_KEY: /tmp/id_rsa
     runs-on: ubuntu-22.04
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-06-07"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-11-05"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
