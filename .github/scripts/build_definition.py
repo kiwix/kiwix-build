@@ -18,8 +18,8 @@ BUILD_DEF = """
     | OS_NAME   | COMPILE_CONFIG     | libzim | libkiwix | zim-tools | kiwix-tools | kiwix-desktop | platform_name           | dependency_name        |
     ==============================================================================================================================================
 # manylinux is a special case as we need to compile libzim on old arch for python
-    | manylinux | native_mixed       | BP     |          |           |             |               | linux-x86_64-manylinux  |                        |
-    | manylinux | aarch64_mixed      | BP     |          |           |             |               | linux-aarch64-manylinux |                        |
+    | x86-64_manylinux    | native_mixed       | BP     |          |           |             |               | linux-x86_64-manylinux  |                        |
+    | aarch64_manylinux   | native_mixed       | BP     |          |           |             |               | linux-aarch64-manylinux |                        |
     ----------------------------------------------------------------------------------------------------------------------------------------------
 # On Windows, we build only libzim for now. And only native_mixed as xapian doesn't compile as dll
     | windows   | native_static      | Bd     | d        | BPd       | BPd         |               | win-x86_64              | win-x86_64-static      |

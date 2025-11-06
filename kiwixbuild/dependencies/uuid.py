@@ -24,7 +24,7 @@ class UUID(Dependency):
             "--enable-fsck",
             "--disable-uuidd",
         ]
-        configure_env = {"_format_CFLAGS": "{env.CFLAGS} -O3 -fPIC"}
+        configure_env = {"_format_CFLAGS": "{env.CFLAGS} -O3 -fPIC -Wno-error=implicit-function-declaration"}
         static_configure_options = dynamic_configure_options = []
         make_targets = ["libs"]
         make_install_targets = ["install-libs"]
