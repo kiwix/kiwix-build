@@ -175,7 +175,7 @@ jobs:
       env:
         COMPILE_CONFIG: ${{matrix.config}}
 
-  ManyLinuxAarch64:
+  LinuxArm64:
     strategy:
       fail-fast: false
       matrix:
