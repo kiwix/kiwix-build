@@ -23,9 +23,9 @@ main_project_versions = {
 #    - Else, increment the value. If no value was present, see `(was ...)`.
 
 release_versions = {
-    "libzim": None,  # Depends of base deps (was 0)
+    "libzim": 1,  # Depends of base deps (was None)
     "libkiwix": None,  # Depends of libzim (was 0)
-    "kiwix-tools": 0,  # Depends of libkiwix and libzim (was None)
+    "kiwix-tools": None,  # Depends of libkiwix and libzim (was 0)
     "zim-tools": None,  # Depends of libzim (was 0)
     "kiwix-desktop": None,  # Depends of libkiwix and libzim (was 0)
 }
