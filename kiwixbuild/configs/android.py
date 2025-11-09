@@ -150,7 +150,7 @@ class AndroidX8664(AndroidConfigInfo):
 
 class Android(MetaConfigInfo):
     name = "android"
-    compatible_hosts = ["fedora", "debian"]
+    compatible_hosts = ["fedora", "debian", "ubuntu"]
 
     @property
     def arch_name(self):
