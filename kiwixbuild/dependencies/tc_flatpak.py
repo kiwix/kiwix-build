@@ -9,6 +9,7 @@ pj = os.path.join
 class org_kde(Dependency):
     neutral = False
     name = "org.kde"
+    version ="6.9"
 
     Source = NoopSource
 
@@ -52,6 +53,7 @@ class org_kde(Dependency):
 class io_qt_qtwebengine(Dependency):
     neutral = False
     name = "io.qt.qtwebengine"
+    version = "6.9"
 
     Source = NoopSource
 
