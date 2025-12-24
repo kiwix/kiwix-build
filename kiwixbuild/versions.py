@@ -35,23 +35,40 @@ release_versions = {
 # Change this when you change base_deps_versions.
 base_deps_meta_version = "18"
 
+# Base dependencies defined as Dependency objects
+class Dependency:
+    """Represents an external dependency with its version."""
+
+    def __init__(self, name: str, version: str):
+        self.name = name
+        self.version = version
+
+    def __repr__(self) -> str:
+        return f"Dependency(name={self.name}, version={self.version})"
+
+base_deps = [
+    Dependency("zlib", "1.3.1"),
+    Dependency("lzma", "5.2.6"),
+    Dependency("zstd", "1.5.2"),
+    Dependency("docoptcpp", "0.6.2"),
+    Dependency("uuid", "1.47.3"),
+    Dependency("xapian-core", "1.4.26"),
+    Dependency("mustache", "4.1"),
+    Dependency("pugixml", "1.15"),
+    Dependency("libmicrohttpd", "0.9.76"),
+    Dependency("gumbo", "0.13.1"),
+    Dependency("icu4c", "73.2"),
+    Dependency("libaria2", "1.37.0"),
+    Dependency("libmagic", "5.44"),
+    Dependency("android-ndk", "r23c"),
+    Dependency("org.kde", "6.9"),
+    Dependency("io.qt.qtwebengine", "6.9"),
+    Dependency("zim-testing-suite", "0.8.0"),
+    Dependency("emsdk", "3.1.41"),
+]
+
+# Backward compatibility:
+# Keep the dict form for existing code paths
 base_deps_versions = {
-    "zlib": "1.3.1",
-    "lzma": "5.2.6",
-    "zstd": "1.5.2",
-    "docoptcpp": "0.6.2",
-    "uuid": "1.47.3",
-    "xapian-core": "1.4.26",
-    "mustache": "4.1",
-    "pugixml": "1.15",
-    "libmicrohttpd": "0.9.76",
-    "gumbo": "0.13.1",
-    "icu4c": "73.2",
-    "libaria2": "1.37.0",
-    "libmagic": "5.44",
-    "android-ndk": "r23c",
-    "org.kde": "6.9",
-    "io.qt.qtwebengine": "6.9",
-    "zim-testing-suite": "0.8.0",
-    "emsdk": "3.1.41",
+    dep.name: dep.version for dep in base_deps
 }
