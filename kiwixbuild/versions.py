@@ -33,7 +33,7 @@ release_versions = {
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = "18"
+base_deps_meta_version = "19"
 
 base_deps_versions = {
     "zlib": "1.3.1",
@@ -50,8 +50,8 @@ base_deps_versions = {
     "libaria2": "1.37.0",
     "libmagic": "5.44",
     "android-ndk": "r23c",
-    "org.kde": "6.9",
-    "io.qt.qtwebengine": "6.9",
+    "org.kde": "6.10",
+    "io.qt.qtwebengine": "6.10",
     "zim-testing-suite": "0.8.0",
     "emsdk": "3.1.41",
 }
