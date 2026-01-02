@@ -5,7 +5,7 @@ main_project_versions = {
     "libkiwix": "14.1.1",
     "kiwix-tools": "3.8.1",
     "zim-tools": "3.6.0",
-    "kiwix-desktop": "2.4.1",
+    "kiwix-desktop": "2.5.0",
 }
 
 # This dictionnary specify what we need to build at each release process.
@@ -25,9 +25,9 @@ main_project_versions = {
 release_versions = {
     "libzim": None,  # Depends of base deps (was 1)
     "libkiwix": None,  # Depends of libzim (was 0)
-    "kiwix-tools": 0,  # Depends of libkiwix and libzim (was None)
+    "kiwix-tools": None,  # Depends of libkiwix and libzim (was 0)
     "zim-tools": None,  # Depends of libzim (was 0)
-    "kiwix-desktop": None,  # Depends of libkiwix and libzim (was 0)
+    "kiwix-desktop": 0,  # Depends of libkiwix and libzim (was None)
 }
 
 
