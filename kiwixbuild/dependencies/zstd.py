@@ -5,6 +5,7 @@ from kiwixbuild.utils import Remotefile
 
 class zstd(Dependency):
     name = "zstd"
+    version = "1.5.2"
 
     class Source(ReleaseDownload):
         archive = Remotefile(
