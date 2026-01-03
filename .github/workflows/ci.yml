@@ -52,28 +52,28 @@ jobs:
       run: |
         echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
       env:
-        SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
+        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
     - name: Ensure base deps
       run: |
         python .github\\scripts\\ensure_base_deps.py
       env:
-        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
+        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
     - name: Compile all deps
       run: |
         python .github\\scripts\\compile_all_deps.py
       env:
-        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
+        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
     - name: Build projects
       run: |
         python .github\\scripts\\build_projects.py
       env:
-        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
+        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
     - name: Upload failure logs
       if: failure()
       run: |
         python .github\\scripts\\upload_failure_logs.py
       env:
-        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
+        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
 
   Linux:
     strategy:
@@ -110,7 +110,7 @@ jobs:
           image_variant: x86-64_manylinux
     env:
       HOME: /home/runner
-      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/id_rsa
+      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key
       OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04
     container:
@@ -173,7 +173,7 @@ jobs:
           - aarch64_manylinux
     env:
       HOME: /home/runner
-      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/id_rsa
+      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key
       OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04-arm
     container:
@@ -231,7 +231,7 @@ jobs:
       fail-fast: false
     env:
       HOME: /home/runner
-      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/id_rsa
+      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key
       COMPILE_CONFIG: flatpak
       OS_NAME: jammy
     runs-on: ubuntu-24.04
@@ -285,7 +285,7 @@ jobs:
           - apple_all_static
     runs-on: macos-14
     env:
-      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/id_rsa
+      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key
       OS_NAME: macos
     steps:
     - name: Set Xcode version (16.1)

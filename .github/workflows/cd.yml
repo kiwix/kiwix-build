@@ -52,9 +52,9 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY_PATH
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
       env:
-        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
+        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
     - name: Install and configure eSigner CKA and Windows SDK
       if: github.event_name == 'push'
       env:
@@ -90,19 +90,19 @@ jobs:
       run: |
         python .github\\scripts\\ensure_base_deps.py
       env:
-        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
+        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
     - name: Build Release
       run: |
         python .github\\scripts\\build_release_nightly.py
       env:
         SIGNTOOL_PATH: "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x86/signtool.exe"
-        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
+        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
     - name: Upload failure logs
       if: failure()
       run: |
         python .github\\scripts\\upload_failure_logs.py
       env:
-        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
+        KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
 
   Linux:
     strategy:
@@ -134,7 +134,7 @@ jobs:
             image_variant: x86-64_manylinux
     env:
       HOME: /home/runner
-      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/id_rsa
+      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key
     runs-on: ubuntu-22.04
     container:
       image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-11-05"
@@ -185,7 +185,7 @@ jobs:
           - aarch64_manylinux
     env:
       HOME: /home/runner
-      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/id_rsa
+      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key
     runs-on: ubuntu-22.04-arm
     container:
       image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-11-05"
@@ -231,7 +231,8 @@ jobs:
       fail-fast: false
     env:
       HOME: /home/runner
-      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/id_rsa
+      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key
+      KIWIXBOT_GIT_SSH_KEY_PATH: /tmp/kiwixbot_git_ssh_key
       COMPILE_CONFIG: flatpak
       OS_NAME: jammy
     runs-on: ubuntu-24.04
@@ -255,6 +256,8 @@ jobs:
       run: |
         echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
         chmod 600 $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
+        echo "${{secrets.KIWIXBOT_GIT_SSH_KEY}}" > $KIWIXBOT_GIT_SSH_KEY_PATH
+        chmod 600 $KIWIXBOT_GIT_SSH_KEY_PATH
     - name: Ensure base deps
       shell: bash
       run: |
@@ -281,7 +284,7 @@ jobs:
           - apple_all_static
     runs-on: macos-14
     env:
-      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/id_rsa
+      KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key
       OS_NAME: macos
       CERTIFICATE: /tmp/wmch-devid.p12
       SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
