@@ -268,7 +268,7 @@ try:
                 host,
                 port=port,
                 username=user,
-                key_filename=_environ.get("KIWIX_FILE_UPLOAD_SSH_KEY"),
+                key_filename=_environ.get("SSH_KEY_PATH"),
                 look_for_keys=False,
                 compress=True,
             )
@@ -331,7 +331,7 @@ except ModuleNotFoundError:
             "-c",
             "aes128-ctr",
             "-i",
-            _environ.get("KIWIX_FILE_UPLOAD_SSH_KEY"),
+            _environ.get("SSH_KEY_PATH"),
             "-P",
             port,
             "-o",
@@ -349,7 +349,7 @@ except ModuleNotFoundError:
             "-P",
             port,
             "-i",
-            _environ.get("KIWIX_FILE_UPLOAD_SSH_KEY"),
+            _environ.get("SSH_KEY_PATH"),
             "-o",
             "StrictHostKeyChecking=no",
             str(file_to_upload),
@@ -620,7 +620,7 @@ def update_flathub_git():
     call(command)
     command = ["git", "push", "origin", branch_name]
     env["GIT_SSH_COMMAND"] = "ssh -o StrictHostKeyChecking=no -i " + _environ.get(
-        "KIWIXBOT_GIT_SSH_KEY"
+        "SSH_KEY_PATH"
     )
     call(command)
 

@@ -50,30 +50,30 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY_PATH
       env:
-        SSH_KEY: ${{ runner.temp }}/id_rsa
+        SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
     - name: Ensure base deps
       run: |
         python .github\\scripts\\ensure_base_deps.py
       env:
-        SSH_KEY: ${{ runner.temp }}/id_rsa
+        SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
     - name: Compile all deps
       run: |
         python .github\\scripts\\compile_all_deps.py
       env:
-        SSH_KEY: ${{ runner.temp }}/id_rsa
+        SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
     - name: Build projects
       run: |
         python .github\\scripts\\build_projects.py
       env:
-        SSH_KEY: ${{ runner.temp }}/id_rsa
+        SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
     - name: Upload failure logs
       if: failure()
       run: |
         python .github\\scripts\\upload_failure_logs.py
       env:
-        SSH_KEY: ${{ runner.temp }}/id_rsa
+        SSH_KEY_PATH: ${{ runner.temp }}/id_rsa
 
   Linux:
     strategy:
@@ -110,7 +110,7 @@ jobs:
           image_variant: x86-64_manylinux
     env:
       HOME: /home/runner
-      SSH_KEY: /tmp/id_rsa
+      SSH_KEY_PATH: /tmp/id_rsa
       OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04
     container:
@@ -134,8 +134,8 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY
-        chmod 600 $SSH_KEY
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY_PATH
+        chmod 600 $SSH_KEY_PATH
     - name: Ensure base deps
       shell: bash
       run: |
@@ -173,7 +173,7 @@ jobs:
           - aarch64_manylinux
     env:
       HOME: /home/runner
-      SSH_KEY: /tmp/id_rsa
+      SSH_KEY_PATH: /tmp/id_rsa
       OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04-arm
     container:
@@ -197,8 +197,8 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY
-        chmod 600 $SSH_KEY
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY_PATH
+        chmod 600 $SSH_KEY_PATH
     - name: Ensure base deps
       shell: bash
       run: |
@@ -231,7 +231,7 @@ jobs:
       fail-fast: false
     env:
       HOME: /home/runner
-      SSH_KEY: /tmp/id_rsa
+      SSH_KEY_PATH: /tmp/id_rsa
       COMPILE_CONFIG: flatpak
       OS_NAME: jammy
     runs-on: ubuntu-24.04
@@ -254,8 +254,8 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY
-        chmod 600 $SSH_KEY
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY_PATH
+        chmod 600 $SSH_KEY_PATH
     - name: Ensure base deps
       shell: bash
       run: |
@@ -285,7 +285,7 @@ jobs:
           - apple_all_static
     runs-on: macos-14
     env:
-      SSH_KEY: /tmp/id_rsa
+      SSH_KEY_PATH: /tmp/id_rsa
       OS_NAME: macos
     steps:
     - name: Set Xcode version (16.1)
@@ -307,8 +307,8 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY
-        chmod 600 $SSH_KEY
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY_PATH
+        chmod 600 $SSH_KEY_PATH
     - name: Ensure base deps
       shell: bash
       run: |
