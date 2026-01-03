@@ -52,7 +52,7 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.ssh_key}}" > $SSH_KEY
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY
       env:
         SSH_KEY: ${{ runner.temp }}/id_rsa
     - name: Install and configure eSigner CKA and Windows SDK
@@ -153,7 +153,7 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.ssh_key}}" > $SSH_KEY
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY
         chmod 600 $SSH_KEY
     - name: Ensure base deps
       shell: bash
@@ -204,7 +204,7 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.ssh_key}}" > $SSH_KEY
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY
         chmod 600 $SSH_KEY
     - name: Ensure base deps
       shell: bash
@@ -253,7 +253,7 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.ssh_key}}" > $SSH_KEY
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY
         chmod 600 $SSH_KEY
     - name: Ensure base deps
       shell: bash
@@ -308,7 +308,7 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.ssh_key}}" > $SSH_KEY
+        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $SSH_KEY
         chmod 600 $SSH_KEY
     - name: install Apple certificate
       shell: bash
