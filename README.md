@@ -128,7 +128,7 @@ To build `kiwix-android` itself, you should see the documentation of `kiwix-andr
 iOS
 ---
 
-When building for ios, we may want to compile a "fat library", a library
+When building for iOS, we may want to compile a "fat library", a library
 for several architectures.
 
 To do so, you should directly use the target-platfrom `ios_multi`.
