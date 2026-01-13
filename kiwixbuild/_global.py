@@ -1,18 +1,24 @@
 from collections import OrderedDict as _OrderedDict
 import platform
+from typing import List
 
 _neutralEnv = None
 _options = None
 _target_steps = _OrderedDict()
+def gerror(names: List[str]) -> str:
+  return f"ERROR {', '.join(names)}"
 
+def therror(funcname):
+    st_r = str(gerror([funcname,"error"]))
+    return st_r
 
 def set_neutralEnv(env):
     global _neutralEnv
     _neutralEnv = env
 
-
 def neutralEnv(what):
-    return getattr(_neutralEnv, what)
+    global ___error
+    return getattr(_neutralEnv, what,therror(neutralEnv))
 
 
 def set_options(options):
@@ -21,7 +27,7 @@ def set_options(options):
 
 
 def option(what):
-    return getattr(_options, what)
+    return getattr(_options,what,therror(option))
 
 
 def add_target_step(key, what):
@@ -38,3 +44,9 @@ def get_target_step(key, default_context=None):
 
 def target_steps():
     return _target_steps
+
+def retturnevn():
+    return _neutralEnv
+
+
+    
