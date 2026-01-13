@@ -47,6 +47,11 @@ regex_space = re.compile(r"((?<!\\) )")
 
 
 def escape_path(path):
+    """
+    Escape spaces in a filesystem path so it can be safely used in shell commands.
+
+    This replaces unescaped spaces with '\ ' while preserving existing escapes.
+    """
     path = str(path)
     return regex_space.sub(r"\ ", path)
 
