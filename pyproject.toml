@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kiwix-build"
+version = "0.1"
+description = "A tool to build kiwix and openzim projects."
+readme = "README.md"
+authors = [{ name = "Matthieu Gautier", email = "mgautier@kymeria.fr" }]
+license = { text = "GPLv3" }
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.4",
+]
+dependencies = [
+    "meson",
+    "distro",
+    "paramiko",
+]
+
+[project.urls]
+Homepage = "https://github.com/kiwix/kiwix-build/"
+
+[project.scripts]
+kiwix-build = "kiwixbuild:main"
+
+[tool.setuptools]
+packages = ["kiwixbuild"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+# This section replaces your MANIFEST.in file
+"kiwixbuild" = [
+    "templates/*_cross_file.txt",
+    "patches/*.patch",
+    "dependencies/icu4c_data_filter.json"
+]
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+# OpenZIM standard linting rules
+select = ["E", "F", "I"]
+line-length = 88
