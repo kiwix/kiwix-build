@@ -55,3 +55,7 @@ line-length = 88
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.pyright]
+typeCheckingMode = "basic"
+pythonVersion = "3.10"
