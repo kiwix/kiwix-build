@@ -16,10 +16,16 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.4",
 ]
+
 dependencies = [
     "meson",
     "distro",
     "paramiko",
+]
+
+dev = [
+    "invoke",
+    "ruff",
 ]
 
 [project.urls]
@@ -40,10 +46,12 @@ include-package-data = true
     "dependencies/icu4c_data_filter.json"
 ]
 
-[tool.black]
-line-length = 88
 
 [tool.ruff]
 # OpenZIM standard linting rules
 select = ["E", "F", "I"]
 line-length = 88
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
