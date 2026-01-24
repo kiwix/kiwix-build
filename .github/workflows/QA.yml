@@ -12,7 +12,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install .[dev]
+          pip install ".[dev]"
           pip install pyright 
           
       - name: Run Linting and Formatting
