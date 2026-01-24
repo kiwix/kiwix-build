@@ -41,7 +41,6 @@ packages = ["kiwixbuild"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-# This section replaces your MANIFEST.in file
 "kiwixbuild" = [
     "templates/*_cross_file.txt",
     "patches/*.patch",
