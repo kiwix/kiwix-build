@@ -52,6 +52,9 @@ include-package-data = true
 # OpenZIM standard linting rules
 select = ["E", "F", "I"]
 line-length = 88
+
+# We ignore these for now to allow the infrastructure migration to pass. 
+# These will be fixed in a follow-up PR.
 ignore = [
     "E501", # Line too long
     "E731", # Lambda assignment
