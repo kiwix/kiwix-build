@@ -50,7 +50,13 @@ include-package-data = true
 
 [tool.ruff]
 # OpenZIM standard linting rules
-select = ["E", "F", "I"]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "PL",  # Pylint
+    "UP",  # pyupgrade
+]
 line-length = 88
 
 # We ignore these for now to allow the infrastructure migration to pass. 
