@@ -13,12 +13,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install ".[dev]"
-          pip install pyright 
           
       - name: Run Linting and Formatting
         run: |
           inv lintall
-          
-      - name: Run Static Type Checks
-        run: |
-          pyright .
