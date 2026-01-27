@@ -51,12 +51,95 @@ include-package-data = true
 [tool.ruff]
 # OpenZIM standard linting rules
 select = [
-    "E",   # pycodestyle errors
-    "F",   # pyflakes
-    "I",   # isort
-    "PL",  # Pylint
-    "UP",  # pyupgrade
+  "A",  # flake8-builtins
+  # "ANN",  # flake8-annotations
+  "ARG",  # flake8-unused-arguments
+  # "ASYNC",  # flake8-async
+  "B",  # flake8-bugbear
+  # "BLE",  # flake8-blind-except
+  "C4",  # flake8-comprehensions
+  "C90",  # mccabe
+  # "COM",  # flake8-commas
+  # "D",  # pydocstyle
+  # "DJ",  # flake8-django
+  "DTZ",  # flake8-datetimez
+  "E",  # pycodestyle (default)
+  "EM",  # flake8-errmsg
+  # "ERA",  # eradicate
+  # "EXE",  # flake8-executable
+  "F",  # Pyflakes (default)
+  # "FA",  # flake8-future-annotations
+  "FBT",  # flake8-boolean-trap
+  # "FLY",  # flynt
+  # "G",  # flake8-logging-format
+  "I",  # isort
+  "ICN",  # flake8-import-conventions
+  # "INP",  # flake8-no-pep420
+  # "INT",  # flake8-gettext
+  "ISC",  # flake8-implicit-str-concat
+  "N",  # pep8-naming
+  # "NPY",  # NumPy-specific rules
+  # "PD",  # pandas-vet
+  # "PGH",  # pygrep-hooks
+  # "PIE",  # flake8-pie
+  # "PL",  # Pylint
+  "PLC",  # Pylint: Convention
+  "PLE",  # Pylint: Error
+  "PLR",  # Pylint: Refactor
+  "PLW",  # Pylint: Warning
+  # "PT",  # flake8-pytest-style
+  # "PTH",  # flake8-use-pathlib
+  # "PYI",  # flake8-pyi
+  "Q",  # flake8-quotes
+  # "RET",  # flake8-return
+  # "RSE",  # flake8-raise
+  "RUF",  # Ruff-specific rules
+  "S",  # flake8-bandit
+  # "SIM",  # flake8-simplify
+  # "SLF",  # flake8-self
+  "T10",  # flake8-debugger
+  "T20",  # flake8-print
+  # "TCH",  # flake8-type-checking
+  # "TD",  # flake8-todos
+  "TID",  # flake8-tidy-imports
+  # "TRY",  # tryceratops
+  "UP",  # pyupgrade
+  "W",  # pycodestyle
+  "YTT",  # flake8-2020
 ]
+ignore = [
+  # Allow non-abstract empty methods in abstract base classes
+  "B027",
+  # Remove flake8-errmsg since we consider they bloat the code and provide limited value
+  "EM",
+  # Allow boolean positional values in function calls, like `dict.get(... True)`
+  "FBT003",
+  # Ignore checks for possible passwords
+  "S105", "S106", "S107",
+  # Ignore warnings on subprocess.run / popen
+  "S603",
+  # Ignore complexity
+  "C901", "PLR0911", "PLR0912", "PLR0913", "PLR0915",
+]
+unfixable = [
+  # Don't touch unused imports
+  "F401",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["kiwix-build"]
+
+[tool.ruff.lint.flake8-bugbear]
+# add exceptions to B008 for fastapi.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**/*" = ["PLR2004", "S101", "TID252"]
+
 line-length = 88
 
 # We ignore these for now to allow the infrastructure migration to pass. 
