@@ -10,6 +10,7 @@ from common import (
     create_desktop_image,
     update_flathub_git,
     upload_archive,
+    should_upload,
     fix_macos_rpath,
     BASE_DIR,
     OS_NAME,
@@ -19,6 +20,8 @@ from common import (
 )
 
 from build_definition import select_build_targets, BUILD, PUBLISH, SOURCE_PUBLISH
+
+skip_upload = not should_upload()
 
 
 def release_filter(project):
@@ -41,7 +44,7 @@ for target in TARGETS:
             notarize_macos_build(target)
         archive = make_archive(target, make_release=MAKE_RELEASE)
     if archive:
-        upload_archive(archive, target, make_release=MAKE_RELEASE)
+        upload_archive(archive, target, make_release=MAKE_RELEASE, skip_upload=skip_upload)
 
 # We have few more things to do for release:
 if MAKE_RELEASE:
@@ -68,7 +71,7 @@ if MAKE_RELEASE:
                 / "meson-dist"
                 / "{}.tar.xz".format(full_target_name)
             )
-        upload_archive(archive, target, make_release=MAKE_RELEASE)
+        upload_archive(archive, target, make_release=MAKE_RELEASE, skip_upload=skip_upload)
 
     # Publish flathub
     if COMPILE_CONFIG == "flatpak" and "kiwix-desktop" in TARGETS:
