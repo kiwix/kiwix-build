@@ -61,6 +61,11 @@ if not MAKE_RELEASE and _ref != "main":
 else:
     DEV_BRANCH = None
 
+# Only the main repository has the secrets needed to upload. Skip uploads on
+# forks and local runs, where GITHUB_REPOSITORY is different or unset.
+_repository = _environ.get("GITHUB_REPOSITORY", "")
+UPLOAD_ENABLED = _repository.lower() == "kiwix/kiwix-build"
+
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
 
@@ -248,6 +253,14 @@ try:
             print_message("No {} to upload!", file_to_upload)
             return
 
+        if not UPLOAD_ENABLED:
+            print_message(
+                "Skipping upload of {}: not running in kiwix/kiwix-build ({})",
+                file_to_upload,
+                _repository or "local run",
+            )
+            return
+
         if ":" in host:
             host, port = host.split(":", 1)
         else:
@@ -307,6 +320,14 @@ except ModuleNotFoundError:
     def upload(file_to_upload, host, dest_path):
         if not file_to_upload.exists():
             print_message("No {} to upload!", file_to_upload)
+            return
+
+        if not UPLOAD_ENABLED:
+            print_message(
+                "Skipping upload of {}: not running in kiwix/kiwix-build ({})",
+                file_to_upload,
+                _repository or "local run",
+            )
             return
 
         if ":" in host:
