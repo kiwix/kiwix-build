@@ -108,6 +108,10 @@ select = [
   "YTT",  # flake8-2020
 ]
 ignore = [
+  # Line too long
+  "E501",
+  # Lambda assignment
+  "E731", 
   # Allow non-abstract empty methods in abstract base classes
   "B027",
   # Remove flake8-errmsg since we consider they bloat the code and provide limited value
@@ -126,28 +130,7 @@ unfixable = [
   "F401",
 ]
 
-[tool.ruff.lint.isort]
-known-first-party = ["kiwix-build"]
-
-[tool.ruff.lint.flake8-bugbear]
-# add exceptions to B008 for fastapi.
-extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
-
-[tool.ruff.lint.flake8-tidy-imports]
-ban-relative-imports = "all"
-
-[tool.ruff.lint.per-file-ignores]
-# Tests can use magic values, assertions, and relative imports
-"tests/**/*" = ["PLR2004", "S101", "TID252"]
-
 line-length = 88
-
-# We ignore these for now to allow the infrastructure migration to pass. 
-# These will be fixed in a follow-up PR.
-ignore = [
-    "E501", # Line too long
-    "E731", # Lambda assignment
-]
 
 [tool.ruff.format]
 quote-style = "double"
