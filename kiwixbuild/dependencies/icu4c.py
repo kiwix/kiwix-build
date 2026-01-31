@@ -15,6 +15,7 @@ if platform.system() == "Windows":
 
     class Icu(Dependency):
         name = "icu4c"
+        version = "73.2"
 
         class Source(ReleaseDownload):
             archive = Remotefile(
