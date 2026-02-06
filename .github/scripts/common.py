@@ -65,6 +65,16 @@ FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
 
 
+def should_upload() -> bool:
+    """Check if we should upload artifacts (only for kiwix/kiwix-build repo, not forks)."""
+    return os.environ.get('GITHUB_REPOSITORY', '').lower() == 'kiwix/kiwix-build'
+
+
+def fork_name() -> str:
+    """Get the name of the GitHub repository (for fork identification in messages)."""
+    return os.environ.get('GITHUB_REPOSITORY', 'unknown')
+
+
 def major_version(version: str) -> str:
     return version.split(".")[0]
 
@@ -243,9 +253,13 @@ def run_kiwix_build(
 try:
     import paramiko
 
-    def upload(file_to_upload, host, dest_path):
+    def upload(file_to_upload, host, dest_path, skip_upload=False):
         if not file_to_upload.exists():
             print_message("No {} to upload!", file_to_upload)
+            return
+
+        if skip_upload:
+            print_message("Skipping upload for fork: {}", fork_name())
             return
 
         if ":" in host:
@@ -304,9 +318,13 @@ except ModuleNotFoundError:
     # On old system (bionic) paramiko is really complex to install
     # Keep the old implementaion on sush system.
 
-    def upload(file_to_upload, host, dest_path):
+    def upload(file_to_upload, host, dest_path, skip_upload=False):
         if not file_to_upload.exists():
             print_message("No {} to upload!", file_to_upload)
+            return
+
+        if skip_upload:
+            print_message("Skipping upload for fork: {}", fork_name())
             return
 
         if ":" in host:
@@ -359,9 +377,13 @@ except ModuleNotFoundError:
         subprocess.check_call(command)
 
 
-def upload_archive(archive, project, make_release, dev_branch=None):
+def upload_archive(archive, project, make_release, dev_branch=None, skip_upload=False):
     if not archive.exists():
         print_message("No archive {} to upload!", archive)
+        return
+
+    if skip_upload:
+        print_message("Skipping upload for fork: {}", fork_name())
         return
 
     if project.startswith("kiwix-") or project in ["libkiwix"]:
