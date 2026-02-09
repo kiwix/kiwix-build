@@ -13,6 +13,10 @@ class zstd(Dependency):
             "https://dev.kiwix.org/kiwix-build/zstd-1.5.7.tar.gz",
         )
 
+        patches = [
+            "zstd_qsort.patch",
+        ]
+
     class Builder(MesonBuilder):
         subsource_dir = "build/meson"
         build_type = "release"
