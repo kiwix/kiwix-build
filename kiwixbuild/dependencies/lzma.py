@@ -8,6 +8,7 @@ from kiwixbuild.utils import Remotefile
 
 class lzma(Dependency):
     name = 'lzma'
+    version = "5.2.6"
 
     class Source(ReleaseDownload):
         src_archive = Remotefile(

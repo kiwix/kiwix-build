@@ -12,6 +12,7 @@ from kiwixbuild._global import get_target_step
 
 class LibMagic(Dependency):
     name = "libmagic"
+    version = "5.44"
 
     class Source(ReleaseDownload):
         name = "libmagic"
