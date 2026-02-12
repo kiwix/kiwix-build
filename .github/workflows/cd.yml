@@ -16,7 +16,7 @@ jobs:
           - native_mixed
           - native_dyn
           - native_static
-    runs-on: windows-2022
+    runs-on: windows-2025
     env:
       OS_NAME: windows
       COMPILE_CONFIG: ${{matrix.config}}

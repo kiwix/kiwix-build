@@ -2,9 +2,8 @@
 
 Kiwix Build provides advanced tools to (cross-)compile easily
 [Kiwix](https://kiwix.org) & [openZIM](https://openzim.org) softwares
-and libraries and deploy them. They have been tested on
-[Fedora](https://getfedora.org) 35+ & [Ubuntu](https://ubuntu.com)
-20.04+.
+and libraries and deploy them. They have been tested [Ubuntu](https://ubuntu.com)
+22.04+.
 
 Kiwix Build audience is:
 * Advanced users who don't want/can handle all the dependencies
