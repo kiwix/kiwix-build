@@ -1,7 +1,7 @@
 # This file reference all the versions of the depedencies we use in kiwix-build.
 
 main_project_versions = {
-    "libzim": "9.4.1",
+    "libzim": "9.5.0",
     "libkiwix": "14.1.1",
     "kiwix-tools": "3.8.1",
     "zim-tools": "3.6.0",
@@ -24,21 +24,21 @@ main_project_versions = {
 
 release_versions = {
     "libzim": None,  # Depends of base deps (was 0)
-    "libkiwix": None,  # Depends of libzim (was 0)
+    "libkiwix": 1,  # Depends of libzim (was none)
     "kiwix-tools": None,  # Depends of libkiwix and libzim (was 0)
     "zim-tools": None,  # Depends of libzim (was 0)
-    "kiwix-desktop": 0,  # Depends of libkiwix and libzim (was 1)
+    "kiwix-desktop": None,  # Depends of libkiwix and libzim (was 0)
 }
 
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = "20"
+base_deps_meta_version = "22"
 
 base_deps_versions = {
     "zlib": "1.3.1",
     "lzma": "5.2.6",
-    "zstd": "1.5.2",
+    "zstd": "1.5.7",
     "docoptcpp": "0.6.2",
     "uuid": "1.47.3",
     "xapian-core": "1.4.26",

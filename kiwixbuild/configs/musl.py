@@ -15,6 +15,8 @@ class MuslConfigInfo(ConfigInfo):
             "extra_libs": [],
             "extra_cflags": [
                 "-I{}".format(include_dir) for include_dir in self.get_include_dirs()
+                ] + [
+                "-DZSTD_USE_C90_QSORT"
             ],
             "host_machine": {
                 "system": "linux",
