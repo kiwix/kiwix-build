@@ -8,6 +8,7 @@ from .configs import ConfigInfo
 from .builder import Builder
 from .flatpak_builder import FlatpakBuilder
 from . import _global
+from . import buildenv
 
 
 def parse_args():
