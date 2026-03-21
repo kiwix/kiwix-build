@@ -21,7 +21,7 @@ jobs:
       HOME: 'C:\\Users\\runneradmin'
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Setup python 3.13
       uses: actions/setup-python@v5
       with:
@@ -292,7 +292,7 @@ jobs:
       # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md#xcode
       run: sudo xcode-select -s /Applications/Xcode_16.1.app
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Setup Python 3.13
       uses: actions/setup-python@v5
       with:
