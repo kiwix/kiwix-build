@@ -10,6 +10,7 @@ class android_ndk(Dependency):
     dont_skip = True
     neutral = False
     name = "android-ndk"
+    version = "r23c"
     gccver = "4.9.x"
     api = "24"
 
