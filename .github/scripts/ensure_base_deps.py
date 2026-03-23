@@ -12,6 +12,7 @@ from common import (
     run_kiwix_build,
     upload,
     make_deps_archive,
+    should_upload,
     HOME,
     COMPILE_CONFIG,
     OS_NAME,
@@ -47,6 +48,7 @@ def get_archive_name():
 
 
 def main():
+    skip_upload = not should_upload()
     base_dep_archive_name = get_archive_name()
     print_message("Getting archive {}", base_dep_archive_name)
     try:
@@ -61,7 +63,7 @@ def main():
             print_message("Cannot get archive. Build dependencies")
             run_kiwix_build("alldependencies", config=COMPILE_CONFIG)
             archive_file = make_deps_archive(name=base_dep_archive_name, full=True)
-            upload(archive_file, "ci@tmp.kiwix.org:30022", "/data/tmp/ci")
+            upload(archive_file, "ci@tmp.kiwix.org:30022", "/data/tmp/ci", skip_upload=skip_upload)
             os.remove(str(archive_file))
 
 
