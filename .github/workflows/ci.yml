@@ -50,7 +50,7 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
+        echo "${{secrets.KIWIXBUILD_FILE_UPLOAD_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
       env:
         KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
     - name: Ensure base deps
@@ -134,7 +134,7 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
+        echo "${{secrets.KIWIXBUILD_FILE_UPLOAD_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
         chmod 600 $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
     - name: Ensure base deps
       shell: bash
@@ -197,7 +197,7 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
+        echo "${{secrets.KIWIXBUILD_FILE_UPLOAD_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
         chmod 600 $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
     - name: Ensure base deps
       shell: bash
@@ -254,7 +254,7 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
+        echo "${{secrets.KIWIXBUILD_FILE_UPLOAD_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
         chmod 600 $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
     - name: Ensure base deps
       shell: bash
@@ -307,7 +307,7 @@ jobs:
     - name: secret
       shell: bash
       run: |
-        echo "${{secrets.KIWIX_FILE_UPLOAD_SSH_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
+        echo "${{secrets.KIWIXBUILD_FILE_UPLOAD_KEY}}" > $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
         chmod 600 $KIWIX_FILE_UPLOAD_SSH_KEY_PATH
     - name: Ensure base deps
       shell: bash

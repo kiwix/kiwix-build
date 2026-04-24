@@ -365,10 +365,10 @@ def upload_archive(archive, project, make_release, dev_branch=None):
         return
 
     if project.startswith("kiwix-") or project in ["libkiwix"]:
-        host = "ci@master.download.kiwix.org:30022"
+        host = "kiwix-build@master.download.kiwix.org:30322"
         dest_path = "/data/download/"
     else:
-        host = "ci@download.openzim.org:30022"
+        host = "kiwix-build@download.openzim.org:30322"
         dest_path = "/data/openzim/"
 
     if make_release:

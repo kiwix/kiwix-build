@@ -15,4 +15,4 @@ with tarfile.open(ARCHIVE_NAME, "w:xz") as tar:
     for name in set(files_to_archive):
         tar.add(str(name))
 
-upload(ARCHIVE_NAME, "ci@tmp.kiwix.org:30022", "/data/tmp/ci")
+upload(ARCHIVE_NAME, "kiwix-build@tmp.kiwix.org:30522", "/data/tmp/ci")
