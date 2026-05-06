@@ -18,5 +18,5 @@ for target in select_build_targets(DEPS):
         destination = "/data/tmp/ci/dev_preview/" + DEV_BRANCH
     else:
         destination = "/data/tmp/ci"
-    upload(archive_file, "ci@tmp.kiwix.org:30022", destination)
+    upload(archive_file, "kiwix-build@tmp.kiwix.org:30522", destination)
     os.remove(str(archive_file))

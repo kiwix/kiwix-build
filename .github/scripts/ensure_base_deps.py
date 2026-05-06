@@ -61,7 +61,7 @@ def main():
             print_message("Cannot get archive. Build dependencies")
             run_kiwix_build("alldependencies", config=COMPILE_CONFIG)
             archive_file = make_deps_archive(name=base_dep_archive_name, full=True)
-            upload(archive_file, "ci@tmp.kiwix.org:30022", "/data/tmp/ci")
+            upload(archive_file, "kiwix-build@tmp.kiwix.org:30522", "/data/tmp/ci")
             os.remove(str(archive_file))
 
 
