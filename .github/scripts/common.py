@@ -366,7 +366,7 @@ def upload_archive(archive, project, make_release, dev_branch=None):
 
     if project.startswith("kiwix-") or project in ["libkiwix"]:
         host = "kiwix-build@master.download.kiwix.org:30322"
-        dest_path = "/data/download/"
+        dest_path = "/data/kiwix/"
     else:
         host = "kiwix-build@download.openzim.org:30322"
         dest_path = "/data/openzim/"
@@ -377,6 +377,7 @@ def upload_archive(archive, project, make_release, dev_branch=None):
         dest_path = dest_path + "nightly/" + DATE
 
     if dev_branch:
+        host = "kiwix-build@tmp.kiwix.org:30522"
         dest_path = "/data/tmp/ci/dev_preview/" + dev_branch
     else:
         # Make the archive read only. This way, scp will preserve rights.
