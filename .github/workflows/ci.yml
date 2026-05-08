@@ -106,8 +106,10 @@ jobs:
           - x86-64_musl_mixed
         image_variant: ['jammy']
         include:
-        - config: native_mixed
-          image_variant: x86-64_manylinux
+          - config: native_dyn
+            image_variant: noble
+          - config: native_mixed
+            image_variant: x86-64_manylinux
     env:
       HOME: /home/runner
       KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key

@@ -130,6 +130,8 @@ jobs:
           - x86-64_musl_mixed
         image_variant: ['jammy']
         include:
+          - config: native_dyn
+            image_variant: noble
           - config: native_mixed
             image_variant: x86-64_manylinux
     env:
