@@ -114,7 +114,7 @@ jobs:
       OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-11-05"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2026-04-25"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
@@ -177,7 +177,7 @@ jobs:
       OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04-arm
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-11-05"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2026-04-25"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
