@@ -149,7 +149,12 @@ jobs:
         git clone https://github.com/${REP}
         cd ./${REP##*/}
         git checkout --force ${GITHUB_SHA}
-        pip3 install --user --no-deps .
+        pip3_extra_options=()
+        if pip3 install --help|grep -qF -- --break-system-packages
+        then
+          pip3_extra_options+=(--break-system-packages)
+        fi
+        pip3 install --user --no-deps "${pip3_extra_options[@]}" .
       env:
         REP: ${{github.repository}}
     - name: secret

@@ -126,13 +126,23 @@ jobs:
         git clone https://github.com/${REP}
         cd ./${REP##*/}
         git checkout --force ${GITHUB_SHA}
-        pip3 install --user --no-deps .
+        pip3_extra_options=()
+        if pip3 install --help|grep -qF -- --break-system-packages
+        then
+          pip3_extra_options+=(--break-system-packages)
+        fi
+        pip3 install --user --no-deps "${pip3_extra_options[@]}" .
       env:
         REP: ${{github.repository}}
     - name: Install paramiko
-      if: ${{matrix.image_variant != 'bionic' }}
       shell: bash
-      run: pip3 install --user paramiko
+      run: |
+        pip3_extra_options=()
+        if pip3 install --help|grep -qF -- --break-system-packages
+        then
+          pip3_extra_options+=(--break-system-packages)
+        fi
+        pip3 install --user "${pip3_extra_options[@]}" paramiko
     - name: secret
       shell: bash
       run: |
@@ -193,7 +203,6 @@ jobs:
       env:
         REP: ${{github.repository}}
     - name: Install paramiko
-      if: ${{matrix.image_variant != 'bionic' }}
       shell: bash
       run: pip3 install --user paramiko
     - name: secret
