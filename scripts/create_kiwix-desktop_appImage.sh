@@ -15,9 +15,9 @@ ICONFILE=$SOURCEDIR/resources/icons/kiwix/scalable/kiwix-desktop.svg
 DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop.desktop
 
 # Get linuxdeploy
-wget --continue https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20240109-1/linuxdeploy-x86_64.AppImage
+wget --continue https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage
 chmod u+x linuxdeploy-x86_64.AppImage
-wget --continue https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20240109-1/linuxdeploy-plugin-qt-x86_64.AppImage
+wget --continue https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/1-alpha-20250213-1/linuxdeploy-plugin-qt-x86_64.AppImage
 chmod u+x linuxdeploy-plugin-qt-x86_64.AppImage
 
 # Fill with all deps libs and so
@@ -41,7 +41,7 @@ patchelf --set-rpath '$ORIGIN/../lib' $APPDIR/usr/libexec/QtWebEngineProcess
 
 mv $APPDIR/{AppRun.wrapped,kiwix-desktop}
 sed -i 's/AppRun\.wrapped/kiwix-desktop/g' $APPDIR/AppRun
-wget --continue https://github.com/AppImage/AppImageKit/releases/download/13/obsolete-appimagetool-x86_64.AppImage
-chmod u+x obsolete-appimagetool-x86_64.AppImage
+wget --continue https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
+chmod u+x appimagetool-x86_64.AppImage
 
-./obsolete-appimagetool-x86_64.AppImage AppDir Kiwix-"$VERSION"-x86_64.AppImage
+./appimagetool-x86_64.AppImage AppDir Kiwix-"$VERSION"-x86_64.AppImage

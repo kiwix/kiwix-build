@@ -106,15 +106,17 @@ jobs:
           - x86-64_musl_mixed
         image_variant: ['jammy']
         include:
-        - config: native_mixed
-          image_variant: x86-64_manylinux
+          - config: native_dyn
+            image_variant: noble
+          - config: native_mixed
+            image_variant: x86-64_manylinux
     env:
       HOME: /home/runner
       KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key
       OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-11-05"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2026-04-25"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
@@ -124,13 +126,23 @@ jobs:
         git clone https://github.com/${REP}
         cd ./${REP##*/}
         git checkout --force ${GITHUB_SHA}
-        pip3 install --user --no-deps .
+        pip3_extra_options=()
+        if pip3 install --help|grep -qF -- --break-system-packages
+        then
+          pip3_extra_options+=(--break-system-packages)
+        fi
+        pip3 install --user --no-deps "${pip3_extra_options[@]}" .
       env:
         REP: ${{github.repository}}
     - name: Install paramiko
-      if: ${{matrix.image_variant != 'bionic' }}
       shell: bash
-      run: pip3 install --user paramiko
+      run: |
+        pip3_extra_options=()
+        if pip3 install --help|grep -qF -- --break-system-packages
+        then
+          pip3_extra_options+=(--break-system-packages)
+        fi
+        pip3 install --user "${pip3_extra_options[@]}" paramiko
     - name: secret
       shell: bash
       run: |
@@ -177,7 +189,7 @@ jobs:
       OS_NAME: ${{matrix.image_variant}}
     runs-on: ubuntu-22.04-arm
     container:
-      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2025-11-05"
+      image: "ghcr.io/kiwix/kiwix-build_ci_${{matrix.image_variant}}:2026-04-25"
       options: "--device /dev/fuse --privileged"
     steps:
     - name: Checkout code
@@ -191,7 +203,6 @@ jobs:
       env:
         REP: ${{github.repository}}
     - name: Install paramiko
-      if: ${{matrix.image_variant != 'bionic' }}
       shell: bash
       run: pip3 install --user paramiko
     - name: secret

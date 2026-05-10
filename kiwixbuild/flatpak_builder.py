@@ -74,6 +74,54 @@ MANIFEST = {
 
 GET_REF_URL_API_TEMPLATE = "https://api.github.com/repos{repo}/git/refs/tags/{ref}"
 
+LIBTORRENT_MODULES = [
+    {
+        # Library installation directory (CMAKE_INSTALL_LIBDIR) for libtorrent
+        # is resolved by cmake to /app/lib64 in this flatpak build, whereas the
+        # rest of the libs go into /app/lib, resulting in a linker error when
+        # building kiwix-desktop. This hack makes /app/lib64 a symlink to
+        # /app/lib.
+        "name": "lib64hack",
+        "buildsystem": "simple",
+        "build-commands": [
+            "ln -s lib /app/lib64 ",
+        ],
+        "sources": [
+        ]
+    },
+
+    {
+        "name": "boost",
+        "buildsystem": "simple",
+        "build-commands": [
+            "./bootstrap.sh --prefix=/app --with-libraries=headers",
+            "./b2 install variant=release link=shared runtime-link=shared cxxflags=\"$CXXFLAGS\" linkflags=\"$LDFLAGS\" -j $FLATPAK_BUILDER_N_JOBS"
+        ],
+        "sources": [
+            {
+                "type": "archive",
+                "url": "https://archives.boost.io/release/1.90.0/source/boost_1_90_0.tar.bz2",
+                "sha256": "49551aff3b22cbc5c5a9ed3dbc92f0e23ea50a0f7325b0d198b705e8ee3fc305"
+            }
+        ]
+    },
+
+    {
+        "name": "libtorrent",
+        "buildsystem": "cmake-ninja",
+        "builddir": True,
+        "config-opts": [
+            "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+        ],
+        "sources": [
+            {
+                "type": "archive",
+                "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.7/libtorrent-rasterbar-2.0.7.tar.gz",
+                "sha256": "3850a27aacb79fcc4d352c1f02a7a59e0e8322afdaa1f5d58d676c02edfcfa36"
+            }
+        ]
+    }
+]
 
 class FlatpakBuilder:
     def __init__(self):
@@ -222,7 +270,7 @@ class FlatpakBuilder:
                             }
                          ]
         }
-        modules = [meson_module] + modules
+        modules = LIBTORRENT_MODULES + [meson_module] + modules
 
         for m in modules:
             temp = m["sources"]
