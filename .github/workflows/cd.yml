@@ -131,7 +131,7 @@ jobs:
         image_variant: ['jammy']
         include:
           - config: native_dyn
-            image_variant: noble
+            image_variant: resolute
           - config: native_mixed
             image_variant: x86-64_manylinux
     env:
