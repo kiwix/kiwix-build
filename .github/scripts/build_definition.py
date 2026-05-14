@@ -40,7 +40,7 @@ BUILD_DEF = """
     | jammy     | native_static      | d      | d        | dBPSD     | dBPSD       |               | linux-x86_64            | linux-x86_64-static    |
     | jammy     | native_mixed       | BPS    | BPS      |           |             |               | linux-x86_64            |                        |
     | jammy     | native_dyn         | d      | d        | dB        | dB          |               |                         | linux-x86_64-dyn       |
-    | noble     | native_dyn         |        |          |           |             | dBPS          |                         | linux-x86_64-dyn       |
+    | resolute  | native_dyn         |        |          |           |             | dBPS          |                         | linux-x86_64-dyn       |
     # libzim CI is building alpine_dyn but not us
     | jammy     | android_arm        | dBP    | dBP      |           |             |               | android-arm             | android-arm            |
     | jammy     | android_arm64      | dBP    | dBP      |           |             |               | android-arm64           | android-arm64          |
