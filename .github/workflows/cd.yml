@@ -289,7 +289,7 @@ jobs:
           - macos_arm64_static
           - macos_arm64_mixed
           - apple_all_static
-    runs-on: macos-14
+    runs-on: macos-26
     env:
       KIWIX_FILE_UPLOAD_SSH_KEY_PATH: /tmp/kiwix_file_upload_key
       OS_NAME: macos
@@ -300,8 +300,8 @@ jobs:
       KEYCHAIN_PROFILE: build-profile
     steps:
     - name: Set Xcode version (16.1)
-      # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md#xcode
-      run: sudo xcode-select -s /Applications/Xcode_16.1.app
+      # https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md#xcode
+      run: sudo xcode-select -s /Applications/Xcode_26.5.app
     - name: Checkout code
       uses: actions/checkout@v6
     - name: Setup python 3.13
