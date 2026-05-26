@@ -20,6 +20,23 @@ inputs:
   extract_dir:
     description: "Where to extract our dependencies. [Default to env var `HOME`]"
     required: false
+outputs:
+  extract-dir:
+    description: "Directory where the archive was extracted"
+  build-dir:
+    description: "Detected primary BUILD_* directory"
+  install-dir:
+    description: "INSTALL directory inside the primary build directory"
+  pkg-config-path:
+    description: "Path list for PKG_CONFIG_PATH"
+  ld-library-path:
+    description: "Path list for LD_LIBRARY_PATH"
+  cppflags:
+    description: "Include flags for CPPFLAGS"
+  meson-cross-file:
+    description: "Detected Meson cross file, if present"
+  cmake-toolchain-file:
+    description: "Detected CMake toolchain file, if present"
 runs:
   using: 'node20'
   main: 'dist/index.js'
