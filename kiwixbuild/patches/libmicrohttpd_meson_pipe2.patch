@@ -1,0 +1,14 @@
+--- libmicrohttpd-0.9.76/meson.build.orig       2026-05-27 13:37:50
++++ libmicrohttpd-0.9.76/meson.build    2026-05-27 13:44:16
+@@ -152,7 +152,10 @@
+ )
+ cdata.set('SIZEOF_UINT64_T', 8)
+
+-cdata.set('HAVE_PIPE2_FUNC', cc.has_function('pipe2'))
++if host_machine.system() != 'darwin'
++  cdata.set('HAVE_PIPE2_FUNC', cc.has_function('pipe2'))
++endif
++
+ cdata.set('MHD_HAVE___BUILTIN_BSWAP32', cc.has_function('__builtin_bswap32'))
+ cdata.set('MHD_HAVE___BUILTIN_BSWAP64', cc.has_function('__builtin_bswap64'))
+

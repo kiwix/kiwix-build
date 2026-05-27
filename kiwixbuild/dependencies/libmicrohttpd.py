@@ -22,6 +22,7 @@ class MicroHttpd(Dependency):
             "libmicrohttpd_meson_pkgconfig.patch",
             "libmicrohttpd_meson_timeval_tvsec_size.patch",
             "libmicrohttpd_meson_winet6.patch",
+            "libmicrohttpd_meson_pipe2.patch",
         ]
 
     class Builder(MesonBuilder):
