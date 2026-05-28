@@ -95,7 +95,9 @@ jobs:
       run: |
         python .github\\scripts\\build_release_nightly.py
       env:
-        SIGNTOOL_PATH: "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x86/signtool.exe"
+        # This references the SDK version
+        # https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md#installed-windows-sdks
+        SIGNTOOL_PATH: "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x86/signtool.exe"
         KIWIX_FILE_UPLOAD_SSH_KEY_PATH: ${{ runner.temp }}/kiwix_file_upload_key
     - name: Upload failure logs
       if: failure()
