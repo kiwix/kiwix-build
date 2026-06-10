@@ -67,9 +67,12 @@ function findFirstFile(buildDirs, fileName) {
   return "";
 }
 
-function setArchiveOutputs(extractDir, archiveDir) {
+function setArchiveOutputs(extractDir, archiveDir, ignoredBuildDirs = []) {
   const roots = unique([archiveDir, extractDir]);
-  const buildDirs = unique(roots.flatMap(listBuildDirs));
+  const ignored = new Set(ignoredBuildDirs);
+  const buildDirs = unique(roots.flatMap(listBuildDirs)).filter(
+    (buildDir) => !ignored.has(buildDir),
+  );
   const mesonCrossFile = findFirstFile(buildDirs, "meson_cross_file.txt");
   const cmakeToolchainFile = findFirstFile(buildDirs, "cmake_cross_file.txt");
   const buildDir = mesonCrossFile
@@ -107,6 +110,7 @@ async function run() {
       "extract_dir",
       process.env["HOME"] || process.env["GITHUB_WORKSPACE"],
     );
+    const preExistingBuildDirs = listBuildDirs(extract_dir);
 
     let archivePath;
     try {
@@ -122,7 +126,7 @@ async function run() {
     process.stdout.write("Extracting " + archivePath + " to " + extract_dir + "\n");
     const archive_dir = await tc.extractTar(archivePath, extract_dir);
     process.stdout.write("Extracted to " + archive_dir + "\n");
-    setArchiveOutputs(extract_dir, archive_dir);
+    setArchiveOutputs(extract_dir, archive_dir, preExistingBuildDirs);
   } catch (error) {
     core.setFailed(error.message);
   }
