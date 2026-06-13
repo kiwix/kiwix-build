@@ -36,7 +36,7 @@ class NeutralEnv:
             self.make_command = self._detect_command("make")
         self.cmake_command = self._detect_command("cmake")
         self.qmake_command = self._detect_command(
-            "qmake", required=False, default=[["qmake"], ["qmake-qt5"]]
+            "qmake", required=False, default=[["qmake"], ["qmake6"]]
         )
 
     def detect_platform(self):
