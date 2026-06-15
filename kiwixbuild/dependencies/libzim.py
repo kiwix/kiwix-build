@@ -32,6 +32,8 @@ class Libzim(Dependency):
         @property
         def configure_options(self):
             configInfo = self.buildEnv.configInfo
+            if configInfo.build in ("android", "wasm"):
+                yield "-Dwithout_writer=true"
             if neutralEnv("distname") == "Windows":
                 yield "-Dwerror=false"
             if configInfo.build == "android":
