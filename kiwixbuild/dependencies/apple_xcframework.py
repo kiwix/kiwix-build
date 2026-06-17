@@ -9,39 +9,29 @@ from .base import Dependency, NoopSource, Builder as BaseBuilder
 
 class AppleXCFramework(Dependency):
     name = "apple_xcframework"
-    subConfigNames = [
+
+    macos_subconfigs = (
         "macos_x86-64_static",
         "macos_arm64_static",
+    )
+
+    ios_subconfigs = (
         "ios_arm64",
+    )
+
+    iossimulator_subconfigs = (
         "iossimulator_x86_64",
         "iossimulator_arm64",
-    ]
+    )
+
+    subConfigNames = macos_subconfigs + ios_subconfigs + iossimulator_subconfigs
+
     Source = NoopSource
 
     class Builder(BaseBuilder):
         @property
         def all_subconfigs(self):
             return self.buildEnv.configInfo.subConfigNames
-
-        @property
-        def macos_subconfigs(self):
-            return [
-                target for target in self.all_subconfigs if target.startswith("macos")
-            ]
-
-        @property
-        def iossimulator_subconfigs(self):
-            return [
-                target
-                for target in self.all_subconfigs
-                if target.startswith("iossimulator")
-            ]
-
-        @property
-        def ios_subconfigs(self):
-            return [
-                target for target in self.all_subconfigs if target.startswith("ios_")
-            ]
 
         @classmethod
         def get_dependencies(cls, configInfo, alldeps):
@@ -72,7 +62,7 @@ class AppleXCFramework(Dependency):
                 run_command(command, lib_dir, context)
 
                 # will be included in xcframework
-                if target in self.ios_subconfigs:
+                if target in AppleXCFramework.ios_subconfigs:
                     xcf_libs.append(pj(lib_dir, "merged.a"))
 
             return xcf_libs
@@ -95,7 +85,7 @@ class AppleXCFramework(Dependency):
 
         def _build_xcframework(self, xcf_libs, context):
             # create xcframework
-            ref_conf = ConfigInfo.get_config(self.macos_subconfigs[0])
+            ref_conf = ConfigInfo.get_config(AppleXCFramework.macos_subconfigs[0])
             command = ["xcodebuild", "-create-xcframework"]
             for lib in xcf_libs:
                 command += [
@@ -114,13 +104,13 @@ class AppleXCFramework(Dependency):
             xcf_libs += self.command(
                 "make_macos_fat",
                 self.make_fat_with,
-                self.macos_subconfigs,
+                AppleXCFramework.macos_subconfigs,
                 "macos_fat",
             )
             xcf_libs += self.command(
                 "make_simulator_fat",
                 self.make_fat_with,
-                self.iossimulator_subconfigs,
+                AppleXCFramework.iossimulator_subconfigs,
                 "ios-simulator_fat",
             )
             self.command("build_xcframework", self._build_xcframework, xcf_libs)
