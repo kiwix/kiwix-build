@@ -161,7 +161,7 @@ class iOSArm64(AppleConfigInfo):
     min_iphoneos_version = "15.0"
 
 
-class iOSx64Simulator(AppleConfigInfo):
+class iOSSimulatorAmd64(AppleConfigInfo):
     name = "iossimulator_x86_64"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
@@ -170,7 +170,7 @@ class iOSx64Simulator(AppleConfigInfo):
     min_iphoneos_version = "15.0"
 
 
-class iOSArm64Simulator(AppleConfigInfo):
+class iOSSimulatorArm64(AppleConfigInfo):
     name = "iossimulator_arm64"
     arch = cpu = "arm64"
     host = "arm-apple-darwin"
