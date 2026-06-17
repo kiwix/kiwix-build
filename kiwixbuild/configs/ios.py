@@ -162,7 +162,7 @@ class iOSArm64(AppleConfigInfo):
 
 
 class iOSSimulatorAmd64(AppleConfigInfo):
-    name = "iossimulator_x86_64"
+    name = "ios_simulator_x86_64"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
     target = "x86-apple-ios-simulator"
@@ -171,7 +171,7 @@ class iOSSimulatorAmd64(AppleConfigInfo):
 
 
 class iOSSimulatorArm64(AppleConfigInfo):
-    name = "iossimulator_arm64"
+    name = "ios_simulator_arm64"
     arch = cpu = "arm64"
     host = "arm-apple-darwin"
     target = "aarch64-apple-ios-simulator"

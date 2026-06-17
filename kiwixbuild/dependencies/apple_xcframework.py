@@ -20,8 +20,8 @@ class AppleXCFramework(Dependency):
     )
 
     iossimulator_subconfigs = (
-        "iossimulator_x86_64",
-        "iossimulator_arm64",
+        "ios_simulator_x86_64",
+        "ios_simulator_arm64",
     )
 
     subConfigNames = macos_subconfigs + ios_subconfigs + iossimulator_subconfigs
