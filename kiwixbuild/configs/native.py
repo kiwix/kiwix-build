@@ -2,7 +2,7 @@ from .base import ConfigInfo, MixedMixin
 
 from kiwixbuild.utils import pj
 from kiwixbuild._global import option, neutralEnv
-from kiwixbuild.configs.ios import MIN_MACOS_VERSION
+from kiwixbuild.configs.apple import MIN_MACOS_VERSION
 import sysconfig
 import platform
 import sys
