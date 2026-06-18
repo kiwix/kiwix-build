@@ -8,6 +8,7 @@ import platform
 
 class Xapian(Dependency):
     name = "xapian-core"
+    version = "1.4.26"
 
     if platform.system() == "Windows":
 

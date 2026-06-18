@@ -6,6 +6,7 @@ from shutil import copy2
 
 class Mustache(Dependency):
     name = "mustache"
+    version = "4.1"
 
     class Source(ReleaseDownload):
         archive = Remotefile(

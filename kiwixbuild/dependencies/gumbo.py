@@ -5,6 +5,7 @@ from kiwixbuild.utils import Remotefile
 
 class Gumbo(Dependency):
     name = "gumbo"
+    version = "0.13.1"
 
     class Source(ReleaseDownload):
         archive = Remotefile(
