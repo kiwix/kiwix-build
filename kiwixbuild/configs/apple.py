@@ -10,7 +10,6 @@ MIN_MACOS_VERSION = "12.0"
 
 
 class AppleConfigInfo(ConfigInfo):
-    build = "ios"
     static = True
     compatible_hosts = ["Darwin"]
     arch = None
@@ -34,9 +33,6 @@ class AppleConfigInfo(ConfigInfo):
             command = "xcrun --sdk {} --show-sdk-path".format(self.sdk_name)
             self._root_path = subprocess.check_output(command, shell=True)[:-1].decode()
         return self._root_path
-
-    def __str__(self):
-        return "ios"
 
     def finalize_setup(self):
         super().finalize_setup()
@@ -152,71 +148,75 @@ class AppleConfigInfo(ConfigInfo):
         yield f"--host={self.host}"
 
 
-class iOSArm64(AppleConfigInfo):
+class iOSConfigBase(AppleConfigInfo):
+    build = "ios"
+    min_iphoneos_version = "15.0"
+
+    def __str__(self):
+        return "ios"
+
+
+
+class iOSArm64(iOSConfigBase):
     name = "ios_arm64"
     arch = cpu = "arm64"
     host = "arm-apple-darwin"
     target = "aarch64-apple-ios"
     sdk_name = "iphoneos"
-    min_iphoneos_version = "15.0"
 
 
-class iOSx64Simulator(AppleConfigInfo):
-    name = "iossimulator_x86_64"
+class iOSSimulatorAmd64(iOSConfigBase):
+    name = "ios_simulator_x86_64"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
     target = "x86-apple-ios-simulator"
     sdk_name = "iphonesimulator"
-    min_iphoneos_version = "15.0"
 
 
-class iOSArm64Simulator(AppleConfigInfo):
-    name = "iossimulator_arm64"
+class iOSSimulatorArm64(iOSConfigBase):
+    name = "ios_simulator_arm64"
     arch = cpu = "arm64"
     host = "arm-apple-darwin"
     target = "aarch64-apple-ios-simulator"
     sdk_name = "iphonesimulator"
-    min_iphoneos_version = "15.0"
 
 
-class macOSArm64(AppleConfigInfo):
+
+class macOSConfigBase(AppleConfigInfo):
+    build = "macos"
+    min_macos_version = MIN_MACOS_VERSION
+    sdk_name = "macosx"
+
+    def __str__(self):
+        return "macos"
+
+
+class macOSArm64(macOSConfigBase):
     name = "macos_arm64_static"
     arch = cpu = "arm64"
     host = "aarch64-apple-darwin"
     target = "arm64-apple-macos"
-    sdk_name = "macosx"
-    min_iphoneos_version = None
-    min_macos_version = MIN_MACOS_VERSION
 
 
-class macOSArm64Mixed(MixedMixin("macos_arm64_static"), AppleConfigInfo):
+class macOSArm64Mixed(MixedMixin("macos_arm64_static"), macOSConfigBase):
     name = "macos_arm64_mixed"
     arch = cpu = "arm64"
     host = "aarch64-apple-darwin"
     target = "arm64-apple-macos"
-    sdk_name = "macosx"
-    min_iphoneos_version = None
-    min_macos_version = MIN_MACOS_VERSION
 
 
-class macOSAmd64(AppleConfigInfo):
+class macOSAmd64(macOSConfigBase):
     name = "macos_x86-64_static"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
     target = "x86_64-apple-darwin"
-    sdk_name = "macosx"
-    min_iphoneos_version = None
-    min_macos_version = MIN_MACOS_VERSION
 
 
-class macOSAmd64Mixed(MixedMixin("macos_x86-64_static"), AppleConfigInfo):
+class macOSAmd64Mixed(MixedMixin("macos_x86-64_static"), macOSConfigBase):
     name = "macos_x86-64_mixed"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
     target = "x86_64-apple-darwin"
-    sdk_name = "macosx"
-    min_iphoneos_version = None
-    min_macos_version = MIN_MACOS_VERSION
 
 
 class IOS(MetaConfigInfo):

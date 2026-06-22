@@ -38,7 +38,7 @@ class Libkiwix(Dependency):
             if configInfo.build == "android":
                 yield "-Dstatic-linkage=true"
                 yield "-Dwerror=false"
-            if configInfo.build == "ios":
+            if configInfo.build in ("ios", "macos"):
                 yield "-Db_bitcode=true"
             if configInfo.name == "flatpak":
                 yield "--wrap-mode=nodownload"
