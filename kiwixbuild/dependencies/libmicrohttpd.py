@@ -5,6 +5,7 @@ from kiwixbuild.utils import Remotefile
 
 class MicroHttpd(Dependency):
     name = "libmicrohttpd"
+    version = "0.9.76"
 
     class Source(ReleaseDownload):
         src_archive = Remotefile(
