@@ -29,9 +29,9 @@ class LibCurl(Dependency):
 
     class Builder(MesonBuilder):
         dependencies = ["zlib"]
-        configure_options = [
-            f"-D{p}=disabled"
-            for p in (
+
+        def get_features_to_disable(self):
+            yield from (
                 "psl",
                 "kerberos-auth",
                 "gss-api",
@@ -55,7 +55,16 @@ class LibCurl(Dependency):
                 "gopher",
                 "tool",
             )
-        ]
+
+            if self.buildEnv.configInfo.name in ("i586_static", "i586_dyn"):
+                yield "ssl"
+
+        @property
+        def configure_options(self):
+            return tuple(
+                f"-D{p}=disabled"
+                for p in self.get_features_to_disable()
+            )
 
         def _test(self, context):
             context.skip("No Test")
