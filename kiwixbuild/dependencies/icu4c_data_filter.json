@@ -1,9 +1,15 @@
 {
     "strategy": "additive",
     "featureFilters": {
+        "brkitr_tree": "include",
+        "brkitr_rules": "include",
+        "brkitr_dictionaries": "include",
+        "cnvalias": "include",
         "lang_tree": "include",
         "locales_tree": "include",
         "translit": "include",
+        "uemoji": "include",
+        "ulayout": "include",
         "misc": {
             "includelist": [
                "likelySubtags",
