@@ -76,11 +76,11 @@ UNICODE_VERSION=15.0
 ICUPREFIX=icu
 ICULIBSUFFIX=
 LIBICU=lib${{ICUPREFIX}}
-pkglibdir=${{libdir}}/icu${{ICULIBSUFFIX}}/73.1
-ICUDATA_NAME = icudt73l
+pkglibdir=${{libdir}}/icu${{ICULIBSUFFIX}}/74.1
+ICUDATA_NAME = icudt74l
 ICUDESC=International Components for Unicode
 
-Version: 73.1
+Version: 74.1
 Cflags: -I${{includedir}}
 Description: International Components for Unicode: Internationalization library
 Name: icu-i18n
