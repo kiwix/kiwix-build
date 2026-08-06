@@ -82,23 +82,36 @@ ICUDESC=International Components for Unicode
 
 Version: 74.1
 Cflags: -I${{includedir}}
-Description: International Components for Unicode: Internationalization library
-Name: icu-i18n
-Libs: -L${{libdir}} -licuin -licuuc -licudt"""
+Description: International Components for Unicode: {libdesc}
+Name: {pkgname}
+Libs: -L${{libdir}} {libs}"""
 
-                pkg_config_content = pkg_config_template.format(
-                    prefix=self.buildEnv.install_dir
+                pkg_config_dir = pj(self.buildEnv.install_dir, "lib", "pkgconfig")
+                os.makedirs(pkg_config_dir, exist_ok=True)
+
+                def writeFile(path, content):
+                    with open(path, mode="w") as f:
+                        f.write(content)
+
+                writeFile(
+                    pj(pkg_config_dir, "icu-i18n.pc"),
+                    pkg_config_template.format(
+                        prefix=self.buildEnv.install_dir,
+                        pkgname='icu-i18n',
+                        libdesc='Internationalization library',
+                        libs='-licuin -licuuc -licudt'
+                    )
                 )
 
-                os.makedirs(
-                    pj(self.buildEnv.install_dir, "lib", "pkgconfig"), exist_ok=True
+                writeFile(
+                    pj(pkg_config_dir, "icu-uc.pc"),
+                    pkg_config_template.format(
+                        prefix=self.buildEnv.install_dir,
+                        pkgname='icu-uc',
+                        libdesc='Common and Data libraries',
+                        libs='-licuuc -licudt'
+                    )
                 )
-                with open(
-                    pj(self.buildEnv.install_dir, "lib", "pkgconfig", "icu-i18n.pc"),
-                    mode="w",
-                ) as f:
-                    f.write(pkg_config_content)
-
 else:
 
     class Icu(Dependency):
