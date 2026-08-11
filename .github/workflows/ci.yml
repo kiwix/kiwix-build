@@ -32,7 +32,7 @@ jobs:
     - name: Install python modules
       shell: bash
       run: |
-        pip3 install meson pytest requests distro paramiko
+        pip3 install meson==1.11.2 pytest requests distro paramiko
         pip3 install --no-deps $GITHUB_WORKSPACE
     - name: Install QT
       if: ${{ matrix.config == 'native_mixed' }}
@@ -325,7 +325,7 @@ jobs:
         brew install automake # ninja
     - name: Install Python modules
       run: |
-        pip3 install meson pytest requests distro paramiko
+        pip3 install meson==1.11.2 pytest requests distro paramiko
         pip3 install --no-deps $GITHUB_WORKSPACE
     - name: secret
       shell: bash
