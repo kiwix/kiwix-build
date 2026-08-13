@@ -4,7 +4,7 @@ main_project_versions = {
     "libzim": "9.8.2",
     "libkiwix": "14.2.1",
     "kiwix-tools": "3.8.2",
-    "zim-tools": "3.7.0",
+    "zim-tools": "3.8.0",
     "kiwix-desktop": "2.5.1",
 }
 
@@ -23,10 +23,10 @@ main_project_versions = {
 #    - Else, increment the value. If no value was present, see `(was ...)`.
 
 release_versions = {
-    "libzim": 0,  # Depends of base deps (was 0)
+    "libzim": None,  # Depends of base deps (was 0)
     "libkiwix": None,  # Depends of libzim (was 2)
     "kiwix-tools": None,  # Depends of libkiwix and libzim (was 0)
-    "zim-tools": None,  # Depends of libzim (was 1)
+    "zim-tools": 0,  # Depends of libzim (was None)
     "kiwix-desktop": None,  # Depends of libkiwix and libzim (was 0)
 }
 
