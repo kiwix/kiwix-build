@@ -63,7 +63,11 @@ class AppleXCFramework(Dependency):
 
                 # will be included in xcframework
                 if target in AppleXCFramework.ios_subconfigs:
-                    xcf_libs.append(pj(lib_dir, "merged.a"))
+                    # ios subconfigs build libzim without the writer (see #946),
+                    # so their header set is smaller than macos's - pair this
+                    # library with its own headers, not a shared reference one.
+                    headers_dir = pj(cfg.buildEnv.install_dir, "include")
+                    xcf_libs.append((pj(lib_dir, "merged.a"), headers_dir))
 
             return xcf_libs
 
@@ -81,18 +85,23 @@ class AppleXCFramework(Dependency):
             command = ["lipo", "-create", "-output", output_merged, *libs]
             run_command(command, self.buildEnv.build_dir, context)
 
-            return [output_merged]
+            # All configs merged into one fat lib share the same header set
+            # (same build type - e.g. all macos, or all ios-simulator), so any
+            # one of them is a valid header source for the fat lib.
+            headers_dir = pj(
+                ConfigInfo.get_config(configs[0]).buildEnv.install_dir, "include"
+            )
+            return [(output_merged, headers_dir)]
 
         def _build_xcframework(self, xcf_libs, context):
             # create xcframework
-            ref_conf = ConfigInfo.get_config(AppleXCFramework.macos_subconfigs[0])
             command = ["xcodebuild", "-create-xcframework"]
-            for lib in xcf_libs:
+            for lib, headers_dir in xcf_libs:
                 command += [
                     "-library",
                     lib,
                     "-headers",
-                    pj(ref_conf.buildEnv.install_dir, "include"),
+                    headers_dir,
                 ]
             command += ["-output", self.final_path]
             run_command(command, self.buildEnv.build_dir, context)
