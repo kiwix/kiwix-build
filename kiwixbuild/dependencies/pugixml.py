@@ -5,6 +5,7 @@ from kiwixbuild.utils import Remotefile
 
 class Pugixml(Dependency):
     name = "pugixml"
+    version = "1.15"
 
     class Source(ReleaseDownload):
         archive = Remotefile(
