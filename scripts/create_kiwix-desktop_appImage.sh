@@ -13,7 +13,7 @@ if [ ! -e "$INSTALLDIR/lib" ] ; then
 fi
 
 ICONFILE=$SOURCEDIR/resources/icons/kiwix/scalable/kiwix-desktop.svg
-DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop.desktop
+DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop
 
 # Get linuxdeploy
 wget --continue https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage
