@@ -11,6 +11,7 @@ from kiwixbuild._global import neutralEnv
 
 class zlib(Dependency):
     name = "zlib"
+    version = "1.3.1"
 
     class Source(ReleaseDownload):
         src_archive = Remotefile(

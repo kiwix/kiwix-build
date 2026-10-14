@@ -5,6 +5,7 @@ from kiwixbuild.utils import Remotefile
 
 class ZimTestingSuite(Dependency):
     name = "zim-testing-suite"
+    version = "0.8.0"
     dont_skip = True
 
     class Source(ReleaseDownload):

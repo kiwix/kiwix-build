@@ -10,6 +10,7 @@ class emsdk(Dependency):
     dont_skip = True
     neutral = False
     name = "emsdk"
+    version = "3.1.41"
 
     class Source(ReleaseDownload):
         archive = Remotefile(

@@ -5,6 +5,7 @@ from kiwixbuild._global import neutralEnv
 
 class docoptcpp(Dependency):
     name = "docoptcpp"
+    version="0.6.2"
 
     class Source(ReleaseDownload):
         name = "docoptcpp"
