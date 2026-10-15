@@ -1,7 +1,9 @@
-from .base import ConfigInfo
+from typing import ClassVar
 
-from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
+from kiwixbuild.utils import pj
+
+from .base import ConfigInfo
 
 
 class WasmConfigInfo(ConfigInfo):
@@ -11,8 +13,8 @@ class WasmConfigInfo(ConfigInfo):
     arch_full = "wasm64-emscripten"
     libdir = "lib"
     # arch_full = 'wasm64-linux'
-    toolchain_names = ["emsdk"]
-    compatible_hosts = ["fedora", "debian", "ubuntu"]
+    toolchain_names: ClassVar[list[str]] = ["emsdk"]
+    compatible_hosts: ClassVar[list[str]] = ["fedora", "debian", "ubuntu"]
     exe_wrapper_def = ""
 
     def get_cross_config(self):

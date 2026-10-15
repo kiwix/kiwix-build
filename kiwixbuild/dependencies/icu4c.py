@@ -1,15 +1,20 @@
+import fileinput
+import os
+import platform
+import shutil
+from typing import ClassVar
+
+from kiwixbuild._global import get_target_step, neutral_env
+from kiwixbuild.utils import Remotefile, extract_archive, pj
+
 from .base import (
-    Dependency,
-    ReleaseDownload,
-    MakeBuilder,
     Builder as BaseBuilder,
 )
-
-from kiwixbuild.utils import pj, SkipCommand, Remotefile, extract_archive
-from kiwixbuild._global import get_target_step, neutralEnv
-import os, shutil
-import fileinput
-import platform
+from .base import (
+    Dependency,
+    MakeBuilder,
+    ReleaseDownload,
+)
 
 if platform.system() == "Windows":
 
@@ -44,7 +49,7 @@ if platform.system() == "Windows":
                     dirs_exist_ok=True,
                 )
 
-                def ignore_non_dll(path, names):
+                def ignore_non_dll(_path, names):
                     return [n for n in names if not n.endswith(".dll")]
 
                 shutil.copytree(
@@ -89,28 +94,28 @@ Libs: -L${{libdir}} {libs}"""
                 pkg_config_dir = pj(self.buildEnv.install_dir, "lib", "pkgconfig")
                 os.makedirs(pkg_config_dir, exist_ok=True)
 
-                def writeFile(path, content):
+                def write_file(path, content):
                     with open(path, mode="w") as f:
                         f.write(content)
 
-                writeFile(
+                write_file(
                     pj(pkg_config_dir, "icu-i18n.pc"),
                     pkg_config_template.format(
                         prefix=self.buildEnv.install_dir,
-                        pkgname='icu-i18n',
-                        libdesc='Internationalization library',
-                        libs='-licuin -licuuc -licudt'
-                    )
+                        pkgname="icu-i18n",
+                        libdesc="Internationalization library",
+                        libs="-licuin -licuuc -licudt",
+                    ),
                 )
 
-                writeFile(
+                write_file(
                     pj(pkg_config_dir, "icu-uc.pc"),
                     pkg_config_template.format(
                         prefix=self.buildEnv.install_dir,
-                        pkgname='icu-uc',
-                        libdesc='Common and Data libraries',
-                        libs='-licuuc -licudt'
-                    )
+                        pkgname="icu-uc",
+                        libdesc="Common and Data libraries",
+                        libs="-licuuc -licudt",
+                    ),
                 )
 else:
 
@@ -129,29 +134,29 @@ else:
                 "https://github.com/unicode-org/icu/releases/download/release-73-2/icu4c-73_2-data.zip",
             )
 
-            archives = [archive_src, archive_data]
+            archives: ClassVar[list] = [archive_src, archive_data]
 
             def _extract(self, context):
                 context.try_skip(self.extract_path)
                 if os.path.exists(self.extract_path):
                     shutil.rmtree(self.extract_path)
                 extract_archive(
-                    pj(neutralEnv("archive_dir"), self.archive_src.name),
-                    neutralEnv("source_dir"),
+                    pj(neutral_env("archive_dir"), self.archive_src.name),
+                    neutral_env("source_dir"),
                     topdir=None,
                     name=self.source_dir,
                 )
                 shutil.rmtree(
-                    pj(neutralEnv("source_dir"), self.source_dir, "source", "data")
+                    pj(neutral_env("source_dir"), self.source_dir, "source", "data")
                 )
                 extract_archive(
-                    pj(neutralEnv("archive_dir"), self.archive_data.name),
-                    pj(neutralEnv("source_dir"), self.source_dir, "source"),
+                    pj(neutral_env("archive_dir"), self.archive_data.name),
+                    pj(neutral_env("source_dir"), self.source_dir, "source"),
                     topdir="data",
                     name="data",
                 )
 
-            patches = [
+            patches: ClassVar[list[str]] = [
                 "icu4c_fix_static_lib_name_mingw.patch",
                 "icu4c_rpath.patch",
                 "icu4c_wasm.patch",
@@ -159,11 +164,11 @@ else:
 
         class Builder(MakeBuilder):
             subsource_dir = "source"
-            make_install_targets = ["install"]
+            make_install_targets: ClassVar[list[str]] = ["install"]
 
             @classmethod
-            def get_dependencies(cls, configInfo, allDeps):
-                plt = "native_static" if configInfo.static else "native_dyn"
+            def get_dependencies(cls, config_info, _all_deps):
+                plt = "native_static" if config_info.static else "native_dyn"
                 return [(plt, "icu4c")]
 
             @property
@@ -175,21 +180,21 @@ else:
                 yield "--enable-rpath"
                 yield "--disable-icuio"
                 yield "--disable-layoutex"
-                configInfo = self.buildEnv.configInfo
-                if configInfo.build != "native":
+                config_info = self.buildEnv.configInfo
+                if config_info.build != "native":
                     icu_native_builder = get_target_step(
-                        "icu4c", "native_static" if configInfo.static else "native_dyn"
+                        "icu4c", "native_static" if config_info.static else "native_dyn"
                     )
                     yield f"--with-cross-build={icu_native_builder.build_path}"
                     yield "--disable-tools"
-                if configInfo.build in ("android", "wasm"):
+                if config_info.build in ("android", "wasm"):
                     yield "--with-data-packaging=archive"
 
             def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
                 env = super().get_env(
-                                cross_comp_flags=cross_comp_flags,
-                                cross_compilers=cross_compilers,
-                                cross_path=cross_path,
+                    cross_comp_flags=cross_comp_flags,
+                    cross_compilers=cross_compilers,
+                    cross_path=cross_path,
                 )
                 if self.buildEnv.configInfo.build == "x86-64_musl":
                     del env["LD_LIBRARY_PATH"]

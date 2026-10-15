@@ -1,36 +1,30 @@
+import contextlib
+import json
+import os
+import subprocess
 import sys
 from collections import OrderedDict
-from .buildenv import *
-
-from .configs import ConfigInfo
-from .utils import remove_duplicates, run_command, StopBuild, Context
-from .dependencies import Dependency
-from .packages import PACKAGE_NAME_MAPPERS
-from .versions import base_deps_versions
-from ._global import (
-    neutralEnv,
-    option,
-    add_target_step,
-    get_target_step,
-    target_steps,
-)
-from . import _global
-from .dependencies.base import (
-    Source,
-    Builder,
-    ReleaseDownload,
-    GitClone,
-    MesonBuilder,
-    CMakeBuilder,
-    QMakeBuilder,
-    MakeBuilder,
-    SCRIPT_DIR,
-)
-import json
 from shutil import copyfile
 from urllib.parse import urlparse
 from urllib.request import urlopen
-import json
+
+from ._global import (
+    add_target_step,
+    get_target_step,
+    neutral_env,
+    option,
+    target_steps,
+)
+from .configs import ConfigInfo
+from .dependencies import Dependency
+from .dependencies.base import (
+    SCRIPT_DIR,
+    GitClone,
+    ReleaseDownload,
+)
+from .packages import PACKAGE_NAME_MAPPERS
+from .utils import Context, StopBuild, pj, remove_duplicates, run_command
+from .versions import base_deps_versions
 
 MANIFEST = {
     "app-id": "org.kiwix.desktop",
@@ -86,123 +80,119 @@ LIBTORRENT_MODULES = [
         "build-commands": [
             "ln -s lib /app/lib64 ",
         ],
-        "sources": [
-        ]
+        "sources": [],
     },
-
     {
         "name": "boost",
         "buildsystem": "simple",
         "build-commands": [
             "./bootstrap.sh --prefix=/app --with-libraries=headers",
-            "./b2 install variant=release link=shared runtime-link=shared cxxflags=\"$CXXFLAGS\" linkflags=\"$LDFLAGS\" -j $FLATPAK_BUILDER_N_JOBS"
+            './b2 install variant=release link=shared runtime-link=shared cxxflags="$CXXFLAGS" linkflags="$LDFLAGS" -j $FLATPAK_BUILDER_N_JOBS',
         ],
         "sources": [
             {
                 "type": "archive",
                 "url": "https://archives.boost.io/release/1.90.0/source/boost_1_90_0.tar.bz2",
-                "sha256": "49551aff3b22cbc5c5a9ed3dbc92f0e23ea50a0f7325b0d198b705e8ee3fc305"
+                "sha256": "49551aff3b22cbc5c5a9ed3dbc92f0e23ea50a0f7325b0d198b705e8ee3fc305",
             }
-        ]
+        ],
     },
-
     {
         "name": "libtorrent",
         "buildsystem": "cmake-ninja",
         "builddir": True,
-        "config-opts": [
-            "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-        ],
+        "config-opts": ["-DCMAKE_BUILD_TYPE=RelWithDebInfo"],
         "sources": [
             {
                 "type": "archive",
                 "url": "https://github.com/arvidn/libtorrent/releases/download/v2.0.7/libtorrent-rasterbar-2.0.7.tar.gz",
-                "sha256": "3850a27aacb79fcc4d352c1f02a7a59e0e8322afdaa1f5d58d676c02edfcfa36"
+                "sha256": "3850a27aacb79fcc4d352c1f02a7a59e0e8322afdaa1f5d58d676c02edfcfa36",
             }
-        ]
-    }
+        ],
+    },
 ]
+
 
 class FlatpakBuilder:
     def __init__(self):
         self._targets = {}
         ConfigInfo.get_config("neutral", self._targets)
         self.config = ConfigInfo.get_config("flatpak", self._targets)
-        if neutralEnv("distname") not in self.config.compatible_hosts:
+        if neutral_env("distname") not in self.config.compatible_hosts:
             print(
                 (
                     "ERROR: The config {} cannot be build on host {}.\n"
                     "Select another config or change your host system."
-                ).format(self.config.name, neutralEnv("distname"))
+                ).format(self.config.name, neutral_env("distname"))
             )
         self.targetDefs = self.config.add_targets(option("target"), self._targets)
 
     def finalize_target_steps(self):
         steps = []
-        for targetDef in self.targetDefs:
-            steps += self.order_steps(targetDef)
+        for target_def in self.targetDefs:
+            steps += self.order_steps(target_def)
         steps = list(remove_duplicates(steps))
 
-        for cfgName in ConfigInfo.all_running_configs:
-            cfg = ConfigInfo.all_configs[cfgName]
-            for tlcName in cfg.toolchain_names:
-                tlc = Dependency.all_deps[tlcName]
-                src_cfg_step = ("source", tlcName)
+        for cfg_name in ConfigInfo.all_running_configs:
+            cfg = ConfigInfo.all_configs[cfg_name]
+            for tlc_name in cfg.toolchain_names:
+                tlc = Dependency.all_deps[tlc_name]
+                src_cfg_step = ("source", tlc_name)
                 add_target_step(src_cfg_step, self._targets[src_cfg_step])
-                blt_cfg_step = ("neutral" if tlc.neutral else cfgName, tlcName)
+                blt_cfg_step = ("neutral" if tlc.neutral else cfg_name, tlc_name)
                 add_target_step(blt_cfg_step, self._targets[blt_cfg_step])
 
         for dep in steps:
             add_target_step(dep, self._targets[dep])
         self.instanciate_steps()
 
-    def order_steps(self, targetDef):
+    def order_steps(self, target_def):
         _targets = dict(self._targets)
-        yield from self.order_dependencies(targetDef, _targets)
+        yield from self.order_dependencies(target_def, _targets)
 
-    def order_dependencies(self, targetDef, targets):
-        targetConfigName, targetName = targetDef
-        if targetConfigName == "source":
+    def order_dependencies(self, target_def, targets):
+        target_config_name, target_name = target_def
+        if target_config_name == "source":
             # Do not try to order sources, they will be added as dep by the
             # build step two lines later.
             return
         try:
-            target = targets.pop(targetDef)
+            target = targets.pop(target_def)
         except KeyError:
             return
 
-        targetConfig = ConfigInfo.get_config(targetConfigName)
-        for dep in target.get_dependencies(targetConfig, True):
+        target_config = ConfigInfo.get_config(target_config_name)
+        for dep in target.get_dependencies(target_config, True):
             if isinstance(dep, tuple):
-                depConfig, depName = dep
+                dep_config, dep_name = dep
             else:
-                depConfig, depName = targetConfigName, dep
-            if (depConfig, depName) in targets:
-                yield from self.order_dependencies((depConfig, depName), targets)
-        yield ("source", targetName)
-        yield targetDef
+                dep_config, dep_name = target_config_name, dep
+            if (dep_config, dep_name) in targets:
+                yield from self.order_dependencies((dep_config, dep_name), targets)
+        yield ("source", target_name)
+        yield target_def
 
     def instanciate_steps(self):
-        for stepDef in list(target_steps()):
-            stepConfig, stepName = stepDef
-            stepClass = Dependency.all_deps[stepName]
-            if stepConfig == "source":
-                source = get_target_step(stepDef)(stepClass)
-                add_target_step(stepDef, source)
+        for step_def in list(target_steps()):
+            step_config, step_name = step_def
+            step_class = Dependency.all_deps[step_name]
+            if step_config == "source":
+                source = get_target_step(step_def)(step_class)
+                add_target_step(step_def, source)
             else:
-                source = get_target_step(stepName, "source")
-                env = ConfigInfo.get_config(stepConfig).buildEnv
-                builder = get_target_step(stepDef)(stepClass, source, env)
-                add_target_step(stepDef, builder)
+                source = get_target_step(step_name, "source")
+                env = ConfigInfo.get_config(step_config).buildEnv
+                builder = get_target_step(step_def)(step_class, source, env)
+                add_target_step(step_def, builder)
 
     def configure(self):
         steps = remove_duplicates(target_steps())
         modules = OrderedDict()
-        for stepDef in steps:
-            module = modules.setdefault(stepDef[1], {})
-            module["name"] = stepDef[1]
-            if stepDef[0] == "source":
-                source = get_target_step(stepDef)
+        for step_def in steps:
+            module = modules.setdefault(step_def[1], {})
+            module["name"] = step_def[1]
+            if step_def[0] == "source":
+                source = get_target_step(step_def)
                 if getattr(source, "flatpak_no_autogen", False):
                     module["no-autogen"] = True
                 module_sources = module.setdefault("sources", [])
@@ -223,18 +213,18 @@ class FlatpakBuilder:
                         "url": source.git_remote,
                         "tag": source.git_ref,
                     }
-                    try:
+                    # Pinning the commit is best effort: keep the tag if it fails.
+                    with contextlib.suppress(Exception):
                         parsed = urlparse(source.git_remote)
                         if parsed.hostname == "github.com":
                             repo = parsed.path[:-4]
                             api_url = GET_REF_URL_API_TEMPLATE.format(
                                 repo=repo, ref=source.git_ref
                             )
-                            with urlopen(api_url) as r:
+                            # api_url is built from a fixed https:// template
+                            with urlopen(api_url) as r:  # noqa: S310
                                 ret = json.loads(r.read())
                             src["commit"] = ret["object"]["sha"]
-                    except:
-                        pass
                     module_sources.append(src)
                 for p in getattr(source, "patches", []):
                     patch = {"type": "patch", "path": "patches/" + p}
@@ -245,32 +235,30 @@ class FlatpakBuilder:
                     module_sources.append(command)
 
             else:
-                builder = get_target_step(stepDef)
+                builder = get_target_step(step_def)
                 builder.set_flatpak_buildsystem(module)
                 print(module["name"])
 
         manifest = MANIFEST.copy()
         modules = [m for m in modules.values() if m.get("sources")]
 
-        meson_module = { "name" : "meson",
-                         "buildsystem" : "simple",
-                         "build-commands" : [
-                            "python3 setup.py build",
-                            "python3 setup.py install --prefix=/app --root=/"
-                         ],
-                         "sources" : [
-                            {
-                                "type": "git",
-                                "url": "https://github.com/mesonbuild/meson.git",
-                                "tag": "1.6.1"
-                            },
-                            {
-                                "type": "patch",
-                                "path": "patches/flatpak_meson.patch"
-                            }
-                         ]
+        meson_module = {
+            "name": "meson",
+            "buildsystem": "simple",
+            "build-commands": [
+                "python3 setup.py build",
+                "python3 setup.py install --prefix=/app --root=/",
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://github.com/mesonbuild/meson.git",
+                    "tag": "1.6.1",
+                },
+                {"type": "patch", "path": "patches/flatpak_meson.patch"},
+            ],
         }
-        modules = LIBTORRENT_MODULES + [meson_module] + modules
+        modules = [*LIBTORRENT_MODULES, meson_module, *modules]
 
         for m in modules:
             temp = m["sources"]
@@ -284,18 +272,16 @@ class FlatpakBuilder:
 
     def _copy_patch_file(self, fname):
         path = pj(SCRIPT_DIR, "patches", fname)
-        os.makedirs(
-            pj(self.config.buildEnv.build_dir, "patches"), exist_ok=True
-        )
+        os.makedirs(pj(self.config.buildEnv.build_dir, "patches"), exist_ok=True)
         dest = pj(self.config.buildEnv.build_dir, "patches", fname)
         copyfile(path, dest)
 
     def copy_patches(self):
         self._copy_patch_file("flatpak_meson.patch")
 
-        sourceDefs = (tDef for tDef in target_steps() if tDef[0] == "source")
-        for sourceDef in sourceDefs:
-            source = get_target_step(sourceDef)
+        source_defs = (tDef for tDef in target_steps() if tDef[0] == "source")
+        for source_def in source_defs:
+            source = get_target_step(source_def)
             if not hasattr(source, "patches"):
                 continue
             for p in source.patches:
@@ -324,9 +310,9 @@ class FlatpakBuilder:
             )
             context._finalise()
         except subprocess.CalledProcessError:
-            with open(log, "r") as f:
+            with open(log) as f:
                 print(f.read())
-            raise StopBuild()
+            raise StopBuild() from None
 
     def bundle(self):
         log = pj(self.config.buildEnv.log_dir, "cmd_bundle_flatpak.log")
@@ -342,19 +328,19 @@ class FlatpakBuilder:
             )
             context._finalise()
         except subprocess.CalledProcessError:
-            with open(log, "r") as f:
+            with open(log) as f:
                 print(f.read())
-            raise StopBuild()
+            raise StopBuild() from None
 
     def _get_packages(self):
         package_name_mapper = PACKAGE_NAME_MAPPERS.get("flatpak", {})
 
         to_drop = []
-        for builderDef in self._targets:
-            configName, builderName = builderDef
-            packages = package_name_mapper.get(builderName)
+        for builder_def in self._targets:
+            _config_name, builder_name = builder_def
+            packages = package_name_mapper.get(builder_name)
             if packages:
-                to_drop.append(builderDef)
+                to_drop.append(builder_def)
         for dep in to_drop:
             del self._targets[dep]
 
@@ -368,14 +354,13 @@ class FlatpakBuilder:
             print("[SETUP TOOLCHAINS]")
             for config in ConfigInfo.all_running_configs.values():
                 config.finalize_setup()
-            for cfgName in ConfigInfo.all_running_configs:
-                cfg = ConfigInfo.all_configs[cfgName]
-                for tlcName in cfg.toolchain_names:
-                    tlc = Dependency.all_deps[tlcName]
-                    builderDef = (cfgName, tlcName)
-                    builder = get_target_step(builderDef)
-                    print("build {} ({}):".format(builder.name, cfgName))
-                    add_target_step(builderDef, builder)
+            for cfg_name in ConfigInfo.all_running_configs:
+                cfg = ConfigInfo.all_configs[cfg_name]
+                for tlc_name in cfg.toolchain_names:
+                    builder_def = (cfg_name, tlc_name)
+                    builder = get_target_step(builder_def)
+                    print(f"build {builder.name} ({cfg_name}):")
+                    add_target_step(builder_def, builder)
                     builder.build()
             print("[GENERATE FLATPAK MANIFEST]")
             self.configure()

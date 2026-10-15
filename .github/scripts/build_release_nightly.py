@@ -1,24 +1,22 @@
 #!/usr/bin/env python3
 
-import os
 
+from build_definition import PUBLISH, SOURCE_PUBLISH, select_build_targets
 from common import (
-    run_kiwix_build,
-    main_project_versions,
-    release_versions,
-    make_archive,
-    create_desktop_image,
-    update_flathub_git,
-    upload_archive,
-    fix_macos_rpath,
     BASE_DIR,
-    OS_NAME,
     COMPILE_CONFIG,
     MAKE_RELEASE,
+    OS_NAME,
+    create_desktop_image,
+    fix_macos_rpath,
+    main_project_versions,
+    make_archive,
     notarize_macos_build,
+    release_versions,
+    run_kiwix_build,
+    update_flathub_git,
+    upload_archive,
 )
-
-from build_definition import select_build_targets, BUILD, PUBLISH, SOURCE_PUBLISH
 
 
 def release_filter(project):
@@ -58,15 +56,15 @@ if MAKE_RELEASE:
         run_kiwix_build(
             target, config=COMPILE_CONFIG, make_release=MAKE_RELEASE, make_dist=True
         )
-        full_target_name = "{}-{}".format(target, main_project_versions[target])
+        full_target_name = f"{target}-{main_project_versions[target]}"
         if target == "kiwix-desktop":
-            archive = BASE_DIR / full_target_name / "{}.tar.gz".format(full_target_name)
+            archive = BASE_DIR / full_target_name / f"{full_target_name}.tar.gz"
         else:
             archive = (
                 BASE_DIR
                 / full_target_name
                 / "meson-dist"
-                / "{}.tar.xz".format(full_target_name)
+                / f"{full_target_name}.tar.xz"
             )
         upload_archive(archive, target, make_release=MAKE_RELEASE)
 

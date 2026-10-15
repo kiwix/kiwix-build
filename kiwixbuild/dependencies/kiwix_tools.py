@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from .base import Dependency, GitClone, MesonBuilder
 
 
@@ -10,7 +12,7 @@ class KiwixTools(Dependency):
         git_dir = "kiwix-tools"
 
     class Builder(MesonBuilder):
-        dependencies = ["libkiwix", "docoptcpp"]
+        dependencies: ClassVar[list[str]] = ["libkiwix", "docoptcpp"]
 
         @property
         def configure_options(self):

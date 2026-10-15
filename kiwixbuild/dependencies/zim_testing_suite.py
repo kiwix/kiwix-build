@@ -1,6 +1,6 @@
-from .base import Dependency, ReleaseDownload, NoopBuilder
-
 from kiwixbuild.utils import Remotefile
+
+from .base import Dependency, NoopBuilder, ReleaseDownload
 
 
 class ZimTestingSuite(Dependency):

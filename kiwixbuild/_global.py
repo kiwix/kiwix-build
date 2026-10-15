@@ -1,22 +1,21 @@
 from collections import OrderedDict as _OrderedDict
-import platform
 
-_neutralEnv = None
+_neutral_env = None
 _options = None
 _target_steps = _OrderedDict()
 
 
-def set_neutralEnv(env):
-    global _neutralEnv
-    _neutralEnv = env
+def set_neutral_env(env):
+    global _neutral_env  # noqa: PLW0603
+    _neutral_env = env
 
 
-def neutralEnv(what):
-    return getattr(_neutralEnv, what)
+def neutral_env(what):
+    return getattr(_neutral_env, what)
 
 
 def set_options(options):
-    global _options
+    global _options  # noqa: PLW0603
     _options = options
 
 

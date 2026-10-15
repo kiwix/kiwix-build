@@ -1,6 +1,8 @@
-from .base import Dependency, ReleaseDownload, MakeBuilder
+from typing import ClassVar
 
 from kiwixbuild.utils import Remotefile
+
+from .base import Dependency, MakeBuilder, ReleaseDownload
 
 
 class UUID(Dependency):
@@ -15,7 +17,7 @@ class UUID(Dependency):
         extract_dir = "e2fsprogs-libs-1.47.3"
 
     class Builder(MakeBuilder):
-        configure_options = [
+        configure_options: ClassVar[list[str]] = [
             "--enable-libuuid",
             "--disable-debugfs",
             "--disable-imager",
@@ -25,7 +27,10 @@ class UUID(Dependency):
             "--disable-uuidd",
             "--enable-subset",
         ]
-        configure_env = {"_format_CFLAGS": "{env.CFLAGS} -O3 -fPIC -Wno-error=implicit-function-declaration"}
-        static_configure_options = dynamic_configure_options = []
-        make_targets = ["libs"]
-        make_install_targets = ["install-libs"]
+        configure_env: ClassVar[dict[str, str]] = {
+            "_format_CFLAGS": "{env.CFLAGS} -O3 -fPIC -Wno-error=implicit-function-declaration"
+        }
+        static_configure_options: ClassVar[list[str]] = []
+        dynamic_configure_options: ClassVar[list[str]] = static_configure_options
+        make_targets: ClassVar[list[str]] = ["libs"]
+        make_install_targets: ClassVar[list[str]] = ["install-libs"]

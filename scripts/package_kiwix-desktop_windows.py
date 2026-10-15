@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
-import sys, subprocess, shutil, argparse, os
+import argparse
+import os
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
@@ -34,7 +38,7 @@ print(
 )
 
 shutil.copy2(install_dir / "bin" / "kiwix-desktop.exe", out_dir)
-subprocess.run(["windeployqt", "--compiler-runtime", str(out_dir)], check=True)
+subprocess.run(["windeployqt", "--compiler-runtime", str(out_dir)], check=True)  # noqa: S607
 
 
 shutil.copy2(static_dir / "bin" / "aria2c.exe", out_dir)
@@ -68,10 +72,8 @@ if args.sign:
 
 print(
     f"""Create archive
-- {archive_path.with_suffix('')}
+- {archive_path.with_suffix("")}
 - From {out_dir.parent}
 - With {out_dir.name}"""
 )
-shutil.make_archive(
-    archive_path.with_suffix(""), "zip", root_dir=out_dir, base_dir=""
-)
+shutil.make_archive(archive_path.with_suffix(""), "zip", root_dir=out_dir, base_dir="")

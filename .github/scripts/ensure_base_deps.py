@@ -2,25 +2,25 @@
 
 import os
 import tarfile
-from urllib.request import urlopen
 from urllib.error import URLError
-
-from kiwixbuild.versions import base_deps_meta_version
+from urllib.request import urlopen
 
 from common import (
+    COMPILE_CONFIG,
+    HOME,
+    MAKE_RELEASE,
+    OS_NAME,
+    make_deps_archive,
     print_message,
     run_kiwix_build,
     upload,
-    make_deps_archive,
-    HOME,
-    COMPILE_CONFIG,
-    OS_NAME,
-    MAKE_RELEASE,
 )
+
+from kiwixbuild.versions import base_deps_meta_version
 
 
 def download_base_archive(base_name):
-    url = "http://tmp.kiwix.org/ci/{}".format(base_name)
+    url = f"http://tmp.kiwix.org/ci/{base_name}"
     file_path = str(HOME / base_name)
     batch_size = 1024 * 1024 * 8
     with urlopen(url) as resource, open(file_path, "wb") as file:
@@ -33,9 +33,10 @@ def download_base_archive(base_name):
     return file_path
 
 
-def get_archive_name():
-    ARCHIVE_NAME_TEMPLATE = "base_deps_{os}_{config}_{version}.tar.gz"
+ARCHIVE_NAME_TEMPLATE = "base_deps_{os}_{config}_{version}.tar.gz"
 
+
+def get_archive_name():
     if COMPILE_CONFIG == "flatpak":
         return "base_deps_flatpak.tar.gz"
 
@@ -52,7 +53,7 @@ def main():
     try:
         local_filename = download_base_archive(base_dep_archive_name)
         with tarfile.open(local_filename) as f:
-            f.extractall(str(HOME))
+            f.extractall(str(HOME))  # noqa: S202 (our own CI archive)
         os.remove(str(local_filename))
     except URLError:
         if COMPILE_CONFIG == "flatpak":

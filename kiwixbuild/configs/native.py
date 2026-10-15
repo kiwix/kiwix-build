@@ -1,11 +1,12 @@
-from .base import ConfigInfo, MixedMixin
-
-from kiwixbuild.utils import pj
-from kiwixbuild._global import option, neutralEnv
-from kiwixbuild.configs.apple import MIN_MACOS_VERSION
-import sysconfig
 import platform
 import sys
+import sysconfig
+from typing import ClassVar
+
+from kiwixbuild._global import neutral_env
+from kiwixbuild.configs.apple import MIN_MACOS_VERSION
+
+from .base import ConfigInfo, mixed_mixin
 
 
 class NativeConfigInfo(ConfigInfo):
@@ -13,9 +14,9 @@ class NativeConfigInfo(ConfigInfo):
 
     def get_env(self):
         env = super().get_env()
-        if neutralEnv("distname") == "fedora":
+        if neutral_env("distname") == "fedora":
             env["QT_SELECT"] = "5-64"
-        if neutralEnv("distname") == "Darwin":
+        if neutral_env("distname") == "Darwin":
             env["CFLAGS"] += f"-mmacosx-version-min={MIN_MACOS_VERSION}"
         return env
 
@@ -29,16 +30,37 @@ class NativeConfigInfo(ConfigInfo):
 class NativeDyn(NativeConfigInfo):
     name = "native_dyn"
     static = False
-    compatible_hosts = ["fedora", "debian", "ubuntu", "Darwin", "almalinux", "Windows"]
+    compatible_hosts: ClassVar[list[str]] = [
+        "fedora",
+        "debian",
+        "ubuntu",
+        "Darwin",
+        "almalinux",
+        "Windows",
+    ]
 
 
 class NativeStatic(NativeConfigInfo):
     name = "native_static"
     static = True
-    compatible_hosts = ["fedora", "debian", "ubuntu", "Darwin", "almalinux", "Windows"]
+    compatible_hosts: ClassVar[list[str]] = [
+        "fedora",
+        "debian",
+        "ubuntu",
+        "Darwin",
+        "almalinux",
+        "Windows",
+    ]
 
 
-class NativeMixed(MixedMixin("native_static"), NativeConfigInfo):
+class NativeMixed(mixed_mixin("native_static"), NativeConfigInfo):
     name = "native_mixed"
     static = False
-    compatible_hosts = ["fedora", "debian", "ubuntu", "Darwin", "almalinux", "Windows"]
+    compatible_hosts: ClassVar[list[str]] = [
+        "fedora",
+        "debian",
+        "ubuntu",
+        "Darwin",
+        "almalinux",
+        "Windows",
+    ]

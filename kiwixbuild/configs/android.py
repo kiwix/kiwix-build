@@ -1,20 +1,23 @@
-from .base import ConfigInfo, MetaConfigInfo
-from kiwixbuild.utils import pj
+from typing import ClassVar
+
 from kiwixbuild._global import get_target_step, option
+from kiwixbuild.utils import pj
+
+from .base import ConfigInfo, MetaConfigInfo
 
 
 class AndroidConfigInfo(ConfigInfo):
     build = "android"
     static = True
-    toolchain_names = ["android-ndk"]
-    compatible_hosts = ["fedora", "debian", "ubuntu"]
+    toolchain_names: ClassVar[list[str]] = ["android-ndk"]
+    compatible_hosts: ClassVar[list[str]] = ["fedora", "debian", "ubuntu"]
 
     def __str__(self):
         return "android"
 
     @property
     def libdir(self):
-        return "lib/{}".format(self.arch_full)
+        return f"lib/{self.arch_full}"
 
     @property
     def binaries_name(self):
@@ -51,12 +54,10 @@ class AndroidConfigInfo(ConfigInfo):
             "-Wl,--exclude-libs,libunwind.a",
             "-Wl,-z,max-page-size=16384",
         ]
-        extra_cflags = [
-            "-I{}".format(include_dir) for include_dir in self.get_include_dirs()
-        ]
+        extra_cflags = [f"-I{include_dir}" for include_dir in self.get_include_dirs()]
         if hasattr(self, "march"):
-            extra_libs.append("-march={}".format(self.march))
-            extra_cflags.append("-march={}".format(self.march))
+            extra_libs.append(f"-march={self.march}")
+            extra_cflags.append(f"-march={self.march}")
         return {
             "exe_wrapper_def": "",
             "install_path": self.install_path,
@@ -87,20 +88,19 @@ class AndroidConfigInfo(ConfigInfo):
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
         root_path = pj(self.install_path, "sysroot")
-        march = "-march={}".format(self.march) if hasattr(self, "march") else ""
+        march = f"-march={self.march}" if hasattr(self, "march") else ""
         env["CFLAGS"] = (
-            "-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} {} ".format(
-                root_path, march
-            )
+            f"-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={root_path} {march} "
             + env["CFLAGS"]
         )
         env["CXXFLAGS"] = (
-            "-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={} {} ".format(
-                root_path, march
-            )
+            f"-fPIC -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 --sysroot={root_path} {march} "
             + env["CXXFLAGS"]
         )
-        env["LDFLAGS"] = "-Wl,-z,max-page-size=16384 --sysroot={} {} ".format(root_path, march) + env["LDFLAGS"]
+        env["LDFLAGS"] = (
+            f"-Wl,-z,max-page-size=16384 --sysroot={root_path} {march} "
+            + env["LDFLAGS"]
+        )
 
     def set_compiler(self, env):
         binaries = self.binaries()
@@ -109,7 +109,7 @@ class AndroidConfigInfo(ConfigInfo):
 
     @property
     def configure_options(self):
-        yield "--host={}".format(self.arch_full)
+        yield f"--host={self.arch_full}"
 
     def finalize_setup(self):
         super().finalize_setup()
@@ -150,18 +150,18 @@ class AndroidX8664(AndroidConfigInfo):
 
 class Android(MetaConfigInfo):
     name = "android"
-    compatible_hosts = ["fedora", "debian", "ubuntu"]
+    compatible_hosts: ClassVar[list[str]] = ["fedora", "debian", "ubuntu"]
 
     @property
     def arch_name(self):
         return "multi-linux-android"
 
     @property
-    def subConfigNames(self):
-        return ["android_{}".format(arch) for arch in option("android_arch")]
+    def sub_config_names(self):
+        return [f"android_{arch}" for arch in option("android_arch")]
 
-    def add_targets(self, targetName, targets):
-        return super().add_targets(targetName, targets)
+    def add_targets(self, target_name, targets):
+        return super().add_targets(target_name, targets)
 
     def __str__(self):
         return self.name

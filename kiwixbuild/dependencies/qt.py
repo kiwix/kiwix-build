@@ -1,8 +1,6 @@
-import shutil
+from kiwixbuild.utils import colorize
 
 from .base import Dependency, NoopBuilder, NoopSource
-
-from kiwixbuild.utils import SkipCommand, colorize
 
 
 class Qt(Dependency):

@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-import os, sys
 import argparse
+import os
 
+# `dependencies` must be imported before `configs` to avoid a circular import.
 from .dependencies import Dependency
-from .configs import ConfigInfo
+
+# isort: split
+from . import _global, buildenv
 from .builder import Builder
+from .configs import ConfigInfo
 from .flatpak_builder import FlatpakBuilder
-from . import _global
-from . import buildenv
 
 
 def parse_args():
@@ -45,9 +47,7 @@ def parse_args():
         "--verbose",
         "-v",
         action="store_true",
-        help=(
-            "Print all logs on stdout instead of in specific" " log files per commands"
-        ),
+        help=("Print all logs on stdout instead of in specific log files per commands"),
     )
     parser.add_argument(
         "--hide-progress",
@@ -155,8 +155,8 @@ def main():
     options = parse_args()
     options.working_dir = os.path.abspath(options.working_dir)
     _global.set_options(options)
-    neutralEnv = buildenv.NeutralEnv(options.get_build_dir)
-    _global.set_neutralEnv(neutralEnv)
+    neutral_env = buildenv.NeutralEnv(options.get_build_dir)
+    _global.set_neutral_env(neutral_env)
     if options.config == "flatpak":
         builder = FlatpakBuilder()
     else:

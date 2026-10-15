@@ -4,7 +4,9 @@ from pathlib import Path
 
 from kiwixbuild.configs import ConfigInfo
 from kiwixbuild.utils import pj, run_command
-from .base import Dependency, NoopSource, Builder as BaseBuilder
+
+from .base import Builder as BaseBuilder
+from .base import Dependency, NoopSource
 
 
 class AppleXCFramework(Dependency):
@@ -15,33 +17,33 @@ class AppleXCFramework(Dependency):
         "macos_arm64_static",
     )
 
-    ios_subconfigs = (
-        "ios_arm64",
-    )
+    ios_subconfigs = ("ios_arm64",)
 
     iossimulator_subconfigs = (
         "ios_simulator_x86_64",
         "ios_simulator_arm64",
     )
 
-    subConfigNames = macos_subconfigs + ios_subconfigs + iossimulator_subconfigs
+    sub_config_names = macos_subconfigs + ios_subconfigs + iossimulator_subconfigs
 
     Source = NoopSource
 
     class Builder(BaseBuilder):
         @property
         def all_subconfigs(self):
-            return self.buildEnv.configInfo.subConfigNames
+            return self.buildEnv.configInfo.sub_config_names
 
         @classmethod
-        def get_dependencies(cls, configInfo, alldeps):
-            return [(target, "libkiwix") for target in AppleXCFramework.subConfigNames]
+        def get_dependencies(cls, _config_info, _all_deps):
+            return [
+                (target, "libkiwix") for target in AppleXCFramework.sub_config_names
+            ]
 
         @property
         def final_path(self):
             return pj(self.buildEnv.install_dir, "lib", "CoreKiwix.xcframework")
 
-        def _remove_if_exists(self, context):
+        def _remove_if_exists(self, context):  # noqa: ARG002 (passed by keyword)
             if not os.path.exists(self.final_path):
                 return
 

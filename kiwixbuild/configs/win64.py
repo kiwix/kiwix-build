@@ -1,12 +1,14 @@
 import subprocess
+from typing import ClassVar
+
+from kiwixbuild._global import neutral_env
+from kiwixbuild.utils import pj, which
 
 from .base import ConfigInfo
-from kiwixbuild.utils import which, pj
-from kiwixbuild._global import neutralEnv
 
 
 class Win64ConfigInfo(ConfigInfo):
-    extra_libs = [
+    extra_libs: ClassVar[list[str]] = [
         "-lmingw32",
         "-lwinmm",
         "-lws2_32",
@@ -18,7 +20,7 @@ class Win64ConfigInfo(ConfigInfo):
         "-lkernel32",
     ]
     build = "win64"
-    compatible_hosts = ["fedora", "debian", "ubuntu"]
+    compatible_hosts: ClassVar[list[str]] = ["fedora", "debian", "ubuntu"]
     arch_full = "x86_64-w64-mingw32"
 
     def get_cross_config(self):
@@ -49,12 +51,12 @@ class Win64ConfigInfo(ConfigInfo):
             "fedora": "/usr/x86_64-w64-mingw32/sys-root/mingw",
             "debian": "/usr/x86_64-w64-mingw32",
         }
-        return root_paths[neutralEnv("distname")]
+        return root_paths[neutral_env("distname")]
 
     @property
     def binaries(self):
         return {
-            k: which("{}-{}".format(self.arch_full, v))
+            k: which(f"{self.arch_full}-{v}")
             for k, v in (
                 ("CC", "gcc"),
                 ("CXX", "g++"),

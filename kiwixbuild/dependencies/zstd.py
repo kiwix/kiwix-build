@@ -1,9 +1,11 @@
-from .base import Dependency, ReleaseDownload, MesonBuilder
+from typing import ClassVar
 
 from kiwixbuild.utils import Remotefile
 
+from .base import Dependency, MesonBuilder, ReleaseDownload
 
-class zstd(Dependency):
+
+class Zstd(Dependency):
     name = "zstd"
 
     class Source(ReleaseDownload):
@@ -13,12 +15,15 @@ class zstd(Dependency):
             "https://dev.kiwix.org/kiwix-build/zstd-1.5.7.tar.gz",
         )
 
-        patches = [
+        patches: ClassVar[list[str]] = [
             "zstd_qsort.patch",
         ]
 
     class Builder(MesonBuilder):
         subsource_dir = "build/meson"
         build_type = "release"
-        strip_options = []
-        configure_options = ["-Dbin_programs=false", "-Dbin_contrib=false"]
+        strip_options: ClassVar[list] = []
+        configure_options: ClassVar[list[str]] = [
+            "-Dbin_programs=false",
+            "-Dbin_contrib=false",
+        ]

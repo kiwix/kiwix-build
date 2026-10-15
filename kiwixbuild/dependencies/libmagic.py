@@ -1,13 +1,11 @@
-import os
+from kiwixbuild._global import get_target_step
+from kiwixbuild.utils import Remotefile, pj, run_command
 
 from .base import (
     Dependency,
-    ReleaseDownload,
     MakeBuilder,
+    ReleaseDownload,
 )
-
-from kiwixbuild.utils import Remotefile, pj, SkipCommand, run_command
-from kiwixbuild._global import get_target_step
 
 
 class LibMagic(Dependency):
@@ -31,14 +29,14 @@ class LibMagic(Dependency):
             yield "--disable-lzlib"
 
         @classmethod
-        def get_dependencies(cls, configInfo, allDeps):
-            if configInfo.build != "native":
+        def get_dependencies(cls, config_info, _all_deps):
+            if config_info.build != "native":
                 return [("native_static", "libmagic")]
             return []
 
         def _compile(self, context):
-            configInfo = self.buildEnv.configInfo
-            if configInfo.build == "native":
+            config_info = self.buildEnv.configInfo
+            if config_info.build == "native":
                 return super()._compile(context)
             context.try_skip(self.build_path)
             command = ["make", "-j4", *self.make_targets, *self.make_options]

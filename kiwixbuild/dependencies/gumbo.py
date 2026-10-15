@@ -1,6 +1,8 @@
-from .base import Dependency, ReleaseDownload, MesonBuilder
+from typing import ClassVar
 
 from kiwixbuild.utils import Remotefile
+
+from .base import Dependency, MesonBuilder, ReleaseDownload
 
 
 class Gumbo(Dependency):
@@ -14,7 +16,5 @@ class Gumbo(Dependency):
         )
 
     class Builder(MesonBuilder):
-        configure_options = [
-            "-Dtests=false"
-        ]
-        strip_options = []
+        configure_options: ClassVar[list[str]] = ["-Dtests=false"]
+        strip_options: ClassVar[list] = []

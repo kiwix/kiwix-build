@@ -1,11 +1,14 @@
-from .base import Dependency, ReleaseDownload, MakeBuilder, NoopBuilder
-
-from kiwixbuild.utils import Remotefile, run_command, pj
 import platform
 from shutil import copy2
+from typing import ClassVar
+
+from kiwixbuild.utils import Remotefile, pj, run_command
+
+from .base import Dependency, MakeBuilder, NoopBuilder, ReleaseDownload
 
 # Important: in case of aria2c update,
 # 'scripts/create_kiwix-desktop_appImage.sh' should not be forgotten!
+
 
 class Aria2(Dependency):
     name = "aria2"
@@ -45,8 +48,8 @@ class Aria2(Dependency):
                 run_command(command, self.extract_path, context)
 
         class Builder(MakeBuilder):
-            dependencies = ["zlib"]
-            configure_options = [
+            dependencies: ClassVar[list[str]] = ["zlib"]
+            configure_options: ClassVar[list[str]] = [
                 "--disable-libaria2",
                 "--disable-websocket",
                 "--without-sqlite3",

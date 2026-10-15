@@ -1,23 +1,24 @@
 import os
-from os import environ as _environ
-from pathlib import Path, PurePosixPath
-from datetime import date
-import tarfile
-import zipfile
-import subprocess
+import platform
 import re
 import shutil
-import platform
+import subprocess
+import tarfile
+import zipfile
+from contextlib import contextmanager
+from datetime import datetime, timezone
+from http import HTTPStatus
+from os import environ as _environ
+from pathlib import Path, PurePosixPath
 
 import requests
-
-from build_definition import get_platform_name, get_dependency_archive_name
+from build_definition import get_dependency_archive_name, get_platform_name
 
 from kiwixbuild.dependencies.apple_xcframework import AppleXCFramework
 from kiwixbuild.versions import (
+    base_deps_versions,
     main_project_versions,
     release_versions,
-    base_deps_versions,
 )
 
 
@@ -42,7 +43,7 @@ SOURCE_DIR = HOME / "SOURCE"
 ARCHIVE_DIR = HOME / "ARCHIVE"
 TOOLCHAIN_DIR = BASE_DIR / "TOOLCHAINS"
 INSTALL_DIR = BASE_DIR / "INSTALL"
-default_tmp_dir = os.getenv("TEMP") if platform.system() == "Windows" else "/tmp"
+default_tmp_dir = os.getenv("TEMP") if platform.system() == "Windows" else "/tmp"  # noqa: S108
 TMP_DIR = Path(os.getenv("TMP_DIR", default_tmp_dir))
 if platform.system() == "Windows":
     KBUILD_SOURCE_DIR = Path(_environ["GITHUB_WORKSPACE"])
@@ -66,7 +67,7 @@ FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
 
 
 def major_version(version: str) -> str:
-    return version.split(".")[0]
+    return version.split(".", maxsplit=1)[0]
 
 
 # Depending of base distribution, libraries are in "lib64" (redhat base) or "lib/<arch>" (debian base)
@@ -175,7 +176,7 @@ EXPORT_FILES = {
     ),
 }
 
-DATE = date.today().isoformat()
+DATE = datetime.now(timezone.utc).date().isoformat()
 
 
 def print_message(message, *args, **kwargs):
@@ -207,6 +208,7 @@ def write_manifest(manifest_file, archive_name, target, config):
 def run_kiwix_build(
     target,
     config,
+    *,
     build_deps_only=False,
     target_only=False,
     make_release=False,
@@ -257,12 +259,10 @@ try:
         else:
             user = None
 
-        from contextlib import contextmanager
-
         @contextmanager
         def get_client():
             client = paramiko.client.SSHClient()
-            client.set_missing_host_key_policy(paramiko.client.WarningPolicy)
+            client.set_missing_host_key_policy(paramiko.client.WarningPolicy)  # noqa: S507
             print_message(f"Connect to {host}:{port}")
             client.connect(
                 host,
@@ -290,8 +290,8 @@ try:
         remote_file = dest_path.joinpath(file_to_upload.name)
 
         with get_sftp() as sftp:
-            for part in list(reversed(dest_path.parents)) + [dest_path]:
-                part = str(part)
+            for part_path in [*reversed(dest_path.parents), dest_path]:
+                part = str(part_path)
                 try:
                     sftp.stat(part)
                 except FileNotFoundError:
@@ -323,7 +323,7 @@ except ModuleNotFoundError:
         sftp_commands = "\n".join(
             [
                 f"mkdir {part}"
-                for part in list(reversed(Path(dest_path).parents)) + [dest_path]
+                for part in [*reversed(Path(dest_path).parents), dest_path]
             ]
         )
         command = [
@@ -353,7 +353,7 @@ except ModuleNotFoundError:
             "-o",
             "StrictHostKeyChecking=no",
             str(file_to_upload),
-            "{}:{}".format(host, dest_path),
+            f"{host}:{dest_path}",
         ]
         print_message("Sending archive with command {}", command)
         subprocess.check_call(command)
@@ -389,26 +389,24 @@ def upload_archive(archive, project, make_release, dev_branch=None):
 
 # This remove "share/doc" and "share/man" from the thing to copy in the deps archive
 def filter_install_dir(path):
-    for dir in path.glob("*"):
-        if dir.name not in ["share"]:
-            yield dir
+    for entry in path.glob("*"):
+        if entry.name not in ["share"]:
+            yield entry
         else:
-            for sub_dir in dir.glob("*"):
+            for sub_dir in entry.glob("*"):
                 if sub_dir.name not in ["doc", "man"]:
                     yield sub_dir
 
 
 # Full: True if we are creating a full archive to be used as cache by kiwix-build (base_deps_{os}_{config}_{base_deps_version}.tar.gz)
 # Full: False if we are creating a archive to be used as pre-cached dependencies for project's CI (deps_{config}_{target}.tar.gz)
-def make_deps_archive(target=None, name=None, full=False):
-    archive_name = name or "deps_{}_{}.tar.gz".format(
-        get_dependency_archive_name(), target
-    )
+def make_deps_archive(target=None, name=None, *, full=False):
+    archive_name = name or f"deps_{get_dependency_archive_name()}_{target}.tar.gz"
     print_message("Create archive {}.", archive_name)
     files_to_archive = list(filter_install_dir(INSTALL_DIR))
     files_to_archive += HOME.glob("BUILD_*/LOGS")
     if COMPILE_CONFIG == "apple_all_static":
-        for subconfig in AppleXCFramework.subConfigNames:
+        for subconfig in AppleXCFramework.sub_config_names:
             base_dir = get_build_dir(subconfig)
             files_to_archive += filter_install_dir(base_dir / "INSTALL")
             if (base_dir / "meson_cross_file.txt").exists():
@@ -452,9 +450,9 @@ def make_deps_archive(target=None, name=None, full=False):
 
     archive_file = TMP_DIR / archive_name
     with tarfile.open(str(archive_file), "w:gz") as tar:
-        for name in set(files_to_archive):
-            print(".{}".format(name), flush=True)
-            tar.add(str(name), arcname=str(name.relative_to(relative_path)))
+        for file_path in set(files_to_archive):
+            print(f".{file_path}", flush=True)
+            tar.add(str(file_path), arcname=str(file_path.relative_to(relative_path)))
 
     return archive_file
 
@@ -463,7 +461,7 @@ def get_postfix(project):
     postfix = main_project_versions[project]
     extra = release_versions.get(project)
     if extra:
-        postfix = "{}-{}".format(postfix, extra)
+        postfix = f"{postfix}-{extra}"
     return postfix
 
 
@@ -502,7 +500,7 @@ def make_archive(project, make_release):
     else:
         postfix = DATE
 
-    archive_name = "{}_{}-{}".format(project, platform_name, postfix)
+    archive_name = f"{project}_{platform_name}-{postfix}"
 
     files_to_archive = []
     for export_file in export_files:
@@ -522,11 +520,11 @@ def make_archive(project, make_release):
     else:
         open_archive = lambda a: tarfile.open(str(a), "w:gz")
         archive_add = lambda a, f: a.add(
-            str(f), arcname="{}/{}".format(archive_name, str(f.relative_to(base_dir)))
+            str(f), arcname=f"{archive_name}/{f.relative_to(base_dir)!s}"
         )
         archive_ext = ".tar.gz"
 
-    archive = TMP_DIR / "{}{}".format(archive_name, archive_ext)
+    archive = TMP_DIR / f"{archive_name}{archive_ext}"
     print_message("create archive {} with {}", archive, files_to_archive)
     with open_archive(archive) as arch:
         for f in files_to_archive:
@@ -545,10 +543,10 @@ def create_desktop_image(make_release):
 
     if COMPILE_CONFIG == "flatpak":
         build_path = BASE_DIR / "org.kiwix.desktop.flatpak"
-        app_name = "org.kiwix.desktop.{}.flatpak".format(postfix)
+        app_name = f"org.kiwix.desktop.{postfix}.flatpak"
         print_message("archive is {}", build_path)
     elif platform.system() == "Windows":
-        archive_basename = "kiwix-desktop_windows_x64_{}".format(postfix)
+        archive_basename = f"kiwix-desktop_windows_x64_{postfix}"
         working_dir = INSTALL_DIR / archive_basename
         build_path = Path(str(working_dir) + ".zip")
         app_name = build_path.name
@@ -564,8 +562,8 @@ def create_desktop_image(make_release):
         print_message("Package archive of kiwix-desktop")
         subprocess.check_call(command, cwd=str(HOME))
     else:
-        build_path = HOME / "Kiwix-{}-x86_64.AppImage".format(postfix)
-        app_name = "kiwix-desktop_x86_64_{}.appimage".format(postfix)
+        build_path = HOME / f"Kiwix-{postfix}-x86_64.AppImage"
+        app_name = f"kiwix-desktop_x86_64_{postfix}.appimage"
         command = [
             KBUILD_SOURCE_DIR / "scripts" / "create_kiwix-desktop_appImage.sh",
             str(INSTALL_DIR),
@@ -577,7 +575,7 @@ def create_desktop_image(make_release):
         print_message("Build AppImage of kiwix-desktop")
         subprocess.check_call(command, cwd=str(HOME), env=env)
 
-    print_message("Copy Build to {}".format(TMP_DIR / app_name))
+    print_message(f"Copy Build to {TMP_DIR / app_name}")
     shutil.copy(str(build_path), str(TMP_DIR / app_name))
     return TMP_DIR / app_name
 
@@ -602,7 +600,7 @@ def update_flathub_git():
     shutil.copy(str(BASE_DIR / "org.kiwix.desktop.json"), str(git_repo_dir))
     patch_dir = KBUILD_SOURCE_DIR / "kiwixbuild" / "patches"
     for dep in ["pugixml", "libmicrohttpd"]:
-        for f in patch_dir.glob("{}_*.patch".format(dep)):
+        for f in patch_dir.glob(f"{dep}_*.patch"):
             shutil.copy(str(f), str(git_repo_dir / "patches"))
     command = ["git", "add", "-A", "."]
     call(command)
@@ -645,7 +643,7 @@ def trigger_workflow(repo, workflow="docker.yml", ref="main", inputs=None):
     ref: branch or tag name
     inputs: dict of inputs to pass to the workflow"""
     print_message(
-        "triggering workflow `{workflow}` on {repo}@{ref} " "with inputs={inputs}",
+        "triggering workflow `{workflow}` on {repo}@{ref} with inputs={inputs}",
         workflow=workflow,
         repo=repo,
         ref=ref,
@@ -668,12 +666,8 @@ def trigger_workflow(repo, workflow="docker.yml", ref="main", inputs=None):
         json={"ref": ref, "inputs": inputs},
         timeout=5,
     )
-    if resp.status_code != 204:
-        raise ValueError(
-            "Unexpected HTTP {code}: {reason}".format(
-                code=resp.status_code, reason=resp.reason
-            )
-        )
+    if resp.status_code != HTTPStatus.NO_CONTENT:
+        raise ValueError(f"Unexpected HTTP {resp.status_code}: {resp.reason}")
 
 
 def trigger_docker_publish(target):
@@ -735,7 +729,7 @@ def notarize_macos_build(project):
         )
 
     # create a zip of the dylibs and upload for notarization
-    zip_name = "{}.zip".format(project)
+    zip_name = f"{project}.zip"
     subprocess.check_call(
         ["/usr/bin/ditto", "-c", "-k", "--keepParent"]
         + [str(f) for f in filepaths]

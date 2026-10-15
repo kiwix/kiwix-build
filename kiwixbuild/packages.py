@@ -23,7 +23,7 @@ _debian_common = [
 ]
 
 _debian_qt5 = {
-    "COMMON": _debian_common + ["libbz2-dev", "libmagic-dev"],
+    "COMMON": [*_debian_common, "libbz2-dev", "libmagic-dev"],
     "zlib": ["zlib1g-dev"],
     "uuid": ["uuid-dev"],
     "libmicrohttpd": ["libmicrohttpd-dev", "ccache"],
@@ -37,7 +37,13 @@ _debian_qt6 = {
     "zlib": ["zlib1g-dev"],
     "uuid": ["uuid-dev"],
     "libmicrohttpd": ["libmicrohttpd-dev", "ccache"],
-    "qt": ["qt6-base-dev", "qt6-base-dev-tools", "libqt6webenginecore6-bin", "libqt6svg6", "qtchooser"],
+    "qt": [
+        "qt6-base-dev",
+        "qt6-base-dev-tools",
+        "libqt6webenginecore6-bin",
+        "libqt6svg6",
+        "qtchooser",
+    ],
     "qtwebengine": ["qt6-webengine-dev"],
     "aria2": ["aria2"],
 }
@@ -71,30 +77,40 @@ PACKAGE_NAME_MAPPERS = {
         "qtwebengine": ["qt5-qtwebengine-devel"],
     },
     "fedora_native_static": {
-        "COMMON": _fedora_common + ["glibc-static", "libstdc++-static"],
+        "COMMON": [*_fedora_common, "glibc-static", "libstdc++-static"],
         "lzma": ["xz-devel", "xz-static"],
         # Either there is no packages, or no static or too old
     },
     "fedora_i586_dyn": {
-        "COMMON": _fedora_common + ["glibc-devel.i686", "libstdc++-devel.i686"],
+        "COMMON": [*_fedora_common, "glibc-devel.i686", "libstdc++-devel.i686"],
     },
     "fedora_i586_static": {
-        "COMMON": _fedora_common + ["glibc-devel.i686"],
+        "COMMON": [*_fedora_common, "glibc-devel.i686"],
     },
     "fedora_armhf_static": {"COMMON": _fedora_common},
     "fedora_armhf_dyn": {"COMMON": _fedora_common},
     "fedora_android": {"COMMON": _fedora_common},
     "debian_native_dyn": _debian_qt5,
     "debian_native_static": {
-        "COMMON": _debian_common + ["libbz2-dev", "libmagic-dev"],
+        "COMMON": [*_debian_common, "libbz2-dev", "libmagic-dev"],
     },
     "debian_i586_dyn": {
-        "COMMON": _debian_common
-        + ["libc6-dev-i386", "lib32stdc++6", "gcc-multilib", "g++-multilib"],
+        "COMMON": [
+            *_debian_common,
+            "libc6-dev-i386",
+            "lib32stdc++6",
+            "gcc-multilib",
+            "g++-multilib",
+        ],
     },
     "debian_i586_static": {
-        "COMMON": _debian_common
-        + ["libc6-dev-i386", "lib32stdc++6", "gcc-multilib", "g++-multilib"],
+        "COMMON": [
+            *_debian_common,
+            "libc6-dev-i386",
+            "lib32stdc++6",
+            "gcc-multilib",
+            "g++-multilib",
+        ],
     },
     "debian_armhf_static": {
         "COMMON": _debian_common,
@@ -109,7 +125,7 @@ PACKAGE_NAME_MAPPERS = {
     "ubuntu_noble_native_dyn": _debian_qt6,
     "ubuntu_oracular_native_dyn": _debian_qt6,
     "ubuntu_native_static": {
-        "COMMON": _debian_common + ["libbz2-dev", "libmagic-dev"],
+        "COMMON": [*_debian_common, "libbz2-dev", "libmagic-dev"],
     },
     "Darwin_native_dyn": {
         "COMMON": ["autoconf", "automake", "libtool", "cmake", "pkg-config"],

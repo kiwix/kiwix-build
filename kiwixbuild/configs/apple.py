@@ -1,17 +1,18 @@
 import subprocess
+from typing import ClassVar
 
 from kiwixbuild._global import option
-from kiwixbuild.utils import pj, xrun_find
-from .base import ConfigInfo, MetaConfigInfo, MixedMixin
 from kiwixbuild.dependencies.apple_xcframework import AppleXCFramework
+from kiwixbuild.utils import pj, xrun_find
 
+from .base import ConfigInfo, MetaConfigInfo, mixed_mixin
 
 MIN_MACOS_VERSION = "12.0"
 
 
 class AppleConfigInfo(ConfigInfo):
     static = True
-    compatible_hosts = ["Darwin"]
+    compatible_hosts: ClassVar[list[str]] = ["Darwin"]
     arch = None
     host = None
     target = None
@@ -30,8 +31,9 @@ class AppleConfigInfo(ConfigInfo):
     @property
     def root_path(self):
         if self._root_path is None:
-            command = "xcrun --sdk {} --show-sdk-path".format(self.sdk_name)
-            self._root_path = subprocess.check_output(command, shell=True)[:-1].decode()
+            command = f"xcrun --sdk {self.sdk_name} --show-sdk-path"
+            output = subprocess.check_output(command, shell=True)  # noqa: S602
+            self._root_path = output[:-1].decode()
         return self._root_path
 
     def finalize_setup(self):
@@ -63,10 +65,7 @@ class AppleConfigInfo(ConfigInfo):
                 self.arch,
                 "-target",
                 self.target,
-                *(
-                    "-I{}".format(include_dir)
-                    for include_dir in self.get_include_dirs()
-                ),
+                *(f"-I{include_dir}" for include_dir in self.get_include_dirs()),
             ],
             "host_machine": {
                 "system": "Darwin",
@@ -79,17 +78,17 @@ class AppleConfigInfo(ConfigInfo):
         }
         if self.min_iphoneos_version:
             config["extra_libs"].append(
-                "-miphoneos-version-min={}".format(self.min_iphoneos_version)
+                f"-miphoneos-version-min={self.min_iphoneos_version}"
             )
             config["extra_cflags"].append(
-                "-miphoneos-version-min={}".format(self.min_iphoneos_version)
+                f"-miphoneos-version-min={self.min_iphoneos_version}"
             )
         if self.min_macos_version:
             config["extra_libs"].append(
-                "-mmacosx-version-min={}".format(self.min_macos_version)
+                f"-mmacosx-version-min={self.min_macos_version}"
             )
             config["extra_cflags"].append(
-                "-mmacosx-version-min={}".format(self.min_macos_version)
+                f"-mmacosx-version-min={self.min_macos_version}"
             )
         return config
 
@@ -97,22 +96,22 @@ class AppleConfigInfo(ConfigInfo):
         env = super().get_env()
         cflags = [env["CFLAGS"]]
         if self.min_iphoneos_version:
-            cflags.append("-miphoneos-version-min={}".format(self.min_iphoneos_version))
+            cflags.append(f"-miphoneos-version-min={self.min_iphoneos_version}")
         if self.min_macos_version:
-            cflags.append("-mmacosx-version-min={}".format(self.min_macos_version))
+            cflags.append(f"-mmacosx-version-min={self.min_macos_version}")
         env["CFLAGS"] = " ".join(cflags)
         return env
 
     def set_comp_flags(self, env):
         super().set_comp_flags(env)
         cflags = [
-            "-isysroot {}".format(self.root_path),
-            "-arch {}".format(self.arch),
-            "-target {}".format(self.target),
+            f"-isysroot {self.root_path}",
+            f"-arch {self.arch}",
+            f"-target {self.target}",
             env["CFLAGS"],
         ]
         if self.min_iphoneos_version:
-            cflags.append("-miphoneos-version-min={}".format(self.min_iphoneos_version))
+            cflags.append(f"-miphoneos-version-min={self.min_iphoneos_version}")
         env["CFLAGS"] = " ".join(cflags)
         env["CXXFLAGS"] = " ".join(
             [
@@ -123,8 +122,8 @@ class AppleConfigInfo(ConfigInfo):
         )
         env["LDFLAGS"] = " ".join(
             [
-                " -arch {}".format(self.arch),
-                "-isysroot {}".format(self.root_path),
+                f" -arch {self.arch}",
+                f"-isysroot {self.root_path}",
             ]
         )
 
@@ -148,7 +147,7 @@ class AppleConfigInfo(ConfigInfo):
         yield f"--host={self.host}"
 
 
-class iOSConfigBase(AppleConfigInfo):
+class IOSConfigBase(AppleConfigInfo):
     build = "ios"
     min_iphoneos_version = "15.0"
 
@@ -156,8 +155,7 @@ class iOSConfigBase(AppleConfigInfo):
         return "ios"
 
 
-
-class iOSArm64(iOSConfigBase):
+class IOSArm64(IOSConfigBase):
     name = "ios_arm64"
     arch = cpu = "arm64"
     host = "arm-apple-darwin"
@@ -165,7 +163,7 @@ class iOSArm64(iOSConfigBase):
     sdk_name = "iphoneos"
 
 
-class iOSSimulatorAmd64(iOSConfigBase):
+class IOSSimulatorAmd64(IOSConfigBase):
     name = "ios_simulator_x86_64"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
@@ -173,7 +171,7 @@ class iOSSimulatorAmd64(iOSConfigBase):
     sdk_name = "iphonesimulator"
 
 
-class iOSSimulatorArm64(iOSConfigBase):
+class IOSSimulatorArm64(IOSConfigBase):
     name = "ios_simulator_arm64"
     arch = cpu = "arm64"
     host = "arm-apple-darwin"
@@ -181,8 +179,7 @@ class iOSSimulatorArm64(iOSConfigBase):
     sdk_name = "iphonesimulator"
 
 
-
-class macOSConfigBase(AppleConfigInfo):
+class MacOSConfigBase(AppleConfigInfo):
     build = "macos"
     min_macos_version = MIN_MACOS_VERSION
     sdk_name = "macosx"
@@ -191,28 +188,28 @@ class macOSConfigBase(AppleConfigInfo):
         return "macos"
 
 
-class macOSArm64(macOSConfigBase):
+class MacOSArm64(MacOSConfigBase):
     name = "macos_arm64_static"
     arch = cpu = "arm64"
     host = "aarch64-apple-darwin"
     target = "arm64-apple-macos"
 
 
-class macOSArm64Mixed(MixedMixin("macos_arm64_static"), macOSConfigBase):
+class MacOSArm64Mixed(mixed_mixin("macos_arm64_static"), MacOSConfigBase):
     name = "macos_arm64_mixed"
     arch = cpu = "arm64"
     host = "aarch64-apple-darwin"
     target = "arm64-apple-macos"
 
 
-class macOSAmd64(macOSConfigBase):
+class MacOSAmd64(MacOSConfigBase):
     name = "macos_x86-64_static"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
     target = "x86_64-apple-darwin"
 
 
-class macOSAmd64Mixed(MixedMixin("macos_x86-64_static"), macOSConfigBase):
+class MacOSAmd64Mixed(mixed_mixin("macos_x86-64_static"), MacOSConfigBase):
     name = "macos_x86-64_mixed"
     arch = cpu = "x86_64"
     host = "x86_64-apple-darwin"
@@ -221,18 +218,18 @@ class macOSAmd64Mixed(MixedMixin("macos_x86-64_static"), macOSConfigBase):
 
 class IOS(MetaConfigInfo):
     name = "ios_multi"
-    compatible_hosts = ["Darwin"]
+    compatible_hosts: ClassVar[list[str]] = ["Darwin"]
 
     @property
     def arch_name(self):
         return self.name
 
     @property
-    def subConfigNames(self):
-        return ["ios_{}".format(arch) for arch in option("ios_arch")]
+    def sub_config_names(self):
+        return [f"ios_{arch}" for arch in option("ios_arch")]
 
-    def add_targets(self, targetName, targets):
-        super().add_targets(targetName, targets)
+    def add_targets(self, target_name, targets):
+        super().add_targets(target_name, targets)
         return ConfigInfo.add_targets(self, "_ios_fat_lib", targets)
 
     def __str__(self):
@@ -241,18 +238,18 @@ class IOS(MetaConfigInfo):
 
 class AppleStaticAll(MetaConfigInfo):
     name = "apple_all_static"
-    compatible_hosts = ["Darwin"]
+    compatible_hosts: ClassVar[list[str]] = ["Darwin"]
 
     @property
     def arch_name(self):
         return self.name
 
     @property
-    def subConfigNames(self):
-        return AppleXCFramework.subConfigNames
+    def sub_config_names(self):
+        return AppleXCFramework.sub_config_names
 
-    def add_targets(self, targetName, targets):
-        super().add_targets(targetName, targets)
+    def add_targets(self, target_name, targets):
+        super().add_targets(target_name, targets)
         return ConfigInfo.add_targets(self, "apple_xcframework", targets)
 
     def __str__(self):

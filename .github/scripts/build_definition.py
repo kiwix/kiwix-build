@@ -1,5 +1,6 @@
+import csv
+import re
 from typing import NamedTuple
-import csv, io, re
 
 # Definition of what to build.
 # Array is read line by line.
@@ -73,8 +74,8 @@ class TableDialect(csv.Dialect):
 
 def strip_array(array_str):
     """Return a iterable of lines, skiping "decorative lines" and with all values in the line's cells stripped"""
-    for line in array_str.splitlines():
-        line = line.strip()
+    for raw_line in array_str.splitlines():
+        line = raw_line.strip()
         line_set = set(line)
         if (
             not line
@@ -112,7 +113,8 @@ DOCKER = "D"
 
 
 def select_build_targets(criteria):
-    from common import COMPILE_CONFIG, OS_NAME
+    # Lazy import: common imports this module.
+    from common import COMPILE_CONFIG, OS_NAME  # noqa: PLC0415
 
     context = Context(COMPILE_CONFIG=COMPILE_CONFIG, OS_NAME=OS_NAME)
 
@@ -137,7 +139,8 @@ def select_build_targets(criteria):
 
 
 def get_column_value(column_name):
-    from common import COMPILE_CONFIG, OS_NAME
+    # Lazy import: common imports this module.
+    from common import COMPILE_CONFIG, OS_NAME  # noqa: PLC0415
 
     context = Context(COMPILE_CONFIG=COMPILE_CONFIG, OS_NAME=OS_NAME)
 

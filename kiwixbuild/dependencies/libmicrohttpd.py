@@ -1,6 +1,8 @@
-from .base import Dependency, ReleaseDownload, MesonBuilder
+from typing import ClassVar
 
 from kiwixbuild.utils import Remotefile
+
+from .base import Dependency, MesonBuilder, ReleaseDownload
 
 
 class MicroHttpd(Dependency):
@@ -17,8 +19,8 @@ class MicroHttpd(Dependency):
             "0954c094a0d4cfe0dd799d8df8a04face6669f7b4d51a7386a9c3e2d37b9c3b3",
             "https://wrapdb.mesonbuild.com/v2/libmicrohttpd_0.9.76-3/get_patch",
         )
-        archives = [src_archive, meson_archive]
-        patches = [
+        archives: ClassVar[list] = [src_archive, meson_archive]
+        patches: ClassVar[list[str]] = [
             "libmicrohttpd_meson_pkgconfig.patch",
             "libmicrohttpd_meson_timeval_tvsec_size.patch",
             "libmicrohttpd_meson_winet6.patch",
@@ -26,7 +28,7 @@ class MicroHttpd(Dependency):
         ]
 
     class Builder(MesonBuilder):
-        configure_options = [
+        configure_options: ClassVar[list[str]] = [
             "-Dgnutls=disabled",
             "-Dgcrypt=disabled",
             "-Dcurl=disabled",

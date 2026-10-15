@@ -1,13 +1,15 @@
 import os
+from typing import ClassVar
+
+from kiwixbuild.utils import which
 
 from .base import ConfigInfo
-from kiwixbuild.utils import which, pj
 
 
 class I586ConfigInfo(ConfigInfo):
     build = "i586"
     arch_full = "i586-linux-gnu"
-    compatible_hosts = ["fedora", "debian", "ubuntu"]
+    compatible_hosts: ClassVar[list[str]] = ["fedora", "debian", "ubuntu"]
 
     def get_cross_config(self):
         return {
@@ -18,10 +20,7 @@ class I586ConfigInfo(ConfigInfo):
                 "-m32",
                 "-march=i586",
                 "-mno-sse",
-                *(
-                    "-I{}".format(include_dir)
-                    for include_dir in self.get_include_dirs()
-                ),
+                *(f"-I{include_dir}" for include_dir in self.get_include_dirs()),
             ],
             "host_machine": {
                 "system": "linux",

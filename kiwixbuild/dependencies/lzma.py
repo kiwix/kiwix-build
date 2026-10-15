@@ -1,13 +1,12 @@
-from .base import (
-    Dependency,
-    ReleaseDownload,
-    MesonBuilder)
+from typing import ClassVar
 
 from kiwixbuild.utils import Remotefile
 
+from .base import Dependency, MesonBuilder, ReleaseDownload
 
-class lzma(Dependency):
-    name = 'lzma'
+
+class Lzma(Dependency):
+    name = "lzma"
 
     class Source(ReleaseDownload):
         src_archive = Remotefile(
@@ -20,7 +19,7 @@ class lzma(Dependency):
             "1c71536d364e1a3ce6bea61266576f89cc5cce4d3b9e11f3494417dafa29780b",
             "https://dev.kiwix.org/kiwix-build/liblzma_5.2.6-3_patch.zip",
         )
-        archives = [src_archive, meson_patch]
-        patches = ['lzma_meson_install.patch']
+        archives: ClassVar[list] = [src_archive, meson_patch]
+        patches: ClassVar[list[str]] = ["lzma_meson_install.patch"]
 
     Builder = MesonBuilder
