@@ -16,6 +16,9 @@ class KiwixDesktop(Dependency):
         configure_env = None
 
         flatpack_build_options = {"env": {"QMAKEPATH": "/app"}}
+        # Temporary workaround for Jammy (see #977): older Flatpak tooling requires
+        # org.kiwix.desktop.desktop in /app/share/applications/ to export metadata and icons.
+        # This workaround should be removed once Jammy is abandoned.
         flatpak_post_install = [
             "if [ -f /app/share/applications/org.kiwix.desktop ] && [ ! -f /app/share/applications/org.kiwix.desktop.desktop ]; then ln /app/share/applications/org.kiwix.desktop /app/share/applications/org.kiwix.desktop.desktop; elif [ -f /app/share/applications/org.kiwix.desktop.desktop ] && [ ! -f /app/share/applications/org.kiwix.desktop ]; then ln /app/share/applications/org.kiwix.desktop.desktop /app/share/applications/org.kiwix.desktop; fi"
         ]

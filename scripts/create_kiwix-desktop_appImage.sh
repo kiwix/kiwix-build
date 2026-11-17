@@ -13,6 +13,7 @@ if [ ! -e "$INSTALLDIR/lib" ] ; then
 fi
 
 ICONFILE=$SOURCEDIR/resources/icons/kiwix/scalable/kiwix-desktop.svg
+# Temporary workaround (see #977): handle both org.kiwix.desktop and org.kiwix.desktop.desktop
 if [ -f "$SOURCEDIR/resources/org.kiwix.desktop.desktop" ]; then
   DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop.desktop
 elif [ -f "$SOURCEDIR/resources/org.kiwix.desktop" ]; then
