@@ -326,6 +326,11 @@ class Builder:
             module["build-options"] = self.flatpack_build_options
         if getattr(self, "configure_options", ""):
             module["config-opts"] = list(self.configure_options)
+        post_install = getattr(self, "flatpak_post_install", None) or getattr(
+            self, "flatpack_post_install", None
+        )
+        if post_install:
+            module.setdefault("post-install", []).extend(post_install)
 
     def get_env(self, *, cross_comp_flags, cross_compilers, cross_path):
         env = self.buildEnv.get_env(

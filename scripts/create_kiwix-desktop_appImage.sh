@@ -13,7 +13,20 @@ if [ ! -e "$INSTALLDIR/lib" ] ; then
 fi
 
 ICONFILE=$SOURCEDIR/resources/icons/kiwix/scalable/kiwix-desktop.svg
-DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop
+if [ -f "$SOURCEDIR/resources/org.kiwix.desktop.desktop" ]; then
+  DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop.desktop
+elif [ -f "$SOURCEDIR/resources/org.kiwix.desktop" ]; then
+  DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop
+else
+  DESKTOPFILE=$SOURCEDIR/resources/org.kiwix.desktop
+fi
+
+# Ensure both org.kiwix.desktop and org.kiwix.desktop.desktop exist
+if [ -f "$SOURCEDIR/resources/org.kiwix.desktop" ] && [ ! -f "$SOURCEDIR/resources/org.kiwix.desktop.desktop" ]; then
+  ln "$SOURCEDIR/resources/org.kiwix.desktop" "$SOURCEDIR/resources/org.kiwix.desktop.desktop" || true
+elif [ -f "$SOURCEDIR/resources/org.kiwix.desktop.desktop" ] && [ ! -f "$SOURCEDIR/resources/org.kiwix.desktop" ]; then
+  ln "$SOURCEDIR/resources/org.kiwix.desktop.desktop" "$SOURCEDIR/resources/org.kiwix.desktop" || true
+fi
 
 # Get linuxdeploy
 wget --continue https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage

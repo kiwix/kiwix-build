@@ -69,7 +69,10 @@ MANIFEST = {
         "/share/doc",
         "/share/man",
     ],
-    "cleanup-commands": ["/app/cleanup-BaseApp.sh"],
+    "cleanup-commands": [
+        "/app/cleanup-BaseApp.sh",
+        "if [ -f /app/share/applications/org.kiwix.desktop ] && [ ! -f /app/share/applications/org.kiwix.desktop.desktop ]; then ln /app/share/applications/org.kiwix.desktop /app/share/applications/org.kiwix.desktop.desktop; elif [ -f /app/share/applications/org.kiwix.desktop.desktop ] && [ ! -f /app/share/applications/org.kiwix.desktop ]; then ln /app/share/applications/org.kiwix.desktop.desktop /app/share/applications/org.kiwix.desktop; fi",
+    ],
 }
 
 GET_REF_URL_API_TEMPLATE = "https://api.github.com/repos{repo}/git/refs/tags/{ref}"
