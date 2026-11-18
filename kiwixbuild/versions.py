@@ -33,7 +33,7 @@ release_versions = {
 
 # This is the "version" of the whole base_deps_versions dict.
 # Change this when you change base_deps_versions.
-base_deps_meta_version = "27"
+base_deps_meta_version = "28"
 
 base_deps_versions = {
     "zlib": "1.3.1",
@@ -45,7 +45,7 @@ base_deps_versions = {
     "mustache": "4.1",
     "pugixml": "1.15",
     "libmicrohttpd": "0.9.76",
-    "gumbo": "0.13.1",
+    "gumbo": "0.14.1",
     "icu4c": "73.2",
     "libaria2": "1.37.0",
     "libmagic": "5.44",
