@@ -5,6 +5,7 @@ from kiwixbuild.utils import Remotefile
 
 class UUID(Dependency):
     name = "uuid"
+    version = "1.47.3"
 
     class Source(ReleaseDownload):
         archive = Remotefile(
