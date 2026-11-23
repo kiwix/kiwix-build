@@ -1,6 +1,7 @@
-from kiwixbuild._global import option
-from .base import Dependency, GitClone, QMakeBuilder
 import platform
+from typing import ClassVar
+
+from .base import Dependency, GitClone, QMakeBuilder
 
 
 class KiwixDesktop(Dependency):
@@ -12,10 +13,10 @@ class KiwixDesktop(Dependency):
         git_dir = "kiwix-desktop"
 
     class Builder(QMakeBuilder):
-        dependencies = ["qt", "qtwebengine", "libkiwix", "aria2"]
+        dependencies: ClassVar[list[str]] = ["qt", "qtwebengine", "libkiwix", "aria2"]
         configure_env = None
 
-        flatpack_build_options = {"env": {"QMAKEPATH": "/app"}}
+        flatpack_build_options: ClassVar[dict] = {"env": {"QMAKEPATH": "/app"}}
 
         @property
         def make_targets(self):

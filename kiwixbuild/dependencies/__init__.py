@@ -1,18 +1,17 @@
-from .base import *
-from . import (
+# `Dependency` must be defined before the dependency modules are imported:
+# they register themselves on import and some of them import `kiwixbuild.configs`,
+# which in turn needs `kiwixbuild.dependencies.Dependency`.
+from .base import Dependency
+
+# isort: split
+from . import (  # noqa: F401 (imported to register the dependencies)
     all_dependencies,
-    boostregex,
-    tc_android_ndk,
     aria2,
-    tc_armhf,
-    tc_musl,
+    boostregex,
     docoptcpp,
-    tc_emsdk,
-    tc_flatpak,
     gumbo,
     icu4c,
     ios_fat_lib,
-    mustache,
     kiwix_desktop,
     kiwix_tools,
     libcurl,
@@ -21,12 +20,20 @@ from . import (
     libmicrohttpd,
     libzim,
     lzma,
-    qt,
+    mustache,
     pugixml,
+    qt,
+    tc_android_ndk,
+    tc_armhf,
+    tc_emsdk,
+    tc_flatpak,
+    tc_musl,
     uuid,
     xapian,
-    zim_tools,
     zim_testing_suite,
+    zim_tools,
     zlib,
     zstd,
 )
+
+__all__ = ["Dependency"]

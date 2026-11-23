@@ -1,8 +1,8 @@
 from os import environ
 
-from .base import Dependency, NoopSource, NoopBuilder
+from kiwixbuild._global import neutral_env
 
-from kiwixbuild._global import neutralEnv
+from .base import Dependency, NoopBuilder, NoopSource
 
 
 class AllBaseDependencies(Dependency):
@@ -12,11 +12,13 @@ class AllBaseDependencies(Dependency):
 
     class Builder(NoopBuilder):
         @classmethod
-        def get_dependencies(cls, configInfo, allDeps):
-            if configInfo.build == "wasm" or environ.get("OS_NAME", "").endswith("manylinux"):
+        def get_dependencies(cls, config_info, _all_deps):
+            if config_info.build == "wasm" or environ.get("OS_NAME", "").endswith(
+                "manylinux"
+            ):
                 return ["zlib", "lzma", "zstd", "icu4c", "xapian-core"]
 
-            if neutralEnv("distname") == "Windows":
+            if neutral_env("distname") == "Windows":
                 base_deps = [
                     "zlib",
                     "zstd",
@@ -27,7 +29,7 @@ class AllBaseDependencies(Dependency):
                     "docoptcpp",
                 ]
 
-                if not configInfo.name.endswith("_dyn"):
+                if not config_info.name.endswith("_dyn"):
                     base_deps += [
                         "pugixml",
                         "libcurl",
@@ -48,12 +50,12 @@ class AllBaseDependencies(Dependency):
                     "zim-testing-suite",
                 ]
                 # Add specific dependencies depending of the config
-                if configInfo.build not in ("android", "ios", "macos"):
+                if config_info.build not in ("android", "ios", "macos"):
                     # For zimtools
                     base_deps += ["docoptcpp", "libmagic", "gumbo"]
                     if (
-                        configInfo.build == "native"
-                        and neutralEnv("distname") != "Darwin"
+                        config_info.build == "native"
+                        and neutral_env("distname") != "Darwin"
                     ):
                         # We compile kiwix-desktop only on native and not on `Darwin`
                         # So we need aria2 only there

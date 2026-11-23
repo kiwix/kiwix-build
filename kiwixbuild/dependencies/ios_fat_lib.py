@@ -1,9 +1,11 @@
 import os
 
-from kiwixbuild.configs import ConfigInfo
-from kiwixbuild.utils import pj, copy_tree, run_command
 from kiwixbuild._global import option
-from .base import Dependency, NoopSource, Builder as BaseBuilder
+from kiwixbuild.configs import ConfigInfo
+from kiwixbuild.utils import copy_tree, pj, run_command
+
+from .base import Builder as BaseBuilder
+from .base import Dependency, NoopSource
 
 
 class IOSFatLib(Dependency):
@@ -13,11 +15,11 @@ class IOSFatLib(Dependency):
 
     class Builder(BaseBuilder):
         @classmethod
-        def get_dependencies(self, platfomInfo, alldeps):
+        def get_dependencies(cls, _config_info, _all_deps):
             base_target = option("target")
-            return [("ios_{}".format(arch), base_target) for arch in option("ios_arch")]
+            return [(f"ios_{arch}", base_target) for arch in option("ios_arch")]
 
-        def _copy_headers(self, context):
+        def _copy_headers(self, context):  # noqa: ARG002 (passed by keyword)
             plt = ConfigInfo.get_config("ios_{}".format(option("ios_arch")[0]))
             include_src = pj(plt.buildEnv.install_dir, "include")
             include_dst = pj(self.buildEnv.install_dir, "include")
@@ -26,7 +28,7 @@ class IOSFatLib(Dependency):
         def _merge_libs(self, context):
             lib_dirs = []
             for arch in option("ios_arch"):
-                plt = ConfigInfo.get_config("ios_{}".format(arch))
+                plt = ConfigInfo.get_config(f"ios_{arch}")
                 lib_dirs.append(pj(plt.buildEnv.install_dir, "lib"))
             libs = []
             for f in os.listdir(lib_dirs[0]):
@@ -35,13 +37,13 @@ class IOSFatLib(Dependency):
                 if f.endswith(".a") or f.endswith(".dylib"):
                     libs.append(f)
             os.makedirs(pj(self.buildEnv.install_dir, "lib"), exist_ok=True)
-            for l in libs:
+            for lib in libs:
                 command = [
                     "lipo",
                     "-create",
-                    *[pj(d, l) for d in lib_dirs],
+                    *[pj(d, lib) for d in lib_dirs],
                     "-output",
-                    pj(self.buildEnv.install_dir, "lib", l),
+                    pj(self.buildEnv.install_dir, "lib", lib),
                 ]
                 run_command(command, self.buildEnv.install_dir, context)
 

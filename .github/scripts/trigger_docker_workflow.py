@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
+from build_definition import DOCKER, select_build_targets
 from common import (
-    trigger_docker_publish,
     MAKE_RELEASE,
+    trigger_docker_publish,
 )
-
-from build_definition import select_build_targets, DOCKER
 
 # Filter what to build if we are doing a release.
 if MAKE_RELEASE:

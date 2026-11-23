@@ -1,12 +1,13 @@
 import os
 
-from .base import Dependency, NoopSource, Builder
-from kiwixbuild.utils import Remotefile, add_execution_right, run_command
+from kiwixbuild.utils import run_command
+
+from .base import Builder, Dependency, NoopSource
 
 pj = os.path.join
 
 
-class org_kde(Dependency):
+class OrgKde(Dependency):
     neutral = False
     name = "org.kde"
 
@@ -49,7 +50,7 @@ class org_kde(Dependency):
             self.command("install_sdk", self._install_sdk)
 
 
-class io_qt_qtwebengine(Dependency):
+class IoQtQtwebengine(Dependency):
     neutral = False
     name = "io.qt.qtwebengine"
 

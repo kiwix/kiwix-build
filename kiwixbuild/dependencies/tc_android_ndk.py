@@ -1,12 +1,14 @@
 import os
+from typing import ClassVar
 
-from .base import Dependency, ReleaseDownload, Builder
 from kiwixbuild.utils import Remotefile, add_execution_right, run_command
+
+from .base import Builder, Dependency, ReleaseDownload
 
 pj = os.path.join
 
 
-class android_ndk(Dependency):
+class AndroidNdk(Dependency):
     dont_skip = True
     neutral = False
     name = "android-ndk"
@@ -24,7 +26,7 @@ class android_ndk(Dependency):
         def source_dir(self):
             return self.target.full_name()
 
-        patches = [
+        patches: ClassVar[list[str]] = [
             "android-ndk-r23c-linux-x86_64.patch",
         ]
 
@@ -78,8 +80,8 @@ class android_ndk(Dependency):
                     self.target.gccver,
                 ),
             ]
-            for root, dirs, files in os.walk(self.install_path):
-                if not root in bin_dirs:
+            for root, _dirs, files in os.walk(self.install_path):
+                if root not in bin_dirs:
                     continue
 
                 for file_ in files:

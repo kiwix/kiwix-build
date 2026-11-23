@@ -173,6 +173,19 @@ wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.z
 unzip ninja-linux.zip ninja -d $HOME/bin
 ```
 
+Contributing
+------------
+
+Python code is checked with [ruff](https://docs.astral.sh/ruff/)
+(configuration in `pyproject.toml`) by the QA workflow on every push and
+pull request. To run the same checks locally, install the development
+dependencies and use [invoke](https://www.pyinvoke.org/):
+```bash
+pip3 install ".[dev]"
+inv lintall  # check linting and formatting, as the CI does
+inv format   # fix formatting and auto-fixable lint issues
+```
+
 License
 -------
 

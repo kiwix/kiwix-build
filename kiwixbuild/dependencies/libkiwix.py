@@ -1,8 +1,8 @@
-import shutil, os
+from typing import ClassVar
+
+from kiwixbuild._global import option
 
 from .base import Dependency, GitClone, MesonBuilder
-from kiwixbuild.utils import pj, copy_tree
-from kiwixbuild._global import option, get_target_step, neutralEnv
 
 
 class Libkiwix(Dependency):
@@ -14,7 +14,7 @@ class Libkiwix(Dependency):
         git_dir = "libkiwix"
 
     class Builder(MesonBuilder):
-        dependencies = [
+        dependencies: ClassVar[list[str]] = [
             "pugixml",
             "libzim",
             "zlib",
@@ -24,7 +24,7 @@ class Libkiwix(Dependency):
             "mustache",
             "xapian-core",
         ]
-        strip_options = []
+        strip_options: ClassVar[list] = []
 
         @property
         def build_type(self):
@@ -34,15 +34,15 @@ class Libkiwix(Dependency):
 
         @property
         def configure_options(self):
-            configInfo = self.buildEnv.configInfo
-            if configInfo.build == "android":
+            config_info = self.buildEnv.configInfo
+            if config_info.build == "android":
                 yield "-Dstatic-linkage=true"
                 yield "-Dwerror=false"
-            if configInfo.build in ("ios", "macos"):
+            if config_info.build in ("ios", "macos"):
                 yield "-Db_bitcode=true"
-            if configInfo.name == "flatpak":
+            if config_info.name == "flatpak":
                 yield "--wrap-mode=nodownload"
-            if configInfo.mixed and option("target") == "libkiwix":
+            if config_info.mixed and option("target") == "libkiwix":
                 yield "-Dstatic-linkage=true"
 
         @property

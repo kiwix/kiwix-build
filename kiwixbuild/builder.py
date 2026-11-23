@@ -1,19 +1,17 @@
+import subprocess
 import sys
-from collections import OrderedDict
-from .buildenv import *
 
-from .configs import ConfigInfo
-from .utils import remove_duplicates, StopBuild, colorize
-from .dependencies import Dependency
-from .packages import PACKAGE_NAME_MAPPERS
 from ._global import (
-    neutralEnv,
-    option,
     add_target_step,
     get_target_step,
+    neutral_env,
+    option,
     target_steps,
 )
-from . import _global
+from .configs import ConfigInfo
+from .dependencies import Dependency
+from .packages import PACKAGE_NAME_MAPPERS
+from .utils import StopBuild, colorize, remove_duplicates
 
 
 class Builder:
@@ -23,121 +21,121 @@ class Builder:
 
         config_name = option("config")
         config = ConfigInfo.get_config(config_name, self._targets)
-        if neutralEnv("distname") not in config.compatible_hosts:
+        if neutral_env("distname") not in config.compatible_hosts:
             print(
                 (
                     colorize("ERROR") + ": The config {} cannot be build on host {}.\n"
                     "Select another config or change your host system."
-                ).format(config.name, neutralEnv("distname"))
+                ).format(config.name, neutral_env("distname"))
             )
         self.targetDefs = config.add_targets(option("target"), self._targets)
 
     def finalize_target_steps(self):
         steps = []
-        for targetDef in self.targetDefs:
-            steps += self.order_steps(targetDef)
+        for target_def in self.targetDefs:
+            steps += self.order_steps(target_def)
         steps = list(remove_duplicates(steps))
 
         if option("build_nodeps"):
             # add all config steps
             for dep in steps:
-                stepClass = Dependency.all_deps[dep[1]]
-                if stepClass.dont_skip:
+                step_class = Dependency.all_deps[dep[1]]
+                if step_class.dont_skip:
                     add_target_step(dep, self._targets[dep])
 
-            src_targetDef = ("source", targetDef[1])
-            add_target_step(src_targetDef, self._targets[src_targetDef])
-            add_target_step(targetDef, self._targets[targetDef])
+            src_target_def = ("source", target_def[1])
+            add_target_step(src_target_def, self._targets[src_target_def])
+            add_target_step(target_def, self._targets[target_def])
         else:
             for dep in steps:
-                if option("build_deps_only") and dep[1] == targetDef[1]:
+                if option("build_deps_only") and dep[1] == target_def[1]:
                     continue
                 add_target_step(dep, self._targets[dep])
         self.instanciate_steps()
 
-    def order_steps(self, targetDef):
-        for cfgName in ConfigInfo.all_running_configs:
-            cfg = ConfigInfo.all_configs[cfgName]
-            for tlcName in cfg.toolchain_names:
-                tlc = Dependency.all_deps[tlcName]
-                yield ("source", tlcName)
-                yield ("neutral" if tlc.neutral else cfgName, tlcName)
+    def order_steps(self, target_def):
+        for cfg_name in ConfigInfo.all_running_configs:
+            cfg = ConfigInfo.all_configs[cfg_name]
+            for tlc_name in cfg.toolchain_names:
+                tlc = Dependency.all_deps[tlc_name]
+                yield ("source", tlc_name)
+                yield ("neutral" if tlc.neutral else cfg_name, tlc_name)
         _targets = dict(self._targets)
-        yield from self.order_dependencies(targetDef, _targets)
+        yield from self.order_dependencies(target_def, _targets)
 
-    def order_dependencies(self, targetDef, targets):
-        targetConfigName, targetName = targetDef
-        if targetConfigName == "source":
+    def order_dependencies(self, target_def, targets):
+        target_config_name, target_name = target_def
+        if target_config_name == "source":
             # Do not try to order sources, they will be added as dep by the
             # build step two lines later.
             return
         try:
-            target = targets.pop(targetDef)
+            target = targets.pop(target_def)
         except KeyError:
             return
 
-        targetConfig = ConfigInfo.get_config(targetConfigName)
-        for dep in target.get_dependencies(targetConfig, True):
-            depConfig, depName = targetConfig.get_fully_qualified_dep(dep)
-            if (depConfig, depName) in targets:
-                yield from self.order_dependencies((depConfig, depName), targets)
-        yield ("source", targetName)
-        yield targetDef
+        target_config = ConfigInfo.get_config(target_config_name)
+        for dep in target.get_dependencies(target_config, True):
+            dep_config, dep_name = target_config.get_fully_qualified_dep(dep)
+            if (dep_config, dep_name) in targets:
+                yield from self.order_dependencies((dep_config, dep_name), targets)
+        yield ("source", target_name)
+        yield target_def
 
     def instanciate_steps(self):
-        for stepDef in list(target_steps()):
-            stepConfig, stepName = stepDef
-            stepClass = Dependency.all_deps[stepName]
-            if stepConfig == "source":
-                source = get_target_step(stepDef)(stepClass)
-                add_target_step(stepDef, source)
+        for step_def in list(target_steps()):
+            step_config, step_name = step_def
+            step_class = Dependency.all_deps[step_name]
+            if step_config == "source":
+                source = get_target_step(step_def)(step_class)
+                add_target_step(step_def, source)
             else:
-                source = get_target_step(stepName, "source")
-                env = ConfigInfo.get_config(stepConfig).buildEnv
-                builder = get_target_step(stepDef)(stepClass, source, env)
-                add_target_step(stepDef, builder)
+                source = get_target_step(step_name, "source")
+                env = ConfigInfo.get_config(step_config).buildEnv
+                builder = get_target_step(step_def)(step_class, source, env)
+                add_target_step(step_def, builder)
 
     def prepare_sources(self):
         if option("skip_source_prepare"):
             print(colorize("SKIP"))
             return
 
-        sourceDefs = remove_duplicates(
+        source_defs = remove_duplicates(
             tDef for tDef in target_steps() if tDef[0] == "source"
         )
-        for sourceDef in sourceDefs:
-            print("prepare sources {} :".format(sourceDef[1]))
-            source = get_target_step(sourceDef)
+        for source_def in source_defs:
+            print(f"prepare sources {source_def[1]} :")
+            source = get_target_step(source_def)
             source.prepare()
 
     def build(self):
-        builderDefs = (tDef for tDef in target_steps() if tDef[0] != "source")
-        for builderDef in builderDefs:
-            builder = get_target_step(builderDef)
-            if option("make_dist") and builderDef[1] == option("target"):
-                print("make dist {} ({}):".format(builder.name, builderDef[0]))
+        builder_defs = (tDef for tDef in target_steps() if tDef[0] != "source")
+        for builder_def in builder_defs:
+            builder = get_target_step(builder_def)
+            if option("make_dist") and builder_def[1] == option("target"):
+                print(f"make dist {builder.name} ({builder_def[0]}):")
                 builder.make_dist()
                 continue
-            print("build {} ({}):".format(builder.name, builderDef[0]))
-            add_target_step(builderDef, builder)
+            print(f"build {builder.name} ({builder_def[0]}):")
+            add_target_step(builder_def, builder)
             builder.build()
 
     def _get_packages(self):
         packages_list = []
-        for runningConfig in ConfigInfo.all_running_configs.values():
-            for mapper_name in self._get_mapper_names_for_config(runningConfig):
+        for running_config in ConfigInfo.all_running_configs.values():
+            for mapper_name in self._get_mapper_names_for_config(running_config):
                 package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
                 packages_list += package_name_mapper.get("COMMON", [])
 
         to_drop = []
-        for builderDef in self._targets:
-            builderConfig, builderName = builderDef
+        for builder_def in self._targets:
+            builder_config, builder_name = builder_def
 
-            for mapper_name in self._get_mapper_names_for_config(builderConfig):
+            for mapper_name in self._get_mapper_names_for_config(builder_config):
                 package_name_mapper = PACKAGE_NAME_MAPPERS.get(mapper_name, {})
-                packages = package_name_mapper.get(builderName)
+                packages = package_name_mapper.get(builder_name)
                 if packages:
-                    to_drop.append(builderDef)
+                    to_drop.append(builder_def)
                     if packages is not True:
                         # True means "assume the dependency is install but do
                         # not try to install anything for it"
@@ -148,8 +146,8 @@ class Builder:
         return packages_list
 
     def _get_mapper_names_for_config(self, config):
-        host = neutralEnv("distname")
-        codename = neutralEnv("codename")
+        host = neutral_env("distname")
+        codename = neutral_env("codename")
         yield f"{host}_{config}"
         if codename != "":
             yield f"{host}_{codename}_{config}"
@@ -162,7 +160,7 @@ class Builder:
             print(colorize("SKIP") + ", Assume package installed")
             return
 
-        distname = neutralEnv("distname")
+        distname = neutral_env("distname")
         if distname in ("fedora", "redhat", "centos"):
             package_installer = "sudo dnf install {}"
             package_checker = "rpm -q --quiet {}"
@@ -175,10 +173,10 @@ class Builder:
 
         packages_to_install = []
         for package in packages_to_have:
-            print(" - {} : ".format(package), end="")
+            print(f" - {package} : ", end="")
             command = package_checker.format(package)
             try:
-                subprocess.check_call(command, shell=True)
+                subprocess.check_call(command, shell=True)  # noqa: S602
             except subprocess.CalledProcessError:
                 print(colorize("NEEDED"))
                 packages_to_install.append(package)
@@ -188,7 +186,7 @@ class Builder:
         if packages_to_install:
             command = package_installer.format(" ".join(packages_to_install))
             print(command)
-            subprocess.check_call(command, shell=True)
+            subprocess.check_call(command, shell=True)  # noqa: S602
         else:
             print(colorize("SKIP") + ", No package to install.")
 

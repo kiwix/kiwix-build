@@ -1,11 +1,14 @@
-from .base import ConfigInfo, MixedMixin
+import subprocess
+from typing import ClassVar
 
-from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
+from kiwixbuild.utils import pj, which
+
+from .base import ConfigInfo, mixed_mixin
 
 
 class MuslConfigInfo(ConfigInfo):
-    compatible_hosts = ["fedora", "debian", "ubuntu"]
+    compatible_hosts: ClassVar[list[str]] = ["fedora", "debian", "ubuntu"]
 
     def get_cross_config(self):
         return {
@@ -14,10 +17,9 @@ class MuslConfigInfo(ConfigInfo):
             "root_path": self.root_path,
             "extra_libs": [],
             "extra_cflags": [
-                "-I{}".format(include_dir) for include_dir in self.get_include_dirs()
-                ] + [
-                "-DZSTD_USE_C90_QSORT"
-            ],
+                f"-I{include_dir}" for include_dir in self.get_include_dirs()
+            ]
+            + ["-DZSTD_USE_C90_QSORT"],
             "host_machine": {
                 "system": "linux",
                 "lsystem": "linux",
@@ -39,7 +41,7 @@ class MuslConfigInfo(ConfigInfo):
     @property
     def binaries(self):
         binaries = (
-            (k, "{}-{}".format(self.arch_full, v))
+            (k, f"{self.arch_full}-{v}")
             for k, v in (
                 ("CC", "gcc"),
                 ("CXX", "g++"),
@@ -113,7 +115,7 @@ class MuslConfigInfo(ConfigInfo):
 class Aarch64MuslConfigInfo(MuslConfigInfo):
     build = "aarch64_musl"
     arch_full = "aarch64-linux-musl"
-    toolchain_names = ["aarch64_musl"]
+    toolchain_names: ClassVar[list[str]] = ["aarch64_musl"]
     libdir = "lib/aarch64-linux-musl"
     cpu_family = "arm"
     cpu = "armhf"
@@ -130,30 +132,30 @@ class Aarch64MuslStatic(Aarch64MuslConfigInfo):
     static = True
 
 
-class Aarch64MuslMixed(MixedMixin("aarch64_musl_static"), Aarch64MuslConfigInfo):
+class Aarch64MuslMixed(mixed_mixin("aarch64_musl_static"), Aarch64MuslConfigInfo):
     name = "aarch64_musl_mixed"
     static = False
 
 
-class X86_64MuslConfigInfo(MuslConfigInfo):
+class Amd64MuslConfigInfo(MuslConfigInfo):
     build = "x86-64_musl"
     arch_full = "x86_64-linux-musl"
-    toolchain_names = ["x86-64_musl"]
+    toolchain_names: ClassVar[list[str]] = ["x86-64_musl"]
     libdir = "lib/x86_64-linux-musl"
     cpu_family = "x86_64"
     cpu = "x86_64"
 
 
-class X86_64MuslDyn(X86_64MuslConfigInfo):
+class Amd64MuslDyn(Amd64MuslConfigInfo):
     name = "x86-64_musl_dyn"
     static = False
 
 
-class X86_64MuslStatic(X86_64MuslConfigInfo):
+class Amd64MuslStatic(Amd64MuslConfigInfo):
     name = "x86-64_musl_static"
     static = True
 
 
-class x86_64MuslMixed(MixedMixin("x86-64_musl_static"), X86_64MuslConfigInfo):
+class Amd64MuslMixed(mixed_mixin("x86-64_musl_static"), Amd64MuslConfigInfo):
     name = "x86-64_musl_mixed"
     static = False

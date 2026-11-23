@@ -2,14 +2,14 @@
 
 import os
 
+from build_definition import DEPS, select_build_targets
 from common import (
-    run_kiwix_build,
-    make_deps_archive,
-    upload,
     COMPILE_CONFIG,
     DEV_BRANCH,
+    make_deps_archive,
+    run_kiwix_build,
+    upload,
 )
-from build_definition import select_build_targets, DEPS
 
 for target in select_build_targets(DEPS):
     run_kiwix_build(target, config=COMPILE_CONFIG, build_deps_only=True)

@@ -1,7 +1,9 @@
-from .base import Dependency, ReleaseDownload, Builder as BaseBuilder
+from shutil import copy2
 
 from kiwixbuild.utils import Remotefile, pj
-from shutil import copy2
+
+from .base import Builder as BaseBuilder
+from .base import Dependency, ReleaseDownload
 
 
 class Mustache(Dependency):

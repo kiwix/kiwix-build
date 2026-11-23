@@ -1,6 +1,8 @@
-from .base import Dependency, ReleaseDownload, TcCopyBuilder
-from kiwixbuild.utils import Remotefile
 import os
+
+from kiwixbuild.utils import Remotefile
+
+from .base import Dependency, ReleaseDownload, TcCopyBuilder
 
 # The arm toolchains
 # This is based on toolchains published here : https://github.com/tttapa/docker-arm-cross-toolchain
@@ -10,7 +12,7 @@ base_url = (
 )
 
 
-class armv6_toolchain(Dependency):
+class Armv6Toolchain(Dependency):
     dont_skip = True
     neutral = True
     name = "armv6"
@@ -26,7 +28,7 @@ class armv6_toolchain(Dependency):
         src_subdir = "armv6-rpi-linux-gnueabihf"
 
 
-class armv8_toolchain(Dependency):
+class Armv8Toolchain(Dependency):
     dont_skip = True
     neutral = True
     name = "armv8"
@@ -42,7 +44,7 @@ class armv8_toolchain(Dependency):
         src_subdir = "armv8-rpi3-linux-gnueabihf"
 
 
-class aarch64_toolchain(Dependency):
+class Aarch64Toolchain(Dependency):
     dont_skip = True
     neutral = True
     name = "aarch64"
@@ -51,7 +53,7 @@ class aarch64_toolchain(Dependency):
         archive = Remotefile(
             "x-tools-aarch64-rpi3-linux-gnu-gcc12.tar.xz",
             "ff51d9fd7b3c4f57605e4e16944b9342740876ff3c14991a932ffc9611af5776",
-            base_url + "x-tools-aarch64-rpi3-linux-gnu-gcc12.tar.xz"
+            base_url + "x-tools-aarch64-rpi3-linux-gnu-gcc12.tar.xz",
         )
 
     class Builder(TcCopyBuilder):

@@ -1,10 +1,14 @@
-import os, sys, shutil
-import subprocess
+import contextlib
+import os
 import platform
+import shutil
+import subprocess
+import sys
+
 import distro
 
-from .utils import pj, download_remote, escape_path
-from ._global import neutralEnv, option
+from ._global import option
+from .utils import download_remote, escape_path, pj
 
 
 class NeutralEnv:
@@ -51,12 +55,14 @@ class NeutralEnv:
         where = where or self.archive_dir
         download_remote(what, where)
 
-    def _detect_command(self, name, default=None, options=["--version"], required=True):
+    def _detect_command(self, name, *, default=None, options=None, required=True):
+        if options is None:
+            options = ["--version"]
         if default is None:
             default = [[name]]
-        env_key = "KBUILD_{}_COMMAND".format(name.upper())
+        env_key = f"KBUILD_{name.upper()}_COMMAND"
         if env_key in os.environ:
-            default = [os.environ[env_key].split()] + default
+            default = [os.environ[env_key].split(), *default]
         for command in default:
             try:
                 retcode = subprocess.check_call(
@@ -67,20 +73,21 @@ class NeutralEnv:
                 continue
             if retcode == 0:
                 return command
+        if required:
+            sys.exit(f"ERROR: {name} command not found")
         else:
-            if required:
-                sys.exit("ERROR: {} command not found".format(name))
-            else:
-                print("WARNING: {} command not found".format(name), file=sys.stderr)
-                return ["{}_NOT_FOUND".format(name.upper())]
+            print(f"WARNING: {name} command not found", file=sys.stderr)
+            return [f"{name.upper()}_NOT_FOUND"]
 
 
 class BuildEnv:
-    def __init__(self, configInfo):
-        self.configInfo = configInfo
+    def __init__(self, config_info):
+        self.configInfo = config_info
         self.base_build_dir = pj(option("working_dir"), option("build_dir"))
         build_dir = (
-            configInfo.arch_name if option("use_target_arch_name") else configInfo.name
+            config_info.arch_name
+            if option("use_target_arch_name")
+            else config_info.name
         )
         build_dir = f"BUILD_{build_dir}"
         self.build_dir = pj(self.base_build_dir, build_dir)
@@ -109,9 +116,9 @@ class BuildEnv:
         if self.configInfo.libdir is not None:
             return self.configInfo.libdir
         if self._is_debianlike():
-            try:
+            with contextlib.suppress(Exception):
                 pc = subprocess.Popen(
-                    ["dpkg-architecture", "-qDEB_HOST_MULTIARCH"],
+                    ["dpkg-architecture", "-qDEB_HOST_MULTIARCH"],  # noqa: S607
                     stdout=subprocess.PIPE,
                     stderr=subprocess.DEVNULL,
                 )
@@ -119,8 +126,6 @@ class BuildEnv:
                 if pc.returncode == 0:
                     archpath = stdo.decode().strip()
                     return "lib/" + archpath
-            except Exception:
-                pass
         if os.path.isdir("/usr/lib64") and not os.path.islink("/usr/lib64"):
             return "lib64"
         return "lib"

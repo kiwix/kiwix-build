@@ -2,7 +2,8 @@
 
 import tarfile
 from pathlib import Path
-from common import upload, OS_NAME, COMPILE_CONFIG, HOME
+
+from common import COMPILE_CONFIG, HOME, OS_NAME, upload
 
 ARCHIVE_NAME = Path(f"fail_log_{OS_NAME}_{COMPILE_CONFIG}.tar.gz")
 

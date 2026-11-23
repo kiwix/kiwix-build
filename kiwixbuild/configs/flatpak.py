@@ -1,5 +1,6 @@
+from typing import ClassVar
+
 from .base import ConfigInfo
-from kiwixbuild._global import option, neutralEnv
 
 
 class FlatpakConfigInfo(ConfigInfo):
@@ -7,8 +8,8 @@ class FlatpakConfigInfo(ConfigInfo):
     arch_name = "flatpak"
     build = "flatpak"
     static = ""
-    toolchain_names = ["org.kde", "io.qt.qtwebengine"]
-    compatible_hosts = ["debian", "ubuntu", "fedora"]
+    toolchain_names: ClassVar[list[str]] = ["org.kde", "io.qt.qtwebengine"]
+    compatible_hosts: ClassVar[list[str]] = ["debian", "ubuntu", "fedora"]
 
     def __str__(self):
         return "flatpak"

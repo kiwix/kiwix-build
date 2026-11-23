@@ -1,17 +1,20 @@
-import os.path
 import hashlib
-import tarfile, zipfile
-import tempfile
-import shutil
-import os, stat, sys
-import urllib.request
-import urllib.error
-import ssl
-import subprocess
+import os
+import os.path
 import re
-from collections import namedtuple, defaultdict
+import shutil
+import ssl
+import stat
+import subprocess
+import sys
+import tarfile
+import tempfile
+import urllib.error
+import urllib.request
+import zipfile
+from collections import defaultdict, namedtuple
 
-from kiwixbuild._global import neutralEnv, option
+from kiwixbuild._global import neutral_env, option
 
 
 def pj(*args):
@@ -32,14 +35,14 @@ REMOTE_PREFIX = "https://dev.kiwix.org/kiwix-build/"
 
 
 def which(name):
-    command = "which {}".format(name)
-    output = subprocess.check_output(command, shell=True)
+    command = f"which {name}"
+    output = subprocess.check_output(command, shell=True)  # noqa: S602
     return output[:-1].decode()
 
 
 def xrun_find(name):
-    command = "xcrun -find {}".format(name)
-    output = subprocess.check_output(command, shell=True)
+    command = f"xcrun -find {name}"
+    output = subprocess.check_output(command, shell=True)  # noqa: S602
     return output[:-1].decode()
 
 
@@ -75,7 +78,7 @@ class DefaultEnv(Defaultdict):
 
 
 def get_separator():
-    return ";" if neutralEnv("distname") == "Windows" else ":"
+    return ";" if neutral_env("distname") == "Windows" else ":"
 
 
 class PathArray(list):
@@ -126,7 +129,7 @@ def colorize(text, color=None):
 
 def print_progress(progress):
     if option("show_progress"):
-        text = "{}\033[{}D".format(progress, len(progress))
+        text = f"{progress}\033[{len(progress)}D"
         print(text, end="")
 
 
@@ -137,7 +140,7 @@ def add_execution_right(file_path):
 
 def copy_tree(src, dst, post_copy_function=None):
     os.makedirs(dst, exist_ok=True)
-    for root, dirs, files in os.walk(src):
+    for root, _dirs, files in os.walk(src):
         r = os.path.relpath(root, src)
         dstdir = pj(dst, r)
         os.makedirs(dstdir, exist_ok=True)
@@ -165,9 +168,11 @@ def download_remote(what, where):
     extra_args = {"context": context} if sys.version_info >= (3, 4, 3) else {}
     progress_chars = "/-\\|"
     try:
-        with urllib.request.urlopen(what.url, **extra_args) as resource, open(
-            file_path, "wb"
-        ) as file:
+        with (
+            # URLs come from the hardcoded Remotefile definitions
+            urllib.request.urlopen(what.url, **extra_args) as resource,  # noqa: S310
+            open(file_path, "wb") as file,
+        ):
             tsize = resource.info().get("Content-Length", None)
             if tsize is not None:
                 tsize = int(tsize)
@@ -178,23 +183,24 @@ def download_remote(what, where):
                     break
                 if tsize:
                     current += batch_size
-                    print_progress("{:.2%}".format(current / tsize))
+                    print_progress(f"{current / tsize:.2%}")
                 else:
                     print_progress(progress_chars[current])
                     current = (current + 1) % 4
                 file.write(batch)
     except urllib.error.URLError as e:
-        print("Cannot download URL {}\n{}".format(what.url, e.reason))
-        raise StopBuild()
+        print(f"Cannot download URL {what.url}\n{e.reason}")
+        raise StopBuild() from None
 
     if not what.sha256:
-        print("Sha256 for {} not set, do no verify download".format(what.name))
+        print(f"Sha256 for {what.name} not set, do no verify download")
     elif what.sha256 != get_sha256(file_path):
         os.remove(file_path)
         raise StopBuild("Sha 256 doesn't correspond")
 
 
-class BaseCommandResult(Exception):
+# Not an error: used to report a skipped/warned command result.
+class BaseCommandResult(Exception):  # noqa: N818
     def __init__(self, msg=""):
         self.msg = msg
 
@@ -205,13 +211,13 @@ class BaseCommandResult(Exception):
 class SkipCommand(BaseCommandResult):
     def __str__(self):
         if self.msg:
-            return colorize("SKIP") + " : {}".format(self.msg)
+            return colorize("SKIP") + f" : {self.msg}"
         return colorize("SKIP")
 
 
 class WarningMessage(BaseCommandResult):
     def __str__(self):
-        return colorize("WARNING") + " : {}".format(self.msg)
+        return colorize("WARNING") + f" : {self.msg}"
 
 
 class StopBuild(BaseCommandResult):
@@ -240,8 +246,8 @@ class Context:
         if self.no_skip:
             return
         if extra_name:
-            extra_name = "_{}".format(extra_name)
-        self.autoskip_file = pj(path, ".{}{}_ok".format(self.command_name, extra_name))
+            extra_name = f"_{extra_name}"
+        self.autoskip_file = pj(path, f".{self.command_name}{extra_name}_ok")
         if os.path.exists(self.autoskip_file):
             raise SkipCommand()
 
@@ -264,7 +270,7 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
         else:
             archive = tarfile.open(archive_path)
             members = archive.getmembers()
-            getname = lambda info: getattr(info, "name")
+            getname = lambda info: info.name
             isdir = lambda info: info.isdir()
         if not topdir:
             for d in (m for m in members if isdir(m)):
@@ -291,7 +297,9 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
                     _members_to_extract = [getname(m) for m in members_to_extract]
                 else:
                     _members_to_extract = members_to_extract
-                archive.extractall(path=tmpdir, members=_members_to_extract)
+                archive.extractall(  # noqa: S202 (trusted, sha256-checked archive)
+                    path=tmpdir, members=_members_to_extract
+                )
                 if is_zip_archive:
                     for member in members_to_extract:
                         if isdir(member):
@@ -317,13 +325,13 @@ def extract_archive(archive_path, dest_dir, topdir=None, name=None):
             if name:
                 dest_dir = pj(dest_dir, name)
                 os.makedirs(dest_dir)
-            archive.extractall(path=dest_dir)
+            archive.extractall(path=dest_dir)  # noqa: S202 (trusted archive)
     finally:
         if archive is not None:
             archive.close()
 
 
-def run_command(command, cwd, context, *, env=None, input=None):
+def run_command(command, cwd, context, *, env=None, input_data=None):
     os.makedirs(cwd, exist_ok=True)
     if env is None:
         env = DefaultEnv()
@@ -331,17 +339,17 @@ def run_command(command, cwd, context, *, env=None, input=None):
     try:
         if not option("verbose"):
             log = open(context.log_file, "w")
-        print("run command '{}'".format(command), file=log)
-        print("current directory is '{}'".format(cwd), file=log)
+        print(f"run command '{command}'", file=log)
+        print(f"current directory is '{cwd}'", file=log)
         print("env is :", file=log)
         env = {k: str(v) for k, v in env.items()}
         for k, v in env.items():
-            print("  {} : {!r}".format(k, v), file=log)
+            print(f"  {k} : {v!r}", file=log)
 
         if log:
             log.flush()
-        kwargs = dict()
-        if input:
+        kwargs = {}
+        if input_data:
             kwargs["stdin"] = subprocess.PIPE
         process = subprocess.Popen(
             command,
@@ -349,21 +357,21 @@ def run_command(command, cwd, context, *, env=None, input=None):
             env=env,
             stdout=log or sys.stdout,
             stderr=subprocess.STDOUT,
-            **kwargs
+            **kwargs,
         )
-        if input:
-            input = input.encode()
+        if input_data:
+            input_data = input_data.encode()
         while True:
             try:
-                if input is None:
+                if input_data is None:
                     process.wait(timeout=30)
                 else:
-                    process.communicate(input, timeout=30)
+                    process.communicate(input_data, timeout=30)
             except subprocess.TimeoutExpired:
-                # Either `wait` timeout (and `input` is None) or
-                # `communicate` timeout (and we must set `input` to None
+                # Either `wait` timeout (and `input_data` is None) or
+                # `communicate` timeout (and we must set `input_data` to None
                 # to not communicate again).
-                input = None
+                input_data = None
                 print(".", end="", flush=True)
             else:
                 break

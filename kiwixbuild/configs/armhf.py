@@ -1,12 +1,15 @@
-from .base import ConfigInfo, MixedMixin
+import subprocess
+from typing import ClassVar
 
-from kiwixbuild.utils import pj
 from kiwixbuild._global import get_target_step
+from kiwixbuild.utils import pj, which
+
+from .base import ConfigInfo, mixed_mixin
 
 
 # Base config for arm
 class ArmConfigInfo(ConfigInfo):
-    compatible_hosts = ["fedora", "debian", "ubuntu", "almalinux"]
+    compatible_hosts: ClassVar[list[str]] = ["fedora", "debian", "ubuntu", "almalinux"]
 
     def get_cross_config(self):
         return {
@@ -15,7 +18,7 @@ class ArmConfigInfo(ConfigInfo):
             "root_path": self.root_path,
             "extra_libs": [],
             "extra_cflags": [
-                "-I{}".format(include_dir) for include_dir in self.get_include_dirs()
+                f"-I{include_dir}" for include_dir in self.get_include_dirs()
             ],
             "host_machine": {
                 "system": "linux",
@@ -29,7 +32,7 @@ class ArmConfigInfo(ConfigInfo):
 
     @property
     def libdir(self):
-        return "lib/{}".format(self.arch_full)
+        return f"lib/{self.arch_full}"
 
     @property
     def toolchain(self):
@@ -42,7 +45,7 @@ class ArmConfigInfo(ConfigInfo):
     @property
     def binaries(self):
         binaries = (
-            (k, "{}-{}".format(self.arch_full, v))
+            (k, f"{self.arch_full}-{v}")
             for k, v in (
                 ("CC", "gcc"),
                 ("CXX", "g++"),
@@ -69,7 +72,7 @@ class ArmConfigInfo(ConfigInfo):
 
     @property
     def configure_options(self):
-        yield "--host={}".format(self.arch_full)
+        yield f"--host={self.arch_full}"
 
     def get_bin_dir(self):
         return [pj(self.root_path, "bin")]
@@ -113,7 +116,7 @@ class ArmConfigInfo(ConfigInfo):
 class Armv6(ArmConfigInfo):
     build = "armv6"
     arch_full = "armv6-rpi-linux-gnueabihf"
-    toolchain_names = ["armv6"]
+    toolchain_names: ClassVar[list[str]] = ["armv6"]
     cpu_family = "arm"
     cpu = "armv6"
 
@@ -128,7 +131,7 @@ class Armv6Static(Armv6):
     static = True
 
 
-class Armv6Mixed(MixedMixin("armv6_static"), Armv6):
+class Armv6Mixed(mixed_mixin("armv6_static"), Armv6):
     name = "armv6_mixed"
     static = False
 
@@ -136,7 +139,7 @@ class Armv6Mixed(MixedMixin("armv6_static"), Armv6):
 class Armv8(ArmConfigInfo):
     build = "armv8"
     arch_full = "armv8-rpi3-linux-gnueabihf"
-    toolchain_names = ["armv8"]
+    toolchain_names: ClassVar[list[str]] = ["armv8"]
     cpu_family = "arm"
     cpu = "armv8"
 
@@ -151,7 +154,7 @@ class Armv8Static(Armv8):
     static = True
 
 
-class Armv8Mixed(MixedMixin("armv8_static"), Armv8):
+class Armv8Mixed(mixed_mixin("armv8_static"), Armv8):
     name = "armv8_mixed"
     static = False
 
@@ -159,7 +162,7 @@ class Armv8Mixed(MixedMixin("armv8_static"), Armv8):
 class Aarch64(ArmConfigInfo):
     build = "aarch64"
     arch_full = "aarch64-rpi3-linux-gnu"
-    toolchain_names = ["aarch64"]
+    toolchain_names: ClassVar[list[str]] = ["aarch64"]
     cpu_family = "aarch64"
     cpu = "aarch64"
 
@@ -178,6 +181,6 @@ class Aarch64Static(Aarch64):
     static = True
 
 
-class Aarch64Mixed(MixedMixin("aarch64_static"), Aarch64):
+class Aarch64Mixed(mixed_mixin("aarch64_static"), Aarch64):
     name = "aarch64_mixed"
     static = False

@@ -1,12 +1,13 @@
 import os
 
-from .base import Dependency, ReleaseDownload, Builder
-from kiwixbuild.utils import Remotefile, run_command, copy_tree
+from kiwixbuild.utils import Remotefile, copy_tree, run_command
+
+from .base import Builder, Dependency, ReleaseDownload
 
 pj = os.path.join
 
 
-class emsdk(Dependency):
+class Emsdk(Dependency):
     dont_skip = True
     neutral = False
     name = "emsdk"

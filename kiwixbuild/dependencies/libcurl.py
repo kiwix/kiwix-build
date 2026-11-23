@@ -1,13 +1,12 @@
-import os
+from typing import ClassVar
+
+from kiwixbuild.utils import Remotefile
 
 from .base import (
     Dependency,
-    ReleaseDownload,
     MesonBuilder,
+    ReleaseDownload,
 )
-
-from kiwixbuild.utils import Remotefile, pj, Defaultdict, SkipCommand, run_command
-from kiwixbuild._global import get_target_step
 
 
 class LibCurl(Dependency):
@@ -25,10 +24,10 @@ class LibCurl(Dependency):
             "bbb6ae75225c36ef9bb336cface729794c7c070c623a003fff40bd416042ff6e",
             "https://dev.kiwix.org/libkiwix/curl_8.4.0-2_patch.zip",
         )
-        archives = [src_archive, meson_archive]
+        archives: ClassVar[list] = [src_archive, meson_archive]
 
     class Builder(MesonBuilder):
-        dependencies = ["zlib"]
+        dependencies: ClassVar[list[str]] = ["zlib"]
 
         def get_features_to_disable(self):
             yield from (
@@ -61,10 +60,7 @@ class LibCurl(Dependency):
 
         @property
         def configure_options(self):
-            return tuple(
-                f"-D{p}=disabled"
-                for p in self.get_features_to_disable()
-            )
+            return tuple(f"-D{p}=disabled" for p in self.get_features_to_disable())
 
         def _test(self, context):
             context.skip("No Test")

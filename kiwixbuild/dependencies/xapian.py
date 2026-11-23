@@ -1,9 +1,10 @@
-from .base import Dependency, GitClone, ReleaseDownload, MakeBuilder, MesonBuilder
-
-from kiwixbuild.utils import Remotefile
-from kiwixbuild._global import neutralEnv
-
 import platform
+from typing import ClassVar
+
+from kiwixbuild._global import neutral_env
+from kiwixbuild.utils import Remotefile
+
+from .base import Dependency, GitClone, MakeBuilder, MesonBuilder, ReleaseDownload
 
 
 class Xapian(Dependency):
@@ -16,7 +17,7 @@ class Xapian(Dependency):
             git_dir = "xapian-core"
 
         class Builder(MesonBuilder):
-            configure_options = [
+            configure_options: ClassVar[list[str]] = [
                 "-Denable-sse=false",
                 "-Denable-backend-chert=false",
                 "-Denable-backend-remote=false",
@@ -24,7 +25,7 @@ class Xapian(Dependency):
             subsource_dir = "xapian-core"
 
             @classmethod
-            def get_dependencies(cls, configInfo, allDeps):
+            def get_dependencies(cls, _config_info, _all_deps):
                 return ["zlib"]
 
     else:
@@ -36,20 +37,20 @@ class Xapian(Dependency):
             )
 
         class Builder(MakeBuilder):
-            configure_options = [
+            configure_options: ClassVar[list[str]] = [
                 "--disable-sse",
                 "--disable-backend-chert",
                 "--disable-backend-remote",
                 "--disable-documentation",
             ]
-            configure_env = {
+            configure_env: ClassVar[dict[str, str]] = {
                 "_format_LDFLAGS": "{env.LDFLAGS} -L{buildEnv.install_dir}/{buildEnv.libprefix}",
                 "_format_CXXFLAGS": "{env.CXXFLAGS} -O3 -I{buildEnv.install_dir}/include",
             }
 
             @classmethod
-            def get_dependencies(cls, configInfo, allDeps):
+            def get_dependencies(cls, config_info, _all_deps):
                 deps = ["zlib", "lzma"]
-                if configInfo.build == "wasm" or neutralEnv("distname") == "Darwin":
+                if config_info.build == "wasm" or neutral_env("distname") == "Darwin":
                     return deps
-                return deps + ["uuid"]
+                return [*deps, "uuid"]

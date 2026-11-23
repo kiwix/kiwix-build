@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
-from build_definition import select_build_targets, BUILD
+from build_definition import BUILD, select_build_targets
 from common import (
-    run_kiwix_build,
-    make_archive,
-    create_desktop_image,
-    fix_macos_rpath,
-    upload_archive,
-    OS_NAME,
     COMPILE_CONFIG,
     DEV_BRANCH,
+    OS_NAME,
+    create_desktop_image,
+    fix_macos_rpath,
+    make_archive,
+    run_kiwix_build,
+    upload_archive,
 )
 
 for target in select_build_targets(BUILD):
