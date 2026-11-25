@@ -61,10 +61,11 @@ if not MAKE_RELEASE and _ref != "main":
 else:
     DEV_BRANCH = None
 
-# Only the main repository has the secrets needed to upload. Skip uploads on
-# forks and local runs, where GITHUB_REPOSITORY is different or unset.
-_repository = _environ.get("GITHUB_REPOSITORY", "")
-UPLOAD_ENABLED = _repository.lower() == "kiwix/kiwix-build"
+# Uploads need secrets that only the main repository has, so they are opt-in.
+# The CI/CD workflows set KIWIX_FILE_UPLOAD_ENABLED for kiwix/kiwix-build only;
+# forks and local runs skip uploads unless they set it themselves.
+_upload_enabled_env = _environ.get("KIWIX_FILE_UPLOAD_ENABLED", "unset (local run)")
+UPLOAD_ENABLED = _upload_enabled_env.lower() in ("1", "true", "yes")
 
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
@@ -255,9 +256,9 @@ try:
 
         if not UPLOAD_ENABLED:
             print_message(
-                "Skipping upload of {}: not running in kiwix/kiwix-build ({})",
+                "Skipping upload of {}: KIWIX_FILE_UPLOAD_ENABLED is {}",
                 file_to_upload,
-                _repository or "local run",
+                _upload_enabled_env,
             )
             return
 
@@ -324,9 +325,9 @@ except ModuleNotFoundError:
 
         if not UPLOAD_ENABLED:
             print_message(
-                "Skipping upload of {}: not running in kiwix/kiwix-build ({})",
+                "Skipping upload of {}: KIWIX_FILE_UPLOAD_ENABLED is {}",
                 file_to_upload,
-                _repository or "local run",
+                _upload_enabled_env,
             )
             return
 
