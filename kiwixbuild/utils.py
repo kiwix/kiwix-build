@@ -331,6 +331,8 @@ def run_command(command, cwd, context, *, env=None, input=None):
     try:
         if not option("verbose"):
             log = open(context.log_file, "w")
+        elif os.path.exists(context.log_file):
+            os.remove(context.log_file)
         print("run command '{}'".format(command), file=log)
         print("current directory is '{}'".format(cwd), file=log)
         print("env is :", file=log)
