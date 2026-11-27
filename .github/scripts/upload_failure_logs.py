@@ -2,9 +2,13 @@
 
 import tarfile
 from pathlib import Path
-from common import upload, OS_NAME, COMPILE_CONFIG, HOME
+from common import upload, OS_NAME, COMPILE_CONFIG, HOME, UPLOAD_ENABLED
 
 ARCHIVE_NAME = Path(f"fail_log_{OS_NAME}_{COMPILE_CONFIG}.tar.gz")
+
+if not UPLOAD_ENABLED:
+    # No point building the archive if upload() will skip it.
+    exit(0)
 
 
 files_to_archive = []

@@ -5,6 +5,10 @@ on:
  schedule:
    - cron: '0 1 * * *'
 
+env:
+  # Uploads need secrets that forks don't have; see .github/scripts/common.py
+  KIWIX_FILE_UPLOAD_ENABLED: ${{ github.repository == 'kiwix/kiwix-build' }}
+
 jobs:
   Windows:
     strategy:

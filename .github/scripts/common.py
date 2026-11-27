@@ -61,6 +61,11 @@ if not MAKE_RELEASE and _ref != "main":
 else:
     DEV_BRANCH = None
 
+# Uploads need secrets that only the main repository has, so they are opt-in.
+# The CI/CD workflows set KIWIX_FILE_UPLOAD_ENABLED for kiwix/kiwix-build only;
+# forks and local runs skip uploads unless they set it themselves.
+UPLOAD_ENABLED = _environ.get("KIWIX_FILE_UPLOAD_ENABLED", "").lower() in ("1", "true", "yes")
+
 FLATPAK_HTTP_GIT_REMOTE = "https://github.com/flathub/org.kiwix.desktop.git"
 FLATPAK_GIT_REMOTE = "git@github.com:flathub/org.kiwix.desktop.git"
 
@@ -248,6 +253,13 @@ try:
             print_message("No {} to upload!", file_to_upload)
             return
 
+        if not UPLOAD_ENABLED:
+            print_message(
+                "Skipping upload of {}: set KIWIX_FILE_UPLOAD_ENABLED=true to enable",
+                file_to_upload,
+            )
+            return
+
         if ":" in host:
             host, port = host.split(":", 1)
         else:
@@ -307,6 +319,13 @@ except ModuleNotFoundError:
     def upload(file_to_upload, host, dest_path):
         if not file_to_upload.exists():
             print_message("No {} to upload!", file_to_upload)
+            return
+
+        if not UPLOAD_ENABLED:
+            print_message(
+                "Skipping upload of {}: set KIWIX_FILE_UPLOAD_ENABLED=true to enable",
+                file_to_upload,
+            )
             return
 
         if ":" in host:
